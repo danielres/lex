@@ -83,7 +83,6 @@ import {
 } from '../ImagesExtension';
 import InsertLayoutDialog from '../LayoutExtension/InsertLayoutDialog';
 import {InsertPollDialog} from '../PollExtension';
-import {$isRubyNode, $toggleRuby} from '../RubyExtension/RubyNode';
 import {shortcut} from '../ShortcutsExtension/shortcuts';
 import {InsertTableDialog} from '../TablePlugin';
 import {
@@ -351,13 +350,11 @@ export default function ToolbarPlugin({
   activeEditor,
   setActiveEditor,
   setIsLinkEditMode,
-  setIsRubyEditMode,
 }: {
   editor: LexicalEditor;
   activeEditor: LexicalEditor;
   setActiveEditor: Dispatch<LexicalEditor>;
   setIsLinkEditMode: Dispatch<boolean>;
-  setIsRubyEditMode: Dispatch<boolean>;
 }): JSX.Element {
   const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(
     null,
@@ -582,26 +579,6 @@ export default function ToolbarPlugin({
       activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
     }
   }, [activeEditor, setIsLinkEditMode, toolbarState.isLink]);
-
-  const insertRuby = useCallback(() => {
-    const {hasRuby, hasSelection} = activeEditor.read(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        return {
-          hasRuby: selection.getNodes().some($isRubyNode),
-          hasSelection: !selection.isCollapsed(),
-        };
-      }
-      return {hasRuby: false, hasSelection: false};
-    });
-    if (hasRuby) {
-      activeEditor.update(() => {
-        $toggleRuby(null);
-      });
-    } else if (hasSelection) {
-      setIsRubyEditMode(true);
-    }
-  }, [activeEditor, setIsRubyEditMode]);
 
   const onCodeLanguageSelect = useCallback(
     (value: string | null) => {
@@ -842,15 +819,6 @@ export default function ToolbarPlugin({
             title={`Insert link (${shortcut('INSERT_LINK')})`}
             type="button">
             <i className="format link" />
-          </button>
-          <button
-            disabled={!isEditable}
-            onClick={insertRuby}
-            className="toolbar-item spaced"
-            aria-label="Insert ruby annotation"
-            title="Insert ruby annotation"
-            type="button">
-            <i className="format ruby" />
           </button>
           <DropDown
             disabled={!isEditable}

@@ -84,7 +84,6 @@ import {MentionsExtension} from './plugins/MentionsExtension';
 import {PollExtension} from './plugins/PollExtension';
 import {PullQuoteExtension} from './plugins/PullQuoteExtension';
 import {ReactReviewExtension} from './plugins/ReviewExtension';
-import {RubyExtension} from './plugins/RubyExtension';
 import {ShortcutsExtension} from './plugins/ShortcutsExtension';
 import {SpecialTextExtension} from './plugins/SpecialTextExtension';
 import {TabFocusExtension} from './plugins/TabFocusExtension';
@@ -220,7 +219,6 @@ const PlaygroundRichTextExtension = defineExtension({
     ReactReviewExtension,
     ReactFindReplaceExtension,
     PullQuoteExtension,
-    RubyExtension,
     ShortcutsExtension,
     configExtension(TabIndentationExtension, {maxIndent: 7}),
   ],

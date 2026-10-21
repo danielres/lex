@@ -26,7 +26,6 @@ import {ExcalidrawPlugin} from './plugins/ExcalidrawExtension';
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
 import {MentionsPlugin} from './plugins/MentionsExtension';
-import FloatingRubyEditorPlugin from './plugins/RubyExtension/FloatingRubyEditor';
 import {ShortcutsExtension} from './plugins/ShortcutsExtension';
 import SpeechToTextPlugin from './plugins/SpeechToTextPlugin';
 import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
@@ -88,8 +87,6 @@ export default function Editor(): JSX.Element {
     },
     [editor, isRichText],
   );
-  const [isRubyEditMode, setIsRubyEditMode] = useState<boolean>(false);
-
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
       setFloatingAnchorElem(_floatingAnchorElem);
@@ -117,7 +114,6 @@ export default function Editor(): JSX.Element {
           activeEditor={activeEditor}
           setActiveEditor={setActiveEditor}
           setIsLinkEditMode={setIsLinkEditMode}
-          setIsRubyEditMode={setIsRubyEditMode}
         />
       )}
       <div
@@ -147,11 +143,6 @@ export default function Editor(): JSX.Element {
                   isLinkEditMode={isLinkEditMode}
                   setIsLinkEditMode={setIsLinkEditMode}
                 />
-                <FloatingRubyEditorPlugin
-                  anchorElem={floatingAnchorElem}
-                  isRubyEditMode={isRubyEditMode}
-                  setIsRubyEditMode={setIsRubyEditMode}
-                />
                 <TableCellActionMenuPlugin
                   anchorElem={floatingAnchorElem}
                   cellMerge={true}
@@ -166,7 +157,6 @@ export default function Editor(): JSX.Element {
                 <FloatingTextFormatToolbarPlugin
                   anchorElem={floatingAnchorElem}
                   setIsLinkEditMode={setIsLinkEditMode}
-                  isRubyEditMode={isRubyEditMode}
                 />
               </>
             )}

@@ -344,7 +344,6 @@ function useFloatingTextFormatToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLElement,
   setIsLinkEditMode: Dispatch<boolean>,
-  isRubyEditMode: boolean,
 ): JSX.Element | null {
   const [isText, setIsText] = useState(false);
   const [isLink, setIsLink] = useState(false);
@@ -464,7 +463,7 @@ function useFloatingTextFormatToolbar(
     );
   }, [editor, updatePopup]);
 
-  if (!isText || isLink || isRubyEditMode) {
+  if (!isText || isLink) {
     return null;
   }
 
@@ -493,17 +492,14 @@ function useFloatingTextFormatToolbar(
 export default function FloatingTextFormatToolbarPlugin({
   anchorElem = document.body,
   setIsLinkEditMode,
-  isRubyEditMode = false,
 }: {
   anchorElem?: HTMLElement;
   setIsLinkEditMode: Dispatch<boolean>;
-  isRubyEditMode?: boolean;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
   return useFloatingTextFormatToolbar(
     editor,
     anchorElem,
     setIsLinkEditMode,
-    isRubyEditMode,
   );
 }
