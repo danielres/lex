@@ -45,17 +45,17 @@
 
   services.adminer.enable = true;
 
-  services.postgres = {
-    enable = true;
-    port = 5432;
-    initialDatabases = [
-      { name = "lex_dev"; }
-      { name = "lex_test"; }
-    ];
-    initialScript = ''
-      CREATE ROLE postgres SUPERUSER LOGIN;  
-    '';
-  };
+  # services.postgres = {
+  #   enable = true;
+  #   port = 5432;
+  #   initialDatabases = [
+  #     { name = "lex_dev"; }
+  #     { name = "lex_test"; }
+  #   ];
+  #   initialScript = ''
+  #     CREATE ROLE postgres SUPERUSER LOGIN;  
+  #   '';
+  # };
 
   # processes.phx-server = {
   #   exec = "PORT=4000 mix phx.server";
