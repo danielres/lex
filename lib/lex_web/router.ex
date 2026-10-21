@@ -17,7 +17,7 @@ defmodule LexWeb.Router do
   scope "/", LexWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive
     post "", AshTypescriptRpcController, :run
     post "", AshTypescriptRpcController, :validate
     get "/ash-typescript", PageController, :index
