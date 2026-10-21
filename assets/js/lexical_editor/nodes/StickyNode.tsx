@@ -12,7 +12,6 @@ import {
   buildEditorFromExtensions,
   NestedEditorExtension,
 } from '@lexical/extension';
-import {SharedHistoryExtension} from '@lexical/history';
 import {PlainTextExtension} from '@lexical/plain-text';
 import {ReactExtension} from '@lexical/react/ReactExtension';
 import {ReactProviderExtension} from '@lexical/react/ReactProviderExtension';
@@ -76,8 +75,8 @@ export type SerializedStickyNode = Spread<
 >;
 
 const StickyEditorExtension = defineExtension({
+  $initialEditorState: null,
   dependencies: [
-    SharedHistoryExtension,
     PlainTextExtension,
     ReactProviderExtension,
     NestedEditorExtension,

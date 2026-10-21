@@ -10,6 +10,7 @@ defmodule LexWeb.HomeLive do
     <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash}>
       <div
         class="lexical-playground"
+        data-document-id="playground"
         id="lexical-editor"
         phx-hook="LexicalEditor"
         phx-update="ignore"

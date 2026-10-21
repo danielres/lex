@@ -13,8 +13,8 @@ defmodule Lex.Application do
       {Ecto.Migrator, repos: Application.fetch_env!(:lex, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:lex, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Lex.PubSub},
-      # Start a worker by calling: Lex.Worker.start_link(arg)
-      # {Lex.Worker, arg},
+      {Registry, keys: :unique, name: Lex.Collaboration.Registry},
+      {DynamicSupervisor, name: Lex.Collaboration.DocumentSupervisor, strategy: :one_for_one},
       # Start to serve requests, typically the last entry
       LexWeb.Endpoint
     ]

@@ -13,7 +13,6 @@ import {
   NestedEditorExtension,
 } from '@lexical/extension';
 import {HashtagExtension} from '@lexical/hashtag';
-import {HistoryExtension} from '@lexical/history';
 import {$generateHtmlFromNodes} from '@lexical/html';
 import {LinkExtension} from '@lexical/link';
 import {ReactExtension} from '@lexical/react/ReactExtension';
@@ -68,9 +67,6 @@ const CaptionEditorExtension = defineExtension({
   // as the editor mounts.
   $initialEditorState: null,
   dependencies: [
-    // FIXME - The current playground has tests that assume that image captions don't have shared history
-    // SharedHistoryExtension,
-    HistoryExtension,
     NestedEditorExtension,
     ReactProviderExtension,
     RichTextExtension,
@@ -150,7 +146,9 @@ const imageNodeSchema = nodeSchema<ImageNode>()({
   }),
   showCaption: withField(booleanValue(), {field: '__showCaption'}),
   src: stringValue(),
-  width: withAccessors(optional(numberValue()), {getter: 'getSerializedWidth'}),
+  width: withAccessors(optional(numberValue()), {
+    getter: 'getSerializedWidth',
+  }),
 });
 
 export class ImageNode extends DecoratorNode<JSX.Element> {

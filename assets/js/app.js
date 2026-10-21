@@ -28,7 +28,7 @@ import {mountLexicalEditor} from "./lexical_editor/mount"
 
 const LexicalEditor = {
   mounted() {
-    this.reactRoot = mountLexicalEditor(this.el)
+    this.reactRoot = mountLexicalEditor(this.el, this.el.dataset.documentId)
   },
 
   destroyed() {

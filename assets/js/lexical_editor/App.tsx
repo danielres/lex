@@ -27,7 +27,6 @@ import {
   WatchEditableExtension,
 } from '@lexical/extension';
 import {HashtagExtension} from '@lexical/hashtag';
-import {HistoryExtension} from '@lexical/history';
 import {
   $createLinkNode,
   ClickableLinkExtension,
@@ -41,6 +40,7 @@ import {
 } from '@lexical/list';
 import {PlainTextExtension} from '@lexical/plain-text';
 import {LexicalExtensionComposer} from '@lexical/react/LexicalExtensionComposer';
+import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {
   $createHeadingNode,
   $createQuoteNode,
@@ -55,6 +55,11 @@ import {
   defineExtension,
 } from 'lexical';
 import {type JSX, useMemo} from 'react';
+import type {ProviderFactory} from './collaboration';
+import {
+  CollaborationContext,
+  useCollaborationConfig,
+} from './context/CollaborationContext';
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext, useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
@@ -233,7 +238,6 @@ const AppExtension = defineExtension({
     // Exposes editor.isEditable() as a signal; consumed by
     // registerSettingsSynchronization to drive ClickableLinkExtension.
     WatchEditableExtension,
-    HistoryExtension,
     HistoryAnnounceExtension,
     EditorModeAnnounceExtension,
     KeywordsExtension,
@@ -300,9 +304,9 @@ interface DynamicSettings {
 }
 
 function buildExtensionFromSettings(settings: DynamicSettings) {
-  const {emptyEditor, isRichText} = settings;
+  const {isRichText} = settings;
   return defineExtension({
-    $initialEditorState: emptyEditor ? undefined : $prepopulatedRichText,
+    $initialEditorState: null,
     dependencies: [
       AppExtension,
       isRichText ? PlaygroundRichTextExtension : PlainTextExtension,
@@ -317,12 +321,7 @@ function buildExtensionFromSettings(settings: DynamicSettings) {
 
 function App(): JSX.Element {
   const {
-    settings: {
-      emptyEditor,
-      isRichText,
-      isShadowDOM,
-      measureTypingPerf,
-    },
+    settings: {emptyEditor, isRichText, isShadowDOM, measureTypingPerf},
   } = useSettings();
 
   // Only the editor-recreating settings belong in this memo's deps. Table
@@ -333,21 +332,30 @@ function App(): JSX.Element {
     () => buildExtensionFromSettings({emptyEditor, isRichText}),
     [emptyEditor, isRichText],
   );
+  const {cursorColor, providerFactory, username} = useCollaborationConfig();
 
   return (
     <LexicalExtensionComposer extension={app} contentEditable={null}>
+      <CollaborationPlugin
+        cursorColor={cursorColor}
+        id="main"
+        initialEditorState={emptyEditor ? undefined : $prepopulatedRichText}
+        providerFactory={providerFactory}
+        shouldBootstrap={true}
+        username={username}
+      />
       <ToolbarContext>
-          {isShadowDOM ? (
-            <ShadowDomWrapper>
-              <div className="editor-shell">
-                <Editor />
-              </div>
-            </ShadowDomWrapper>
-          ) : (
+        {isShadowDOM ? (
+          <ShadowDomWrapper>
             <div className="editor-shell">
               <Editor />
             </div>
-          )}
+          </ShadowDomWrapper>
+        ) : (
+          <div className="editor-shell">
+            <Editor />
+          </div>
+        )}
         <Settings />
         {measureTypingPerf ? <TypingPerfPlugin /> : null}
       </ToolbarContext>
@@ -355,12 +363,18 @@ function App(): JSX.Element {
   );
 }
 
-export default function PlaygroundApp(): JSX.Element {
+export default function PlaygroundApp({
+  providerFactory,
+}: {
+  providerFactory: ProviderFactory;
+}): JSX.Element {
   return (
-    <SettingsContext>
-      <FlashMessageContext>
-        <App />
-      </FlashMessageContext>
-    </SettingsContext>
+    <CollaborationContext providerFactory={providerFactory}>
+      <SettingsContext>
+        <FlashMessageContext>
+          <App />
+        </FlashMessageContext>
+      </SettingsContext>
+    </CollaborationContext>
   );
 }

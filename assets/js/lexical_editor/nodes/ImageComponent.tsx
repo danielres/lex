@@ -8,6 +8,7 @@
 
 import './ImageNode.css';
 
+import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalExtensionEditorComposer} from '@lexical/react/LexicalExtensionEditorComposer';
 import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
@@ -47,6 +48,7 @@ import {
   useState,
 } from 'react';
 
+import {useCollaborationConfig} from '../context/CollaborationContext';
 import {useSettings} from '../context/SettingsContext';
 import brokenImage from '../images/image-broken.svg';
 import TreeViewPlugin from '../plugins/TreeViewPlugin';
@@ -54,8 +56,7 @@ import ImageResizer from '../ui/ImageResizer';
 import {$isCaptionEditorEmpty, $isImageNode} from './ImageNode';
 
 type ImageStatus =
-  | {error: true}
-  | {error: false; width: number; height: number};
+  {error: true} | {error: false; width: number; height: number};
 
 const imageCache = new Map<string, Promise<ImageStatus> | ImageStatus>();
 
@@ -456,6 +457,7 @@ export default function ImageComponent({
   const {
     settings: {showNestedEditorTreeView},
   } = useSettings();
+  const {cursorColor, providerFactory, username} = useCollaborationConfig();
 
   const draggable = isInNodeSelection && !isResizing;
   const isFocused = (isSelected || isResizing) && isEditable;
@@ -486,6 +488,13 @@ export default function ImageComponent({
         {showCaption && (
           <div className="image-caption-container">
             <LexicalExtensionEditorComposer initialEditor={caption}>
+              <CollaborationPlugin
+                cursorColor={cursorColor}
+                id={caption.getKey()}
+                providerFactory={providerFactory}
+                shouldBootstrap={true}
+                username={username}
+              />
               <DisableCaptionOnBlur setShowCaption={setShowCaption} />
               {showNestedEditorTreeView === true ? <TreeViewPlugin /> : null}
             </LexicalExtensionEditorComposer>

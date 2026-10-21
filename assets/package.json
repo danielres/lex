@@ -28,6 +28,7 @@
     "@lexical/table": "0.52.0",
     "@lexical/text": "0.52.0",
     "@lexical/utils": "0.52.0",
+    "@lexical/yjs": "0.52.0",
     "date-fns": "^4.4.0",
     "katex": "^0.16.10",
     "lexical": "0.52.0",
@@ -35,14 +36,17 @@
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
     "phoenix_live_view": "file:../deps/phoenix_live_view",
+    "prettier": "^3.6.2",
     "react": "^19.1.1",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.1.1",
-    "prettier": "^3.6.2",
-    "topbar": "^3.0.0"
+    "topbar": "^3.0.0",
+    "y-phoenix-channel": "^0.3.0",
+    "yjs": "^13.6.33"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.14.182",
+    "@types/phoenix": "^1.6.8",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "typescript": "^6.0.0",

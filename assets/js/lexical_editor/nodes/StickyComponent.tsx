@@ -8,6 +8,7 @@
 
 import './StickyNode.css';
 
+import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalExtensionEditorComposer} from '@lexical/react/LexicalExtensionEditorComposer';
 import {calculateZoomLevel} from '@lexical/utils';
@@ -22,6 +23,7 @@ import {
 import * as React from 'react';
 import {type JSX, useEffect, useLayoutEffect, useRef} from 'react';
 
+import {useCollaborationConfig} from '../context/CollaborationContext';
 import {$isStickyNode} from './StickyNode';
 
 interface Positioning {
@@ -59,6 +61,7 @@ export default function StickyComponent({
   y: number;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
+  const {cursorColor, providerFactory, username} = useCollaborationConfig();
   const stickyContainerRef = useRef<null | HTMLDivElement>(null);
   const dragCleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => () => dragCleanupRef.current?.(), []);
@@ -229,7 +232,15 @@ export default function StickyComponent({
           title="Color">
           <i className="bucket" />
         </button>
-        <LexicalExtensionEditorComposer initialEditor={caption} />
+        <LexicalExtensionEditorComposer initialEditor={caption}>
+          <CollaborationPlugin
+            cursorColor={cursorColor}
+            id={caption.getKey()}
+            providerFactory={providerFactory}
+            shouldBootstrap={true}
+            username={username}
+          />
+        </LexicalExtensionEditorComposer>
       </div>
     </div>
   );
