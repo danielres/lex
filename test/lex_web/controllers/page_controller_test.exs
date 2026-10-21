@@ -3,6 +3,10 @@ defmodule LexWeb.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert html_response(conn, 200) =~ "Peace of mind from prototype to production"
+    response = html_response(conn, 200)
+
+    assert response =~ ~s(id="lexical-editor")
+    assert response =~ ~s(phx-hook="LexicalEditor")
+    assert response =~ ~s(phx-update="ignore")
   end
 end

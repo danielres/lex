@@ -7,8 +7,14 @@ defmodule LexWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
-      Hello
+    <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash}>
+      <div
+        class="lexical-playground"
+        id="lexical-editor"
+        phx-hook="LexicalEditor"
+        phx-update="ignore"
+      >
+      </div>
     </Layouts.app>
     """
   end

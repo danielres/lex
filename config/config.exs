@@ -109,9 +109,19 @@ config :esbuild,
   version: "0.25.4",
   lex: [
     args:
-      ~w(js/index.tsx js/app.js --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=. --splitting --format=esm),
+      ~w(js/index.tsx js/app.js --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=. --splitting --format=esm --conditions=production --loader:.gif=file --loader:.jpg=file --loader:.png=file --loader:.svg=file --loader:.ttf=file --loader:.woff=file --loader:.woff2=file --define:process.env.EXCALIDRAW_ASSET_PATH="/assets/"),
     cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Enum.join([Path.expand("../deps", __DIR__), Path.expand(Mix.Project.build_path()), Path.expand("../_build/dev", __DIR__)], ":")}
+    env: %{
+      "NODE_PATH" =>
+        Enum.join(
+          [
+            Path.expand("../deps", __DIR__),
+            Path.expand(Mix.Project.build_path()),
+            Path.expand("../_build/dev", __DIR__)
+          ],
+          ":"
+        )
+    }
   ]
 
 # Configure tailwind (the version is required)
@@ -123,7 +133,17 @@ config :tailwind,
       --output=priv/static/assets/css/app.css
     ),
     cd: Path.expand("..", __DIR__),
-    env: %{"NODE_PATH" => Enum.join([Path.expand("../deps", __DIR__), Path.expand(Mix.Project.build_path()), Path.expand("../_build/dev", __DIR__)], ":")}
+    env: %{
+      "NODE_PATH" =>
+        Enum.join(
+          [
+            Path.expand("../deps", __DIR__),
+            Path.expand(Mix.Project.build_path()),
+            Path.expand("../_build/dev", __DIR__)
+          ],
+          ":"
+        )
+    }
   ]
 
 # Configure Elixir's Logger
