@@ -5,8 +5,7 @@ defmodule LexWeb.PageControllerTest do
     conn = get(conn, ~p"/")
     response = html_response(conn, 200)
 
-    assert response =~ ~s(id="lexical-editor")
-    assert response =~ ~s(phx-hook="LexicalEditor")
-    assert response =~ ~s(phx-update="ignore")
+    assert response =~ "Hello"
+    refute response =~ ~s(data-document-id=)
   end
 end

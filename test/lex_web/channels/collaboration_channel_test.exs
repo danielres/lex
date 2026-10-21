@@ -60,7 +60,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
     close_channel(second_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
-    assert Registry.lookup(Lex.Collaboration.Registry, room) == []
+    assert_eventually(fn -> Registry.lookup(Lex.Collaboration.Registry, room) == [] end)
   end
 
   defp close_channel(socket) do
@@ -90,4 +90,17 @@ defmodule LexWeb.CollaborationChannelTest do
   defp unique_room do
     "playground/test-#{System.unique_integer([:positive])}"
   end
+
+  defp assert_eventually(assertion, attempts \\ 20)
+
+  defp assert_eventually(assertion, attempts) when attempts > 0 do
+    if assertion.() do
+      assert true
+    else
+      Process.sleep(10)
+      assert_eventually(assertion, attempts - 1)
+    end
+  end
+
+  defp assert_eventually(_assertion, 0), do: flunk("condition did not become true")
 end

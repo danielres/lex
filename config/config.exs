@@ -77,6 +77,7 @@ config :spark,
 
 config :lex,
   ecto_repos: [Lex.Repo],
+  ash_domains: [Lex.Wiki],
   generators: [timestamp_type: :utc_datetime]
 
 # Configure the endpoint
