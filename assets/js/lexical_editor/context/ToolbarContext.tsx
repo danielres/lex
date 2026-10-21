@@ -6,22 +6,15 @@
  *
  */
 
-import type {ElementFormatType} from 'lexical';
-
 import React, {
   createContext,
   type JSX,
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
-
-export const MIN_ALLOWED_FONT_SIZE = 8;
-export const MAX_ALLOWED_FONT_SIZE = 72;
-export const DEFAULT_FONT_SIZE = 16;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rootTypeToRootName = {
@@ -47,19 +40,11 @@ export const blockTypeToBlockName = {
 //disable eslint sorting rule for quick reference to toolbar state
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 const INITIAL_TOOLBAR_STATE = {
-  bgColor: '#fff',
   blockType: 'paragraph' as keyof typeof blockTypeToBlockName,
   canRedo: false,
   canUndo: false,
   codeLanguage: '',
   codeTheme: '',
-  elementFormat: 'left' as ElementFormatType,
-  fontColor: '#000',
-  fontFamily: 'Arial',
-  // Current font size in px
-  fontSize: `${DEFAULT_FONT_SIZE}px`,
-  // Font size input value - for controlled input
-  fontSizeInputValue: `${DEFAULT_FONT_SIZE}`,
   isBold: false,
   isCode: false,
   isHighlight: false,
@@ -100,7 +85,6 @@ export const ToolbarContext = ({
   children: ReactNode;
 }): JSX.Element => {
   const [toolbarState, setToolbarState] = useState(INITIAL_TOOLBAR_STATE);
-  const selectionFontSize = toolbarState.fontSize;
 
   const updateToolbarState = useCallback(
     <Key extends ToolbarStateKey>(key: Key, value: ToolbarStateValue<Key>) => {
@@ -111,11 +95,6 @@ export const ToolbarContext = ({
     },
     [],
   );
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    updateToolbarState('fontSizeInputValue', selectionFontSize.slice(0, -2));
-  }, [selectionFontSize, updateToolbarState]);
 
   const contextValue = useMemo(() => {
     return {

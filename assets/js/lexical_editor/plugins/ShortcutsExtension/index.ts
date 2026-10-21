@@ -14,7 +14,6 @@ import {
 import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
 import {$isListNode, ListNode} from '@lexical/list';
 import {$isHeadingNode} from '@lexical/rich-text';
-import {$getSelectionStyleValueForProperty} from '@lexical/selection';
 import {
   $findMatchingParent,
   $getNearestNodeOfType,
@@ -28,7 +27,6 @@ import {
   configExtension,
   createCommand,
   defineExtension,
-  FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
   INDENT_CONTENT_COMMAND,
   type LexicalCommand,
@@ -37,7 +35,6 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical';
 
-import {DEFAULT_FONT_SIZE} from '../../context/ToolbarContext';
 import {getSelectedNode} from '../../utils/getSelectedNode';
 import {sanitizeUrl} from '../../utils/url';
 import {
@@ -49,8 +46,6 @@ import {
   $formatNumberedList,
   $formatParagraph,
   $formatQuote,
-  $updateFontSize,
-  UpdateFontSizeType,
 } from '../ToolbarPlugin/utils';
 import {SHORTCUT_BINDINGS} from './shortcuts';
 
@@ -117,17 +112,6 @@ function $getBlockType(): string {
   return $isHeadingNode(element) ? element.getTag() : element.getType();
 }
 
-function $getFontSizeInputValue(): string {
-  const selection = $getSelection();
-  return $isRangeSelection(selection)
-    ? $getSelectionStyleValueForProperty(
-        selection,
-        'font-size',
-        `${DEFAULT_FONT_SIZE}px`,
-      ).slice(0, -2)
-    : `${DEFAULT_FONT_SIZE}`;
-}
-
 /**
  * Registers the playground's keyboard shortcuts through
  * {@link KeyboardShortcutsExtension}: the key bindings are contributed to
@@ -173,12 +157,6 @@ export const ShortcutsExtension = defineExtension({
       listen('CHECK_LIST', () => $formatCheckList($getBlockType())),
       listen('CODE_BLOCK', () => $formatCode($getBlockType())),
       listen('QUOTE', () => $formatQuote($getBlockType())),
-      listen('INCREASE_FONT_SIZE', () =>
-        $updateFontSize(UpdateFontSizeType.increment, $getFontSizeInputValue()),
-      ),
-      listen('DECREASE_FONT_SIZE', () =>
-        $updateFontSize(UpdateFontSizeType.decrement, $getFontSizeInputValue()),
-      ),
       listen('INSERT_CODE_BLOCK', e =>
         e.dispatchCommand(FORMAT_TEXT_COMMAND, 'code'),
       ),
@@ -193,18 +171,6 @@ export const ShortcutsExtension = defineExtension({
       ),
       listen('CAPITALIZE', e =>
         e.dispatchCommand(FORMAT_TEXT_COMMAND, 'capitalize'),
-      ),
-      listen('CENTER_ALIGN', e =>
-        e.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center'),
-      ),
-      listen('JUSTIFY_ALIGN', e =>
-        e.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify'),
-      ),
-      listen('LEFT_ALIGN', e =>
-        e.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left'),
-      ),
-      listen('RIGHT_ALIGN', e =>
-        e.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right'),
       ),
       listen('SUBSCRIPT', e =>
         e.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript'),

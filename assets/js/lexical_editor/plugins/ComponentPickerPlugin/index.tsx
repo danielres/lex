@@ -27,7 +27,6 @@ import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
-  FORMAT_ELEMENT_COMMAND,
   type LexicalEditor,
   type TextNode,
 } from 'lexical';
@@ -43,7 +42,6 @@ import {InsertEquationDialog} from '../EquationsExtension';
 import {INSERT_EXCALIDRAW_COMMAND} from '../ExcalidrawExtension';
 import {INSERT_IMAGE_COMMAND, InsertImageDialog} from '../ImagesExtension';
 import InsertLayoutDialog from '../LayoutExtension/InsertLayoutDialog';
-import {INSERT_PAGE_BREAK} from '../PageBreakExtension';
 import {InsertPollDialog} from '../PollExtension';
 import {INSERT_PULLQUOTE_COMMAND} from '../PullQuoteExtension';
 import {INSERT_REVIEW_COMMAND} from '../ReviewExtension';
@@ -232,11 +230,6 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       keywords: ['horizontal rule', 'divider', 'hr'],
       onSelect: () => editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND),
     }),
-    new ComponentPickerOption('Page Break', {
-      icon: <i className="icon page-break" />,
-      keywords: ['page break', 'divider'],
-      onSelect: () => editor.dispatchCommand(INSERT_PAGE_BREAK),
-    }),
     new ComponentPickerOption('Excalidraw', {
       icon: <i className="icon diagram-2" />,
       keywords: ['excalidraw', 'diagram', 'drawing'],
@@ -350,15 +343,6 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
           <InsertLayoutDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
-    ...(['left', 'center', 'right', 'justify'] as const).map(
-      alignment =>
-        new ComponentPickerOption(`Align ${alignment}`, {
-          icon: <i className={`icon ${alignment}-align`} />,
-          keywords: ['align', 'justify', alignment],
-          onSelect: () =>
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, alignment),
-        }),
-    ),
   ];
 }
 

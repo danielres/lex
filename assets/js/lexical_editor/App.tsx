@@ -81,8 +81,6 @@ import {LayoutExtension} from './plugins/LayoutExtension/LayoutExtension';
 import {PlaygroundMarkdownShortcutsExtension} from './plugins/MarkdownShortcutsExtension';
 import {MaxLengthExtension} from './plugins/MaxLengthPlugin';
 import {MentionsExtension} from './plugins/MentionsExtension';
-import {PageBreakExtension} from './plugins/PageBreakExtension';
-import {PagesReactExtension} from './plugins/PagesReactExtension';
 import {PollExtension} from './plugins/PollExtension';
 import {PullQuoteExtension} from './plugins/PullQuoteExtension';
 import {ReactReviewExtension} from './plugins/ReviewExtension';
@@ -203,7 +201,6 @@ const PlaygroundRichTextExtension = defineExtension({
     }),
     ImagesExtension,
     HorizontalRuleExtension,
-    PageBreakExtension,
     TwitterExtension,
     YouTubeExtension,
     FigmaExtension,
@@ -215,8 +212,6 @@ const PlaygroundRichTextExtension = defineExtension({
     }),
     CheckListExtension,
     PlaygroundMarkdownShortcutsExtension,
-    PageBreakExtension,
-    PagesReactExtension,
     PollExtension,
     EquationsExtension,
     LayoutExtension,

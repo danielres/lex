@@ -37,26 +37,11 @@ export const SHORTCUT_BINDINGS = Object.freeze({
   QUOTE: {key: 'q', modifiers: CONTROL_SHIFT},
   ADD_COMMENT: {key: 'm', modifiers: CONTROL_OR_META_ALT},
 
-  INCREASE_FONT_SIZE: {
-    key: '>',
-    modifiers: CONTROL_OR_META_SHIFT,
-    unshiftedKey: '.',
-  },
-  DECREASE_FONT_SIZE: {
-    key: '<',
-    modifiers: CONTROL_OR_META_SHIFT,
-    unshiftedKey: ',',
-  },
   INSERT_CODE_BLOCK: {key: 'c', modifiers: CONTROL_OR_META_SHIFT},
   STRIKETHROUGH: {key: 'x', modifiers: CONTROL_OR_META_SHIFT},
   LOWERCASE: {key: '1', modifiers: CONTROL_SHIFT},
   UPPERCASE: {key: '2', modifiers: CONTROL_SHIFT},
   CAPITALIZE: {key: '3', modifiers: CONTROL_SHIFT},
-  CENTER_ALIGN: {key: 'e', modifiers: CONTROL_OR_META_SHIFT},
-  JUSTIFY_ALIGN: {key: 'j', modifiers: CONTROL_OR_META_SHIFT},
-  LEFT_ALIGN: {key: 'l', modifiers: CONTROL_OR_META_SHIFT},
-  RIGHT_ALIGN: {key: 'r', modifiers: CONTROL_OR_META_SHIFT},
-
   SUBSCRIPT: {key: ',', modifiers: CONTROL_OR_META},
   SUPERSCRIPT: {key: '.', modifiers: CONTROL_OR_META},
   INDENT: {key: ']', modifiers: CONTROL_OR_META},
