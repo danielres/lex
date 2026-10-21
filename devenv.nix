@@ -12,6 +12,7 @@
       #
       beam27Packages.elixir-ls
       emmet-language-server
+      typescript-language-server
       git
       lefthook
       nodejs_24
