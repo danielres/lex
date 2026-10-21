@@ -41,6 +41,7 @@ defmodule Lex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:live_delegate, "~> 0.1.2"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:ash_typescript, "~> 0.19"},
       {:usage_rules, "~> 1.0", only: [:dev]},
