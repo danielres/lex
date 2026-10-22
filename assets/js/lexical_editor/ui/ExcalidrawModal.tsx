@@ -28,6 +28,7 @@ import {
 } from 'react';
 import {createPortal} from 'react-dom';
 
+import useAppTheme from '../hooks/useAppTheme';
 import Button from './Button';
 import Modal from './Modal';
 
@@ -84,6 +85,7 @@ export default function ExcalidrawModal({
   onDelete,
   onClose,
 }: Props): ReactPortal | null {
+  const appTheme = useAppTheme();
   const excaliDrawModelRef = useRef<HTMLDivElement | null>(null);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
@@ -136,11 +138,9 @@ export default function ExcalidrawModal({
       const partialState: Partial<AppState> = {
         exportBackground: appState?.exportBackground,
         exportScale: appState?.exportScale,
-        exportWithDarkMode: appState?.theme === 'dark',
         isBindingEnabled: appState?.isBindingEnabled,
         isLoading: appState?.isLoading,
         name: appState?.name,
-        theme: appState?.theme,
         viewBackgroundColor: appState?.viewBackgroundColor,
         viewModeEnabled: appState?.viewModeEnabled,
         zenModeEnabled: appState?.zenModeEnabled,
@@ -207,13 +207,14 @@ export default function ExcalidrawModal({
         <div className="ExcalidrawModal__row">
           {discardModalOpen && renderDiscardDialog()}
           <Excalidraw
-            onChange={onChange}
             excalidrawAPI={setExcalidrawAPI}
             initialData={{
               appState: initialAppState || {isLoading: false},
               elements: initialElements,
               files: initialFiles,
             }}
+            onChange={onChange}
+            theme={appTheme}
           />
           <div className="ExcalidrawModal__actions">
             <button className="action-button" onClick={discard}>

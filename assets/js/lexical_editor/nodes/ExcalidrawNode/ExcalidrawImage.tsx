@@ -16,6 +16,8 @@ import {exportToSvg} from '@excalidraw/excalidraw';
 import * as React from 'react';
 import {type JSX, useEffect, useMemo, useState} from 'react';
 
+import useAppTheme from '../../hooks/useAppTheme';
+
 type ImageType = 'svg' | 'canvas';
 
 type Dimension = 'inherit' | number;
@@ -78,27 +80,6 @@ const removeStyleFromSvg_HACK = (svg: SVGElement) => {
   }
 };
 
-function useAppDarkMode(): boolean {
-  const [isDarkMode, setIsDarkMode] = useState(
-    () => document.documentElement.dataset.theme === 'dark',
-  );
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const updateTheme = () => setIsDarkMode(root.dataset.theme === 'dark');
-    const observer = new MutationObserver(updateTheme);
-
-    observer.observe(root, {
-      attributeFilter: ['data-theme'],
-      attributes: true,
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isDarkMode;
-}
-
 /**
  * @explorer-desc
  * A component for rendering Excalidraw elements as a static image
@@ -113,7 +94,7 @@ export default function ExcalidrawImage({
   height = 'inherit',
 }: Props): JSX.Element {
   const [Svg, setSvg] = useState<SVGElement | null>(null);
-  const isDarkMode = useAppDarkMode();
+  const appTheme = useAppTheme();
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +104,7 @@ export default function ExcalidrawImage({
         appState: {
           ...appState,
           exportBackground: false,
-          exportWithDarkMode: isDarkMode,
+          exportWithDarkMode: appTheme === 'dark',
         },
         elements,
         files,
@@ -140,7 +121,7 @@ export default function ExcalidrawImage({
     return () => {
       cancelled = true;
     };
-  }, [elements, files, appState, isDarkMode]);
+  }, [elements, files, appState, appTheme]);
 
   const svgHtml = useMemo(() => {
     if (Svg == null) {
