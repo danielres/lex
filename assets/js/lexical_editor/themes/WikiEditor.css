@@ -1,0 +1,175 @@
+/*
+ * Application skin for the Lexical playground editor.
+ *
+ * Keep the original playground theme intact as a reference. This file owns
+ * the integration with the application's DaisyUI theme and responsive layout.
+ */
+
+body .lexical-playground {
+  @apply bg-transparent px-0 text-base-content sm:px-5;
+}
+
+.editor-shell.wiki-editor {
+  @apply my-0 text-base-content sm:my-5;
+}
+
+.editor-shell.wiki-editor .toolbar {
+  @apply bg-base-100;
+}
+.editor-shell.wiki-editor .editor-container {
+  @apply bg-base-100;
+}
+
+.editor-shell.wiki-editor .floating-text-format-popup,
+.editor-shell.wiki-editor .link-editor,
+.editor-shell.wiki-editor .dropdown,
+.editor-shell.wiki-editor .dropdown .item,
+.editor-shell.wiki-editor .typeahead-popover,
+.editor-shell.wiki-editor .typeahead-popover li {
+  @apply bg-base-100 text-base-content;
+}
+
+.editor-shell.wiki-editor .ContentEditable__root {
+  @apply px-4 py-4;
+}
+
+.editor-shell.wiki-editor .ContentEditable__placeholder,
+.editor-shell.wiki-editor .characters-limit,
+.editor-shell.wiki-editor .dropdown .item .shortcut,
+.editor-shell.wiki-editor .toolbar .toolbar-item .text {
+  @apply text-base-content/60;
+}
+
+.editor-shell.wiki-editor .toolbar .divider,
+.editor-shell.wiki-editor .dropdown .divider,
+.editor-shell.wiki-editor .floating-text-format-popup .divider {
+  @apply bg-base-300;
+}
+
+.editor-shell.wiki-editor .toolbar-item:hover:not([disabled]),
+.editor-shell.wiki-editor .dropdown .item:hover,
+.editor-shell.wiki-editor .typeahead-popover li:hover,
+.editor-shell.wiki-editor .typeahead-popover ul li.selected,
+.editor-shell.wiki-editor
+  .floating-text-format-popup
+  .popup-item:hover:not([disabled]),
+.editor-shell.wiki-editor .link-editor .button.hovered {
+  @apply bg-base-200;
+}
+
+.editor-shell.wiki-editor button.toolbar-item.active,
+.editor-shell.wiki-editor .floating-text-format-popup button.popup-item.active,
+.editor-shell.wiki-editor .link-editor .button.active {
+  @apply bg-primary/15;
+}
+
+.editor-shell.wiki-editor .link-editor .link-input,
+.editor-shell.wiki-editor .link-editor .link-view {
+  @apply bg-base-200 text-base-content;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__h1 {
+  @apply text-base-content;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__h2,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
+  @apply text-base-content/65;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
+  @apply border-base-300;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__link {
+  @apply text-primary;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__code,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__textCode {
+  @apply bg-base-200;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__code::before {
+  @apply border-base-300 bg-base-300 text-base-content/60;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCell {
+  @apply border-base-300;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellHeader,
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableFrozenColumn
+  tr
+  > th:first-child,
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableFrozenRow
+  tr:nth-of-type(1)
+  > th {
+  @apply bg-base-200;
+}
+
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableFrozenColumn
+  tr
+  > td:first-child,
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableFrozenRow
+  tr:nth-of-type(1)
+  > td {
+  @apply bg-base-100;
+}
+
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableRowStriping
+  tr:nth-child(even),
+.editor-shell.wiki-editor
+  .PlaygroundEditorTheme__tableFrozenColumn
+  .PlaygroundEditorTheme__table.PlaygroundEditorTheme__tableRowStriping
+  tr:nth-child(even)
+  > td:first-child {
+  @apply bg-base-200/50;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddColumns,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddRows,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellActionButton {
+  @apply bg-base-200 text-base-content;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddColumns:hover,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddRows:hover,
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellActionButton:hover {
+  @apply bg-base-300;
+}
+
+body .Input__label {
+  @apply text-base-content/70;
+}
+
+body .Input__input {
+  @apply border-base-300 bg-base-100 text-base-content;
+}
+
+body .Button__root,
+body .Modal__closeButton {
+  @apply bg-base-200 text-base-content;
+}
+
+body .Button__root:hover,
+body .Modal__closeButton:hover {
+  @apply bg-base-300;
+}
+
+body .Modal__overlay {
+  @apply bg-neutral/60;
+}
+
+body .Modal__modal {
+  @apply bg-base-100 text-base-content shadow-xl;
+}
+
+body .Modal__title {
+  @apply border-base-300 text-base-content;
+}

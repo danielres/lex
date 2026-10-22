@@ -347,12 +347,12 @@ function App(): JSX.Element {
       <ToolbarContext>
         {isShadowDOM ? (
           <ShadowDomWrapper>
-            <div className="editor-shell">
+            <div className="editor-shell wiki-editor">
               <Editor />
             </div>
           </ShadowDomWrapper>
         ) : (
-          <div className="editor-shell">
+          <div className="editor-shell wiki-editor">
             <Editor />
           </div>
         )}
