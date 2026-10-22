@@ -6,7 +6,7 @@
  */
 
 body .lexical-playground {
-  @apply bg-transparent px-0 text-base-content sm:px-5;
+  @apply bg-transparent px-0 text-base-content;
 }
 
 .editor-shell.wiki-editor {
@@ -15,9 +15,11 @@ body .lexical-playground {
 
 .editor-shell.wiki-editor .toolbar {
   @apply bg-base-100;
+  @apply border-t border-x border-base-content/20;
 }
 .editor-shell.wiki-editor .editor-container {
   @apply bg-base-100;
+  @apply border-b border-x border-base-content/20;
 }
 
 .editor-shell.wiki-editor .floating-text-format-popup,
@@ -25,8 +27,14 @@ body .lexical-playground {
 .editor-shell.wiki-editor .dropdown,
 .editor-shell.wiki-editor .dropdown .item,
 .editor-shell.wiki-editor .typeahead-popover,
-.editor-shell.wiki-editor .typeahead-popover li {
+.editor-shell.wiki-editor .typeahead-popover li,
+body > .dropdown,
+body > .dropdown .item {
   @apply bg-base-100 text-base-content;
+}
+
+body > .dropdown{
+  @apply shadow-lg border border-base-content/20;
 }
 
 .editor-shell.wiki-editor .ContentEditable__root {
@@ -36,13 +44,16 @@ body .lexical-playground {
 .editor-shell.wiki-editor .ContentEditable__placeholder,
 .editor-shell.wiki-editor .characters-limit,
 .editor-shell.wiki-editor .dropdown .item .shortcut,
-.editor-shell.wiki-editor .toolbar .toolbar-item .text {
+.editor-shell.wiki-editor .toolbar .toolbar-item .text,
+body > .dropdown .item .shortcut {
   @apply text-base-content/60;
 }
 
 .editor-shell.wiki-editor .toolbar .divider,
 .editor-shell.wiki-editor .dropdown .divider,
-.editor-shell.wiki-editor .floating-text-format-popup .divider {
+.editor-shell.wiki-editor .floating-text-format-popup .divider,
+body > .dropdown .divider,
+body > .dropdown > hr {
   @apply bg-base-300;
 }
 
@@ -53,13 +64,15 @@ body .lexical-playground {
 .editor-shell.wiki-editor
   .floating-text-format-popup
   .popup-item:hover:not([disabled]),
-.editor-shell.wiki-editor .link-editor .button.hovered {
+.editor-shell.wiki-editor .link-editor .button.hovered,
+body > .dropdown .item:hover {
   @apply bg-base-200;
 }
 
 .editor-shell.wiki-editor button.toolbar-item.active,
 .editor-shell.wiki-editor .floating-text-format-popup button.popup-item.active,
-.editor-shell.wiki-editor .link-editor .button.active {
+.editor-shell.wiki-editor .link-editor .button.active,
+body > .dropdown .dropdown-item-active {
   @apply bg-primary/15;
 }
 
