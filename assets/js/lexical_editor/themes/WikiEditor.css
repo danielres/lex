@@ -39,12 +39,13 @@ body > .dropdown{
   @apply shadow-lg border border-base-content/20;
 }
 
-.editor-shell.wiki-editor .ContentEditable__root {
-  @apply px-4 py-4 pt-8;
-}
+.editor-shell.wiki-editor .ContentEditable__root { 
+  @apply px-4 py-4 pt-8 pl-12;
 
-.editor-shell.wiki-editor .ContentEditable__root > * {
-  @apply leading-tight mb-[1em] ;
+  > * {
+    @apply leading-tight mb-[1.25em]; 
+  }
+
 }
 
 .editor-shell.wiki-editor .ContentEditable__placeholder,
@@ -95,6 +96,16 @@ body > .dropdown .dropdown-item-active {
 .editor-shell.wiki-editor .PlaygroundEditorTheme__h2,
 .editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
   @apply text-base-content/65;
+}
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__ul {
+  @apply list-disc;
+}
+
+
+.editor-shell.wiki-editor .PlaygroundEditorTheme__ol1, 
+.editor-shell.wiki-editor .PlaygroundEditorTheme__ol2 {
+  @apply list-decimal;
 }
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
