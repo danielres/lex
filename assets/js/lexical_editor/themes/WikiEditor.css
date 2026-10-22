@@ -40,7 +40,7 @@ body > .dropdown{
 }
 
 .editor-shell.wiki-editor .ContentEditable__root { 
-  @apply px-4 py-4 pt-8 pl-12;
+  @apply px-4 py-4 pt-8 sm:pl-12;
 
   > * {
     @apply leading-tight mb-[1.25em]; 

@@ -96,7 +96,7 @@ export default function Editor(): JSX.Element {
   useEffect(() => {
     const updateViewPortWidth = () => {
       const isNextSmallWidthViewport =
-        CAN_USE_DOM && window.matchMedia('(max-width: 1025px)').matches;
+        CAN_USE_DOM && window.matchMedia('(max-width: 40rem)').matches;
 
       if (isNextSmallWidthViewport !== isSmallWidthViewport) {
         setIsSmallWidthViewport(isNextSmallWidthViewport);
