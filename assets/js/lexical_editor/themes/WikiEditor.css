@@ -199,6 +199,18 @@ body > .dropdown .dropdown-item-active {
   @apply bg-current;
 }
 
+.editor-shell.wiki-editor[data-app-theme="dark"]
+  .draggable-block-menu
+  .icon {
+  @apply brightness-0 invert opacity-60;
+}
+
+.editor-shell.wiki-editor[data-app-theme="dark"]
+  .draggable-block-menu
+  .icon:hover {
+  @apply opacity-100;
+}
+
 body .Input__label {
   @apply text-base-content/70;
 }

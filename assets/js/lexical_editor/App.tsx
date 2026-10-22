@@ -64,6 +64,7 @@ import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext, useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
 import Editor from './Editor';
+import useAppTheme from './hooks/useAppTheme';
 import {registerSettingsSynchronization} from './hooks/useSynchronizeSettings';
 import {KeywordsExtension} from './nodes/KeywordNode';
 import {PlaygroundImportExtension} from './nodes/PlaygroundImportExtension';
@@ -320,6 +321,7 @@ function buildExtensionFromSettings(settings: DynamicSettings) {
 }
 
 function App(): JSX.Element {
+  const appTheme = useAppTheme();
   const {
     settings: {emptyEditor, isRichText, isShadowDOM, measureTypingPerf},
   } = useSettings();
@@ -347,12 +349,16 @@ function App(): JSX.Element {
       <ToolbarContext>
         {isShadowDOM ? (
           <ShadowDomWrapper>
-            <div className="editor-shell wiki-editor">
+            <div
+              className="editor-shell wiki-editor"
+              data-app-theme={appTheme}>
               <Editor />
             </div>
           </ShadowDomWrapper>
         ) : (
-          <div className="editor-shell wiki-editor">
+          <div
+            className="editor-shell wiki-editor"
+            data-app-theme={appTheme}>
             <Editor />
           </div>
         )}
