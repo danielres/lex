@@ -18,6 +18,7 @@ defmodule LexWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
+    live "/wiki", WikiLive
     live "/wiki/:page_slug", PageLive
     post "", AshTypescriptRpcController, :run
     post "", AshTypescriptRpcController, :validate

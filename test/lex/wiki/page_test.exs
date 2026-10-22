@@ -49,4 +49,18 @@ defmodule Lex.Wiki.PageTest do
       assert length(Ash.read!(Page)) == 1
     end
   end
+
+  describe "list/0" do
+    test "returns all pages sorted by slug" do
+      Page.ensure!("summer-activities")
+      Page.ensure!("home")
+      Page.ensure!("about")
+
+      assert Page.list!() |> Enum.map(& &1.slug) == [
+               "about",
+               "home",
+               "summer-activities"
+             ]
+    end
+  end
 end

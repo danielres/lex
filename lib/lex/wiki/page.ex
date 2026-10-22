@@ -15,10 +15,15 @@ defmodule Lex.Wiki.Page do
   code_interface do
     define :ensure, action: :ensure, args: [:slug]
     define :get, action: :read, get_by: [:id]
+    define :list, action: :list
   end
 
   actions do
     defaults [:read]
+
+    read :list do
+      prepare build(sort: :slug)
+    end
 
     create :ensure do
       accept [:slug]

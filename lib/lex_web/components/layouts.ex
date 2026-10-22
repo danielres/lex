@@ -46,7 +46,7 @@ defmodule LexWeb.Layouts do
             <.link navigate={~p"/"} class="btn btn-ghost">Home</.link>
           </li>
           <li>
-            <.link navigate={~p"/wiki/home"} class="btn btn-ghost">Wiki</.link>
+            <.link navigate={~p"/wiki"} class="btn btn-ghost">Wiki</.link>
           </li>
         </ul>
       </div>
