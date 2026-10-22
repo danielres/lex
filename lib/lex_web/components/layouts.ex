@@ -48,7 +48,7 @@ defmodule LexWeb.Layouts do
             <.link
               navigate={~p"/"}
               class={[
-                "btn",
+                "btn rounded-box",
                 @active == "home" && active_class
               ]}
             >Home</.link>
@@ -57,7 +57,7 @@ defmodule LexWeb.Layouts do
             <.link
               navigate={~p"/wiki"}
               class={[
-                "btn",
+                "btn rounded-box",
                 @active == "page" && active_class,
                 @active == "wiki" && active_class
               ]}
@@ -74,7 +74,7 @@ defmodule LexWeb.Layouts do
       </div>
     </header>
 
-    <main class="px-2 py-20 sm:px-4 lg:px-8">
+    <main class="px-2 sm:px-4 lg:px-8">
       <div class={@content_class}>
         {render_slot(@inner_block)}
       </div>

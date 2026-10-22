@@ -16,10 +16,12 @@ body .lexical-playground {
 .editor-shell.wiki-editor .toolbar {
   @apply bg-base-100;
   @apply border-t border-x border-base-content/20;
+  @apply rounded-t-box;
 }
 .editor-shell.wiki-editor .editor-container {
   @apply bg-base-100;
   @apply border-b border-x border-base-content/20;
+  @apply rounded-b-box;
 }
 
 .editor-shell.wiki-editor .floating-text-format-popup,
@@ -120,7 +122,7 @@ body > .dropdown .dropdown-item-active {
   .PlaygroundEditorTheme__tableFrozenRow
   tr:nth-of-type(1)
   > th {
-  @apply bg-base-200;
+  @apply bg-base-200/30;
 }
 
 .editor-shell.wiki-editor
@@ -155,6 +157,30 @@ body > .dropdown .dropdown-item-active {
 .editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddRows:hover,
 .editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellActionButton:hover {
   @apply bg-base-300;
+}
+
+.editor-shell.wiki-editor .action-button {
+  @apply bg-base-200 text-base-content;
+}
+
+.editor-shell.wiki-editor .action-button:hover {
+  @apply bg-base-300 text-base-content;
+}
+
+.editor-shell.wiki-editor .action-button[data-active="true"] {
+  @apply bg-primary/15 text-primary filter-none;
+}
+
+.editor-shell.wiki-editor .action-button[data-active="true"]:hover {
+  @apply bg-primary/25 text-primary filter-none;
+}
+
+.editor-shell.wiki-editor button.action-button:disabled {
+  @apply bg-base-200 text-base-content/50;
+}
+
+.editor-shell.wiki-editor .actions i {
+  @apply bg-current;
 }
 
 body .Input__label {
