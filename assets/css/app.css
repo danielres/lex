@@ -105,6 +105,6 @@
 
 /* This file is for your main application CSS */
 
-body {
+html, body {
   @apply bg-base-300;
 }

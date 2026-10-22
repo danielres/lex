@@ -40,7 +40,11 @@ body > .dropdown{
 }
 
 .editor-shell.wiki-editor .ContentEditable__root {
-  @apply px-4 py-4;
+  @apply px-4 py-4 pt-8;
+}
+
+.editor-shell.wiki-editor .ContentEditable__root > * {
+  @apply leading-tight mb-[1em] ;
 }
 
 .editor-shell.wiki-editor .ContentEditable__placeholder,
@@ -84,7 +88,8 @@ body > .dropdown .dropdown-item-active {
 }
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__h1 {
-  @apply text-base-content;
+  @apply text-base-content leading-tight;
+
 }
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__h2,
