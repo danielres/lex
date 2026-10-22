@@ -9,6 +9,8 @@ defmodule LexWeb.CollaborationChannel do
     with {:ok, shared_doc} <- Collaboration.open_document(room),
          :ok <- SharedDoc.observe(shared_doc) do
       {:ok, assign(socket, :shared_doc, shared_doc)}
+    else
+      {:error, reason} -> {:error, %{reason: inspect(reason)}}
     end
   end
 
@@ -40,7 +42,7 @@ defmodule LexWeb.CollaborationChannel do
   @impl true
   def terminate(_reason, %{assigns: %{shared_doc: shared_doc}}) do
     if Process.alive?(shared_doc) do
-      SharedDoc.unobserve(shared_doc)
+      Collaboration.close_document(shared_doc)
     end
 
     :ok

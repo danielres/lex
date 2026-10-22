@@ -1,13 +1,16 @@
 defmodule LexWeb.PageLive do
   use LexWeb, :live_view
 
+  alias Lex.Wiki.Page
+  alias Lex.Wiki.PageSlug
+
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
 
   def handle_params(%{"page_slug" => slug}, _uri, socket) do
-    if Lex.Wiki.PageSlug.valid?(slug) do
-      page = Lex.Wiki.ensure_page!(slug)
+    if PageSlug.valid?(slug) do
+      page = Page.ensure!(slug)
 
       socket =
         socket
@@ -16,7 +19,7 @@ defmodule LexWeb.PageLive do
 
       {:noreply, socket}
     else
-      raise Ash.Error.Query.NotFound, resource: Lex.Wiki.Page, primary_key: %{slug: slug}
+      raise Ash.Error.Query.NotFound, resource: Page, primary_key: %{slug: slug}
     end
   end
 

@@ -44,5 +44,4 @@ defmodule LexWeb.PageLiveTest do
     assert Plug.Exception.status(error) == 404
     assert Ash.read!(Page) == []
   end
-
 end
