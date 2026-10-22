@@ -491,9 +491,6 @@ export default function ToolbarPlugin({
       updateToolbarState('isSuperscript', selection.hasFormat('superscript'));
       updateToolbarState('isHighlight', selection.hasFormat('highlight'));
       updateToolbarState('isCode', selection.hasFormat('code'));
-      updateToolbarState('isLowercase', selection.hasFormat('lowercase'));
-      updateToolbarState('isUppercase', selection.hasFormat('uppercase'));
-      updateToolbarState('isCapitalize', selection.hasFormat('capitalize'));
     }
     if ($isNodeSelection(selection)) {
       const nodes = selection.getNodes();
@@ -826,51 +823,6 @@ export default function ToolbarPlugin({
             buttonLabel=""
             buttonAriaLabel="Formatting options for additional text styles"
             buttonIconClassName="icon dropdown-more">
-            <DropDownItem
-              onClick={e =>
-                dispatchFormatTextCommand('lowercase', isKeyboardInput(e))
-              }
-              className={
-                'item wide ' + dropDownActiveClass(toolbarState.isLowercase)
-              }
-              title="Lowercase"
-              aria-label="Format text to lowercase">
-              <div className="icon-text-container">
-                <i className="icon lowercase" />
-                <span className="text">Lowercase</span>
-              </div>
-              <span className="shortcut">{shortcut('LOWERCASE')}</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={e =>
-                dispatchFormatTextCommand('uppercase', isKeyboardInput(e))
-              }
-              className={
-                'item wide ' + dropDownActiveClass(toolbarState.isUppercase)
-              }
-              title="Uppercase"
-              aria-label="Format text to uppercase">
-              <div className="icon-text-container">
-                <i className="icon uppercase" />
-                <span className="text">Uppercase</span>
-              </div>
-              <span className="shortcut">{shortcut('UPPERCASE')}</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={e =>
-                dispatchFormatTextCommand('capitalize', isKeyboardInput(e))
-              }
-              className={
-                'item wide ' + dropDownActiveClass(toolbarState.isCapitalize)
-              }
-              title="Capitalize"
-              aria-label="Format text to capitalize">
-              <div className="icon-text-container">
-                <i className="icon capitalize" />
-                <span className="text">Capitalize</span>
-              </div>
-              <span className="shortcut">{shortcut('CAPITALIZE')}</span>
-            </DropDownItem>
             <DropDownItem
               onClick={e =>
                 dispatchFormatTextCommand('strikethrough', isKeyboardInput(e))

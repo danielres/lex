@@ -55,9 +55,6 @@ function TextFormatFloatingToolbar({
   isBold,
   isItalic,
   isUnderline,
-  isUppercase,
-  isLowercase,
-  isCapitalize,
   isCode,
   isStrikethrough,
   isSubscript,
@@ -71,9 +68,6 @@ function TextFormatFloatingToolbar({
   isCode: boolean;
   isItalic: boolean;
   isLink: boolean;
-  isUppercase: boolean;
-  isLowercase: boolean;
-  isCapitalize: boolean;
   isStrikethrough: boolean;
   isSubscript: boolean;
   isSuperscript: boolean;
@@ -289,36 +283,6 @@ function TextFormatFloatingToolbar({
           <button
             type="button"
             onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'uppercase');
-            }}
-            className={'popup-item spaced ' + (isUppercase ? 'active' : '')}
-            title="Uppercase"
-            aria-label="Format text to uppercase">
-            <i className="format uppercase" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'lowercase');
-            }}
-            className={'popup-item spaced ' + (isLowercase ? 'active' : '')}
-            title="Lowercase"
-            aria-label="Format text to lowercase">
-            <i className="format lowercase" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'capitalize');
-            }}
-            className={'popup-item spaced ' + (isCapitalize ? 'active' : '')}
-            title="Capitalize"
-            aria-label="Format text to capitalize">
-            <i className="format capitalize" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code');
             }}
             className={'popup-item spaced ' + (isCode ? 'active' : '')}
@@ -350,9 +314,6 @@ function useFloatingTextFormatToolbar(
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  const [isUppercase, setIsUppercase] = useState(false);
-  const [isLowercase, setIsLowercase] = useState(false);
-  const [isCapitalize, setIsCapitalize] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
@@ -390,9 +351,6 @@ function useFloatingTextFormatToolbar(
       setIsBold(selection.hasFormat('bold'));
       setIsItalic(selection.hasFormat('italic'));
       setIsUnderline(selection.hasFormat('underline'));
-      setIsUppercase(selection.hasFormat('uppercase'));
-      setIsLowercase(selection.hasFormat('lowercase'));
-      setIsCapitalize(selection.hasFormat('capitalize'));
       setIsStrikethrough(selection.hasFormat('strikethrough'));
       setIsSubscript(selection.hasFormat('subscript'));
       setIsSuperscript(selection.hasFormat('superscript'));
@@ -475,9 +433,6 @@ function useFloatingTextFormatToolbar(
       isLink={isLink}
       isBold={isBold}
       isItalic={isItalic}
-      isUppercase={isUppercase}
-      isLowercase={isLowercase}
-      isCapitalize={isCapitalize}
       isStrikethrough={isStrikethrough}
       isSubscript={isSubscript}
       isSuperscript={isSuperscript}
