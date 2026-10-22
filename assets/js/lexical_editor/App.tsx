@@ -39,6 +39,7 @@ import {
   ListExtension,
 } from '@lexical/list';
 import {PlainTextExtension} from '@lexical/plain-text';
+import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalExtensionComposer} from '@lexical/react/LexicalExtensionComposer';
 import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {
@@ -54,7 +55,7 @@ import {
   configExtension,
   defineExtension,
 } from 'lexical';
-import {type JSX, useMemo} from 'react';
+import {type JSX, useEffect, useMemo, useRef} from 'react';
 import type {ProviderFactory} from './collaboration';
 import {
   CollaborationContext,
@@ -300,18 +301,20 @@ const AppExtension = defineExtension({
  * fixed.
  */
 interface DynamicSettings {
+  editable: boolean;
   emptyEditor: boolean;
   isRichText: boolean;
 }
 
 function buildExtensionFromSettings(settings: DynamicSettings) {
-  const {isRichText} = settings;
+  const {editable, isRichText} = settings;
   return defineExtension({
     $initialEditorState: null,
     dependencies: [
       AppExtension,
       isRichText ? PlaygroundRichTextExtension : PlainTextExtension,
     ],
+    editable,
     name: '@lexical/playground/dynamic-config',
     // Apply INITIAL_SETTINGS to the extension config signals synchronously as
     // the editor is built (and wire the editable→clickable-link signal),
@@ -320,7 +323,18 @@ function buildExtensionFromSettings(settings: DynamicSettings) {
   });
 }
 
-function App(): JSX.Element {
+function EditableController({editable}: {editable: boolean}): null {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    editor.setEditable(editable);
+  }, [editable, editor]);
+
+  return null;
+}
+
+function App({editable}: {editable: boolean}): JSX.Element {
+  const initialEditable = useRef(editable).current;
   const appTheme = useAppTheme();
   const {
     settings: {emptyEditor, isRichText, isShadowDOM, measureTypingPerf},
@@ -331,8 +345,13 @@ function App(): JSX.Element {
   // reactively in Editor.tsx via useSyncExtensionSignal, so they must NOT
   // appear here or they would rebuild the whole editor on every change.
   const app = useMemo(
-    () => buildExtensionFromSettings({emptyEditor, isRichText}),
-    [emptyEditor, isRichText],
+    () =>
+      buildExtensionFromSettings({
+        editable: initialEditable,
+        emptyEditor,
+        isRichText,
+      }),
+    [emptyEditor, initialEditable, isRichText],
   );
   const {cursorColor, providerFactory, username} = useCollaborationConfig();
 
@@ -346,6 +365,7 @@ function App(): JSX.Element {
         shouldBootstrap={true}
         username={username}
       />
+      <EditableController editable={editable} />
       <ToolbarContext>
         {isShadowDOM ? (
           <ShadowDomWrapper>
@@ -370,15 +390,17 @@ function App(): JSX.Element {
 }
 
 export default function PlaygroundApp({
+  editable,
   providerFactory,
 }: {
+  editable: boolean;
   providerFactory: ProviderFactory;
 }): JSX.Element {
   return (
     <CollaborationContext providerFactory={providerFactory}>
       <SettingsContext>
         <FlashMessageContext>
-          <App />
+          <App editable={editable} />
         </FlashMessageContext>
       </SettingsContext>
     </CollaborationContext>

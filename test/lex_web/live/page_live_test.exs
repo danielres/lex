@@ -35,6 +35,20 @@ defmodule LexWeb.PageLiveTest do
     refute home.id == summer.id
   end
 
+  test "the lock button toggles whether the editor is editable", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
+    assert has_element?(view, "button[aria-label='Enable editing']")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
+    assert has_element?(view, "button[aria-label='Make editor read-only']")
+  end
+
   test "invalid slugs return not found and do not create pages", %{conn: conn} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->

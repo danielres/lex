@@ -28,11 +28,19 @@ import {mountLexicalEditor} from "./lexical_editor/mount"
 
 const LexicalEditor = {
   mounted() {
-    this.reactRoot = mountLexicalEditor(this.el, this.el.dataset.documentId)
+    this.lexicalEditor = mountLexicalEditor(
+      this.el,
+      this.el.dataset.documentId,
+      this.el.dataset.editable === "true",
+    )
+  },
+
+  updated() {
+    this.lexicalEditor?.setEditable(this.el.dataset.editable === "true")
   },
 
   destroyed() {
-    this.reactRoot?.unmount()
+    this.lexicalEditor?.unmount()
   },
 }
 

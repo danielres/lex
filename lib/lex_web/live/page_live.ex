@@ -5,6 +5,8 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.PageSlug
 
   def mount(_params, _session, socket) do
+    socket = assign(socket, :editable, false)
+
     {:ok, socket}
   end
 
@@ -23,12 +25,40 @@ defmodule LexWeb.PageLive do
     end
   end
 
+  def handle_event("toggle_editable", _params, socket) do
+    socket = update(socket, :editable, &(!&1))
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} active={"page"}>
+    <Layouts.app flash={@flash} active="page">
+      <div class="flex justify-end pb-2">
+        <button
+          aria-label={if @editable, do: "Make editor read-only", else: "Enable editing"}
+          aria-pressed={!@editable}
+          class={[
+            "btn btn-square rounded-box",
+            @editable && "btn-info"
+          ]}
+          phx-click="toggle_editable"
+          title={if @editable, do: "Make editor read-only", else: "Enable editing"}
+          type="button"
+        >
+          <.icon
+            name={if @editable, do: "hero-lock-open-solid", else: "hero-lock-closed-solid"}
+            class={[
+              "size-4"
+            ]}
+          />
+        </button>
+      </div>
+
       <div
         class="lexical-playground"
         data-document-id={@page.id}
+        data-editable={to_string(@editable)}
         id={"lexical-editor-#{@page.id}"}
         phx-hook="LexicalEditor"
         phx-update="ignore"
