@@ -24,7 +24,10 @@ body .lexical-playground {
   @apply rounded-b-box;
 }
 
-.editor-shell.wiki-editor .floating-text-format-popup,
+.editor-shell.wiki-editor .floating-text-format-popup {
+  @apply bg-base-200 border border-base-content/30;
+}
+
 .editor-shell.wiki-editor .link-editor,
 .editor-shell.wiki-editor .dropdown,
 .editor-shell.wiki-editor .dropdown .item,
@@ -90,6 +93,17 @@ body > .dropdown .dropdown-item-active {
 .editor-shell.wiki-editor .link-editor .link-input,
 .editor-shell.wiki-editor .link-editor .link-view {
   @apply bg-base-200 text-base-content;
+}
+
+.editor-shell.wiki-editor .editor-image
+{
+  img {
+    @apply rounded-box;
+  }
+
+  .image-caption-container {
+    @apply bg-base-100/50 backdrop-blur border-none text-base-content/80;
+  }
 }
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__h1 {
