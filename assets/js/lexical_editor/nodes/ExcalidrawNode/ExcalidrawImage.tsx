@@ -78,6 +78,27 @@ const removeStyleFromSvg_HACK = (svg: SVGElement) => {
   }
 };
 
+function useAppDarkMode(): boolean {
+  const [isDarkMode, setIsDarkMode] = useState(
+    () => document.documentElement.dataset.theme === 'dark',
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const updateTheme = () => setIsDarkMode(root.dataset.theme === 'dark');
+    const observer = new MutationObserver(updateTheme);
+
+    observer.observe(root, {
+      attributeFilter: ['data-theme'],
+      attributes: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDarkMode;
+}
+
 /**
  * @explorer-desc
  * A component for rendering Excalidraw elements as a static image
@@ -92,21 +113,34 @@ export default function ExcalidrawImage({
   height = 'inherit',
 }: Props): JSX.Element {
   const [Svg, setSvg] = useState<SVGElement | null>(null);
+  const isDarkMode = useAppDarkMode();
 
   useEffect(() => {
+    let cancelled = false;
+
     const setContent = async () => {
       const svg: SVGElement = await exportToSvg({
-        appState,
+        appState: {
+          ...appState,
+          exportBackground: false,
+          exportWithDarkMode: isDarkMode,
+        },
         elements,
         files,
       });
       removeStyleFromSvg_HACK(svg);
       svg.setAttribute('display', 'block');
 
-      setSvg(svg);
+      if (!cancelled) {
+        setSvg(svg);
+      }
     };
     setContent().catch(console.error);
-  }, [elements, files, appState]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [elements, files, appState, isDarkMode]);
 
   const svgHtml = useMemo(() => {
     if (Svg == null) {
