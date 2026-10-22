@@ -32,21 +32,36 @@ defmodule LexWeb.Layouts do
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   attr :content_class, :any, default: "mx-auto max-w-2xl space-y-4"
+  attr :active, :string, default: ""
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
+    <% active_class = "bg-base-100" %>
     <header class="navbar">
       <div class="flex-1">
         <ul class={[
-          "flex flex-column space-x-4"
+          "flex flex-column space-x-2"
         ]}>
           <li>
-            <.link navigate={~p"/"} class="btn btn-ghost">Home</.link>
+            <.link
+              navigate={~p"/"}
+              class={[
+                "btn",
+                @active == "home" && active_class
+              ]}
+            >Home</.link>
           </li>
           <li>
-            <.link navigate={~p"/wiki"} class="btn btn-ghost">Wiki</.link>
+            <.link
+              navigate={~p"/wiki"}
+              class={[
+                "btn",
+                @active == "page" && active_class,
+                @active == "wiki" && active_class
+              ]}
+            >Wiki</.link>
           </li>
         </ul>
       </div>
@@ -59,7 +74,7 @@ defmodule LexWeb.Layouts do
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
+    <main class="px-2 py-20 sm:px-4 lg:px-8">
       <div class={@content_class}>
         {render_slot(@inner_block)}
       </div>

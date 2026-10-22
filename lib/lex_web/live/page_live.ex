@@ -25,7 +25,7 @@ defmodule LexWeb.PageLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash}>
+    <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash} active={"page"}>
       <div
         class="lexical-playground"
         data-document-id={@page.id}

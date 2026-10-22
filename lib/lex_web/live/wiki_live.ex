@@ -12,7 +12,7 @@ defmodule LexWeb.WikiLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash}>
+    <Layouts.app content_class="mx-auto max-w-7xl" flash={@flash} active="wiki">
       <ul class="list list-disc pl-4">
         <li><.link class="link link-hover link-info" navigate={~p"/wiki/home"}>Home</.link></li>
         <li :for={page <- @pages}>
