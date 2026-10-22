@@ -31,7 +31,7 @@ defmodule LexWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
-  attr :content_class, :any, default: "mx-auto max-w-2xl space-y-4"
+  attr :content_class, :any, default: "mx-auto max-w-4xl px-2 sm:px-4 lg:px-8"
   attr :active, :string, default: ""
 
   slot :inner_block, required: true
@@ -39,7 +39,10 @@ defmodule LexWeb.Layouts do
   def app(assigns) do
     ~H"""
     <% active_class = "bg-base-100" %>
-    <header class="navbar">
+    <header class={[
+      "navbar px-0",
+      @content_class
+    ]}>
       <div class="flex-1">
         <ul class={[
           "flex flex-column space-x-2"
@@ -74,10 +77,8 @@ defmodule LexWeb.Layouts do
       </div>
     </header>
 
-    <main class="px-2 sm:px-4 lg:px-8">
-      <div class={@content_class}>
-        {render_slot(@inner_block)}
-      </div>
+    <main class={[@content_class]}>
+      {render_slot(@inner_block)}
     </main>
 
     <.flash_group flash={@flash} />

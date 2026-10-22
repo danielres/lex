@@ -10,7 +10,7 @@ body .lexical-playground {
 }
 
 .editor-shell.wiki-editor {
-  @apply my-0 text-base-content sm:my-5;
+  @apply m-0 max-w-full text-base-content;
 }
 
 .editor-shell.wiki-editor .toolbar {
@@ -54,6 +54,10 @@ body > .dropdown{
 .editor-shell.wiki-editor .toolbar .toolbar-item .text,
 body > .dropdown .item .shortcut {
   @apply text-base-content/60;
+}
+
+.editor-shell.wiki-editor .toolbar .divider   {
+  @apply self-center;
 }
 
 .editor-shell.wiki-editor .toolbar .divider,
@@ -127,6 +131,9 @@ body > .dropdown .dropdown-item-active {
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__tableCell {
   @apply border-base-300;
+}
+.editor-shell.wiki-editor .PlaygroundEditorTheme__textHighlight {
+  @apply bg-yellow-200/40 border-none text-base-content;
 }
 
 .editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellHeader,
