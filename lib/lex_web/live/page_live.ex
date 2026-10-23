@@ -50,8 +50,60 @@ defmodule LexWeb.PageLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="page">
-      <div class="flex justify-between pb-2 pt-6 items-end">
-        <h1 class="text-3xl opacity-75">{@page_title}</h1>
+      <div class="flex justify-between pt-6 gap-4 pb-2">
+        <h1
+          :if={!@editable || @page.slug == "home"}
+          class={[
+            "text-3xl opacity-75 grow",
+            "self-end",
+            "leading-tight"
+          ]}
+        >
+          {@page_title}
+        </h1>
+
+        <div
+          :if={@editable && @page.slug != "home"}
+          class={[
+            "grow join max-w-sm border border-base-100 focus-within:border-info rounded-box",
+            "bg-base-200",
+            "focus:bg-info/30 dark:focus:bg-info/30"
+          ]}
+        >
+          <input
+            value={@page_title}
+            class={[
+              "peer",
+              "join-item",
+              "text-2xl opacity-75 grow",
+              "rounded-l-box w-full px-2",
+              "outline-none"
+            ]}
+          />
+          <button
+            class={[
+              "hidden peer-focus:block",
+              "join-item",
+              "btn btn-square btn-ghost",
+              "bg-transparent"
+            ]}
+            type="button"
+          >
+            <.icon name="hero-x-mark-micro" />
+          </button>
+          <button
+            class={[
+              "hidden peer-focus:block",
+              "join-item",
+              "btn btn-square rounded-r-box",
+              "btn-info"
+            ]}
+            type="button"
+          >
+            <.icon name="hero-check-micro" />
+          </button>
+        </div>
+
         <button
           aria-label={if @editable, do: "Make editor read-only", else: "Enable editing"}
           aria-pressed={!@editable}
@@ -65,9 +117,7 @@ defmodule LexWeb.PageLive do
         >
           <.icon
             name={if @editable, do: "hero-lock-open-solid", else: "hero-lock-closed-solid"}
-            class={[
-              "size-4"
-            ]}
+            class="size-4"
           />
         </button>
       </div>
