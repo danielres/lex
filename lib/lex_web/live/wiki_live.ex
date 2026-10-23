@@ -100,8 +100,19 @@ defmodule LexWeb.WikiLive do
             <tbody>
               <tr :for={page <- @pages}>
                 <td>
-                  <.link class="link link-hover" navigate={~p"/wiki/#{page.slug}"}>
+                  <.link
+                    class={[
+                      "font-semibold",
+                      "flex items-center gap-1",
+                      page.slug != "home" && "text-base-content/75",
+                      page.slug == "home" && "text-base-content",
+                      "hover:text-info",
+                      "transition"
+                    ]}
+                    navigate={~p"/wiki/#{page.slug}"}
+                  >
                     {page.title}
+                    <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />
                   </.link>
                 </td>
                 <td>
