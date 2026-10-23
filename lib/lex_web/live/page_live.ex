@@ -110,7 +110,7 @@ defmodule LexWeb.PageLive do
         <h1
           :if={!@editable || @page.slug == "home"}
           class={[
-            "text-3xl opacity-80 grow",
+            "text-3xl opacity-80",
             "self-end",
             "leading-tight"
           ]}
@@ -152,7 +152,7 @@ defmodule LexWeb.PageLive do
             <button
               aria-label="Cancel title change"
               class={[
-                "hidden group-focus-within:block",
+                "opacity-0 group-focus-within:opacity-100 transition",
                 "join-item btn btn-square btn-ghost",
                 "bg-transparent"
               ]}
@@ -164,7 +164,7 @@ defmodule LexWeb.PageLive do
             <button
               aria-label="Save page title"
               class={[
-                "hidden group-focus-within:block",
+                "opacity-0 group-focus-within:opacity-100 transition",
                 "join-item btn btn-square rounded-r-box",
                 "btn-info"
               ]}
