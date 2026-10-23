@@ -33,4 +33,41 @@ defmodule LexWeb.WikiLiveTest do
 
     assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
   end
+
+  test "sorts pages by a column and toggles its direction", %{conn: conn} do
+    Page.ensure!("Winter Activities")
+    Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki")
+
+    assert has_element?(view, "th[aria-sort=descending] button[phx-value-sort-by=updated_at]")
+
+    view
+    |> element("button[phx-value-sort-by=title]")
+    |> render_click()
+
+    assert has_element?(view, "th[aria-sort=ascending] button[phx-value-sort-by=title]")
+    assert has_element?(view, "tbody tr:first-child", "Summer Activities")
+
+    view
+    |> element("button[phx-value-sort-by=title]")
+    |> render_click()
+
+    assert has_element?(view, "th[aria-sort=descending] button[phx-value-sort-by=title]")
+    assert has_element?(view, "tbody tr:first-child", "Winter Activities")
+  end
+
+  test "keeps the selected sort when pages change", %{conn: conn} do
+    page = Page.ensure!("Summer Activities")
+    Page.ensure!("Winter Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki")
+
+    view
+    |> element("button[phx-value-sort-by=title]")
+    |> render_click()
+
+    Page.rename!(page, "Autumn Activities")
+
+    assert has_element?(view, "th[aria-sort=ascending] button[phx-value-sort-by=title]")
+    assert has_element?(view, "tbody tr:first-child", "Autumn Activities")
+  end
 end
