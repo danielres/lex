@@ -9,14 +9,15 @@ defmodule Lex.Wiki.PageTitle do
       |> String.trim()
       |> String.replace(@whitespace, " ")
 
-    if title == "" do
-      {:error, "must not be blank"}
-    else
-      {:ok, title}
+    case String.length(title) do
+      0 -> {:error, "Cannot be empty"}
+      length when length < 3 -> {:error, "Min 3 chars"}
+      length when length > 20 -> {:error, "Max 40 chars"}
+      _length -> {:ok, title}
     end
   end
 
-  def normalize(_title), do: {:error, "must be a string"}
+  def normalize(_title), do: {:error, "Must be a string"}
 
   def slug(title) do
     with {:ok, title} <- normalize(title) do
@@ -27,7 +28,7 @@ defmodule Lex.Wiki.PageTitle do
         |> String.trim("-")
 
       if slug == "" do
-        {:error, "must contain at least one letter or number"}
+        {:error, "Must contain at least one letter or number"}
       else
         {:ok, slug}
       end

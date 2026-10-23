@@ -1,6 +1,7 @@
 defmodule Lex.Wiki.Page do
   require Ash.Query
 
+  alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageSlug
   alias Lex.Wiki.PageTitle
@@ -18,6 +19,7 @@ defmodule Lex.Wiki.Page do
   code_interface do
     define :get, action: :read, get_by: [:id]
     define :list, action: :list
+    define :rename, action: :rename_page, args: [:title]
   end
 
   actions do
@@ -32,7 +34,10 @@ defmodule Lex.Wiki.Page do
     end
 
     update :rename_page do
-      accept [:title, :slug]
+      accept [:title]
+      require_atomic? false
+
+      change SetTitleAndSlug
     end
   end
 
@@ -63,7 +68,10 @@ defmodule Lex.Wiki.Page do
   end
 
   identities do
-    identity :unique_slug, [:slug]
+    identity :unique_slug, [:slug],
+      eager_check?: true,
+      field_names: [:title],
+      message: "Not available"
   end
 
   def ensure(title) do
@@ -93,21 +101,6 @@ defmodule Lex.Wiki.Page do
   end
 
   def open!(slug), do: unwrap_or_raise!(open(slug))
-
-  def rename(page, title) do
-    with {:ok, title} <- PageTitle.normalize(title),
-         {:ok, slug} <- PageTitle.slug(title),
-         :ok <- ensure_slug_available(slug, page.id) do
-      page
-      |> Ash.Changeset.for_update(:rename_page, %{title: title, slug: slug})
-      |> Ash.update()
-    else
-      {:error, message} when is_binary(message) -> invalid_attribute(:title, title, message)
-      {:error, error} -> {:error, error}
-    end
-  end
-
-  def rename!(page, title), do: unwrap_or_raise!(rename(page, title))
 
   def subscribe do
     Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
@@ -150,15 +143,6 @@ defmodule Lex.Wiki.Page do
       {:ok, nil} -> {:error, original_error}
       {:ok, _page} -> title_collision(title, slug)
       {:error, _error} -> {:error, original_error}
-    end
-  end
-
-  defp ensure_slug_available(slug, page_id) do
-    case get_by_slug(slug) do
-      {:ok, nil} -> :ok
-      {:ok, %{id: ^page_id}} -> :ok
-      {:ok, _page} -> {:error, "Not available"}
-      {:error, error} -> {:error, error}
     end
   end
 

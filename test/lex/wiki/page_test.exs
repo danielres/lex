@@ -92,7 +92,7 @@ defmodule Lex.Wiki.PageTest do
     test "changes the title and slug without changing the page id" do
       page = Page.ensure!("Summer Activities")
 
-      renamed_page = Page.rename!(page, "Winter Activities")
+      renamed_page = Page.rename!(page, "  Winter   Activities ")
 
       assert renamed_page.id == page.id
       assert renamed_page.title == "Winter Activities"

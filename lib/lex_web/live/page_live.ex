@@ -22,7 +22,7 @@ defmodule LexWeb.PageLive do
         |> assign(page: page)
         |> assign(pages: pages)
         |> assign(page_title: page.title)
-        |> assign(page_title_form: page_title_form(page.title))
+        |> assign(page_title_form: page_title_form(page))
 
       {:noreply, socket}
     else
@@ -35,27 +35,28 @@ defmodule LexWeb.PageLive do
     {:noreply, socket}
   end
 
-  def handle_event("change_page_title", %{"page_title" => %{"title" => title}}, socket) do
-    socket = assign(socket, :page_title_form, page_title_form(title))
+  def handle_event("change_page_title", %{"page_title" => params}, socket) do
+    form = AshPhoenix.Form.validate(socket.assigns.page_title_form, params)
+    socket = assign(socket, :page_title_form, form)
+
     {:noreply, socket}
   end
 
   def handle_event("reset_page_title", _params, socket) do
-    socket = assign(socket, :page_title_form, page_title_form(socket.assigns.page.title))
+    socket = assign(socket, :page_title_form, page_title_form(socket.assigns.page))
+
     {:noreply, socket}
   end
 
-  def handle_event("rename_page", %{"page_title" => %{"title" => title}}, socket) do
-    case Page.rename(socket.assigns.page, title) do
+  def handle_event("rename_page", %{"page_title" => params}, socket) do
+    case AshPhoenix.Form.submit(socket.assigns.page_title_form, params: params) do
       {:ok, _page} ->
         {:noreply, socket}
 
-      {:error, error} ->
-        errors = [title: {title_error(error), []}]
-
+      {:error, form} ->
         socket =
           socket
-          |> assign(page_title_form: page_title_form(title, errors))
+          |> assign(page_title_form: form)
           |> push_event("page_title_blur", %{})
 
         {:noreply, socket}
@@ -99,7 +100,7 @@ defmodule LexWeb.PageLive do
         socket
         |> assign(page: renamed_page)
         |> assign(page_title: renamed_page.title)
-        |> assign(page_title_form: page_title_form(renamed_page.title))
+        |> assign(page_title_form: page_title_form(renamed_page))
         |> push_event("page_title_blur", %{})
         |> push_patch(to: ~p"/wiki/#{renamed_page.slug}")
 
@@ -140,17 +141,9 @@ defmodule LexWeb.PageLive do
     }
   end
 
-  defp page_title_form(title, errors \\ []) do
-    to_form(%{"title" => title}, as: :page_title, errors: errors)
-  end
-
-  defp title_error(error) do
-    error
-    |> Ash.Error.to_error_class()
-    |> Map.fetch!(:errors)
-    |> Enum.find_value(Exception.message(error), fn
-      %{field: :title, message: message} when is_binary(message) -> message
-      _error -> nil
-    end)
+  defp page_title_form(page) do
+    page
+    |> AshPhoenix.Form.for_update(:rename_page, as: "page_title")
+    |> to_form()
   end
 end
