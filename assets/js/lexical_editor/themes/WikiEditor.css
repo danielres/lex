@@ -6,61 +6,36 @@
  */
 
 body .lexical-playground {
-  @apply bg-transparent px-0 text-base-content;
+  @apply bg-base-100 px-0 text-base-content rounded-box;
+  @apply border border-transparent;
+}
+
+ .lexical-playground[data-editable='true']  {
+  @apply focus-within:border-info;
 }
 
 .editor-shell.wiki-editor {
   @apply m-0 max-w-full text-base-content;
 
-  .toolbar {
-    @apply bg-base-100;
-    @apply border-t border-x border-base-content/20;
-    @apply rounded-t-box;
-  }
+  .toolbar { @apply bg-base-200/25 border-b border-base-300; }
+  .editor-container { @apply bg-transparent; }
 
-  .editor-container {
-    @apply bg-base-100;
-    @apply border-base-content/20;
+  &[data-editable='false'] .ContentEditable__root { 
+    @apply p-8; 
   }
-
-  &[data-editable='false'] .editor-container {
-    @apply rounded-box;
-  }
-
-  &[data-editable='true'] .editor-container {
-    @apply border-b border-x ;
-    @apply rounded-b-box;
-  }
-
-  &[data-editable='false'] .ContentEditable__root {
-    @apply px-8 py-8 ;
-  }
-
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
   }
 
   .ContentEditable__root {
-    @apply p-0;
-
-    > * {
-      @apply leading-tight mb-[1.25em];
-    }
-
-    > * {
-      @apply mt-[1.5em] first:mt-0;
-    }
+    @apply bg-transparent p-0;
+    > * { @apply my-[1.5em] first:mt-0; }
   }
 
   .floating-text-format-popup {
     @apply bg-base-200 border border-base-content/30;
   }
 }
-
-
-
-
-
 
 .editor-shell.wiki-editor .link-editor,
 .editor-shell.wiki-editor .dropdown,
@@ -75,7 +50,6 @@ body > .dropdown .item {
 body > .dropdown{
   @apply shadow-lg border border-base-content/20;
 }
-
 
 .editor-shell.wiki-editor .ContentEditable__placeholder,
 .editor-shell.wiki-editor .characters-limit,
@@ -101,9 +75,7 @@ body > .dropdown > hr {
 .editor-shell.wiki-editor .dropdown .item:hover,
 .editor-shell.wiki-editor .typeahead-popover li:hover,
 .editor-shell.wiki-editor .typeahead-popover ul li.selected,
-.editor-shell.wiki-editor
-  .floating-text-format-popup
-  .popup-item:hover:not([disabled]),
+.editor-shell.wiki-editor .floating-text-format-popup .popup-item:hover:not([disabled]),
 .editor-shell.wiki-editor .link-editor .button.hovered,
 body > .dropdown .item:hover {
   @apply bg-base-200;
@@ -116,119 +88,73 @@ body > .dropdown .dropdown-item-active {
   @apply bg-primary/15;
 }
 
-.editor-shell.wiki-editor .link-editor .link-input,
-.editor-shell.wiki-editor .link-editor .link-view {
-  @apply bg-base-200 text-base-content;
-}
 
+.editor-shell.wiki-editor {
+  .action-button {
+    @apply hidden;
+    @apply bg-base-200 text-base-content;
+  }
 
+  .PlaygroundEditorTheme__paragraph,
+  .PlaygroundEditorTheme__ul,
+  .PlaygroundEditorTheme__ol1 { @apply text-base-content/75;}
 
-.editor-shell.wiki-editor { 
   .PlaygroundEditorTheme__h1,
-  .PlaygroundEditorTheme__h2, 
+  .PlaygroundEditorTheme__h2,
   .PlaygroundEditorTheme__h3 {
     @apply text-base-content leading-tight normal-case text-balance font-normal;
     font-variant-caps: small-caps;
   } 
-
   .PlaygroundEditorTheme__h1 { @apply text-3xl; } 
   .PlaygroundEditorTheme__h2 { @apply text-2xl; }
   .PlaygroundEditorTheme__h3 { @apply text-xl; }
+
+  .PlaygroundEditorTheme__ul { @apply list-disc; }
+  .PlaygroundEditorTheme__ol1,
+  .PlaygroundEditorTheme__ol2 { @apply list-decimal; }
+  .PlaygroundEditorTheme__quote { @apply text-base-content/65; }
+  .PlaygroundEditorTheme__quote { @apply border-base-300; }
+  .PlaygroundEditorTheme__link { @apply text-primary; }
+  .PlaygroundEditorTheme__code,
+  .PlaygroundEditorTheme__textCode { @apply bg-base-200; }
+  .PlaygroundEditorTheme__code::before { @apply border-base-300 bg-base-300 text-base-content/60; }
+  .PlaygroundEditorTheme__textHighlight { @apply bg-yellow-200/40 border-none text-base-content; }
+
+  .PlaygroundEditorTheme__tableCell { @apply border-base-300; }
+  .PlaygroundEditorTheme__tableCellHeader,
+  .PlaygroundEditorTheme__tableFrozenColumn tr > th:first-child,
+  .PlaygroundEditorTheme__tableFrozenRow tr:nth-of-type(1) > th { @apply bg-base-200/30; }
+  .PlaygroundEditorTheme__tableFrozenColumn tr > td:first-child,
+  .PlaygroundEditorTheme__tableFrozenRow tr:nth-of-type(1) > td { @apply bg-base-100; }
+  .PlaygroundEditorTheme__tableAddColumns,
+  .PlaygroundEditorTheme__tableAddRows,
+  .PlaygroundEditorTheme__tableCellActionButton { @apply bg-base-200 text-base-content; }
+  .PlaygroundEditorTheme__tableAddColumns:hover,
+  .PlaygroundEditorTheme__tableAddRows:hover,
+  .PlaygroundEditorTheme__tableCellActionButton:hover { @apply bg-base-300; }
+
+  .link-editor .link-input,
+  .link-editor .link-view {
+    @apply bg-base-200 text-base-content;
+  }
 
   .editor-image {
     img { @apply rounded-box; }
     .image-caption-container { @apply bg-base-100/50 backdrop-blur border-none text-base-content/80; }
   }
+
 }
 
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
-  @apply text-base-content/65;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__ul {
-  @apply list-disc;
-}
-
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__ol1, 
-.editor-shell.wiki-editor .PlaygroundEditorTheme__ol2 {
-  @apply list-decimal;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
-  @apply border-base-300;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__link {
-  @apply text-primary;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__code,
-.editor-shell.wiki-editor .PlaygroundEditorTheme__textCode {
-  @apply bg-base-200;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__code::before {
-  @apply border-base-300 bg-base-300 text-base-content/60;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCell {
-  @apply border-base-300;
-}
-.editor-shell.wiki-editor .PlaygroundEditorTheme__textHighlight {
-  @apply bg-yellow-200/40 border-none text-base-content;
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellHeader,
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableFrozenColumn
-  tr
-  > th:first-child,
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableFrozenRow
-  tr:nth-of-type(1)
-  > th {
-  @apply bg-base-200/30;
-}
-
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableFrozenColumn
-  tr
-  > td:first-child,
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableFrozenRow
-  tr:nth-of-type(1)
-  > td {
-  @apply bg-base-100;
-}
-
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableRowStriping
-  tr:nth-child(even),
-.editor-shell.wiki-editor
-  .PlaygroundEditorTheme__tableFrozenColumn
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableRowStriping tr:nth-child(even),
+.editor-shell.wiki-editor .PlaygroundEditorTheme__tableFrozenColumn
   .PlaygroundEditorTheme__table.PlaygroundEditorTheme__tableRowStriping
   tr:nth-child(even)
   > td:first-child {
   @apply bg-base-200/50;
 }
 
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddColumns,
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddRows,
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellActionButton {
-  @apply bg-base-200 text-base-content;
-}
 
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddColumns:hover,
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableAddRows:hover,
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableCellActionButton:hover {
-  @apply bg-base-300;
-}
 
-.editor-shell.wiki-editor .action-button {
-  @apply bg-base-200 text-base-content;
-}
 
 .editor-shell.wiki-editor .action-button:hover {
   @apply bg-base-300 text-base-content;

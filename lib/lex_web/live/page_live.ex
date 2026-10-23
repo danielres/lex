@@ -110,7 +110,7 @@ defmodule LexWeb.PageLive do
         <h1
           :if={!@editable || @page.slug == "home"}
           class={[
-            "text-3xl opacity-75 grow",
+            "text-3xl opacity-80 grow",
             "self-end",
             "leading-tight"
           ]}
@@ -131,7 +131,7 @@ defmodule LexWeb.PageLive do
           <div class={[
             "group join w-full rounded-box border border-base-100",
             "bg-base-200",
-            "focus-within:border-info focus-within:bg-info/30"
+            "focus-within:border-info"
           ]}>
             <input
               aria-label="Page title"
