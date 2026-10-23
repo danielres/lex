@@ -130,6 +130,25 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
   end
 
+  test "resets an unsaved page title when the input loses focus", %{conn: conn} do
+    Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    view
+    |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
+    |> render_change()
+
+    view
+    |> element("#page_title_title")
+    |> render_blur()
+
+    assert has_element?(view, "#page-title-form input[value='Summer Activities']")
+  end
+
   test "resets an unsaved page title with Escape", %{conn: conn} do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")

@@ -11,22 +11,56 @@ body .lexical-playground {
 
 .editor-shell.wiki-editor {
   @apply m-0 max-w-full text-base-content;
+
+  .toolbar {
+    @apply bg-base-100;
+    @apply border-t border-x border-base-content/20;
+    @apply rounded-t-box;
+  }
+
+  .editor-container {
+    @apply bg-base-100;
+    @apply border-base-content/20;
+  }
+
+  &[data-editable='false'] .editor-container {
+    @apply rounded-box;
+  }
+
+  &[data-editable='true'] .editor-container {
+    @apply border-b border-x ;
+    @apply rounded-b-box;
+  }
+
+  &[data-editable='false'] .ContentEditable__root {
+    @apply px-8 py-8 ;
+  }
+
+  &[data-editable='true'] .ContentEditable__root {
+    @apply px-4 py-4 pt-8 sm:pl-12;
+  }
+
+  .ContentEditable__root {
+    @apply p-0;
+
+    > * {
+      @apply leading-tight mb-[1.25em];
+    }
+
+    > * {
+      @apply mt-[1.5em] first:mt-0;
+    }
+  }
+
+  .floating-text-format-popup {
+    @apply bg-base-200 border border-base-content/30;
+  }
 }
 
-.editor-shell.wiki-editor .toolbar {
-  @apply bg-base-100;
-  @apply border-t border-x border-base-content/20;
-  @apply rounded-t-box;
-}
-.editor-shell.wiki-editor .editor-container {
-  @apply bg-base-100;
-  @apply border-b border-x border-base-content/20;
-  @apply rounded-b-box;
-}
 
-.editor-shell.wiki-editor .floating-text-format-popup {
-  @apply bg-base-200 border border-base-content/30;
-}
+
+
+
 
 .editor-shell.wiki-editor .link-editor,
 .editor-shell.wiki-editor .dropdown,
@@ -42,14 +76,6 @@ body > .dropdown{
   @apply shadow-lg border border-base-content/20;
 }
 
-.editor-shell.wiki-editor .ContentEditable__root { 
-  @apply px-4 py-4 pt-8 sm:pl-12;
-
-  > * {
-    @apply leading-tight mb-[1.25em]; 
-  }
-
-}
 
 .editor-shell.wiki-editor .ContentEditable__placeholder,
 .editor-shell.wiki-editor .characters-limit,
@@ -95,23 +121,27 @@ body > .dropdown .dropdown-item-active {
   @apply bg-base-200 text-base-content;
 }
 
-.editor-shell.wiki-editor .editor-image
-{
-  img {
-    @apply rounded-box;
-  }
 
-  .image-caption-container {
-    @apply bg-base-100/50 backdrop-blur border-none text-base-content/80;
+
+.editor-shell.wiki-editor { 
+  .PlaygroundEditorTheme__h1,
+  .PlaygroundEditorTheme__h2, 
+  .PlaygroundEditorTheme__h3 {
+    @apply text-base-content leading-tight normal-case text-balance font-normal;
+    font-variant-caps: small-caps;
+  } 
+
+  .PlaygroundEditorTheme__h1 { @apply text-3xl; } 
+  .PlaygroundEditorTheme__h2 { @apply text-2xl; }
+  .PlaygroundEditorTheme__h3 { @apply text-xl; }
+
+  .editor-image {
+    img { @apply rounded-box; }
+    .image-caption-container { @apply bg-base-100/50 backdrop-blur border-none text-base-content/80; }
   }
 }
 
-.editor-shell.wiki-editor .PlaygroundEditorTheme__h1 {
-  @apply text-base-content leading-tight;
 
-}
-
-.editor-shell.wiki-editor .PlaygroundEditorTheme__h2,
 .editor-shell.wiki-editor .PlaygroundEditorTheme__quote {
   @apply text-base-content/65;
 }

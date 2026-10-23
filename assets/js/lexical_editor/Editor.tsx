@@ -9,6 +9,7 @@
 import { getExtensionDependencyFromEditor, signal } from '@lexical/extension';
 import { CharacterLimitPlugin } from '@lexical/react/LexicalCharacterLimitPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable';
 import { useSignalValue } from '@lexical/react/useExtensionSignalValue';
 import { CAN_USE_DOM, registerEventListener } from 'lexical';
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react';
@@ -63,6 +64,7 @@ export default function Editor(): JSX.Element {
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
     useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
+  const isEditable = useLexicalEditable();
   const [activeEditor, setActiveEditor] = useState(editor);
   // The link edit mode state lives on the ShortcutsExtension output so the
   // insert-link keyboard shortcut can set it without any React coupling
@@ -108,7 +110,7 @@ export default function Editor(): JSX.Element {
 
   return (
     <>
-      {isRichText && (
+      {isRichText && isEditable && (
         <ToolbarPlugin
           editor={editor}
           activeEditor={activeEditor}
@@ -132,10 +134,10 @@ export default function Editor(): JSX.Element {
               </div>
             </div>
             {hasFitNestedTables ? <TableFitNestedTablePlugin /> : null}
-            <TableCellResizer />
+            {isEditable && <TableCellResizer />}
             <TableScrollShadowPlugin />
             <ExcalidrawPlugin />
-            {floatingAnchorElem && (
+            {isEditable && floatingAnchorElem && (
               <>
                 <FloatingLinkEditorPlugin
                   anchorElem={floatingAnchorElem}
@@ -148,7 +150,7 @@ export default function Editor(): JSX.Element {
                 />
               </>
             )}
-            {floatingAnchorElem && !isSmallWidthViewport && (
+            {isEditable && floatingAnchorElem && !isSmallWidthViewport && (
               <>
                 <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
                 <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
@@ -170,7 +172,7 @@ export default function Editor(): JSX.Element {
           />
         )}
         <div>{showTableOfContents && <TableOfContentsPlugin />}</div>
-        {shouldUseLexicalContextMenu && (
+        {isEditable && shouldUseLexicalContextMenu && (
           <ContextMenuPlugin
             shouldPreserveNewLinesInMarkdown={shouldPreserveNewLinesInMarkdown}
           />

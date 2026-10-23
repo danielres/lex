@@ -38,6 +38,7 @@ import {
 } from '@lexical/list';
 import {PlainTextExtension} from '@lexical/plain-text';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
 import {LexicalExtensionComposer} from '@lexical/react/LexicalExtensionComposer';
 import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {
@@ -334,6 +335,26 @@ function EditableController({editable}: {editable: boolean}): null {
   return null;
 }
 
+function EditorShell({
+  appTheme,
+  isShadowDOM,
+}: {
+  appTheme: string;
+  isShadowDOM: boolean;
+}): JSX.Element {
+  const isEditable = useLexicalEditable();
+  const editor = (
+    <div
+      className="editor-shell wiki-editor"
+      data-app-theme={appTheme}
+      data-editable={isEditable}>
+      <Editor />
+    </div>
+  );
+
+  return isShadowDOM ? <ShadowDomWrapper>{editor}</ShadowDomWrapper> : editor;
+}
+
 function App({editable}: {editable: boolean}): JSX.Element {
   const initialEditable = useRef(editable).current;
   const appTheme = useAppTheme();
@@ -368,21 +389,7 @@ function App({editable}: {editable: boolean}): JSX.Element {
       />
       <EditableController editable={editable} />
       <ToolbarContext>
-        {isShadowDOM ? (
-          <ShadowDomWrapper>
-            <div
-              className="editor-shell wiki-editor"
-              data-app-theme={appTheme}>
-              <Editor />
-            </div>
-          </ShadowDomWrapper>
-        ) : (
-          <div
-            className="editor-shell wiki-editor"
-            data-app-theme={appTheme}>
-            <Editor />
-          </div>
-        )}
+        <EditorShell appTheme={appTheme} isShadowDOM={isShadowDOM} />
         <Settings />
         {measureTypingPerf ? <TypingPerfPlugin /> : null}
       </ToolbarContext>
