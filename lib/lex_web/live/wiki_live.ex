@@ -97,8 +97,8 @@ defmodule LexWeb.WikiLive do
               </tr>
             </thead>
 
-            <tbody>
-              <tr :for={page <- @pages}>
+            <tbody phx-hook="AutoAnimate" id="wiki-pages-entries">
+              <tr :for={page <- @pages} id={"wiki-pages-entries-" <> page.id}>
                 <td>
                   <.link
                     class={[
