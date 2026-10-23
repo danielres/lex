@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -41,6 +42,10 @@ export function WikiPagesProvider({
   const [pageById, setPageById] = useState(
     () => new Map(initialPages.map(page => [page.id, page])),
   );
+
+  useEffect(() => {
+    setPageById(new Map(initialPages.map(page => [page.id, page])));
+  }, [initialPages]);
 
   const rememberPage = useCallback((page: WikiPageReference) => {
     setPageById(currentPages => {

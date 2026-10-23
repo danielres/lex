@@ -20,6 +20,7 @@ defmodule LexWeb.PageLive do
         |> assign(page: page)
         |> assign(pages: pages)
         |> assign(page_title: page.title)
+        |> assign(page_title_form: page_title_form(page.title))
 
       {:noreply, socket}
     else
@@ -31,6 +32,44 @@ defmodule LexWeb.PageLive do
     socket = update(socket, :editable, &(!&1))
 
     {:noreply, socket}
+  end
+
+  def handle_event("change_page_title", %{"page_title" => %{"title" => title}}, socket) do
+    socket = assign(socket, :page_title_form, page_title_form(title))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("reset_page_title", _params, socket) do
+    socket = assign(socket, :page_title_form, page_title_form(socket.assigns.page.title))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("rename_page", %{"page_title" => %{"title" => title}}, socket) do
+    case Page.rename(socket.assigns.page, title) do
+      {:ok, page} ->
+        socket =
+          socket
+          |> assign(page: page)
+          |> assign(pages: Page.list!())
+          |> assign(page_title: page.title)
+          |> assign(page_title_form: page_title_form(page.title))
+          |> push_event("page_title_blur", %{})
+          |> push_patch(to: ~p"/wiki/#{page.slug}")
+
+        {:noreply, socket}
+
+      {:error, error} ->
+        errors = [title: {title_error(error), []}]
+
+        socket =
+          socket
+          |> assign(page_title_form: page_title_form(title, errors))
+          |> push_event("page_title_blur", %{})
+
+        {:noreply, socket}
+    end
   end
 
   def handle_event("ensure_wiki_page", %{"title" => title}, socket) do
@@ -62,47 +101,69 @@ defmodule LexWeb.PageLive do
           {@page_title}
         </h1>
 
-        <div
+        <.form
           :if={@editable && @page.slug != "home"}
-          class={[
-            "grow join max-w-sm border border-base-100 focus-within:border-info rounded-box",
-            "bg-base-200",
-            "focus:bg-info/30 dark:focus:bg-info/30"
-          ]}
+          for={@page_title_form}
+          id="page-title-form"
+          phx-change="change_page_title"
+          phx-hook=".PageTitleForm"
+          phx-submit="rename_page"
+          tabindex="-1"
+          class="grow max-w-sm"
         >
-          <input
-            value={@page_title}
-            class={[
-              "peer",
-              "join-item",
-              "text-2xl opacity-75 grow",
-              "rounded-l-box w-full px-2",
-              "outline-none"
-            ]}
-          />
-          <button
-            class={[
-              "hidden peer-focus:block",
-              "join-item",
-              "btn btn-square btn-ghost",
-              "bg-transparent"
-            ]}
-            type="button"
+          <div class={[
+            "group join w-full rounded-box border border-base-100",
+            "bg-base-200",
+            "focus-within:border-info focus-within:bg-info/30"
+          ]}>
+            <input
+              aria-label="Page title"
+              autocomplete="off"
+              class={[
+                "peer join-item grow",
+                "w-full rounded-l-box px-2",
+                "text-2xl opacity-75",
+                "outline-none"
+              ]}
+              id={@page_title_form[:title].id}
+              name={@page_title_form[:title].name}
+              phx-key="Escape"
+              phx-keydown={reset_page_title()}
+              phx-click-away={reset_page_title()}
+              value={@page_title_form[:title].value}
+            />
+            <button
+              aria-label="Cancel title change"
+              class={[
+                "hidden group-focus-within:block",
+                "join-item btn btn-square btn-ghost",
+                "bg-transparent"
+              ]}
+              phx-click={reset_page_title()}
+              type="button"
+            >
+              <.icon name="hero-x-mark-micro" />
+            </button>
+            <button
+              aria-label="Save page title"
+              class={[
+                "hidden group-focus-within:block",
+                "join-item btn btn-square rounded-r-box",
+                "btn-info"
+              ]}
+              type="submit"
+            >
+              <.icon name="hero-check-micro" />
+            </button>
+          </div>
+          <p
+            :for={{message, _options} <- @page_title_form[:title].errors}
+            class="mt-1.5 flex items-center gap-2 text-sm text-error"
           >
-            <.icon name="hero-x-mark-micro" />
-          </button>
-          <button
-            class={[
-              "hidden peer-focus:block",
-              "join-item",
-              "btn btn-square rounded-r-box",
-              "btn-info"
-            ]}
-            type="button"
-          >
-            <.icon name="hero-check-micro" />
-          </button>
-        </div>
+            <.icon name="hero-exclamation-circle" class="size-5" />
+            {message}
+          </p>
+        </.form>
 
         <button
           aria-label={if @editable, do: "Make editor read-only", else: "Enable editing"}
@@ -121,6 +182,20 @@ defmodule LexWeb.PageLive do
           />
         </button>
       </div>
+
+      <script :type={Phoenix.LiveView.ColocatedHook} name=".PageTitleForm">
+        export default {
+          mounted() {
+            this.handleSubmit = () => this.el.querySelector("input")?.blur()
+            this.el.addEventListener("submit", this.handleSubmit)
+            this.handleEvent("page_title_blur", () => this.el.querySelector("input")?.blur())
+          },
+
+          destroyed() {
+            this.el.removeEventListener("submit", this.handleSubmit)
+          },
+        }
+      </script>
 
       <div
         class="lexical-playground"
@@ -143,5 +218,24 @@ defmodule LexWeb.PageLive do
       slug: page.slug,
       title: page.title
     }
+  end
+
+  defp page_title_form(title, errors \\ []) do
+    to_form(%{"title" => title}, as: :page_title, errors: errors)
+  end
+
+  defp reset_page_title do
+    JS.push("reset_page_title")
+    |> JS.focus(to: "#page-title-form")
+  end
+
+  defp title_error(error) do
+    error
+    |> Ash.Error.to_error_class()
+    |> Map.fetch!(:errors)
+    |> Enum.find_value(Exception.message(error), fn
+      %{field: :title, message: message} when is_binary(message) -> message
+      _error -> nil
+    end)
   end
 end

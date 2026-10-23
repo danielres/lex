@@ -53,6 +53,7 @@ const LexicalEditor = {
 
   updated() {
     this.lexicalEditor?.setEditable(this.el.dataset.editable === "true")
+    this.lexicalEditor?.setPages(JSON.parse(this.el.dataset.pages || "[]"))
   },
 
   destroyed() {

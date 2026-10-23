@@ -6,15 +6,15 @@
  *
  */
 
-import {getExtensionDependencyFromEditor, signal} from '@lexical/extension';
-import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {useSignalValue} from '@lexical/react/useExtensionSignalValue';
-import {CAN_USE_DOM, registerEventListener} from 'lexical';
-import {type JSX, useCallback, useEffect, useMemo, useState} from 'react';
+import { getExtensionDependencyFromEditor, signal } from '@lexical/extension';
+import { CharacterLimitPlugin } from '@lexical/react/LexicalCharacterLimitPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useSignalValue } from '@lexical/react/useExtensionSignalValue';
+import { CAN_USE_DOM, registerEventListener } from 'lexical';
+import { type JSX, useCallback, useEffect, useMemo, useState } from 'react';
 
-import {useSettings} from './context/SettingsContext';
-import {useSynchronizeSettings} from './hooks/useSynchronizeSettings';
+import { useSettings } from './context/SettingsContext';
+import { useSynchronizeSettings } from './hooks/useSynchronizeSettings';
 import ActionsPlugin from './plugins/ActionsPlugin';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
@@ -22,11 +22,11 @@ import ComponentPickerPlugin from './plugins/ComponentPickerPlugin';
 import ContextMenuPlugin from './plugins/ContextMenuPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import EmojiPickerPlugin from './plugins/EmojiPickerPlugin';
-import {ExcalidrawPlugin} from './plugins/ExcalidrawExtension';
+import { ExcalidrawPlugin } from './plugins/ExcalidrawExtension';
 import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
-import {MentionsPlugin} from './plugins/MentionsExtension';
-import {ShortcutsExtension} from './plugins/ShortcutsExtension';
+import { MentionsPlugin } from './plugins/MentionsExtension';
+import { ShortcutsExtension } from './plugins/ShortcutsExtension';
 import SpeechToTextPlugin from './plugins/SpeechToTextPlugin';
 import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
 import TableCellResizer from './plugins/TableCellResizer';
@@ -71,7 +71,7 @@ export default function Editor(): JSX.Element {
     () =>
       isRichText
         ? getExtensionDependencyFromEditor(editor, ShortcutsExtension).output
-            .isLinkEditMode
+          .isLinkEditMode
         : signal(false),
     [editor, isRichText],
   );
@@ -117,9 +117,8 @@ export default function Editor(): JSX.Element {
         />
       )}
       <div
-        className={`editor-container ${showTreeView ? 'tree-view' : ''} ${
-          !isRichText ? 'plain-text' : ''
-        }`}>
+        className={`editor-container ${showTreeView ? 'tree-view' : ''} ${!isRichText ? 'plain-text' : ''
+          }`}>
         <ComponentPickerPlugin />
         <EmojiPickerPlugin />
         <AutoEmbedPlugin />

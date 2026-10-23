@@ -61,6 +61,92 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "button[aria-label='Make editor read-only']")
   end
 
+  test "renames a page and patches to its new slug", %{conn: conn} do
+    page = Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    assert has_element?(view, "#page-title-form input[value='Summer Activities']")
+
+    view
+    |> form("#page-title-form", page_title: %{title: "Winter Activities"})
+    |> render_submit()
+
+    assert_push_event(view, "page_title_blur", %{})
+    assert_patch(view, ~p"/wiki/winter-activities")
+    assert Page.get!(page.id).title == "Winter Activities"
+    assert Page.get!(page.id).slug == "winter-activities"
+    assert has_element?(view, "#page-title-form input[value='Winter Activities']")
+  end
+
+  test "resets an unsaved page title", %{conn: conn} do
+    Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    view
+    |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
+    |> render_change()
+
+    view
+    |> element("button[aria-label='Cancel title change']")
+    |> render_click()
+
+    assert has_element?(view, "#page-title-form input[value='Summer Activities']")
+  end
+
+  test "resets an unsaved page title with Escape", %{conn: conn} do
+    Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    view
+    |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
+    |> render_change()
+
+    view
+    |> element("#page_title_title")
+    |> render_keydown(%{"key" => "Escape"})
+
+    assert has_element?(view, "#page-title-form input[value='Summer Activities']")
+  end
+
+  test "shows title errors without renaming the page", %{conn: conn} do
+    Page.ensure!("Winter Activities")
+    page = Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    view
+    |> form("#page-title-form", page_title: %{title: "Winter Activities"})
+    |> render_submit()
+
+    assert render(view) =~ "produces the already-used slug"
+    assert Page.get!(page.id).title == "Summer Activities"
+  end
+
+  test "does not offer title editing for the home page", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    refute has_element?(view, "#page-title-form")
+  end
+
   test "invalid slugs return not found and do not create pages", %{conn: conn} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->

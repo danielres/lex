@@ -16,6 +16,7 @@ import './setupEnv';
 
 export interface MountedLexicalEditor {
   setEditable(editable: boolean): void;
+  setPages(pages: WikiPageReference[]): void;
   unmount(): void;
 }
 
@@ -36,12 +37,13 @@ export function mountLexicalEditor(
   const collaboration = createPhoenixCollaboration(documentId);
   const root = createRoot(element);
   let editable = initialEditable;
+  let pages = initialPages;
 
   const render = () => {
     root.render(
       <PlaygroundApp
         editable={editable}
-        initialPages={initialPages}
+        initialPages={pages}
         providerFactory={collaboration.providerFactory}
         wikiPageRepository={wikiPageRepository}
       />,
@@ -56,6 +58,10 @@ export function mountLexicalEditor(
         editable = nextEditable;
         render();
       }
+    },
+    setPages(nextPages) {
+      pages = nextPages;
+      render();
     },
     unmount() {
       root.unmount();
