@@ -3,12 +3,12 @@ defmodule LexWeb.PageLive do
 
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageSlug
+  alias LexWeb.PageLive.EditableTitle
+  alias LexWeb.PageLive.ButtonToggleEdit
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Page.subscribe()
-
     socket = assign(socket, :editable, false)
-
     {:ok, socket}
   end
 
@@ -32,19 +32,16 @@ defmodule LexWeb.PageLive do
 
   def handle_event("toggle_editable", _params, socket) do
     socket = update(socket, :editable, &(!&1))
-
     {:noreply, socket}
   end
 
   def handle_event("change_page_title", %{"page_title" => %{"title" => title}}, socket) do
     socket = assign(socket, :page_title_form, page_title_form(title))
-
     {:noreply, socket}
   end
 
   def handle_event("reset_page_title", _params, socket) do
     socket = assign(socket, :page_title_form, page_title_form(socket.assigns.page.title))
-
     {:noreply, socket}
   end
 
@@ -116,113 +113,9 @@ defmodule LexWeb.PageLive do
     ~H"""
     <Layouts.app flash={@flash} active="page">
       <div class="flex justify-between pt-6 gap-4 pb-2">
-        <h1
-          :if={!@editable || @page.slug == "home"}
-          class={[
-            "text-3xl opacity-80",
-            "self-end",
-            "leading-tight"
-          ]}
-        >
-          {@page_title}
-        </h1>
-
-        <.form
-          :if={@editable && @page.slug != "home"}
-          for={@page_title_form}
-          id="page-title-form"
-          phx-change="change_page_title"
-          phx-hook=".PageTitleForm"
-          phx-submit="rename_page"
-          tabindex="-1"
-          class="grow max-w-sm"
-        >
-          <div class={[
-            "group join w-full rounded-box border border-base-100",
-            "bg-base-200",
-            "focus-within:border-info"
-          ]}>
-            <input
-              aria-label="Page title"
-              autocomplete="off"
-              class={[
-                "peer join-item grow",
-                "w-full rounded-l-box px-2",
-                "text-2xl opacity-75",
-                "outline-none"
-              ]}
-              id={@page_title_form[:title].id}
-              name={@page_title_form[:title].name}
-              phx-hook="CapitalizeFirstLetter"
-              phx-blur={reset_page_title()}
-              phx-key="Escape"
-              phx-keydown={reset_page_title()}
-              value={@page_title_form[:title].value}
-            />
-            <button
-              aria-label="Cancel title change"
-              class={[
-                "opacity-0 group-focus-within:opacity-100 transition",
-                "join-item btn btn-square btn-ghost",
-                "bg-transparent"
-              ]}
-              phx-click={reset_page_title()}
-              type="button"
-            >
-              <.icon name="hero-x-mark-micro" />
-            </button>
-            <button
-              aria-label="Save page title"
-              class={[
-                "opacity-0 group-focus-within:opacity-100 transition",
-                "join-item btn btn-square rounded-r-box",
-                "btn-info"
-              ]}
-              type="submit"
-            >
-              <.icon name="hero-check-micro" />
-            </button>
-          </div>
-          <p
-            :for={{message, _options} <- @page_title_form[:title].errors}
-            class="mt-1.5 flex items-center gap-2 text-sm text-error"
-          >
-            <.icon name="hero-exclamation-circle" class="size-5" />
-            {message}
-          </p>
-        </.form>
-
-        <button
-          aria-label={if @editable, do: "Make editor read-only", else: "Enable editing"}
-          aria-pressed={!@editable}
-          class={[
-            "btn btn-square rounded-box",
-            @editable && "btn-info"
-          ]}
-          phx-click="toggle_editable"
-          title={if @editable, do: "Make editor read-only", else: "Enable editing"}
-          type="button"
-        >
-          <.icon
-            name={if @editable, do: "hero-lock-open-solid", else: "hero-lock-closed-solid"}
-            class="size-4"
-          />
-        </button>
+        <EditableTitle.render {assigns} />
+        <ButtonToggleEdit.render {assigns} />
       </div>
-
-      <script :type={Phoenix.LiveView.ColocatedHook} name=".PageTitleForm">
-        export default {
-          mounted() {
-            this.handleSubmit = () => this.el.querySelector("input")?.blur()
-            this.el.addEventListener("submit", this.handleSubmit)
-            this.handleEvent("page_title_blur", () => this.el.querySelector("input")?.blur())
-          },
-
-          destroyed() {
-            this.el.removeEventListener("submit", this.handleSubmit)
-          },
-        }
-      </script>
 
       <div
         class="lexical-playground"
@@ -249,11 +142,6 @@ defmodule LexWeb.PageLive do
 
   defp page_title_form(title, errors \\ []) do
     to_form(%{"title" => title}, as: :page_title, errors: errors)
-  end
-
-  defp reset_page_title do
-    JS.push("reset_page_title")
-    |> JS.focus(to: "#page-title-form")
   end
 
   defp title_error(error) do
