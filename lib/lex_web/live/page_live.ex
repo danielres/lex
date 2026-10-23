@@ -78,6 +78,13 @@ defmodule LexWeb.PageLive do
   end
 
   def handle_info(
+        %Ash.Notifier.Notification{action: %{name: :save}, resource: Lex.Wiki.PageDocument},
+        socket
+      ) do
+    {:noreply, socket}
+  end
+
+  def handle_info(
         %Ash.Notifier.Notification{action: %{name: :create_page}},
         socket
       ) do

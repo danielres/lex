@@ -47,6 +47,15 @@ defmodule LexWeb.PageLiveTest do
     refute home.id == summer.id
   end
 
+  test "remains alive when a document checkpoint is saved", %{conn: conn} do
+    page = Page.ensure!("Home")
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    assert :ok = Page.set_checkpoint(page, "main", document("updated"))
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
+  end
+
   test "the lock button toggles whether the editor is editable", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/wiki/home")
 
@@ -212,5 +221,11 @@ defmodule LexWeb.PageLiveTest do
 
     assert Plug.Exception.status(error) == 404
     assert Ash.read!(Page) == []
+  end
+
+  defp document(text) do
+    doc = Yex.Doc.new()
+    doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
+    doc
   end
 end
