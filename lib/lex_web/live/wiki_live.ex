@@ -11,7 +11,8 @@ defmodule LexWeb.WikiLive do
     {:ok, socket}
   end
 
-  def handle_info(%Ash.Notifier.Notification{action: %{name: :rename_page}}, socket) do
+  def handle_info(%Ash.Notifier.Notification{action: %{name: action}}, socket)
+      when action in [:create_page, :rename_page] do
     socket = assign(socket, :pages, list_pages())
 
     {:noreply, socket}

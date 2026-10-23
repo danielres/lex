@@ -12,6 +12,19 @@ defmodule Lex.Wiki.PageTest do
       assert {:ok, page.id} == Ecto.UUID.cast(page.id)
     end
 
+    test "publishes a notification after creating a page" do
+      Page.subscribe()
+
+      page = Page.ensure!("Summer Activities")
+
+      assert_receive %Ash.Notifier.Notification{
+        action: %{name: :create_page},
+        data: %{id: page_id, title: "Summer Activities"}
+      }
+
+      assert page_id == page.id
+    end
+
     test "returns the existing page for the same normalized title" do
       assert {:ok, first_page} = Page.ensure("Summer   Activities")
       assert {:ok, second_page} = Page.ensure("  Summer Activities ")

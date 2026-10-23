@@ -80,6 +80,15 @@ defmodule LexWeb.PageLive do
   end
 
   def handle_info(
+        %Ash.Notifier.Notification{action: %{name: :create_page}},
+        socket
+      ) do
+    socket = assign(socket, :pages, Page.list!())
+
+    {:noreply, socket}
+  end
+
+  def handle_info(
         %Ash.Notifier.Notification{action: %{name: :rename_page}, data: renamed_page},
         socket
       ) do

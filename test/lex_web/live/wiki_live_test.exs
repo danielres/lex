@@ -24,4 +24,13 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(view, ~s|a[href="/wiki/winter-activities"]|, "Winter Activities")
     refute has_element?(view, ~s|a[href="/wiki/summer-activities"]|)
   end
+
+  test "adds a page link after the page is created", %{conn: conn} do
+    Page.ensure!("Home")
+    {:ok, view, _html} = live(conn, ~p"/wiki")
+
+    Page.ensure!("Summer Activities")
+
+    assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
+  end
 end

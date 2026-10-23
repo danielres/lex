@@ -41,6 +41,7 @@ defmodule Lex.Wiki.Page do
     name Lex.PubSub
     prefix "wiki"
 
+    publish :create_page, "pages"
     publish :rename_page, "pages"
   end
 

@@ -111,6 +111,15 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
   end
 
+  test "refreshes page references when another page is created", %{conn: conn} do
+    Page.ensure!("Home")
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    Page.ensure!("Summer Activities")
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+  end
+
   test "resets an unsaved page title", %{conn: conn} do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
