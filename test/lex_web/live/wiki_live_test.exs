@@ -6,12 +6,12 @@ defmodule LexWeb.WikiLiveTest do
   alias Lex.Wiki.Page
 
   test "lists links to pages other than home", %{conn: conn} do
-    Page.ensure!("home")
-    Page.ensure!("summer-activities")
+    Page.ensure!("Home")
+    Page.ensure!("Summer Activities")
 
     {:ok, view, _html} = live(conn, ~p"/wiki")
 
     assert has_element?(view, ~s|a[href="/wiki/home"]|, "Home")
-    assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "summer-activities")
+    assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
   end
 end

@@ -12,12 +12,14 @@ defmodule LexWeb.PageLive do
 
   def handle_params(%{"page_slug" => slug}, _uri, socket) do
     if PageSlug.valid?(slug) do
-      page = Page.ensure!(slug)
+      page = Page.open!(slug)
+      pages = Page.list!()
 
       socket =
         socket
         |> assign(page: page)
-        |> assign(page_title: title_from_slug(slug))
+        |> assign(pages: pages)
+        |> assign(page_title: page.title)
 
       {:noreply, socket}
     else
@@ -31,10 +33,25 @@ defmodule LexWeb.PageLive do
     {:noreply, socket}
   end
 
+  def handle_event("ensure_wiki_page", %{"title" => title}, socket) do
+    case Page.ensure(title) do
+      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
+      {:error, error} -> {:reply, %{ok: false, error: Exception.message(error)}, socket}
+    end
+  end
+
+  def handle_event("resolve_wiki_page", %{"id" => id}, socket) do
+    case Page.get(id) do
+      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
+      {:error, _error} -> {:reply, %{ok: false}, socket}
+    end
+  end
+
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="page">
-      <div class="flex justify-end pb-2">
+      <div class="flex justify-between pb-2 pt-6 items-end">
+        <h1 class="text-3xl opacity-75">{@page_title}</h1>
         <button
           aria-label={if @editable, do: "Make editor read-only", else: "Enable editing"}
           aria-pressed={!@editable}
@@ -59,6 +76,7 @@ defmodule LexWeb.PageLive do
         class="lexical-playground"
         data-document-id={@page.id}
         data-editable={to_string(@editable)}
+        data-pages={Jason.encode!(Enum.map(@pages, &page_reference/1))}
         id={"lexical-editor-#{@page.id}"}
         phx-hook="LexicalEditor"
         phx-update="ignore"
@@ -68,9 +86,12 @@ defmodule LexWeb.PageLive do
     """
   end
 
-  defp title_from_slug(slug) do
-    slug
-    |> String.split("-")
-    |> Enum.map_join(" ", &String.capitalize/1)
+  defp page_reference(page) do
+    %{
+      id: page.id,
+      path: ~p"/wiki/#{page.slug}",
+      slug: page.slug,
+      title: page.title
+    }
   end
 end

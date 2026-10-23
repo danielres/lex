@@ -67,10 +67,10 @@ import {
 import useModal from '../../hooks/useModal';
 import catTypingGif from '../../images/cat-typing.gif';
 import {$createStickyNode} from '../../nodes/StickyNode';
+import {$isWikiLinkNode} from '../../nodes/WikiLinkNode';
 import DropDown, {DropDownItem} from '../../ui/DropDown';
 import {isKeyboardInput} from '../../utils/focusUtils';
 import {getSelectedNode} from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
 import {EmbedConfigs} from '../AutoEmbedPlugin';
 import {INSERT_COLLAPSIBLE_COMMAND} from '../CollapsibleExtension';
 import {INSERT_DATETIME_COMMAND} from '../DateTimeExtension';
@@ -565,12 +565,21 @@ export default function ToolbarPlugin({
   }, [$updateToolbar, activeEditor, editor, updateToolbarState]);
 
   const insertLink = useCallback(() => {
+    const isWikiLink = activeEditor.read('latest', () => {
+      const selection = $getSelection();
+      return (
+        $isNodeSelection(selection) &&
+        selection.getNodes().some($isWikiLinkNode)
+      );
+    });
+
+    if (isWikiLink) {
+      setIsLinkEditMode(true);
+      return;
+    }
+
     if (!toolbarState.isLink) {
       setIsLinkEditMode(true);
-      activeEditor.dispatchCommand(
-        TOGGLE_LINK_COMMAND,
-        sanitizeUrl('https://'),
-      );
     } else {
       setIsLinkEditMode(false);
       activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, null);

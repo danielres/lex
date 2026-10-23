@@ -16,7 +16,9 @@ defmodule LexWeb.WikiLive do
       <ul class="list list-disc pl-4">
         <li><.link class="link link-hover link-info" navigate={~p"/wiki/home"}>Home</.link></li>
         <li :for={page <- @pages}>
-          <.link class="link link-hover link-info" navigate={~p"/wiki/#{page.slug}"}>{page.slug}</.link>
+          <.link class="link link-hover link-info" navigate={~p"/wiki/#{page.slug}"}>
+            {page.title}
+          </.link>
         </li>
       </ul>
     </Layouts.app>

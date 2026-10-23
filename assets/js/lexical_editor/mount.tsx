@@ -8,6 +8,10 @@ import {createRoot} from 'react-dom/client';
 
 import PlaygroundApp from './App';
 import {createPhoenixCollaboration} from './collaboration';
+import type {
+  WikiPageReference,
+  WikiPageRepository,
+} from './context/WikiPagesContext';
 import './setupEnv';
 
 export interface MountedLexicalEditor {
@@ -17,8 +21,17 @@ export interface MountedLexicalEditor {
 
 export function mountLexicalEditor(
   element: HTMLElement,
-  documentId: string,
-  initialEditable: boolean,
+  {
+    documentId,
+    initialEditable,
+    initialPages,
+    wikiPageRepository,
+  }: {
+    documentId: string;
+    initialEditable: boolean;
+    initialPages: WikiPageReference[];
+    wikiPageRepository: WikiPageRepository;
+  },
 ): MountedLexicalEditor {
   const collaboration = createPhoenixCollaboration(documentId);
   const root = createRoot(element);
@@ -28,7 +41,9 @@ export function mountLexicalEditor(
     root.render(
       <PlaygroundApp
         editable={editable}
+        initialPages={initialPages}
         providerFactory={collaboration.providerFactory}
+        wikiPageRepository={wikiPageRepository}
       />,
     );
   };

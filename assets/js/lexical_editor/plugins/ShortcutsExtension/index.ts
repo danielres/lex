@@ -36,7 +36,6 @@ import {
 } from 'lexical';
 
 import {getSelectedNode} from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
 import {
   $clearFormatting,
   $formatBulletList,
@@ -189,10 +188,9 @@ export const ShortcutsExtension = defineExtension({
           isLink = $isLinkNode(node) || $isLinkNode(node.getParent());
         }
         isLinkEditMode.value = !isLink;
-        e.dispatchCommand(
-          TOGGLE_LINK_COMMAND,
-          isLink ? null : sanitizeUrl('https://'),
-        );
+        if (isLink) {
+          e.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+        }
       }),
     );
   },

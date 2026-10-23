@@ -25,13 +25,16 @@ import {
 } from '@lexical/link';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {
+  $createTextNode,
   $findMatchingParent,
+  $getNodeByKey,
   $getSelection,
   $isDecoratorNode,
   $isLineBreakNode,
   $isNodeSelection,
   $isRangeSelection,
   $onUpdate,
+  $setSelection,
   type BaseSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
@@ -46,6 +49,7 @@ import {
   KEY_ESCAPE_COMMAND,
   type LexicalEditor,
   mergeRegister,
+  type NodeKey,
   type RangeSelection,
   registerEventListener,
   SELECTION_CHANGE_COMMAND,
@@ -61,6 +65,11 @@ import {
 } from 'react';
 import {createPortal} from 'react-dom';
 
+import {
+  type WikiPageReference,
+  useWikiPages,
+} from '../../context/WikiPagesContext';
+import {$createWikiLinkNode, $isWikiLinkNode} from '../../nodes/WikiLinkNode';
 import {getSelectedNode} from '../../utils/getSelectedNode';
 import {sanitizeUrl} from '../../utils/url';
 
@@ -97,10 +106,25 @@ function preventDefault(
   event.preventDefault();
 }
 
+type SelectedWikiLink = {
+  nodeKey: NodeKey;
+  pageId: string;
+};
+
+function slugPreview(title: string): string {
+  return title
+    .normalize('NFC')
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function FloatingLinkEditor({
   editor,
   isLink,
   setIsLink,
+  wikiLink,
   anchorElem,
   isLinkEditMode,
   setIsLinkEditMode,
@@ -108,17 +132,38 @@ function FloatingLinkEditor({
   editor: LexicalEditor;
   isLink: boolean;
   setIsLink: Dispatch<boolean>;
+  wikiLink: SelectedWikiLink | null;
   anchorElem: HTMLElement;
   isLinkEditMode: boolean;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const {ensurePage, pageById, pages} = useWikiPages();
   const [linkUrl, setLinkUrl] = useState('');
   const [editedLinkUrl, setEditedLinkUrl] = useState('https://');
+  const [linkMode, setLinkMode] = useState<'wiki' | 'external'>('wiki');
+  const [wikiQuery, setWikiQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [lastSelection, setLastSelection] = useState<BaseSelection | null>(
     null,
   );
+  const selectedWikiPage = wikiLink ? pageById.get(wikiLink.pageId) : undefined;
+  const normalizedWikiQuery = wikiQuery.trim().toLocaleLowerCase();
+  const matchingPages = pages
+    .filter(
+      page =>
+        page.title.toLocaleLowerCase().includes(normalizedWikiQuery) ||
+        page.slug.toLocaleLowerCase().includes(normalizedWikiQuery),
+    )
+    .slice(0, 8);
+  const hasExactPage = pages.some(
+    page =>
+      page.title.toLocaleLowerCase() === normalizedWikiQuery ||
+      page.slug.toLocaleLowerCase() === normalizedWikiQuery,
+  );
+  const visible = isLink || isLinkEditMode;
 
   const scrollerElem = getParentElement(anchorElem);
 
@@ -152,9 +197,6 @@ function FloatingLinkEditor({
       } else {
         setLinkUrl('');
       }
-      if (isLinkEditMode) {
-        setEditedLinkUrl(linkUrl);
-      }
     } else if ($isNodeSelection(selection)) {
       const nodes = selection.getNodes();
       if (nodes.length > 0) {
@@ -166,9 +208,6 @@ function FloatingLinkEditor({
           setLinkUrl(node.getURL());
         } else {
           setLinkUrl('');
-        }
-        if (isLinkEditMode) {
-          setEditedLinkUrl(linkUrl);
         }
       }
     }
@@ -233,14 +272,14 @@ function FloatingLinkEditor({
         }
       }
       setLastSelection(selection);
-    } else if (!activeElement || activeElement.className !== 'link-input') {
+    } else if (!activeElement || !editorRef.current?.contains(activeElement)) {
       setLastSelection(null);
       setIsLinkEditMode(false);
       setLinkUrl('');
     }
 
     return true;
-  }, [editor, setIsLinkEditMode, isLinkEditMode, linkUrl, refs]);
+  }, [editor, refs, setIsLinkEditMode]);
 
   useEffect(() => {
     return mergeRegister(
@@ -261,8 +300,9 @@ function FloatingLinkEditor({
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
         () => {
-          if (isLink) {
+          if (visible) {
             setIsLink(false);
+            setIsLinkEditMode(false);
             return true;
           }
           return false;
@@ -270,7 +310,7 @@ function FloatingLinkEditor({
         COMMAND_PRIORITY_HIGH,
       ),
     );
-  }, [editor, $updateLinkEditor, setIsLink, isLink]);
+  }, [editor, $updateLinkEditor, setIsLink, setIsLinkEditMode, visible]);
 
   useEffect(() => {
     editor.read('latest', () => {
@@ -279,10 +319,27 @@ function FloatingLinkEditor({
   }, [editor, $updateLinkEditor]);
 
   useEffect(() => {
+    if (isLinkEditMode) {
+      setError(null);
+      if (wikiLink) {
+        setLinkMode('wiki');
+        setWikiQuery(selectedWikiPage?.title ?? '');
+      } else if (isLink) {
+        setLinkMode('external');
+        setEditedLinkUrl(linkUrl);
+      } else {
+        setLinkMode('wiki');
+        setWikiQuery('');
+        setEditedLinkUrl('https://');
+      }
+    }
+  }, [isLink, isLinkEditMode, linkUrl, selectedWikiPage?.title, wikiLink]);
+
+  useEffect(() => {
     if (isLinkEditMode && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isLinkEditMode, isLink]);
+  }, [isLinkEditMode, linkMode]);
 
   useEffect(() => {
     const editorElement = editorRef.current;
@@ -290,13 +347,13 @@ function FloatingLinkEditor({
       return;
     }
     const handleBlur = (event: FocusEvent) => {
-      if (!editorElement.contains(event.relatedTarget as Element) && isLink) {
+      if (!editorElement.contains(event.relatedTarget as Element) && visible) {
         setIsLink(false);
         setIsLinkEditMode(false);
       }
     };
     return registerEventListener(editorElement, 'focusout', handleBlur);
-  }, [editorRef, setIsLink, setIsLinkEditMode, isLink]);
+  }, [editorRef, setIsLink, setIsLinkEditMode, visible]);
 
   const monitorInputInteraction = (
     event: React.KeyboardEvent<HTMLInputElement>,
@@ -311,35 +368,91 @@ function FloatingLinkEditor({
 
   const handleLinkSubmission = (
     event:
-      | React.KeyboardEvent<HTMLInputElement>
-      | React.MouseEvent<HTMLElement>,
+      React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLElement>,
   ) => {
     event.preventDefault();
-    if (lastSelection !== null) {
-      if (linkUrl !== '') {
-        editor.update(() => {
-          editor.dispatchCommand(
-            TOGGLE_LINK_COMMAND,
-            sanitizeUrl(editedLinkUrl),
-          );
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const parent = getSelectedNode(selection).getParent();
-            if ($isAutoLinkNode(parent)) {
-              const linkNode = $createLinkNode(parent.getURL(), {
-                rel: parent.__rel,
-                target: parent.__target,
-                title: parent.__title,
-              });
-              parent.replace(linkNode, true);
-            }
-          }
+    if (lastSelection !== null && editedLinkUrl.trim() !== '') {
+      editor.update(() => {
+        $setSelection(lastSelection.clone());
+        editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+          rel: 'noopener noreferrer',
+          target: '_blank',
+          url: sanitizeUrl(editedLinkUrl),
         });
-      }
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const parent = getSelectedNode(selection).getParent();
+          if ($isAutoLinkNode(parent)) {
+            const linkNode = $createLinkNode(parent.getURL(), {
+              rel: parent.__rel,
+              target: parent.__target,
+              title: parent.__title,
+            });
+            parent.replace(linkNode, true);
+          }
+        }
+      });
       setEditedLinkUrl('https://');
       setIsLinkEditMode(false);
     }
   };
+
+  const insertWikiPage = useCallback(
+    (page: WikiPageReference) => {
+      if (lastSelection === null) {
+        return;
+      }
+
+      editor.update(() => {
+        if (wikiLink) {
+          const node = $getNodeByKey(wikiLink.nodeKey);
+          if ($isWikiLinkNode(node)) {
+            node.setPageId(page.id);
+          }
+        } else {
+          $setSelection(lastSelection.clone());
+          $getSelection()?.insertNodes([$createWikiLinkNode(page.id)]);
+        }
+      });
+      setIsLinkEditMode(false);
+      setIsLink(false);
+    },
+    [editor, lastSelection, setIsLink, setIsLinkEditMode, wikiLink],
+  );
+
+  const createWikiPage = useCallback(async () => {
+    if (wikiQuery.trim() === '') {
+      return;
+    }
+
+    setError(null);
+    setIsSaving(true);
+    try {
+      insertWikiPage(await ensurePage(wikiQuery));
+    } catch (reason) {
+      setError(
+        reason instanceof Error ? reason.message : 'Could not create page',
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [ensurePage, insertWikiPage, wikiQuery]);
+
+  const unlinkWikiPage = useCallback(() => {
+    if (!wikiLink) {
+      return;
+    }
+
+    editor.update(() => {
+      const node = $getNodeByKey(wikiLink.nodeKey);
+      if ($isWikiLinkNode(node)) {
+        node.replace(
+          $createTextNode(selectedWikiPage?.title ?? 'Missing page'),
+        );
+      }
+    });
+    setIsLink(false);
+  }, [editor, selectedWikiPage?.title, setIsLink, wikiLink]);
 
   return (
     <div
@@ -350,50 +463,103 @@ function FloatingLinkEditor({
       className="link-editor"
       style={{
         ...floatingStyles,
-        opacity: isLink ? 1 : 0,
-        pointerEvents: isLink ? 'auto' : 'none',
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
       }}>
-      {!isLink ? null : isLinkEditMode ? (
-        <>
-          <input
-            ref={inputRef}
-            className="link-input"
-            value={editedLinkUrl}
-            onChange={event => {
-              setEditedLinkUrl(event.target.value);
-            }}
-            onKeyDown={event => {
-              monitorInputInteraction(event);
-            }}
-          />
-          <div>
-            <div
-              className="link-cancel"
-              role="button"
-              tabIndex={0}
-              onMouseDown={preventDefault}
-              onClick={() => {
-                setIsLinkEditMode(false);
-              }}
-            />
-
-            <div
-              className="link-confirm"
-              role="button"
-              tabIndex={0}
-              onMouseDown={preventDefault}
-              onClick={handleLinkSubmission}
-            />
+      {!visible ? null : isLinkEditMode ? (
+        <div className="wiki-link-editor">
+          <div className="wiki-link-tabs" role="tablist">
+            <button
+              aria-selected={linkMode === 'wiki'}
+              onClick={() => setLinkMode('wiki')}
+              role="tab"
+              type="button">
+              Wiki page
+            </button>
+            <button
+              aria-selected={linkMode === 'external'}
+              onClick={() => setLinkMode('external')}
+              role="tab"
+              type="button">
+              External URL
+            </button>
           </div>
-        </>
+
+          {linkMode === 'wiki' ? (
+            <div className="wiki-link-page-picker">
+              <input
+                ref={inputRef}
+                aria-label="Search or create a wiki page"
+                className="link-input"
+                onChange={event => setWikiQuery(event.target.value)}
+                placeholder="Page title"
+                value={wikiQuery}
+              />
+              <div className="wiki-link-results">
+                {matchingPages.map(page => (
+                  <button
+                    key={page.id}
+                    onClick={() => insertWikiPage(page)}
+                    onMouseDown={preventDefault}
+                    type="button">
+                    <span>{page.title}</span>
+                    <small>/{page.slug}</small>
+                  </button>
+                ))}
+                {wikiQuery.trim() !== '' && !hasExactPage ? (
+                  <button
+                    disabled={isSaving || slugPreview(wikiQuery) === ''}
+                    onClick={() => void createWikiPage()}
+                    onMouseDown={preventDefault}
+                    type="button">
+                    <span>Create “{wikiQuery.trim()}”</span>
+                    <small>/{slugPreview(wikiQuery)}</small>
+                  </button>
+                ) : null}
+              </div>
+              {error ? <p className="wiki-link-error">{error}</p> : null}
+            </div>
+          ) : (
+            <div className="wiki-link-external-editor">
+              <input
+                ref={inputRef}
+                aria-label="External URL"
+                className="link-input"
+                value={editedLinkUrl}
+                onChange={event => setEditedLinkUrl(event.target.value)}
+                onKeyDown={monitorInputInteraction}
+              />
+              <button
+                onMouseDown={preventDefault}
+                onClick={handleLinkSubmission}
+                type="button">
+                Apply
+              </button>
+            </div>
+          )}
+
+          <button
+            className="wiki-link-cancel"
+            onMouseDown={preventDefault}
+            onClick={() => setIsLinkEditMode(false)}
+            type="button">
+            Cancel
+          </button>
+        </div>
       ) : (
         <div className="link-view">
-          <a
-            href={sanitizeUrl(linkUrl)}
-            target="_blank"
-            rel="noopener noreferrer">
-            {linkUrl}
-          </a>
+          {wikiLink ? (
+            <a href={selectedWikiPage?.path}>
+              {selectedWikiPage?.title ?? 'Missing page'}
+            </a>
+          ) : (
+            <a
+              href={sanitizeUrl(linkUrl)}
+              target="_blank"
+              rel="noopener noreferrer">
+              {linkUrl}
+            </a>
+          )}
           <div
             className="link-edit"
             role="button"
@@ -401,7 +567,6 @@ function FloatingLinkEditor({
             onMouseDown={preventDefault}
             onClick={event => {
               event.preventDefault();
-              setEditedLinkUrl(linkUrl);
               setIsLinkEditMode(true);
             }}
           />
@@ -411,7 +576,11 @@ function FloatingLinkEditor({
             tabIndex={0}
             onMouseDown={preventDefault}
             onClick={() => {
-              editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+              if (wikiLink) {
+                unlinkWikiPage();
+              } else {
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+              }
             }}
           />
         </div>
@@ -428,6 +597,7 @@ function useFloatingLinkEditorToolbar(
 ): JSX.Element | null {
   const [activeEditor, setActiveEditor] = useState(editor);
   const [isLink, setIsLink] = useState(false);
+  const [wikiLink, setWikiLink] = useState<SelectedWikiLink | null>(null);
 
   useEffect(() => {
     function $updateToolbar() {
@@ -437,10 +607,12 @@ function useFloatingLinkEditorToolbar(
         // editor is read-only. Clicking a link in read-only mode follows it
         // (ClickableLinkExtension), so there is nothing to pop up.
         setIsLink(false);
+        setWikiLink(null);
         return;
       }
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
+        setWikiLink(null);
         const focusLinkNode = $getSelectedLinkNode(selection);
         const focusNode = getSelectedNode(selection);
         const focusAutoLinkNode = $findMatchingParent(
@@ -475,13 +647,29 @@ function useFloatingLinkEditorToolbar(
         const nodes = selection.getNodes();
         if (nodes.length === 0) {
           setIsLink(false);
+          setWikiLink(null);
           return;
         }
         const node = nodes[0];
         const parent = node.getParent();
-        if ($isLinkNode(parent) || $isLinkNode(node)) {
+        if ($isWikiLinkNode(node)) {
+          setWikiLink(currentWikiLink => {
+            const nextWikiLink = {
+              nodeKey: node.getKey(),
+              pageId: node.getPageId(),
+            };
+
+            return currentWikiLink?.nodeKey === nextWikiLink.nodeKey &&
+              currentWikiLink.pageId === nextWikiLink.pageId
+              ? currentWikiLink
+              : nextWikiLink;
+          });
+          setIsLink(true);
+        } else if ($isLinkNode(parent) || $isLinkNode(node)) {
+          setWikiLink(null);
           setIsLink(true);
         } else {
+          setWikiLink(null);
           setIsLink(false);
         }
       }
@@ -492,6 +680,7 @@ function useFloatingLinkEditorToolbar(
       editor.registerEditableListener(editable => {
         if (!editable) {
           setIsLink(false);
+          setWikiLink(null);
         }
       }),
       editor.registerUpdateListener(({editorState}) => {
@@ -533,6 +722,7 @@ function useFloatingLinkEditorToolbar(
       isLink={isLink}
       anchorElem={anchorElem}
       setIsLink={setIsLink}
+      wikiLink={wikiLink}
       isLinkEditMode={isLinkEditMode}
       setIsLinkEditMode={setIsLinkEditMode}
     />,

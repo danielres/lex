@@ -10,15 +10,12 @@ import type {AnyLexicalExtension, LexicalEditor} from 'lexical';
 
 import {
   batch,
-  effect,
   getExtensionDependencyFromEditor,
   getPeerDependencyFromEditor,
   SelectBlockExtension,
   SelectionAlwaysOnDisplayExtension,
-  WatchEditableExtension,
 } from '@lexical/extension';
 import {
-  ClickableLinkExtension,
   type LinkAttributes,
   LinkExtension,
 } from '@lexical/link';
@@ -133,21 +130,12 @@ export function synchronizeSettingsToSignals(
  * - Applies {@link INITIAL_SETTINGS} synchronously so the editor matches the
  *   playground defaults from the moment it is created (no first-render flash
  *   while a React effect catches up).
- * - Links the editor's editable state (exposed as a signal by
- *   {@link WatchEditableExtension}) to {@link ClickableLinkExtension}'s
- *   `disabled` signal, so clickable links are active only in read-only mode.
- *   This is editor state rather than a setting, so it is driven by a signals
- *   `effect` (reactive, no React re-render) instead of `useLexicalEditable`.
  */
 export function registerSettingsSynchronization(
   editor: LexicalEditor,
 ): () => void {
   synchronizeSettingsToSignals(editor, INITIAL_SETTINGS);
-  const editable = output(editor, WatchEditableExtension);
-  const clickableLink = output(editor, ClickableLinkExtension);
-  return effect(() => {
-    clickableLink.disabled.value = editable.value;
-  });
+  return () => undefined;
 }
 
 /**

@@ -24,12 +24,10 @@ import {
   SelectBlockExtension,
   SelectionAlwaysOnDisplayExtension,
   TabIndentationExtension,
-  WatchEditableExtension,
 } from '@lexical/extension';
 import {HashtagExtension} from '@lexical/hashtag';
 import {
   $createLinkNode,
-  ClickableLinkExtension,
   LinkExtension,
 } from '@lexical/link';
 import {
@@ -64,6 +62,11 @@ import {
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext, useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
+import {
+  type WikiPageReference,
+  type WikiPageRepository,
+  WikiPagesProvider,
+} from './context/WikiPagesContext';
 import Editor from './Editor';
 import useAppTheme from './hooks/useAppTheme';
 import {registerSettingsSynchronization} from './hooks/useSynchronizeSettings';
@@ -98,6 +101,7 @@ import {TerseExportExtension} from './plugins/TerseExportExtension';
 import {TwitterExtension} from './plugins/TwitterExtension';
 import TypingPerfPlugin from './plugins/TypingPerfPlugin';
 import {VisibleNonPrintingExtension} from './plugins/VisibleNonPrintingExtension';
+import {WikiClickableLinkExtension} from './plugins/WikiClickableLinkExtension';
 import {YouTubeExtension} from './plugins/YouTubeExtension';
 import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
@@ -237,9 +241,6 @@ const AppExtension = defineExtension({
     AutoFocusExtension,
     ClearEditorExtension,
     DecoratorTextExtension,
-    // Exposes editor.isEditable() as a signal; consumed by
-    // registerSettingsSynchronization to drive ClickableLinkExtension.
-    WatchEditableExtension,
     HistoryAnnounceExtension,
     EditorModeAnnounceExtension,
     KeywordsExtension,
@@ -252,7 +253,7 @@ const AppExtension = defineExtension({
     MentionsExtension,
     configExtension(LinkExtension, {validateUrl}),
     PlaygroundAutoLinkExtension,
-    configExtension(ClickableLinkExtension, {newTab: true}),
+    WikiClickableLinkExtension,
     SelectionAlwaysOnDisplayExtension,
     configExtension(SelectBlockExtension, {
       cascadeSelection: true,
@@ -317,8 +318,8 @@ function buildExtensionFromSettings(settings: DynamicSettings) {
     editable,
     name: '@lexical/playground/dynamic-config',
     // Apply INITIAL_SETTINGS to the extension config signals synchronously as
-    // the editor is built (and wire the editable→clickable-link signal),
-    // before the React useSynchronizeSettings effect takes over live updates.
+    // the editor is built, before the React useSynchronizeSettings effect
+    // takes over live updates.
     register: registerSettingsSynchronization,
   });
 }
@@ -391,18 +392,26 @@ function App({editable}: {editable: boolean}): JSX.Element {
 
 export default function PlaygroundApp({
   editable,
+  initialPages,
   providerFactory,
+  wikiPageRepository,
 }: {
   editable: boolean;
+  initialPages: WikiPageReference[];
   providerFactory: ProviderFactory;
+  wikiPageRepository: WikiPageRepository;
 }): JSX.Element {
   return (
-    <CollaborationContext providerFactory={providerFactory}>
-      <SettingsContext>
-        <FlashMessageContext>
-          <App editable={editable} />
-        </FlashMessageContext>
-      </SettingsContext>
-    </CollaborationContext>
+    <WikiPagesProvider
+      initialPages={initialPages}
+      repository={wikiPageRepository}>
+      <CollaborationContext providerFactory={providerFactory}>
+        <SettingsContext>
+          <FlashMessageContext>
+            <App editable={editable} />
+          </FlashMessageContext>
+        </SettingsContext>
+      </CollaborationContext>
+    </WikiPagesProvider>
   );
 }

@@ -28,11 +28,27 @@ import {mountLexicalEditor} from "./lexical_editor/mount"
 
 const LexicalEditor = {
   mounted() {
-    this.lexicalEditor = mountLexicalEditor(
-      this.el,
-      this.el.dataset.documentId,
-      this.el.dataset.editable === "true",
-    )
+    const requestPage = (event, payload) =>
+      new Promise(resolve => this.pushEvent(event, payload, resolve))
+
+    const wikiPageRepository = {
+      async ensure(title) {
+        const reply = await requestPage("ensure_wiki_page", {title})
+        if (!reply.ok) throw new Error(reply.error)
+        return reply.page
+      },
+      async resolve(id) {
+        const reply = await requestPage("resolve_wiki_page", {id})
+        return reply.ok ? reply.page : null
+      },
+    }
+
+    this.lexicalEditor = mountLexicalEditor(this.el, {
+      documentId: this.el.dataset.documentId,
+      initialEditable: this.el.dataset.editable === "true",
+      initialPages: JSON.parse(this.el.dataset.pages || "[]"),
+      wikiPageRepository,
+    })
   },
 
   updated() {

@@ -83,7 +83,6 @@ function TextFormatFloatingToolbar({
   const insertLink = useCallback(() => {
     if (!isLink) {
       setIsLinkEditMode(true);
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://');
     } else {
       setIsLinkEditMode(false);
       editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
@@ -452,9 +451,5 @@ export default function FloatingTextFormatToolbarPlugin({
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
-  return useFloatingTextFormatToolbar(
-    editor,
-    anchorElem,
-    setIsLinkEditMode,
-  );
+  return useFloatingTextFormatToolbar(editor, anchorElem, setIsLinkEditMode);
 }

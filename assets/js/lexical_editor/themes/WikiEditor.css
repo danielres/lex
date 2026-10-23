@@ -261,3 +261,65 @@ body .Modal__modal {
 body .Modal__title {
   @apply border-base-300 text-base-content;
 }
+
+.editor-shell.wiki-editor .wiki-link {
+  @apply cursor-pointer text-info underline decoration-info/40 underline-offset-2;
+}
+
+.editor-shell.wiki-editor .wiki-link:hover {
+  @apply decoration-info;
+}
+
+.editor-shell.wiki-editor .wiki-link-editor {
+  @apply flex w-full flex-col gap-2 p-3;
+}
+
+.editor-shell.wiki-editor .wiki-link-tabs {
+  @apply flex gap-1 rounded-box bg-base-200 p-1;
+}
+
+.editor-shell.wiki-editor .wiki-link-tabs button {
+  @apply flex-1 rounded-field px-3 py-1.5 text-sm;
+}
+
+.editor-shell.wiki-editor .wiki-link-tabs button[aria-selected="true"] {
+  @apply bg-base-100 font-semibold shadow-sm;
+}
+
+.editor-shell.wiki-editor .wiki-link-page-picker,
+.editor-shell.wiki-editor .wiki-link-external-editor {
+  @apply flex flex-col gap-2;
+}
+
+.editor-shell.wiki-editor .wiki-link-editor .link-input {
+  @apply m-0 w-full rounded-field border border-base-300 bg-base-100 px-3 py-2;
+}
+
+.editor-shell.wiki-editor .wiki-link-results {
+  @apply flex max-h-56 flex-col overflow-y-auto;
+}
+
+.editor-shell.wiki-editor .wiki-link-results button {
+  @apply flex items-center justify-between gap-4 rounded-field px-3 py-2 text-left hover:bg-base-200;
+}
+
+.editor-shell.wiki-editor .wiki-link-results small {
+  @apply truncate text-base-content/60;
+}
+
+.editor-shell.wiki-editor .wiki-link-external-editor {
+  @apply flex-row;
+}
+
+.editor-shell.wiki-editor .wiki-link-external-editor button,
+.editor-shell.wiki-editor .wiki-link-cancel {
+  @apply rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm hover:bg-base-300;
+}
+
+.editor-shell.wiki-editor .wiki-link-cancel {
+  @apply self-end;
+}
+
+.editor-shell.wiki-editor .wiki-link-error {
+  @apply text-sm text-error;
+}

@@ -11,6 +11,18 @@ defmodule LexWeb.PageLiveTest do
 
     assert html =~ ~s(data-document-id="#{page.id}")
     assert html =~ ~s(id="lexical-editor-#{page.id}")
+    assert page.title == "Home"
+  end
+
+  test "preloads page references and creates missing link targets", %{conn: conn} do
+    Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+
+    render_hook(view, "ensure_wiki_page", %{"title" => "Winter Plans"})
+
+    assert Page.list!() |> Enum.any?(&(&1.title == "Winter Plans"))
   end
 
   test "revisiting a slug reuses its page id", %{conn: conn} do
