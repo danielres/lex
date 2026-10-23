@@ -144,9 +144,9 @@ defmodule LexWeb.PageLive do
               ]}
               id={@page_title_form[:title].id}
               name={@page_title_form[:title].name}
+              phx-blur={reset_page_title()}
               phx-key="Escape"
               phx-keydown={reset_page_title()}
-              phx-click-away={reset_page_title()}
               value={@page_title_form[:title].value}
             />
             <button
