@@ -181,7 +181,7 @@ defmodule LexWeb.PageLiveTest do
     |> form("#page-title-form", page_title: %{title: "Winter Activities"})
     |> render_submit()
 
-    assert render(view) =~ "produces a slug already used by another page"
+    assert render(view) =~ "Not available"
     assert Page.get!(page.id).title == "Summer Activities"
   end
 

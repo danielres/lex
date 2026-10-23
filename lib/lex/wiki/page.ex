@@ -156,7 +156,7 @@ defmodule Lex.Wiki.Page do
     case get_by_slug(slug) do
       {:ok, nil} -> :ok
       {:ok, %{id: ^page_id}} -> :ok
-      {:ok, _page} -> {:error, "produces a slug already used by another page"}
+      {:ok, _page} -> {:error, "Not available"}
       {:error, error} -> {:error, error}
     end
   end
