@@ -144,6 +144,7 @@ defmodule LexWeb.PageLive do
               ]}
               id={@page_title_form[:title].id}
               name={@page_title_form[:title].name}
+              phx-hook="CapitalizeFirstLetter"
               phx-blur={reset_page_title()}
               phx-key="Escape"
               phx-keydown={reset_page_title()}
