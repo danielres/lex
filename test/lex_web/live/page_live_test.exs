@@ -82,6 +82,35 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#page-title-form input[value='Winter Activities']")
   end
 
+  test "propagates a rename to other viewers of the same page", %{conn: conn} do
+    Page.ensure!("Summer Activities")
+    {:ok, first_view, _html} = live(conn, ~p"/wiki/summer-activities")
+    {:ok, second_view, _html} = live(recycle(conn), ~p"/wiki/summer-activities")
+
+    first_view
+    |> element("button[phx-click=toggle_editable]")
+    |> render_click()
+
+    first_view
+    |> form("#page-title-form", page_title: %{title: "Winter Activities"})
+    |> render_submit()
+
+    assert_patch(first_view, ~p"/wiki/winter-activities")
+    assert_patch(second_view, ~p"/wiki/winter-activities")
+    assert has_element?(second_view, "h1", "Winter Activities")
+  end
+
+  test "refreshes page references when another page is renamed", %{conn: conn} do
+    Page.ensure!("Home")
+    summer = Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    Page.rename!(summer, "Winter Activities")
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Winter Activities']")
+    refute has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+  end
+
   test "resets an unsaved page title", %{conn: conn} do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
@@ -133,7 +162,7 @@ defmodule LexWeb.PageLiveTest do
     |> form("#page-title-form", page_title: %{title: "Winter Activities"})
     |> render_submit()
 
-    assert render(view) =~ "produces the already-used slug"
+    assert render(view) =~ "produces a slug already used by another page"
     assert Page.get!(page.id).title == "Summer Activities"
   end
 

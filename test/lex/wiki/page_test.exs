@@ -93,6 +93,20 @@ defmodule Lex.Wiki.PageTest do
       assert {:error, _error} = Page.rename(summer, "Winter Activities")
       assert Page.get!(summer.id).slug == "summer-activities"
     end
+
+    test "publishes a notification after a successful rename" do
+      page = Page.ensure!("Summer Activities")
+      Page.subscribe()
+
+      renamed_page = Page.rename!(page, "Winter Activities")
+
+      assert_receive %Ash.Notifier.Notification{
+        action: %{name: :rename_page},
+        data: %{id: page_id, title: "Winter Activities"}
+      }
+
+      assert page_id == renamed_page.id
+    end
   end
 
   describe "list/0" do

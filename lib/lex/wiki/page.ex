@@ -7,7 +7,8 @@ defmodule Lex.Wiki.Page do
 
   use Ash.Resource,
     domain: Lex.Wiki,
-    data_layer: AshSqlite.DataLayer
+    data_layer: AshSqlite.DataLayer,
+    notifiers: [Ash.Notifier.PubSub]
 
   sqlite do
     table "pages"
@@ -33,6 +34,14 @@ defmodule Lex.Wiki.Page do
     update :rename_page do
       accept [:title, :slug]
     end
+  end
+
+  pub_sub do
+    module Phoenix.PubSub
+    name Lex.PubSub
+    prefix "wiki"
+
+    publish :rename_page, "pages"
   end
 
   attributes do
@@ -98,6 +107,10 @@ defmodule Lex.Wiki.Page do
   end
 
   def rename!(page, title), do: unwrap_or_raise!(rename(page, title))
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
+  end
 
   def restore(page, document_key, doc) do
     with {:ok, page_document} <- get_page_document(page, document_key) do

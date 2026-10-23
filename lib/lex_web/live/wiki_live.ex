@@ -4,10 +4,17 @@ defmodule LexWeb.WikiLive do
   alias Lex.Wiki.Page
 
   def mount(_params, _session, socket) do
-    pages = Page.list!() |> Enum.reject(&(&1.slug == "home"))
-    socket = assign(socket, pages: pages)
+    if connected?(socket), do: Page.subscribe()
+
+    socket = assign(socket, :pages, list_pages())
 
     {:ok, socket}
+  end
+
+  def handle_info(%Ash.Notifier.Notification{action: %{name: :rename_page}}, socket) do
+    socket = assign(socket, :pages, list_pages())
+
+    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -23,5 +30,9 @@ defmodule LexWeb.WikiLive do
       </ul>
     </Layouts.app>
     """
+  end
+
+  defp list_pages do
+    Page.list!() |> Enum.reject(&(&1.slug == "home"))
   end
 end

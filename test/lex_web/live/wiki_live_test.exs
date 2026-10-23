@@ -14,4 +14,14 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(view, ~s|a[href="/wiki/home"]|, "Home")
     assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
   end
+
+  test "updates a page link after the page is renamed", %{conn: conn} do
+    page = Page.ensure!("Summer Activities")
+    {:ok, view, _html} = live(conn, ~p"/wiki")
+
+    Page.rename!(page, "Winter Activities")
+
+    assert has_element?(view, ~s|a[href="/wiki/winter-activities"]|, "Winter Activities")
+    refute has_element?(view, ~s|a[href="/wiki/summer-activities"]|)
+  end
 end

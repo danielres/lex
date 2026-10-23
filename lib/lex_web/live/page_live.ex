@@ -5,6 +5,8 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.PageSlug
 
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Page.subscribe()
+
     socket = assign(socket, :editable, false)
 
     {:ok, socket}
@@ -48,16 +50,7 @@ defmodule LexWeb.PageLive do
 
   def handle_event("rename_page", %{"page_title" => %{"title" => title}}, socket) do
     case Page.rename(socket.assigns.page, title) do
-      {:ok, page} ->
-        socket =
-          socket
-          |> assign(page: page)
-          |> assign(pages: Page.list!())
-          |> assign(page_title: page.title)
-          |> assign(page_title_form: page_title_form(page.title))
-          |> push_event("page_title_blur", %{})
-          |> push_patch(to: ~p"/wiki/#{page.slug}")
-
+      {:ok, _page} ->
         {:noreply, socket}
 
       {:error, error} ->
@@ -83,6 +76,30 @@ defmodule LexWeb.PageLive do
     case Page.get(id) do
       {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
       {:error, _error} -> {:reply, %{ok: false}, socket}
+    end
+  end
+
+  def handle_info(
+        %Ash.Notifier.Notification{action: %{name: :rename_page}, data: renamed_page},
+        socket
+      ) do
+    pages = Page.list!()
+    current_page = socket.assigns.page
+
+    socket = assign(socket, :pages, pages)
+
+    if current_page.id == renamed_page.id do
+      socket =
+        socket
+        |> assign(page: renamed_page)
+        |> assign(page_title: renamed_page.title)
+        |> assign(page_title_form: page_title_form(renamed_page.title))
+        |> push_event("page_title_blur", %{})
+        |> push_patch(to: ~p"/wiki/#{renamed_page.slug}")
+
+      {:noreply, socket}
+    else
+      {:noreply, socket}
     end
   end
 
