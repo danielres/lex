@@ -114,7 +114,33 @@ body > .dropdown .dropdown-item-active {
   .PlaygroundEditorTheme__ol2 { @apply list-decimal; }
   .PlaygroundEditorTheme__quote { @apply text-base-content/65; }
   .PlaygroundEditorTheme__quote { @apply border-base-300; }
-  .PlaygroundEditorTheme__link { @apply text-primary; }
+  .PlaygroundEditorTheme__link {
+    @apply no-underline;
+    @apply text-info after:opacity-50 hover:after:opacity-100 after:transition;
+    @apply after:content-['↗'] after:pl-0.5 after:pr-1 after:font-bold;
+    @apply opacity-90 hover:opacity-100 transition;
+    @apply hover:bg-info/20 pl-0.5;
+  }
+
+  .wiki-link { @apply cursor-pointer text-info hover:bg-info/20 transition; }
+  .wiki-link-editor { @apply flex w-full flex-col gap-2 p-3; }
+  .wiki-link-tabs { @apply flex gap-1 rounded-box bg-base-200 p-1; }
+  .wiki-link-tabs button { @apply flex-1 rounded-field px-3 py-1.5 text-sm; }
+  .wiki-link-tabs button[aria-selected="true"] { @apply bg-base-100 font-semibold shadow-sm; }
+  .wiki-link-page-picker,
+  .wiki-link-external-editor { @apply flex flex-col gap-2; }
+  .wiki-link-editor .link-input { @apply m-0 w-full rounded-field border border-base-300 bg-base-100 px-3 py-2; }
+  .wiki-link-results { @apply flex max-h-56 flex-col overflow-y-auto; }
+  .wiki-link-results button {
+    @apply flex items-center justify-between gap-4 rounded-field px-3 py-2 text-left hover:bg-base-200;
+  }
+  .wiki-link-results small { @apply truncate text-base-content/60; }
+  .wiki-link-external-editor { @apply flex-row; }
+  .wiki-link-external-editor button,
+  .wiki-link-cancel { @apply rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm hover:bg-base-300; }
+  .wiki-link-cancel { @apply self-end; }
+  .wiki-link-error { @apply text-sm text-error; }
+
   .PlaygroundEditorTheme__code,
   .PlaygroundEditorTheme__textCode { @apply bg-base-200; }
   .PlaygroundEditorTheme__code::before { @apply border-base-300 bg-base-300 text-base-content/60; }
@@ -218,64 +244,4 @@ body .Modal__title {
   @apply border-base-300 text-base-content;
 }
 
-.editor-shell.wiki-editor .wiki-link {
-  @apply cursor-pointer text-info underline decoration-info/40 underline-offset-2;
-}
 
-.editor-shell.wiki-editor .wiki-link:hover {
-  @apply decoration-info;
-}
-
-.editor-shell.wiki-editor .wiki-link-editor {
-  @apply flex w-full flex-col gap-2 p-3;
-}
-
-.editor-shell.wiki-editor .wiki-link-tabs {
-  @apply flex gap-1 rounded-box bg-base-200 p-1;
-}
-
-.editor-shell.wiki-editor .wiki-link-tabs button {
-  @apply flex-1 rounded-field px-3 py-1.5 text-sm;
-}
-
-.editor-shell.wiki-editor .wiki-link-tabs button[aria-selected="true"] {
-  @apply bg-base-100 font-semibold shadow-sm;
-}
-
-.editor-shell.wiki-editor .wiki-link-page-picker,
-.editor-shell.wiki-editor .wiki-link-external-editor {
-  @apply flex flex-col gap-2;
-}
-
-.editor-shell.wiki-editor .wiki-link-editor .link-input {
-  @apply m-0 w-full rounded-field border border-base-300 bg-base-100 px-3 py-2;
-}
-
-.editor-shell.wiki-editor .wiki-link-results {
-  @apply flex max-h-56 flex-col overflow-y-auto;
-}
-
-.editor-shell.wiki-editor .wiki-link-results button {
-  @apply flex items-center justify-between gap-4 rounded-field px-3 py-2 text-left hover:bg-base-200;
-}
-
-.editor-shell.wiki-editor .wiki-link-results small {
-  @apply truncate text-base-content/60;
-}
-
-.editor-shell.wiki-editor .wiki-link-external-editor {
-  @apply flex-row;
-}
-
-.editor-shell.wiki-editor .wiki-link-external-editor button,
-.editor-shell.wiki-editor .wiki-link-cancel {
-  @apply rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm hover:bg-base-300;
-}
-
-.editor-shell.wiki-editor .wiki-link-cancel {
-  @apply self-end;
-}
-
-.editor-shell.wiki-editor .wiki-link-error {
-  @apply text-sm text-error;
-}
