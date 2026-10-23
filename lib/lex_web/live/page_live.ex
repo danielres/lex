@@ -113,7 +113,7 @@ defmodule LexWeb.PageLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="page">
-      <div class="flex justify-between pt-6 gap-4 pb-2">
+      <div class="flex justify-between pt-6 gap-4 pb-4">
         <EditableTitle.render {assigns} />
         <ButtonToggleEdit.render {assigns} />
       </div>
