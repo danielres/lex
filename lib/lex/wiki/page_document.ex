@@ -3,7 +3,8 @@ defmodule Lex.Wiki.PageDocument do
 
   use Ash.Resource,
     domain: Lex.Wiki,
-    data_layer: AshSqlite.DataLayer
+    data_layer: AshSqlite.DataLayer,
+    notifiers: [Ash.Notifier.PubSub]
 
   sqlite do
     table "page_documents"
@@ -19,6 +20,14 @@ defmodule Lex.Wiki.PageDocument do
       upsert_identity :unique_page_document
       upsert_fields [:yjs_state]
     end
+  end
+
+  pub_sub do
+    module Phoenix.PubSub
+    name Lex.PubSub
+    prefix "wiki"
+
+    publish :save, "pages"
   end
 
   attributes do

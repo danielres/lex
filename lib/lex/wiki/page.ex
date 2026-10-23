@@ -26,7 +26,7 @@ defmodule Lex.Wiki.Page do
     defaults [:read]
 
     read :list do
-      prepare build(sort: :title)
+      prepare build(load: :last_updated_at, sort: :title)
     end
 
     create :create_page do
@@ -65,6 +65,19 @@ defmodule Lex.Wiki.Page do
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
+  end
+
+  calculations do
+    calculate :last_updated_at,
+              :utc_datetime_usec,
+              expr(
+                fragment(
+                  "MAX(?, COALESCE((SELECT MAX(updated_at) FROM page_documents WHERE page_id = ?), ?))",
+                  updated_at,
+                  id,
+                  updated_at
+                )
+              )
   end
 
   identities do

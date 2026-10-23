@@ -12,7 +12,7 @@ defmodule Lex.Wiki.PageTitle do
     case String.length(title) do
       0 -> {:error, "Cannot be empty"}
       length when length < 3 -> {:error, "Min 3 chars"}
-      length when length > 20 -> {:error, "Max 40 chars"}
+      length when length > 40 -> {:error, "Max 40 chars"}
       _length -> {:ok, title}
     end
   end

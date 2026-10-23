@@ -5,8 +5,8 @@ defmodule LexWeb.WikiLive do
 
   @sort_fields %{
     "inserted_at" => :inserted_at,
-    "title" => :title,
-    "updated_at" => :updated_at
+    "last_updated_at" => :last_updated_at,
+    "title" => :title
   }
 
   def mount(_params, _session, socket) do
@@ -20,8 +20,8 @@ defmodule LexWeb.WikiLive do
 
     socket =
       socket
-      |> assign(pages: list_pages(:updated_at, :desc))
-      |> assign(sort_by: :updated_at)
+      |> assign(pages: list_pages(:last_updated_at, :desc))
+      |> assign(sort_by: :last_updated_at)
       |> assign(sort_direction: :desc)
       |> assign(tz: tz)
 
@@ -29,7 +29,7 @@ defmodule LexWeb.WikiLive do
   end
 
   def handle_info(%Ash.Notifier.Notification{action: %{name: action}}, socket)
-      when action in [:create_page, :rename_page] do
+      when action in [:create_page, :rename_page, :save] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
 
@@ -85,9 +85,9 @@ defmodule LexWeb.WikiLive do
                     Created
                   </.sortable>
                 </th>
-                <th aria-sort={aria_sort(@sort_by, @sort_direction, :updated_at)}>
+                <th aria-sort={aria_sort(@sort_by, @sort_direction, :last_updated_at)}>
                   <.sortable
-                    field={:updated_at}
+                    field={:last_updated_at}
                     sort_by={@sort_by}
                     sort_direction={@sort_direction}
                   >
@@ -119,7 +119,7 @@ defmodule LexWeb.WikiLive do
                   {Utils.Time.relative(page.inserted_at)}
                 </td>
                 <td>
-                  {Utils.Time.relative(page.updated_at)}
+                  {Utils.Time.relative(page.last_updated_at)}
                 </td>
               </tr>
             </tbody>
@@ -179,5 +179,8 @@ defmodule LexWeb.WikiLive do
   defp next_sort_direction(%{sort_by: sort_by, sort_direction: :asc}, sort_by), do: :desc
   defp next_sort_direction(%{sort_by: sort_by, sort_direction: :desc}, sort_by), do: :asc
   defp next_sort_direction(_assigns, :title), do: :asc
-  defp next_sort_direction(_assigns, field) when field in [:inserted_at, :updated_at], do: :desc
+
+  defp next_sort_direction(_assigns, field)
+       when field in [:inserted_at, :last_updated_at],
+       do: :desc
 end

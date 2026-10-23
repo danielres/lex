@@ -39,7 +39,10 @@ defmodule LexWeb.WikiLiveTest do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki")
 
-    assert has_element?(view, "th[aria-sort=descending] button[phx-value-sort-by=updated_at]")
+    assert has_element?(
+             view,
+             "th[aria-sort=descending] button[phx-value-sort-by=last_updated_at]"
+           )
 
     view
     |> element("button[phx-value-sort-by=title]")
@@ -69,5 +72,21 @@ defmodule LexWeb.WikiLiveTest do
 
     assert has_element?(view, "th[aria-sort=ascending] button[phx-value-sort-by=title]")
     assert has_element?(view, "tbody tr:first-child", "Autumn Activities")
+  end
+
+  test "sorts and refreshes pages by their latest document checkpoint", %{conn: conn} do
+    first_page = Page.ensure!("First Page")
+    Page.ensure!("Second Page")
+    {:ok, view, _html} = live(conn, ~p"/wiki")
+
+    assert :ok = Page.set_checkpoint(first_page, "main", document("updated"))
+
+    assert has_element?(view, "tbody tr:first-child", "First Page")
+  end
+
+  defp document(text) do
+    doc = Yex.Doc.new()
+    doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
+    doc
   end
 end

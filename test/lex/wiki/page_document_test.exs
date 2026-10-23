@@ -9,10 +9,40 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert :ok = Page.set_checkpoint(page, "main", document("first version"))
     assert restored_text(page, "main") == "first version"
+    [first_checkpoint] = Ash.read!(PageDocument)
 
     assert :ok = Page.set_checkpoint(page, "main", document("second version"))
     assert restored_text(page, "main") == "second version"
-    assert length(Ash.read!(PageDocument)) == 1
+    [second_checkpoint] = Ash.read!(PageDocument)
+
+    assert DateTime.after?(second_checkpoint.updated_at, first_checkpoint.updated_at)
+  end
+
+  test "advances the page's last update when a document is checkpointed" do
+    page = Page.ensure!("Home")
+
+    assert [page_before_checkpoint] = Page.list!()
+    assert page_before_checkpoint.last_updated_at == page.updated_at
+
+    assert :ok = Page.set_checkpoint(page, "main", document("first version"))
+
+    assert [page_after_checkpoint] = Page.list!()
+    assert DateTime.after?(page_after_checkpoint.last_updated_at, page.updated_at)
+  end
+
+  test "uses the newest checkpoint across nested documents" do
+    page = Page.ensure!("Home")
+
+    assert :ok = Page.set_checkpoint(page, "main", document("main"))
+    [main_document] = Ash.read!(PageDocument)
+
+    assert :ok = Page.set_checkpoint(page, "caption-1", document("caption"))
+
+    page = Page.list!() |> List.first()
+    latest_document = PageDocument |> Ash.Query.sort(updated_at: :desc) |> Ash.read_first!()
+
+    assert DateTime.after?(latest_document.updated_at, main_document.updated_at)
+    assert page.last_updated_at == latest_document.updated_at
   end
 
   test "keeps pages and nested document keys isolated" do
