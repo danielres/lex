@@ -31,7 +31,7 @@ defmodule LexWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
-  attr :content_class, :any, default: "mx-auto max-w-4xl px-2 sm:px-4 lg:px-8"
+  attr :content_class, :any, default: "mx-auto max-w-4xl px-2 sm:px-4 lg:px-8 mb-4"
   attr :active, :string, default: ""
 
   slot :inner_block, required: true
