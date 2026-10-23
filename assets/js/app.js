@@ -25,6 +25,7 @@ import { LiveSocket } from "phoenix_live_view"
 import { hooks as colocatedHooks } from "phoenix-colocated/lex"
 import topbar from "topbar"
 import { AutoAnimate } from "./hooks/AutoAnimate"
+import { CapitalizeFirstLetter } from "./hooks/CapitalizeFirstLetter"
 import { mountLexicalEditor } from "./lexical_editor/mount"
 
 const LexicalEditor = {
@@ -69,6 +70,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
   hooks: {
     ...colocatedHooks,
     AutoAnimate,
+    CapitalizeFirstLetter,
     LexicalEditor
   },
 })
