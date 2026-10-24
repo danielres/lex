@@ -8,7 +8,7 @@ defmodule LexWeb.PageLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Page.subscribe()
-    socket = assign(socket, :editable, false)
+    socket = socket |> assign(editable: false)
     {:ok, socket}
   end
 
@@ -31,19 +31,19 @@ defmodule LexWeb.PageLive do
   end
 
   def handle_event("toggle_editable", _params, socket) do
-    socket = update(socket, :editable, &(!&1))
+    socket = socket |> update(:editable, &(!&1))
     {:noreply, socket}
   end
 
   def handle_event("change_page_title", %{"page_title" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.page_title_form, params)
-    socket = assign(socket, :page_title_form, form)
+    socket = socket |> assign(page_title_form: form)
 
     {:noreply, socket}
   end
 
   def handle_event("reset_page_title", _params, socket) do
-    socket = assign(socket, :page_title_form, page_title_form(socket.assigns.page))
+    socket = socket |> assign(page_title_form: page_title_form(socket.assigns.page))
 
     {:noreply, socket}
   end
@@ -88,7 +88,7 @@ defmodule LexWeb.PageLive do
         %Ash.Notifier.Notification{action: %{name: :create_page}},
         socket
       ) do
-    socket = assign(socket, :pages, Page.list!())
+    socket = socket |> assign(pages: Page.list!())
 
     {:noreply, socket}
   end
@@ -100,7 +100,7 @@ defmodule LexWeb.PageLive do
     pages = Page.list!()
     current_page = socket.assigns.page
 
-    socket = assign(socket, :pages, pages)
+    socket = socket |> assign(pages: pages)
 
     if current_page.id == renamed_page.id do
       socket =

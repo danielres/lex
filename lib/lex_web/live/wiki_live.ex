@@ -33,7 +33,7 @@ defmodule LexWeb.WikiLive do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
 
-    socket = assign(socket, :pages, list_pages(sort_by, sort_direction))
+    socket = socket |> assign(pages: list_pages(sort_by, sort_direction))
 
     {:noreply, socket}
   end
