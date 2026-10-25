@@ -6,11 +6,11 @@
  *
  */
 
-import type {JSX} from 'react';
+import type { JSX } from 'react';
 
 import './ContentEditable.css';
 
-import {ContentEditable} from '@lexical/react/LexicalContentEditable';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import * as React from 'react';
 
 type Props = {
@@ -29,7 +29,7 @@ export default function LexicalContentEditable({
       className={className ?? 'ContentEditable__root'}
       aria-placeholder={placeholder}
       placeholder={
-        <div className={placeholderClassName ?? 'ContentEditable__placeholder'}>
+        <div className={placeholderClassName ?? 'ContentEditable__placeholder py-8 text-center'}>
           {placeholder}
         </div>
       }
