@@ -57,8 +57,8 @@ export default function Editor(): JSX.Element {
   // editor). See the hook for details.
   useSynchronizeSettings();
   const placeholder = isRichText
-    ? 'Enter some rich text...'
-    : 'Enter some plain text...';
+    ? '(Empty page)'
+    : '(Empty page)';
   const [floatingAnchorElem, setFloatingAnchorElem] =
     useState<HTMLDivElement | null>(null);
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
