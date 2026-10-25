@@ -1,7 +1,9 @@
 defmodule LexWeb.WikiLive do
   use LexWeb, :live_view
 
+  alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
 
   @sort_fields %{
     "inserted_at" => :inserted_at,
@@ -28,8 +30,17 @@ defmodule LexWeb.WikiLive do
     {:ok, socket}
   end
 
-  def handle_info(%Ash.Notifier.Notification{action: %{name: action}}, socket)
-      when action in [:create_page, :rename_page, :save] do
+  def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)
+      when action in [:create, :rename] do
+    sort_by = socket.assigns.sort_by
+    sort_direction = socket.assigns.sort_direction
+
+    socket = socket |> assign(pages: list_pages(sort_by, sort_direction))
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%Notification{resource: PageDocument, action: %{name: :save}}, socket) do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
 

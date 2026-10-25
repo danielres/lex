@@ -19,7 +19,7 @@ defmodule Lex.Wiki.Page do
   code_interface do
     define :get, action: :read, get_by: [:id]
     define :list, action: :list
-    define :rename, action: :rename_page, args: [:title]
+    define :rename, action: :rename, args: [:title]
   end
 
   actions do
@@ -29,11 +29,11 @@ defmodule Lex.Wiki.Page do
       prepare build(load: :last_updated_at, sort: :title)
     end
 
-    create :create_page do
+    create :create do
       accept [:title, :slug]
     end
 
-    update :rename_page do
+    update :rename do
       accept [:title]
       require_atomic? false
 
@@ -46,8 +46,8 @@ defmodule Lex.Wiki.Page do
     name Lex.PubSub
     prefix "wiki"
 
-    publish :create_page, "pages"
-    publish :rename_page, "pages"
+    publish :create, "pages"
+    publish :rename, "pages"
   end
 
   attributes do
@@ -143,7 +143,7 @@ defmodule Lex.Wiki.Page do
 
   defp create_page(title, slug) do
     __MODULE__
-    |> Ash.Changeset.for_create(:create_page, %{title: title, slug: slug})
+    |> Ash.Changeset.for_create(:create, %{title: title, slug: slug})
     |> Ash.create()
     |> recover_concurrent_create(title, slug)
   end

@@ -1,113 +1,75 @@
 defmodule LexWeb.PageLive do
   use LexWeb, :live_view
+  use LiveDelegate
 
+  alias Ash.Error
+  alias Ash.Error.Query.NotFound
+  alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
-  alias Lex.Wiki.PageSlug
-  alias LexWeb.PageLive.EditableTitle
-  alias LexWeb.PageLive.ButtonToggleEdit
+  alias Lex.Wiki.PageDocument
+  alias LexWeb.PageLive.Editing
+  alias LexWeb.PageLive.WikiLinkMap
 
-  def mount(_params, _session, socket) do
+  delegate(:editing, Editing, info: false)
+  delegate(:wiki_link_map, WikiLinkMap, info: false)
+
+  @impl true
+  def mount(params, session, socket) do
     if connected?(socket), do: Page.subscribe()
-    socket = socket |> assign(editable: false)
+    socket = delegate_mount(socket, params, session)
     {:ok, socket}
   end
 
+  @impl true
   def handle_params(%{"page_slug" => slug}, _uri, socket) do
-    if PageSlug.valid?(slug) do
-      page = Page.open!(slug)
-      pages = Page.list!()
-
-      socket =
-        socket
-        |> assign(page: page)
-        |> assign(pages: pages)
-        |> assign(page_title: page.title)
-        |> assign(page_title_form: page_title_form(page))
-
-      {:noreply, socket}
-    else
-      raise Ash.Error.Query.NotFound, resource: Page, primary_key: %{slug: slug}
-    end
-  end
-
-  def handle_event("toggle_editable", _params, socket) do
-    socket = socket |> update(:editable, &(!&1))
-    {:noreply, socket}
-  end
-
-  def handle_event("change_page_title", %{"page_title" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.page_title_form, params)
-    socket = socket |> assign(page_title_form: form)
-
-    {:noreply, socket}
-  end
-
-  def handle_event("reset_page_title", _params, socket) do
-    socket = socket |> assign(page_title_form: page_title_form(socket.assigns.page))
-
-    {:noreply, socket}
-  end
-
-  def handle_event("rename_page", %{"page_title" => params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.page_title_form, params: params) do
-      {:ok, _page} ->
-        {:noreply, socket}
-
-      {:error, form} ->
+    case Page.open(slug) do
+      {:ok, page} ->
         socket =
           socket
-          |> assign(page_title_form: form)
-          |> push_event("page_title_blur", %{})
+          |> assign(page: page)
+          |> Editing.reload(page)
+          |> WikiLinkMap.reload()
 
         {:noreply, socket}
+
+      {:error, %Error.Invalid{}} ->
+        raise NotFound, resource: Page, primary_key: %{slug: slug}
+
+      {:error, error} ->
+        raise error
     end
   end
 
-  def handle_event("ensure_wiki_page", %{"title" => title}, socket) do
-    case Page.ensure(title) do
-      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
-      {:error, error} -> {:reply, %{ok: false, error: Exception.message(error)}, socket}
-    end
-  end
-
-  def handle_event("resolve_wiki_page", %{"id" => id}, socket) do
-    case Page.get(id) do
-      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
-      {:error, _error} -> {:reply, %{ok: false}, socket}
-    end
-  end
-
+  @impl true
   def handle_info(
-        %Ash.Notifier.Notification{action: %{name: :save}, resource: Lex.Wiki.PageDocument},
+        %Notification{resource: PageDocument, action: %{name: :save}},
         socket
       ) do
     {:noreply, socket}
   end
 
   def handle_info(
-        %Ash.Notifier.Notification{action: %{name: :create_page}},
+        %Notification{resource: Page, action: %{name: :create}},
         socket
       ) do
-    socket = socket |> assign(pages: Page.list!())
+    socket = WikiLinkMap.reload(socket)
 
     {:noreply, socket}
   end
 
   def handle_info(
-        %Ash.Notifier.Notification{action: %{name: :rename_page}, data: renamed_page},
+        %Notification{resource: Page, action: %{name: :rename}, data: renamed_page},
         socket
       ) do
-    pages = Page.list!()
     current_page = socket.assigns.page
 
-    socket = socket |> assign(pages: pages)
+    socket = WikiLinkMap.reload(socket)
 
     if current_page.id == renamed_page.id do
       socket =
         socket
         |> assign(page: renamed_page)
-        |> assign(page_title: renamed_page.title)
-        |> assign(page_title_form: page_title_form(renamed_page))
+        |> Editing.reload(renamed_page)
         |> push_event("page_title_blur", %{})
         |> push_patch(to: ~p"/wiki/#{renamed_page.slug}")
 
@@ -117,19 +79,22 @@ defmodule LexWeb.PageLive do
     end
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="page">
       <div class="flex justify-between pt-6 gap-4 pb-4">
-        <EditableTitle.render {assigns} />
-        <ButtonToggleEdit.render {assigns} />
+        <Editing.Title.render editing={@editing} page={@page} />
+        <Editing.ButtonToggle.render editing={@editing} />
       </div>
 
       <div
         class="lexical-playground"
         data-document-id={@page.id}
-        data-editable={to_string(@editable)}
-        data-pages={Jason.encode!(Enum.map(@pages, &page_reference/1))}
+        data-editable={to_string(@editing.enabled?)}
+        data-ensure-page-event={WikiLinkMap.ensure_event()}
+        data-pages={WikiLinkMap.encode(@wiki_link_map)}
+        data-resolve-page-event={WikiLinkMap.resolve_event()}
         id={"lexical-editor-#{@page.id}"}
         phx-hook="LexicalEditor"
         phx-update="ignore"
@@ -137,20 +102,5 @@ defmodule LexWeb.PageLive do
       </div>
     </Layouts.app>
     """
-  end
-
-  defp page_reference(page) do
-    %{
-      id: page.id,
-      path: ~p"/wiki/#{page.slug}",
-      slug: page.slug,
-      title: page.title
-    }
-  end
-
-  defp page_title_form(page) do
-    page
-    |> AshPhoenix.Form.for_update(:rename_page, as: "page_title")
-    |> to_form()
   end
 end

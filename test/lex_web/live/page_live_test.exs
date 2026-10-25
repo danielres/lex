@@ -20,7 +20,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
 
-    render_hook(view, "ensure_wiki_page", %{"title" => "Winter Plans"})
+    render_hook(view, "wiki_link_map:ensure", %{"title" => "Winter Plans"})
 
     assert Page.list!() |> Enum.any?(&(&1.title == "Winter Plans"))
   end
@@ -63,7 +63,7 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "button[aria-label='Enable editing']")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
@@ -75,7 +75,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
@@ -97,7 +97,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, second_view, _html} = live(recycle(conn), ~p"/wiki/summer-activities")
 
     first_view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     first_view
@@ -134,7 +134,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     view
@@ -153,7 +153,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     view
@@ -172,7 +172,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     view
@@ -192,7 +192,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     view
@@ -207,7 +207,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/home")
 
     view
-    |> element("button[phx-click=toggle_editable]")
+    |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
     refute has_element?(view, "#page-title-form")

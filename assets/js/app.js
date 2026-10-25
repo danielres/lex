@@ -32,15 +32,17 @@ const LexicalEditor = {
   mounted() {
     const requestPage = (event, payload) =>
       new Promise(resolve => this.pushEvent(event, payload, resolve))
+    const ensurePageEvent = this.el.dataset.ensurePageEvent
+    const resolvePageEvent = this.el.dataset.resolvePageEvent
 
     const wikiPageRepository = {
       async ensure(title) {
-        const reply = await requestPage("ensure_wiki_page", { title })
+        const reply = await requestPage(ensurePageEvent, { title })
         if (!reply.ok) throw new Error(reply.error)
         return reply.page
       },
       async resolve(id) {
-        const reply = await requestPage("resolve_wiki_page", { id })
+        const reply = await requestPage(resolvePageEvent, { id })
         return reply.ok ? reply.page : null
       },
     }

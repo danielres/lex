@@ -18,7 +18,8 @@ defmodule Lex.Wiki.PageTest do
       page = Page.ensure!("Summer Activities")
 
       assert_receive %Ash.Notifier.Notification{
-        action: %{name: :create_page},
+        resource: Page,
+        action: %{name: :create},
         data: %{id: page_id, title: "Summer Activities"}
       }
 
@@ -114,7 +115,8 @@ defmodule Lex.Wiki.PageTest do
       renamed_page = Page.rename!(page, "Winter Activities")
 
       assert_receive %Ash.Notifier.Notification{
-        action: %{name: :rename_page},
+        resource: Page,
+        action: %{name: :rename},
         data: %{id: page_id, title: "Winter Activities"}
       }
 

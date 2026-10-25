@@ -1,26 +1,27 @@
-defmodule LexWeb.PageLive.EditableTitle do
+defmodule LexWeb.PageLive.Editing.Title do
   use LexWeb, :html
+  use LiveDelegate, path: [:editing]
 
   def render(assigns) do
     ~H"""
     <h1
-      :if={!@editable || @page.slug == "home"}
+      :if={!@editing.enabled? || @page.slug == "home"}
       class={[
         "text-3xl opacity-80",
         "self-end",
         "leading-tight"
       ]}
     >
-      {@page_title}
+      {@page.title}
     </h1>
 
     <.form
-      :if={@editable && @page.slug != "home"}
-      for={@page_title_form}
+      :if={@editing.enabled? && @page.slug != "home"}
+      for={@editing.title_form}
       id="page-title-form"
-      phx-change="change_page_title"
+      phx-change={delegate_event("title_change")}
       phx-hook=".PageTitleForm"
-      phx-submit="rename_page"
+      phx-submit={delegate_event("title_save")}
       tabindex="-1"
       class="grow max-w-sm"
     >
@@ -38,13 +39,13 @@ defmodule LexWeb.PageLive.EditableTitle do
             "text-2xl opacity-75",
             "outline-none"
           ]}
-          id={@page_title_form[:title].id}
-          name={@page_title_form[:title].name}
+          id={@editing.title_form[:title].id}
+          name={@editing.title_form[:title].name}
           phx-hook="CapitalizeFirstLetter"
           phx-blur={reset_page_title()}
           phx-key="Escape"
           phx-keydown={reset_page_title()}
-          value={@page_title_form[:title].value}
+          value={@editing.title_form[:title].value}
         />
         <button
           aria-label="Cancel title change"
@@ -71,7 +72,7 @@ defmodule LexWeb.PageLive.EditableTitle do
         </button>
       </div>
       <p
-        :for={{message, _options} <- @page_title_form[:title].errors}
+        :for={{message, _options} <- @editing.title_form[:title].errors}
         class="mt-1.5 flex items-center gap-2 text-sm text-error"
       >
         <.icon name="hero-exclamation-circle" class="size-5" />
@@ -96,7 +97,7 @@ defmodule LexWeb.PageLive.EditableTitle do
   end
 
   defp reset_page_title do
-    JS.push("reset_page_title")
+    JS.push(delegate_event("title_reset"))
     |> JS.focus(to: "#page-title-form")
   end
 end
