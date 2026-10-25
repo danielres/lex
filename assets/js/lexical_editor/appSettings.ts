@@ -12,7 +12,7 @@ export const isDevPlayground: boolean =
   hostName !== 'lexical-playground.vercel.app';
 
 export const DEFAULT_SETTINGS = {
-  emptyEditor: false,
+  emptyEditor: true,
   hasFitNestedTables: false,
   hasLinkAttributes: false,
   hasNestedTables: false,
