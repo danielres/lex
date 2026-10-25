@@ -51,6 +51,7 @@ import {
 import {useCollaborationConfig} from '../context/CollaborationContext';
 import {useSettings} from '../context/SettingsContext';
 import brokenImage from '../images/image-broken.svg';
+import DocumentSnapshotPlugin from '../plugins/DocumentSnapshotPlugin';
 import TreeViewPlugin from '../plugins/TreeViewPlugin';
 import ImageResizer from '../ui/ImageResizer';
 import {$isCaptionEditorEmpty, $isImageNode} from './ImageNode';
@@ -495,6 +496,7 @@ export default function ImageComponent({
                 shouldBootstrap={true}
                 username={username}
               />
+              <DocumentSnapshotPlugin documentKey={caption.getKey()} />
               <DisableCaptionOnBlur setShowCaption={setShowCaption} />
               {showNestedEditorTreeView === true ? <TreeViewPlugin /> : null}
             </LexicalExtensionEditorComposer>

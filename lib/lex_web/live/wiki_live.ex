@@ -40,7 +40,8 @@ defmodule LexWeb.WikiLive do
     {:noreply, socket}
   end
 
-  def handle_info(%Notification{resource: PageDocument, action: %{name: :save}}, socket) do
+  def handle_info(%Notification{resource: PageDocument, action: %{name: action}}, socket)
+      when action in [:save, :save_snapshot] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
 

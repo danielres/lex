@@ -9,6 +9,7 @@ defmodule LexWeb.CollaborationChannelTest do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Yex.Sync
+  alias Yex.Sync.SharedDoc
 
   @endpoint LexWeb.Endpoint
 
@@ -126,6 +127,53 @@ defmodule LexWeb.CollaborationChannelTest do
     assert persisted_text(caption_room) == "caption text"
   end
 
+  test "semantic checkpoints save changed active documents and skip unchanged ones" do
+    page = Page.ensure!(unique_slug())
+    main_room = "#{page.id}/main"
+    caption_room = "#{page.id}/caption-1"
+    {:ok, main_shared_doc} = Collaboration.open_document(main_room)
+    {:ok, caption_shared_doc} = Collaboration.open_document(caption_room)
+    :ok = SharedDoc.observe(main_shared_doc)
+    :ok = SharedDoc.observe(caption_shared_doc)
+
+    :ok =
+      SharedDoc.update_doc(main_shared_doc, fn doc ->
+        doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, "main")
+      end)
+
+    :ok =
+      SharedDoc.update_doc(caption_shared_doc, fn doc ->
+        doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, "caption")
+      end)
+
+    documents = [
+      document_snapshot("main", "Main"),
+      document_snapshot("caption-1", "Caption")
+    ]
+
+    assert {:ok, %{saved: 2, unchanged: 0}} = Collaboration.checkpoint(page, documents)
+    assert {:ok, %{saved: 0, unchanged: 2}} = Collaboration.checkpoint(page, documents)
+
+    page_documents = PageDocument |> Ash.Query.sort(:document_key) |> Ash.read!()
+
+    assert Enum.map(page_documents, & &1.document_key) == ["caption-1", "main"]
+    assert Enum.map(page_documents, & &1.search_text) == ["Caption", "Main"]
+
+    main_monitor = Process.monitor(main_shared_doc)
+    caption_monitor = Process.monitor(caption_shared_doc)
+    :ok = Collaboration.close_document(main_shared_doc)
+    :ok = Collaboration.close_document(caption_shared_doc)
+    assert_receive {:DOWN, ^main_monitor, :process, ^main_shared_doc, :normal}
+    assert_receive {:DOWN, ^caption_monitor, :process, ^caption_shared_doc, :normal}
+  end
+
+  test "semantic checkpointing requires active document rooms" do
+    page = Page.ensure!(unique_slug())
+
+    assert {:error, :document_not_open} =
+             Collaboration.checkpoint(page, [document_snapshot("main", "Missing")])
+  end
+
   test "awareness is not included in the persisted document" do
     room = unique_room()
     socket = join(room)
@@ -182,6 +230,21 @@ defmodule LexWeb.CollaborationChannelTest do
     doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
     {:ok, update} = Yex.encode_state_as_update(doc)
     Sync.message_encode!({:sync, {:sync_update, update}})
+  end
+
+  defp document_snapshot(document_key, text) do
+    %{
+      "document_key" => document_key,
+      "lexical_state" => %{
+        "root" => %{
+          "children" => [],
+          "text" => text,
+          "type" => "root",
+          "version" => 1
+        }
+      },
+      "search_text" => text
+    }
   end
 
   defp join(room) do

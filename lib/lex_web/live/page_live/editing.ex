@@ -2,21 +2,54 @@ defmodule LexWeb.PageLive.Editing do
   use LexWeb, :live_view
   use LiveDelegate, path: [:editing]
 
+  alias Lex.Collaboration
+
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{enabled?: false, title_form: nil})
+    delegate_assign(socket, %{checkpointing?: false, enabled?: false, title_form: nil})
   end
 
   def reload(socket, page) do
     delegate_assign(socket, :title_form, title_form(page))
   end
 
+  def checkpoint_event, do: delegate_event("checkpoint")
+  def snapshot_request_event, do: "document_snapshot_requested"
+
   @impl true
   def handle_event("toggle", _params, socket) do
     editing = socket.assigns.editing
-    socket = delegate_assign(socket, :enabled?, !editing.enabled?)
+
+    socket =
+      cond do
+        editing.checkpointing? ->
+          socket
+
+        editing.enabled? ->
+          socket
+          |> delegate_assign(:checkpointing?, true)
+          |> delegate_assign(:enabled?, false)
+          |> push_event(snapshot_request_event(), %{})
+
+        true ->
+          delegate_assign(socket, :enabled?, true)
+      end
 
     {:noreply, socket}
   end
+
+  def handle_event("checkpoint", %{"documents" => documents}, socket)
+      when is_list(documents) do
+    case Collaboration.checkpoint(socket.assigns.page, documents) do
+      {:ok, counts} ->
+        socket = delegate_assign(socket, :checkpointing?, false)
+        {:reply, %{ok: true, result: counts}, socket}
+
+      {:error, _reason} ->
+        checkpoint_failed(socket)
+    end
+  end
+
+  def handle_event("checkpoint", _params, socket), do: checkpoint_failed(socket)
 
   def handle_event("title_change", %{"page_title" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.editing.title_form, params)
@@ -50,5 +83,15 @@ defmodule LexWeb.PageLive.Editing do
     page
     |> AshPhoenix.Form.for_update(:rename, as: "page_title")
     |> to_form()
+  end
+
+  defp checkpoint_failed(socket) do
+    socket =
+      socket
+      |> delegate_assign(:checkpointing?, false)
+      |> delegate_assign(:enabled?, true)
+      |> put_flash(:error, "Could not save the document")
+
+    {:reply, %{ok: false}, socket}
   end
 end

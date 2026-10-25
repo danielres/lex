@@ -8,10 +8,12 @@ import {
 } from 'react';
 
 import type {ProviderFactory} from '../collaboration';
+import type {DocumentSnapshotRegistry} from '../documentSnapshots';
 
 interface CollaborationConfig {
   cursorColor: string;
   providerFactory: ProviderFactory;
+  snapshotRegistry: DocumentSnapshotRegistry;
   username: string;
 }
 
@@ -26,9 +28,11 @@ const ANIMALS = ['Badger', 'Fox', 'Heron', 'Otter', 'Wren'];
 export function CollaborationContext({
   children,
   providerFactory,
+  snapshotRegistry,
 }: {
   children: ReactNode;
   providerFactory: ProviderFactory;
+  snapshotRegistry: DocumentSnapshotRegistry;
 }): JSX.Element {
   const config = useMemo(() => {
     const colorIndex = Math.floor(Math.random() * COLORS.length);
@@ -38,9 +42,10 @@ export function CollaborationContext({
     return {
       cursorColor: COLORS[colorIndex],
       providerFactory,
+      snapshotRegistry,
       username: `${ADJECTIVES[adjectiveIndex]} ${ANIMALS[animalIndex]}`,
     };
-  }, [providerFactory]);
+  }, [providerFactory, snapshotRegistry]);
 
   return (
     <LexicalCollaboration>

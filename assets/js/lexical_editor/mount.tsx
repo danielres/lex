@@ -12,9 +12,14 @@ import type {
   WikiPageReference,
   WikiPageRepository,
 } from './context/WikiPagesContext';
+import {
+  type DocumentSnapshot,
+  DocumentSnapshotRegistry,
+} from './documentSnapshots';
 import './setupEnv';
 
 export interface MountedLexicalEditor {
+  getDocumentSnapshots(): DocumentSnapshot[];
   setEditable(editable: boolean): void;
   setPages(pages: WikiPageReference[]): void;
   unmount(): void;
@@ -35,6 +40,7 @@ export function mountLexicalEditor(
   },
 ): MountedLexicalEditor {
   const collaboration = createPhoenixCollaboration(documentId);
+  const snapshotRegistry = new DocumentSnapshotRegistry(initialEditable);
   const root = createRoot(element);
   let editable = initialEditable;
   let pages = initialPages;
@@ -45,6 +51,7 @@ export function mountLexicalEditor(
         editable={editable}
         initialPages={pages}
         providerFactory={collaboration.providerFactory}
+        snapshotRegistry={snapshotRegistry}
         wikiPageRepository={wikiPageRepository}
       />,
     );
@@ -53,9 +60,13 @@ export function mountLexicalEditor(
   render();
 
   return {
+    getDocumentSnapshots() {
+      return snapshotRegistry.snapshots();
+    },
     setEditable(nextEditable) {
       if (editable !== nextEditable) {
         editable = nextEditable;
+        snapshotRegistry.setEditable(editable);
         render();
       }
     },

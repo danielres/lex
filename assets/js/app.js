@@ -34,6 +34,8 @@ const LexicalEditor = {
       new Promise(resolve => this.pushEvent(event, payload, resolve))
     const ensurePageEvent = this.el.dataset.ensurePageEvent
     const resolvePageEvent = this.el.dataset.resolvePageEvent
+    const checkpointEvent = this.el.dataset.checkpointEvent
+    const snapshotRequestEvent = this.el.dataset.snapshotRequestEvent
 
     const wikiPageRepository = {
       async ensure(title) {
@@ -53,6 +55,22 @@ const LexicalEditor = {
       initialPages: JSON.parse(this.el.dataset.pages || "[]"),
       wikiPageRepository,
     })
+
+    this.snapshotRequestRef = this.handleEvent(snapshotRequestEvent, () => {
+      try {
+        this.lexicalEditor?.setEditable(false)
+        const documents =
+          this.lexicalEditor?.getDocumentSnapshots().map(snapshot => ({
+            document_key: snapshot.documentKey,
+            lexical_state: snapshot.lexicalState,
+            search_text: snapshot.searchText
+          })) || []
+
+        this.pushEvent(checkpointEvent, { documents })
+      } catch (_error) {
+        this.pushEvent(checkpointEvent, { error: "snapshot_failed" })
+      }
+    })
   },
 
   updated() {
@@ -61,6 +79,7 @@ const LexicalEditor = {
   },
 
   destroyed() {
+    this.removeHandleEvent(this.snapshotRequestRef)
     this.lexicalEditor?.unmount()
   },
 }

@@ -29,6 +29,28 @@ defmodule Lex.Collaboration do
     end
   end
 
+  def checkpoint(_page, []), do: {:error, :missing_document_snapshots}
+
+  def checkpoint(page, documents) when is_list(documents) do
+    Enum.reduce_while(documents, {:ok, %{saved: 0, unchanged: 0}}, fn document, result ->
+      with {:ok, snapshot} <- snapshot(document),
+           {:ok, status} <- checkpoint_document(page, snapshot) do
+        {:ok, counts} = result
+        counts = Map.update!(counts, status, &(&1 + 1))
+        {:cont, {:ok, counts}}
+      else
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp checkpoint_document(page, snapshot) do
+    with {:ok, shared_doc} <- active_document(page, snapshot.document_key) do
+      doc = SharedDoc.get_doc(shared_doc)
+      Page.set_checkpoint(page, snapshot.document_key, doc, snapshot)
+    end
+  end
+
   defp find_or_start_document(room, document_ref) do
     case Registry.lookup(@registry, room) do
       [{pid, _value}] ->
@@ -42,6 +64,31 @@ defmodule Lex.Collaboration do
         start_document(room, document_ref)
     end
   end
+
+  defp active_document(page, document_key) do
+    room = "#{page.id}/#{document_key}"
+
+    case Registry.lookup(@registry, room) do
+      [{pid, _value}] -> {:ok, pid}
+      [] -> {:error, :document_not_open}
+    end
+  end
+
+  defp snapshot(%{
+         "document_key" => document_key,
+         "lexical_state" => lexical_state,
+         "search_text" => search_text
+       })
+       when is_binary(document_key) and is_map(lexical_state) and is_binary(search_text) do
+    {:ok,
+     %{
+       document_key: document_key,
+       lexical_state: lexical_state,
+       search_text: search_text
+     }}
+  end
+
+  defp snapshot(_document), do: {:error, :invalid_document_snapshot}
 
   defp start_document(room, document_ref) do
     child_spec = %{

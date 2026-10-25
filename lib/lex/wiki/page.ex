@@ -127,8 +127,42 @@ defmodule Lex.Wiki.Page do
 
   def set_checkpoint(page, document_key, doc) do
     with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
-         {:ok, _page_document} <- save_page_document(page, document_key, yjs_state) do
-      :ok
+         {:ok, page_document} <- get_page_document(page, document_key) do
+      if page_document != nil and page_document.yjs_state == yjs_state do
+        :ok
+      else
+        with {:ok, _page_document} <- save_page_document(page, document_key, yjs_state) do
+          :ok
+        end
+      end
+    end
+  end
+
+  def set_checkpoint(
+        page,
+        document_key,
+        doc,
+        %{lexical_state: lexical_state, search_text: search_text}
+      ) do
+    content_hash = content_hash(lexical_state)
+
+    with {:ok, page_document} <- get_page_document(page, document_key) do
+      if page_document != nil and page_document.content_hash == content_hash do
+        {:ok, :unchanged}
+      else
+        with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
+             {:ok, _page_document} <-
+               save_page_document_snapshot(
+                 page,
+                 document_key,
+                 yjs_state,
+                 lexical_state,
+                 search_text,
+                 content_hash
+               ) do
+          {:ok, :saved}
+        end
+      end
     end
   end
 
@@ -209,5 +243,32 @@ defmodule Lex.Wiki.Page do
       yjs_state: yjs_state
     })
     |> Ash.create()
+  end
+
+  defp save_page_document_snapshot(
+         page,
+         document_key,
+         yjs_state,
+         lexical_state,
+         search_text,
+         content_hash
+       ) do
+    PageDocument
+    |> Ash.Changeset.for_create(:save_snapshot, %{
+      content_hash: content_hash,
+      document_key: document_key,
+      lexical_state: lexical_state,
+      page_id: page.id,
+      search_text: search_text,
+      yjs_state: yjs_state
+    })
+    |> Ash.create()
+  end
+
+  defp content_hash(lexical_state) do
+    lexical_state
+    |> :erlang.term_to_binary([:deterministic])
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
   end
 end

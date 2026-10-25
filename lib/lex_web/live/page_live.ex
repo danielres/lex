@@ -42,9 +42,10 @@ defmodule LexWeb.PageLive do
 
   @impl true
   def handle_info(
-        %Notification{resource: PageDocument, action: %{name: :save}},
+        %Notification{resource: PageDocument, action: %{name: action}},
         socket
-      ) do
+      )
+      when action in [:save, :save_snapshot] do
     {:noreply, socket}
   end
 
@@ -90,11 +91,13 @@ defmodule LexWeb.PageLive do
 
       <div
         class="lexical-playground"
+        data-checkpoint-event={Editing.checkpoint_event()}
         data-document-id={@page.id}
         data-editable={to_string(@editing.enabled?)}
         data-ensure-page-event={WikiLinkMap.ensure_event()}
         data-pages={WikiLinkMap.encode(@wiki_link_map)}
         data-resolve-page-event={WikiLinkMap.resolve_event()}
+        data-snapshot-request-event={Editing.snapshot_request_event()}
         id={"lexical-editor-#{@page.id}"}
         phx-hook="LexicalEditor"
         phx-update="ignore"

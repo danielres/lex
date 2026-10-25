@@ -18,6 +18,90 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert DateTime.after?(second_checkpoint.updated_at, first_checkpoint.updated_at)
   end
 
+  test "persists a semantic snapshot with its searchable text and content hash" do
+    page = Page.ensure!("Home")
+    lexical_state = lexical_state("First version", format: 0)
+
+    assert {:ok, :saved} =
+             Page.set_checkpoint(
+               page,
+               "main",
+               document("first version"),
+               %{lexical_state: lexical_state, search_text: "First version"}
+             )
+
+    [page_document] = Ash.read!(PageDocument)
+
+    assert page_document.lexical_state == lexical_state
+    assert page_document.search_text == "First version"
+    assert String.length(page_document.content_hash) == 64
+  end
+
+  test "does not update an unchanged semantic snapshot" do
+    page = Page.ensure!("Home")
+    lexical_state = lexical_state("Same content", format: 0)
+    snapshot = %{lexical_state: lexical_state, search_text: "Same content"}
+
+    assert {:ok, :saved} =
+             Page.set_checkpoint(page, "main", document("first state"), snapshot)
+
+    [first_checkpoint] = Ash.read!(PageDocument)
+
+    assert {:ok, :unchanged} =
+             Page.set_checkpoint(page, "main", document("different yjs state"), snapshot)
+
+    [second_checkpoint] = Ash.read!(PageDocument)
+
+    assert second_checkpoint.updated_at == first_checkpoint.updated_at
+    assert second_checkpoint.yjs_state == first_checkpoint.yjs_state
+  end
+
+  test "persists formatting changes when searchable text is unchanged" do
+    page = Page.ensure!("Home")
+
+    assert {:ok, :saved} =
+             Page.set_checkpoint(
+               page,
+               "main",
+               document("text"),
+               %{lexical_state: lexical_state("Text", format: 0), search_text: "Text"}
+             )
+
+    [first_checkpoint] = Ash.read!(PageDocument)
+
+    assert {:ok, :saved} =
+             Page.set_checkpoint(
+               page,
+               "main",
+               document("text"),
+               %{lexical_state: lexical_state("Text", format: 1), search_text: "Text"}
+             )
+
+    [second_checkpoint] = Ash.read!(PageDocument)
+
+    refute second_checkpoint.content_hash == first_checkpoint.content_hash
+  end
+
+  test "a Yjs-only checkpoint preserves an existing semantic snapshot" do
+    page = Page.ensure!("Home")
+    lexical_state = lexical_state("Searchable", format: 0)
+
+    assert {:ok, :saved} =
+             Page.set_checkpoint(
+               page,
+               "main",
+               document("first"),
+               %{lexical_state: lexical_state, search_text: "Searchable"}
+             )
+
+    assert :ok = Page.set_checkpoint(page, "main", document("second"))
+
+    [page_document] = Ash.read!(PageDocument)
+
+    assert page_document.lexical_state == lexical_state
+    assert page_document.search_text == "Searchable"
+  end
+
   test "advances the page's last update when a document is checkpointed" do
     page = Page.ensure!("Home")
 
@@ -77,6 +161,32 @@ defmodule Lex.Wiki.PageDocumentTest do
     doc = Yex.Doc.new()
     doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
     doc
+  end
+
+  defp lexical_state(text, options) do
+    %{
+      "root" => %{
+        "children" => [
+          %{
+            "children" => [
+              %{
+                "detail" => 0,
+                "format" => Keyword.fetch!(options, :format),
+                "mode" => "normal",
+                "style" => "",
+                "text" => text,
+                "type" => "text",
+                "version" => 1
+              }
+            ],
+            "type" => "paragraph",
+            "version" => 1
+          }
+        ],
+        "type" => "root",
+        "version" => 1
+      }
+    }
   end
 
   defp restored_text(page, document_key) do

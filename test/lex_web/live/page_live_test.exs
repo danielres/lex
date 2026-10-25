@@ -3,7 +3,10 @@ defmodule LexWeb.PageLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Collaboration
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
+  alias Yex.Sync.SharedDoc
 
   test "a direct visit creates the page and binds the editor to its id", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/wiki/home")
@@ -58,6 +61,9 @@ defmodule LexWeb.PageLiveTest do
 
   test "the lock button toggles whether the editor is editable", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/wiki/home")
+    [page] = Ash.read!(Page)
+    {:ok, shared_doc} = Collaboration.open_document("#{page.id}/main")
+    :ok = SharedDoc.observe(shared_doc)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
     assert has_element?(view, "button[aria-label='Enable editing']")
@@ -68,6 +74,46 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
     assert has_element?(view, "button[aria-label='Make editor read-only']")
+
+    view
+    |> element("button[phx-click='editing:toggle']")
+    |> render_click()
+
+    assert_push_event(view, "document_snapshot_requested", %{})
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
+    assert has_element?(view, "button[aria-label='Saving document'][disabled]")
+
+    render_hook(view, "editing:checkpoint", %{
+      "documents" => [document_snapshot("main", "Home content")]
+    })
+
+    assert has_element?(view, "button[aria-label='Enable editing']")
+    assert [page_document] = Ash.read!(PageDocument)
+    assert page_document.search_text == "Home content"
+
+    monitor = Process.monitor(shared_doc)
+    :ok = Collaboration.close_document(shared_doc)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+  end
+
+  test "restores edit mode when checkpointing fails", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/wiki/home")
+
+    view
+    |> element("button[phx-click='editing:toggle']")
+    |> render_click()
+
+    view
+    |> element("button[phx-click='editing:toggle']")
+    |> render_click()
+
+    assert_push_event(view, "document_snapshot_requested", %{})
+
+    render_hook(view, "editing:checkpoint", %{"error" => "snapshot_failed"})
+
+    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
+    assert has_element?(view, "button[aria-label='Make editor read-only']")
+    assert render(view) =~ "Could not save the document"
   end
 
   test "renames a page and patches to its new slug", %{conn: conn} do
@@ -227,5 +273,20 @@ defmodule LexWeb.PageLiveTest do
     doc = Yex.Doc.new()
     doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
     doc
+  end
+
+  defp document_snapshot(document_key, text) do
+    %{
+      "document_key" => document_key,
+      "lexical_state" => %{
+        "root" => %{
+          "children" => [],
+          "text" => text,
+          "type" => "root",
+          "version" => 1
+        }
+      },
+      "search_text" => text
+    }
   end
 end

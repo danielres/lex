@@ -24,6 +24,7 @@ import * as React from 'react';
 import {type JSX, useEffect, useLayoutEffect, useRef} from 'react';
 
 import {useCollaborationConfig} from '../context/CollaborationContext';
+import DocumentSnapshotPlugin from '../plugins/DocumentSnapshotPlugin';
 import {$isStickyNode} from './StickyNode';
 
 interface Positioning {
@@ -240,6 +241,7 @@ export default function StickyComponent({
             shouldBootstrap={true}
             username={username}
           />
+          <DocumentSnapshotPlugin documentKey={caption.getKey()} />
         </LexicalExtensionEditorComposer>
       </div>
     </div>

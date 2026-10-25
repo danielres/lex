@@ -60,6 +60,7 @@ import {
   CollaborationContext,
   useCollaborationConfig,
 } from './context/CollaborationContext';
+import type {DocumentSnapshotRegistry} from './documentSnapshots';
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext, useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
@@ -78,6 +79,7 @@ import {PlaygroundDOMRenderExtension} from './PlaygroundDOMRenderExtension';
 import {AutocompleteExtension} from './plugins/AutocompleteExtension';
 import {PlaygroundAutoLinkExtension} from './plugins/AutoLinkExtension';
 import {CardExtension} from './plugins/CardExtension';
+import DocumentSnapshotPlugin from './plugins/DocumentSnapshotPlugin';
 import {CodeHighlightExtension} from './plugins/CodeHighlightExtension';
 import {CollapsibleExtension} from './plugins/CollapsibleExtension';
 import {DateTimeExtension} from './plugins/DateTimeExtension';
@@ -387,6 +389,7 @@ function App({editable}: {editable: boolean}): JSX.Element {
         shouldBootstrap={true}
         username={username}
       />
+      <DocumentSnapshotPlugin documentKey="main" />
       <EditableController editable={editable} />
       <ToolbarContext>
         <EditorShell appTheme={appTheme} isShadowDOM={isShadowDOM} />
@@ -401,18 +404,22 @@ export default function PlaygroundApp({
   editable,
   initialPages,
   providerFactory,
+  snapshotRegistry,
   wikiPageRepository,
 }: {
   editable: boolean;
   initialPages: WikiPageReference[];
   providerFactory: ProviderFactory;
+  snapshotRegistry: DocumentSnapshotRegistry;
   wikiPageRepository: WikiPageRepository;
 }): JSX.Element {
   return (
     <WikiPagesProvider
       initialPages={initialPages}
       repository={wikiPageRepository}>
-      <CollaborationContext providerFactory={providerFactory}>
+      <CollaborationContext
+        providerFactory={providerFactory}
+        snapshotRegistry={snapshotRegistry}>
         <SettingsContext>
           <FlashMessageContext>
             <App editable={editable} />

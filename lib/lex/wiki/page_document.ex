@@ -20,6 +20,22 @@ defmodule Lex.Wiki.PageDocument do
       upsert_identity :unique_page_document
       upsert_fields [:yjs_state]
     end
+
+    create :save_snapshot do
+      accept [
+        :content_hash,
+        :document_key,
+        :lexical_state,
+        :page_id,
+        :search_text,
+        :yjs_state
+      ]
+
+      require_attributes [:content_hash, :lexical_state, :search_text]
+      upsert? true
+      upsert_identity :unique_page_document
+      upsert_fields [:content_hash, :lexical_state, :search_text, :yjs_state]
+    end
   end
 
   pub_sub do
@@ -28,6 +44,7 @@ defmodule Lex.Wiki.PageDocument do
     prefix "wiki"
 
     publish :save, "pages"
+    publish :save_snapshot, "pages"
   end
 
   attributes do
@@ -36,6 +53,19 @@ defmodule Lex.Wiki.PageDocument do
     attribute :document_key, :string do
       allow_nil? false
       constraints min_length: 1, max_length: 255
+      public? true
+    end
+
+    attribute :content_hash, :string do
+      constraints min_length: 64, max_length: 64
+      public? true
+    end
+
+    attribute :lexical_state, :map do
+      public? true
+    end
+
+    attribute :search_text, :string do
       public? true
     end
 
