@@ -5,7 +5,7 @@ defmodule LexWeb.PageLive.Editing do
   alias Lex.Collaboration
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{checkpointing?: false, enabled?: false, title_form: nil})
+    delegate_assign(socket, %{checkpointing?: false, title_form: nil})
   end
 
   def reload(socket, page) do
@@ -24,14 +24,13 @@ defmodule LexWeb.PageLive.Editing do
         editing.checkpointing? ->
           socket
 
-        editing.enabled? ->
+        socket.assigns.live_action == :editing ->
           socket
           |> delegate_assign(:checkpointing?, true)
-          |> delegate_assign(:enabled?, false)
           |> push_event(snapshot_request_event(), %{})
 
         true ->
-          delegate_assign(socket, :enabled?, true)
+          assign(socket, :live_action, :editing)
       end
 
     {:noreply, socket}
@@ -41,7 +40,12 @@ defmodule LexWeb.PageLive.Editing do
       when is_list(documents) do
     case Collaboration.checkpoint(socket.assigns.page, documents) do
       {:ok, counts} ->
-        socket = delegate_assign(socket, :checkpointing?, false)
+        socket =
+          socket
+          |> delegate_assign(:checkpointing?, false)
+          |> assign(:live_action, :show)
+          |> push_patch(replace: true, to: ~p"/wiki/#{socket.assigns.page.slug}")
+
         {:reply, %{ok: true, result: counts}, socket}
 
       {:error, _reason} ->
@@ -89,7 +93,6 @@ defmodule LexWeb.PageLive.Editing do
     socket =
       socket
       |> delegate_assign(:checkpointing?, false)
-      |> delegate_assign(:enabled?, true)
       |> put_flash(:error, "Could not save the document")
 
     {:reply, %{ok: false}, socket}

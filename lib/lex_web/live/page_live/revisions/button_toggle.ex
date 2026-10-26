@@ -8,7 +8,6 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
       :if={!@active?}
       aria-label="Browse revisions"
       class="btn btn-square rounded-box"
-      disabled={@disabled?}
       patch={~p"/wiki/#{@page.slug}/revisions"}
       title="Browse revisions"
     >

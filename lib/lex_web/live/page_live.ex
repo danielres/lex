@@ -82,6 +82,7 @@ defmodule LexWeb.PageLive do
       ) do
     current_page = socket.assigns.page
 
+    live_action = socket.assigns.live_action
     socket = WikiLinkMap.reload(socket)
 
     if current_page.id == renamed_page.id do
@@ -90,7 +91,13 @@ defmodule LexWeb.PageLive do
         |> assign(page: renamed_page)
         |> Editing.reload(renamed_page)
         |> push_event("page_title_blur", %{})
-        |> push_patch(to: ~p"/wiki/#{renamed_page.slug}")
+
+      socket =
+        if live_action == :editing do
+          socket
+        else
+          push_patch(socket, to: page_path(socket, renamed_page))
+        end
 
       {:noreply, socket}
     else
@@ -103,16 +110,11 @@ defmodule LexWeb.PageLive do
     ~H"""
     <Layouts.app flash={@flash} active="page">
       <div class="flex justify-between pt-6 gap-4 pb-4">
-        <Editing.Title.render editing={@editing} page={@page} />
+        <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 
         <div class="flex gap-2">
-          <Revisions.ButtonToggle.render
-            active?={@live_action == :revisions}
-            disabled?={@editing.enabled?}
-            page={@page}
-          />
-
-          <Editing.ButtonToggle.render disabled={@live_action == :revisions} editing={@editing} />
+          <Revisions.ButtonToggle.render active?={@live_action == :revisions} page={@page} />
+          <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
         </div>
       </div>
 
@@ -124,7 +126,7 @@ defmodule LexWeb.PageLive do
           class="lexical-playground"
           data-checkpoint-event={Editing.checkpoint_event()}
           data-document-id={@page.id}
-          data-editable={to_string(@editing.enabled?)}
+          data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
           data-ensure-page-event={WikiLinkMap.ensure_event()}
           data-pages={WikiLinkMap.encode(@wiki_link_map)}
           data-resolve-page-event={WikiLinkMap.resolve_event()}
@@ -156,4 +158,16 @@ defmodule LexWeb.PageLive do
   end
 
   defp requested_revision_id(_socket), do: nil
+
+  defp page_path(
+         %{assigns: %{live_action: :revisions, revisions: %{requested_id: revision_id}}},
+         page
+       )
+       when revision_id != nil,
+       do: ~p"/wiki/#{page.slug}/revisions/#{revision_id}"
+
+  defp page_path(%{assigns: %{live_action: :revisions}}, page),
+    do: ~p"/wiki/#{page.slug}/revisions"
+
+  defp page_path(_socket, page), do: ~p"/wiki/#{page.slug}"
 end

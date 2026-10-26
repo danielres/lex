@@ -5,30 +5,23 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
   def render(assigns) do
     ~H"""
     <button
-      aria-label={button_label(@editing)}
-      aria-pressed={!@editing.enabled?}
+      aria-label={button_label(@live_action, @editing.checkpointing?)}
+      aria-pressed={@live_action == :editing}
       class={[
         "btn btn-square rounded-box",
-        @editing.enabled? && "btn-info"
+        @live_action == :editing && "btn-info"
       ]}
-      disabled={@editing.checkpointing? || @disabled}
+      disabled={@editing.checkpointing?}
       phx-click={delegate_event("toggle")}
-      title={button_label(@editing)}
+      title={button_label(@live_action, @editing.checkpointing?)}
       type="button"
     >
-      <.icon
-        name={
-          if @editing.enabled?,
-            do: "hero-lock-open-solid",
-            else: "hero-lock-closed-solid"
-        }
-        class="size-4"
-      />
+      <.icon name="hero-pencil-mini" />
     </button>
     """
   end
 
-  defp button_label(%{checkpointing?: true}), do: "Saving document"
-  defp button_label(%{enabled?: true}), do: "Make editor read-only"
-  defp button_label(_editing), do: "Enable editing"
+  defp button_label(_live_action, true), do: "Saving document"
+  defp button_label(:editing, false), do: "Make editor read-only"
+  defp button_label(_live_action, false), do: "Enable editing"
 end

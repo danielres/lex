@@ -5,7 +5,7 @@ defmodule LexWeb.PageLive.Editing.Title do
   def render(assigns) do
     ~H"""
     <h1
-      :if={!@editing.enabled? || @page.slug == "home"}
+      :if={@live_action != :editing || @page.slug == "home"}
       class={[
         "text-3xl opacity-80",
         "self-end",
@@ -16,7 +16,7 @@ defmodule LexWeb.PageLive.Editing.Title do
     </h1>
 
     <.form
-      :if={@editing.enabled? && @page.slug != "home"}
+      :if={@live_action == :editing && @page.slug != "home"}
       for={@editing.title_form}
       id="page-title-form"
       phx-change={delegate_event("title_change")}

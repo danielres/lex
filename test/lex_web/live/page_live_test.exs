@@ -69,12 +69,11 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
     assert has_element?(view, "button[aria-label='Enable editing']")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
     assert has_element?(view, "button[aria-label='Make editor read-only']")
+    refute has_element?(view, "[aria-label='Browse revisions']")
 
     view
     |> element("button[phx-click='editing:toggle']")
@@ -88,6 +87,7 @@ defmodule LexWeb.PageLiveTest do
       "documents" => [document_snapshot("main", "Home content")]
     })
 
+    assert_patch(view, ~p"/wiki/home")
     assert has_element?(view, "button[aria-label='Enable editing']")
     assert [page_document] = Ash.read!(PageDocument)
     assert page_document.search_text == "Home content"
@@ -103,9 +103,7 @@ defmodule LexWeb.PageLiveTest do
   test "restores edit mode when checkpointing fails", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/wiki/home")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     view
     |> element("button[phx-click='editing:toggle']")
@@ -120,13 +118,11 @@ defmodule LexWeb.PageLiveTest do
     assert render(view) =~ "Could not save the document"
   end
 
-  test "renames a page and patches to its new slug", %{conn: conn} do
+  test "renames a page while remaining in edit mode", %{conn: conn} do
     page = Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
 
@@ -135,7 +131,7 @@ defmodule LexWeb.PageLiveTest do
     |> render_submit()
 
     assert_push_event(view, "page_title_blur", %{})
-    assert_patch(view, ~p"/wiki/winter-activities")
+    refute_patched(view)
     assert Page.get!(page.id).title == "Winter Activities"
     assert Page.get!(page.id).slug == "winter-activities"
     assert has_element?(view, "#page-title-form input[value='Winter Activities']")
@@ -146,15 +142,12 @@ defmodule LexWeb.PageLiveTest do
     {:ok, first_view, _html} = live(conn, ~p"/wiki/summer-activities")
     {:ok, second_view, _html} = live(recycle(conn), ~p"/wiki/summer-activities")
 
-    first_view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(first_view)
 
     first_view
     |> form("#page-title-form", page_title: %{title: "Winter Activities"})
     |> render_submit()
 
-    assert_patch(first_view, ~p"/wiki/winter-activities")
     assert_patch(second_view, ~p"/wiki/winter-activities")
     assert has_element?(second_view, "h1", "Winter Activities")
   end
@@ -183,9 +176,7 @@ defmodule LexWeb.PageLiveTest do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     view
     |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
@@ -202,9 +193,7 @@ defmodule LexWeb.PageLiveTest do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     view
     |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
@@ -221,9 +210,7 @@ defmodule LexWeb.PageLiveTest do
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     view
     |> form("#page-title-form", page_title: %{title: "Unsaved Title"})
@@ -241,9 +228,7 @@ defmodule LexWeb.PageLiveTest do
     page = Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/wiki/summer-activities")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     view
     |> form("#page-title-form", page_title: %{title: "Winter Activities"})
@@ -256,9 +241,7 @@ defmodule LexWeb.PageLiveTest do
   test "does not offer title editing for the home page", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/wiki/home")
 
-    view
-    |> element("button[phx-click='editing:toggle']")
-    |> render_click()
+    enable_editing(view)
 
     refute has_element?(view, "#page-title-form")
   end
@@ -272,6 +255,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "#revision-preview-#{second_revision.id}")
     assert render(view) =~ "First version"
+    refute has_element?(view, "[aria-label='Enable editing']")
     assert has_element?(view, "a#previous-revision")
     assert has_element?(view, "button#next-revision[disabled]")
 
@@ -374,6 +358,14 @@ defmodule LexWeb.PageLiveTest do
     doc = Yex.Doc.new()
     doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, text)
     doc
+  end
+
+  defp enable_editing(view) do
+    view
+    |> element("button[phx-click='editing:toggle']")
+    |> render_click()
+
+    refute_patched(view)
   end
 
   defp document_snapshot(document_key, text) do
