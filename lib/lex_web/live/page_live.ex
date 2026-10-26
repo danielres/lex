@@ -108,22 +108,23 @@ defmodule LexWeb.PageLive do
           <.link
             :if={@live_action == :show}
             aria-label="Browse revisions"
+            disabled={@editing.enabled?}
             class="btn btn-square rounded-box"
             patch={~p"/wiki/#{@page.slug}/revisions"}
             title="Browse revisions"
           >
-            <.icon name="hero-clock-solid" class="size-4" />
+            <.icon name="hero-clock-solid" />
           </.link>
           <.link
             :if={@live_action == :revisions}
             aria-label="Return to current page"
-            class="btn btn-square rounded-box"
+            class="btn btn-square rounded-box btn-info"
             patch={~p"/wiki/#{@page.slug}"}
             title="Return to current page"
           >
-            <.icon name="hero-arrow-uturn-left-solid" class="size-4" />
+            <.icon name="hero-clock-solid" />
           </.link>
-          <Editing.ButtonToggle.render :if={@live_action == :show} editing={@editing} />
+          <Editing.ButtonToggle.render disabled={@live_action == :revisions} editing={@editing} />
         </div>
       </div>
 

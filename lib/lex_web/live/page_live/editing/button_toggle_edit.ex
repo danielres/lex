@@ -11,7 +11,7 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
         "btn btn-square rounded-box",
         @editing.enabled? && "btn-info"
       ]}
-      disabled={@editing.checkpointing?}
+      disabled={@editing.checkpointing? || @disabled}
       phx-click={delegate_event("toggle")}
       title={button_label(@editing)}
       type="button"
