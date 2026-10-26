@@ -140,88 +140,12 @@ defmodule LexWeb.PageLive do
       </div>
 
       <section :if={@live_action == :revisions} id="page-revisions">
-        <div :if={@revisions.selected} class="flex items-center justify-between gap-3 pb-4">
-          <div>
-            <p class="font-medium">
-              Revision {Revisions.position(@revisions)} of {length(@revisions.entries)}
-            </p>
-            <p class="text-sm opacity-60">{@revisions.selected.inserted_at}</p>
-          </div>
-
-          <div class="flex gap-2">
-            <.link
-              :if={Revisions.previous(@revisions)}
-              aria-label="Previous revision"
-              class="btn btn-square"
-              id="previous-revision"
-              patch={~p"/wiki/#{@page.slug}/revisions/#{Revisions.previous(@revisions).id}"}
-            >
-              <.icon name="hero-chevron-left-micro" class="size-4" />
-            </.link>
-            <button
-              :if={!Revisions.previous(@revisions)}
-              aria-label="Previous revision"
-              class="btn btn-square"
-              disabled
-              id="previous-revision"
-              type="button"
-            >
-              <.icon name="hero-chevron-left-micro" class="size-4" />
-            </button>
-            <.link
-              :if={Revisions.next(@revisions)}
-              aria-label="Next revision"
-              class="btn btn-square"
-              id="next-revision"
-              patch={~p"/wiki/#{@page.slug}/revisions/#{Revisions.next(@revisions).id}"}
-            >
-              <.icon name="hero-chevron-right-micro" class="size-4" />
-            </.link>
-            <button
-              :if={!Revisions.next(@revisions)}
-              aria-label="Next revision"
-              class="btn btn-square"
-              disabled
-              id="next-revision"
-              type="button"
-            >
-              <.icon name="hero-chevron-right-micro" class="size-4" />
-            </button>
-            <button
-              aria-label="Restore revision"
-              class="btn btn-info"
-              disabled={@revisions.restoring?}
-              phx-click="revisions:restore"
-              type="button"
-            >
-              <span :if={@revisions.restoring?} class="loading loading-spinner loading-xs"></span>
-              Restore
-            </button>
-          </div>
-        </div>
-
-        <div
-          :if={@revisions.selected}
-          class="lexical-playground"
-          data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
+        <Revisions.render
+          revisions={@revisions}
+          page={@page}
+          wiki_link_map={@wiki_link_map}
           data-pages={WikiLinkMap.encode(@wiki_link_map)}
-          data-previous-lexical-state={Jason.encode!(Revisions.previous_lexical_state(@revisions))}
-          id={"revision-preview-#{@revisions.selected.id}"}
-          phx-hook="LexicalRevisionPreview"
-          phx-update="ignore"
-        >
-        </div>
-
-        <div :if={!@revisions.selected} class="hero min-h-64 rounded-box bg-base-200">
-          <div class="hero-content text-center">
-            <div>
-              <h2 class="text-xl font-semibold">No revisions yet</h2>
-              <p class="py-2 opacity-70">
-                A revision will be created at the next document checkpoint.
-              </p>
-            </div>
-          </div>
-        </div>
+        />
       </section>
     </Layouts.app>
     """
