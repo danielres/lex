@@ -132,11 +132,14 @@ defmodule LexWeb.PageLive.Revisions do
     ~H"""
     <div
       :if={@revisions.selected}
-      class="flex items-center justify-between gap-3 mb-4"
+      class={[
+        "flex items-center justify-between gap-3 mb-8",
+        "bg-base-300 px-4 py-2 rounded-box border-2 border-base-100 shadow"
+      ]}
     >
       <div>
-        <p class="font-medium">
-          Revision {position(@revisions)} of {length(@revisions.entries)}
+        <p class="font-semibold">
+          V. {position(@revisions)} of {length(@revisions.entries)}
         </p>
         <p class="text-sm opacity-60">{Utils.Time.relative(@revisions.selected.inserted_at)}</p>
       </div>
@@ -145,7 +148,7 @@ defmodule LexWeb.PageLive.Revisions do
         <.link
           :if={previous(@revisions)}
           aria-label="Previous revision"
-          class="btn btn-square"
+          class="btn btn-square hover:btn-info"
           id="previous-revision"
           patch={~p"/wiki/#{@page.slug}/revisions/#{previous(@revisions).id}"}
         >
@@ -154,7 +157,7 @@ defmodule LexWeb.PageLive.Revisions do
         <button
           :if={!previous(@revisions)}
           aria-label="Previous revision"
-          class="btn btn-square"
+          class="btn btn-square hover:btn-info"
           disabled
           id="previous-revision"
           type="button"
@@ -164,7 +167,7 @@ defmodule LexWeb.PageLive.Revisions do
         <.link
           :if={next(@revisions)}
           aria-label="Next revision"
-          class="btn btn-square"
+          class="btn btn-square hover:btn-info"
           id="next-revision"
           patch={~p"/wiki/#{@page.slug}/revisions/#{next(@revisions).id}"}
         >
@@ -173,7 +176,7 @@ defmodule LexWeb.PageLive.Revisions do
         <button
           :if={!next(@revisions)}
           aria-label="Next revision"
-          class="btn btn-square"
+          class="btn btn-square hover:btn-info"
           disabled
           id="next-revision"
           type="button"
@@ -182,7 +185,7 @@ defmodule LexWeb.PageLive.Revisions do
         </button>
         <button
           aria-label="Restore revision"
-          class="btn btn-info"
+          class="btn btn-info rounded"
           disabled={@revisions.restoring?}
           phx-click="revisions:restore"
           type="button"

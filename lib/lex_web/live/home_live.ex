@@ -9,7 +9,7 @@ defmodule LexWeb.HomeLive do
     ~H"""
     <Layouts.app
       flash={@flash}
-      active="home"
+      active="dashboard"
     >
       Hello
     </Layouts.app>

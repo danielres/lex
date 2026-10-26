@@ -50,8 +50,8 @@ defmodule LexWeb.Layouts do
   def drawer(assigns) do
     ~H"""
     <% active_class = "bg-info text-white" %>
-    <div class="border min-h-svh grid grid-rows-[auto_1fr]">
-      <div class="bg-base-300 items-center flex px-5 py-2 gap-4 border-b border-base-100">
+    <div class="min-h-svh grid grid-rows-[auto_1fr]">
+      <div class="bg-base-300 items-center flex sm:px-5 py-2 gap-4 border-b border-base-100">
         <label
           for="my-drawer-4"
           aria-label="open sidebar"
@@ -67,7 +67,7 @@ defmodule LexWeb.Layouts do
         <span class="">Navbar</span>
       </div>
 
-      <div class="drawer drawer-open">
+      <div class="drawer sm:drawer-open">
         <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" />
         <div class="drawer-content p-4 sm:px-8">
           <!-- Page content here -->
@@ -77,23 +77,24 @@ defmodule LexWeb.Layouts do
         <div class="drawer-side is-drawer-close:overflow-visible h-auto">
           <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
           <div class={[
-            "flex min-h-full flex-col items-start bg-base-300/50",
-            "is-drawer-close:w-16 px-1 is-drawer-open:w-32",
-            "border-r border-base-100"
+            "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
+            "is-drawer-close:w-16 px-1 is-drawer-open:w-40",
+            "border-r border-base-100",
+            "max-sm:min-h-svh"
           ]}>
             <!-- Sidebar content here -->
-            <ul class="menu gap-1 w-full font-semibold grow">
+            <ul class="menu gap-1 w-full font-semibold">
               <li>
                 <.link
                   navigate={~p"/"}
                   class={[
                     "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                    @active == "home" && active_class
+                    @active == "dashboard" && active_class
                   ]}
-                  data-tip="Homepage"
+                  data-tip="Dashboard"
                 >
-                  <.icon name="hero-home-mini" />
-                  <span class="is-drawer-close:hidden">Home</span>
+                  <.icon name="hero-squares-2x2-solid" />
+                  <span class="is-drawer-close:hidden">Dashboard</span>
                 </.link>
               </li>
               <li>
@@ -113,7 +114,7 @@ defmodule LexWeb.Layouts do
             </ul>
 
             <div class={[
-              "border-y border-base-100 py-4",
+              "border-t border-base-100 py-2 mt-2",
               "w-full flex justify-center",
               "is-drawer-close:hidden"
             ]}>

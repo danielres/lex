@@ -28,7 +28,7 @@ defmodule LexWeb.PageLive.Editing.Title do
       <div class={[
         "group join w-full rounded-box border border-base-100",
         "bg-base-100",
-        "focus-within:border-info"
+        "focus-within:outline-2 outline-info/50"
       ]}>
         <input
           aria-label="Page title"
