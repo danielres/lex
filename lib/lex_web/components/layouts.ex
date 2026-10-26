@@ -31,57 +31,94 @@ defmodule LexWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
-  attr :content_class, :any, default: "mx-auto max-w-4xl px-2 sm:px-4 lg:px-8 mb-4"
+  attr :content_class, :any, default: "max-w-4xl px-2 sm:px-4 lg:px-8 mb-4"
   attr :active, :string, default: ""
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <% active_class = "bg-base-100" %>
-    <header class={[
-      "navbar px-0",
-      @content_class
-    ]}>
-      <div class="flex-1">
-        <ul class={[
-          "flex flex-column space-x-2"
-        ]}>
-          <li>
-            <.link
-              navigate={~p"/"}
-              class={[
-                "btn rounded-box",
-                @active == "home" && active_class
-              ]}
-            >Home</.link>
-          </li>
-          <li>
-            <.link
-              navigate={~p"/wiki"}
-              class={[
-                "btn rounded-box",
-                @active == "page" && active_class,
-                @active == "wiki" && active_class
-              ]}
-            >Wiki</.link>
-          </li>
-        </ul>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <.theme_toggle />
-          </li>
-        </ul>
-      </div>
-    </header>
-
-    <main class={[@content_class]}>
-      {render_slot(@inner_block)}
-    </main>
+    <.drawer {assigns}>
+      <main class={[@content_class]}>
+        {render_slot(@inner_block)}
+      </main>
+    </.drawer>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  def drawer(assigns) do
+    ~H"""
+    <% active_class = "bg-info" %>
+
+    <div class="drawer drawer-open">
+      <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" />
+      <div class="drawer-content">
+        <div class="bg-base-200 items-center flex px-2 py-2 gap-2">
+          <label
+            for="my-drawer-4"
+            aria-label="open sidebar"
+            class={[
+              "hover:bg-base-100 transition",
+              "cursor-pointer",
+              "size-8 aspect-square p-1 rounded",
+              "flex items-center justify-center"
+            ]}
+          >
+            <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
+          </label>
+          <span class="">Navbar</span>
+        </div>
+        <!-- Page content here -->
+        {render_slot(@inner_block)}
+      </div>
+
+      <div class="drawer-side is-drawer-close:overflow-visible">
+        <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
+        <div class={[
+          "flex min-h-full flex-col items-start bg-base-200",
+          "is-drawer-close:w-14 is-drawer-open:w-32",
+          "border-r border-base-100"
+        ]}>
+          <!-- Sidebar content here -->
+          <ul class="menu gap-2 w-full">
+            <li>
+              <.link
+                navigate={~p"/"}
+                class={[
+                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                  @active == "home" && active_class
+                ]}
+                data-tip="Homepage"
+              >
+                <.icon name="hero-home-mini" />
+                <span class="is-drawer-close:hidden">Home</span>
+              </.link>
+            </li>
+            <li>
+              <.link
+                navigate={~p"/wiki"}
+                class={[
+                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                  @active == "page" && active_class,
+                  @active == "wiki" && active_class
+                ]}
+                data-tip="Wiki"
+              >
+                <.icon name="hero-book-open-mini" />
+                <span class="is-drawer-close:hidden">Wiki</span>
+              </.link>
+            </li>
+            <li class="is-drawer-close:hidden"></li>
+          </ul>
+
+          <div class="w-full flex justify-center is-drawer-close:hidden">
+            <.theme_toggle />
+          </div>
+        </div>
+      </div>
+    </div>
     """
   end
 
