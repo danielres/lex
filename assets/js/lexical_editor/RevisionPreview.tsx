@@ -14,6 +14,64 @@ import PlaygroundNodes from './nodes/PlaygroundNodes';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';
 
+const EXCALIDRAW_SELECTOR = '[data-lexical-excalidraw-id]';
+const EXCALIDRAW_PLACEHOLDER = 'data-revision-excalidraw';
+
+function protectExcalidraw(
+  html: string,
+  elements: Map<string, Element>,
+): string {
+  const template = document.createElement('template');
+  const occurrences = new Map<string, number>();
+  template.innerHTML = html;
+
+  template.content.querySelectorAll(EXCALIDRAW_SELECTOR).forEach(element => {
+    const revisionId = element.getAttribute('data-lexical-excalidraw-id');
+
+    if (revisionId === null) {
+      throw new Error('Excalidraw revision id is missing');
+    }
+
+    const occurrence = occurrences.get(revisionId) ?? 0;
+    const id = `${revisionId}-${occurrence}`;
+    occurrences.set(revisionId, occurrence + 1);
+    elements.set(id, element.cloneNode(true) as Element);
+
+    const placeholder = document.createElement('img');
+    placeholder.setAttribute(EXCALIDRAW_PLACEHOLDER, id);
+    element.replaceWith(placeholder);
+  });
+
+  return template.innerHTML;
+}
+
+function restoreExcalidraw(html: string, elements: Map<string, Element>): string {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  template.content
+    .querySelectorAll(`[${EXCALIDRAW_PLACEHOLDER}]`)
+    .forEach(placeholder => {
+      const id = placeholder.getAttribute(EXCALIDRAW_PLACEHOLDER);
+      const element = id === null ? undefined : elements.get(id);
+
+      if (element !== undefined) {
+        placeholder.replaceWith(element.cloneNode(true));
+      }
+    });
+
+  return template.innerHTML;
+}
+
+function renderDiff(previousHtml: string, currentHtml: string): string {
+  const elements = new Map<string, Element>();
+  const protectedPreviousHtml = protectExcalidraw(previousHtml, elements);
+  const protectedCurrentHtml = protectExcalidraw(currentHtml, elements);
+  const html = differ(protectedPreviousHtml, protectedCurrentHtml);
+
+  return restoreExcalidraw(html, elements);
+}
+
 function CaptureHtmlPlugin({onHtml}: {onHtml: (html: string) => void}) {
   const [editor] = useLexicalComposerContext();
 
@@ -101,7 +159,7 @@ export default function RevisionPreview({
   const diffHtml =
     currentHtml === null || previousHtml === null
       ? ''
-      : differ(previousHtml, currentHtml);
+      : renderDiff(previousHtml, currentHtml);
 
   return (
     <ReadOnlyEditorEnvironment pages={pages}>

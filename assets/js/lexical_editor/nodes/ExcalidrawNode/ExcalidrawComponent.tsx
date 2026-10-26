@@ -35,6 +35,22 @@ import ImageResizer from '../../ui/ImageResizer';
 import {$isExcalidrawNode} from '.';
 import ExcalidrawImage from './ExcalidrawImage';
 
+function revisionId(
+  data: string,
+  width: 'inherit' | number,
+  height: 'inherit' | number,
+): string {
+  const value = JSON.stringify([data, width, height]);
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index++) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36);
+}
+
 export default function ExcalidrawComponent({
   nodeKey,
   data,
@@ -196,7 +212,8 @@ export default function ExcalidrawComponent({
       {elements.length > 0 && (
         <button
           ref={buttonRef}
-          className={`excalidraw-button ${isSelected ? 'selected' : ''}`}>
+          className={`excalidraw-button ${isSelected ? 'selected' : ''}`}
+          data-lexical-excalidraw-id={revisionId(data, width, height)}>
           <ExcalidrawImage
             imageContainerRef={imageContainerRef}
             className="image"

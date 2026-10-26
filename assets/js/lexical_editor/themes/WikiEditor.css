@@ -38,12 +38,15 @@ body .lexical-playground {
 }
 
 .lexical-revision-diff {
-  del {
+  del:not(:has(.excalidraw-button)), 
+  del .excalidraw-button {
     @apply bg-error/25 text-base-content no-underline;
     @apply border border-red-500;
   }
 
-  ins {
+
+  ins:not(:has(.excalidraw-button)), 
+  ins .excalidraw-button {
     @apply bg-success/25 text-base-content no-underline;
     @apply border border-green-500;
   }
