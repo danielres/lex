@@ -43,6 +43,13 @@ defmodule LexWeb.PageLive.Revisions do
     end
   end
 
+  def previous_lexical_state(revisions) do
+    case previous(revisions) do
+      nil -> nil
+      revision -> revision.lexical_state
+    end
+  end
+
   def position(%{selected_index: nil}), do: nil
   def position(revisions), do: length(revisions.entries) - revisions.selected_index
 

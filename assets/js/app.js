@@ -124,6 +124,7 @@ const LexicalRevisionPreview = {
     this.unmountPreview = mountRevisionPreview(
       this.el,
       JSON.parse(this.el.dataset.lexicalState),
+      JSON.parse(this.el.dataset.previousLexicalState),
       JSON.parse(this.el.dataset.pages || "[]")
     )
   },

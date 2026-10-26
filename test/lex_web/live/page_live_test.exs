@@ -271,6 +271,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, view, _html} = live(conn, ~p"/wiki/home/revisions")
 
     assert has_element?(view, "#revision-preview-#{second_revision.id}")
+    assert render(view) =~ "First version"
     assert has_element?(view, "a#previous-revision")
     assert has_element?(view, "button#next-revision[disabled]")
 
@@ -280,6 +281,12 @@ defmodule LexWeb.PageLiveTest do
 
     assert_patch(view, ~p"/wiki/home/revisions/#{first_revision.id}")
     assert has_element?(view, "#revision-preview-#{first_revision.id}")
+
+    assert has_element?(
+             view,
+             "#revision-preview-#{first_revision.id}[data-previous-lexical-state='null']"
+           )
+
     assert has_element?(view, "button#previous-revision[disabled]")
     assert has_element?(view, "a#next-revision")
     assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")

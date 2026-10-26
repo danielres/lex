@@ -216,6 +216,7 @@ defmodule LexWeb.PageLive do
           class="lexical-playground"
           data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
           data-pages={WikiLinkMap.encode(@wiki_link_map)}
+          data-previous-lexical-state={Jason.encode!(Revisions.previous_lexical_state(@revisions))}
           id={"revision-preview-#{@revisions.selected.id}"}
           phx-hook="LexicalRevisionPreview"
           phx-update="ignore"
