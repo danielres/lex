@@ -104,26 +104,14 @@ defmodule LexWeb.PageLive do
     <Layouts.app flash={@flash} active="page">
       <div class="flex justify-between pt-6 gap-4 pb-4">
         <Editing.Title.render editing={@editing} page={@page} />
+
         <div class="flex gap-2">
-          <.link
-            :if={@live_action == :show}
-            aria-label="Browse revisions"
-            disabled={@editing.enabled?}
-            class="btn btn-square rounded-box"
-            patch={~p"/wiki/#{@page.slug}/revisions"}
-            title="Browse revisions"
-          >
-            <.icon name="hero-clock-solid" />
-          </.link>
-          <.link
-            :if={@live_action == :revisions}
-            aria-label="Return to current page"
-            class="btn btn-square rounded-box btn-info"
-            patch={~p"/wiki/#{@page.slug}"}
-            title="Return to current page"
-          >
-            <.icon name="hero-clock-solid" />
-          </.link>
+          <Revisions.ButtonToggle.render
+            active?={@live_action == :revisions}
+            disabled?={@editing.enabled?}
+            page={@page}
+          />
+
           <Editing.ButtonToggle.render disabled={@live_action == :revisions} editing={@editing} />
         </div>
       </div>
