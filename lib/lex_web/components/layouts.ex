@@ -31,7 +31,6 @@ defmodule LexWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
-  attr :content_class, :any, default: "max-w-4xl px-2 sm:px-4 lg:px-8 mb-4"
   attr :active, :string, default: ""
 
   slot :inner_block, required: true
@@ -39,7 +38,7 @@ defmodule LexWeb.Layouts do
   def app(assigns) do
     ~H"""
     <.drawer {assigns}>
-      <main class={[@content_class]}>
+      <main>
         {render_slot(@inner_block)}
       </main>
     </.drawer>
@@ -50,71 +49,76 @@ defmodule LexWeb.Layouts do
 
   def drawer(assigns) do
     ~H"""
-    <% active_class = "bg-info" %>
-
-    <div class="drawer drawer-open">
-      <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" />
-      <div class="drawer-content">
-        <div class="bg-base-200 items-center flex px-2 py-2 gap-2">
-          <label
-            for="my-drawer-4"
-            aria-label="open sidebar"
-            class={[
-              "hover:bg-base-100 transition",
-              "cursor-pointer",
-              "size-8 aspect-square p-1 rounded",
-              "flex items-center justify-center"
-            ]}
-          >
-            <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
-          </label>
-          <span class="">Navbar</span>
-        </div>
-        <!-- Page content here -->
-        {render_slot(@inner_block)}
+    <% active_class = "bg-info text-white" %>
+    <div class="border min-h-svh grid grid-rows-[auto_1fr]">
+      <div class="bg-base-300 items-center flex px-5 py-2 gap-4 border-b border-base-100">
+        <label
+          for="my-drawer-4"
+          aria-label="open sidebar"
+          class={[
+            "hover:bg-base-100 transition",
+            "cursor-pointer",
+            "aspect-square p-1.5 rounded",
+            "flex items-center justify-center"
+          ]}
+        >
+          <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
+        </label>
+        <span class="">Navbar</span>
       </div>
 
-      <div class="drawer-side is-drawer-close:overflow-visible">
-        <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-        <div class={[
-          "flex min-h-full flex-col items-start bg-base-200",
-          "is-drawer-close:w-14 is-drawer-open:w-32",
-          "border-r border-base-100"
-        ]}>
-          <!-- Sidebar content here -->
-          <ul class="menu gap-2 w-full">
-            <li>
-              <.link
-                navigate={~p"/"}
-                class={[
-                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  @active == "home" && active_class
-                ]}
-                data-tip="Homepage"
-              >
-                <.icon name="hero-home-mini" />
-                <span class="is-drawer-close:hidden">Home</span>
-              </.link>
-            </li>
-            <li>
-              <.link
-                navigate={~p"/wiki"}
-                class={[
-                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  @active == "page" && active_class,
-                  @active == "wiki" && active_class
-                ]}
-                data-tip="Wiki"
-              >
-                <.icon name="hero-book-open-mini" />
-                <span class="is-drawer-close:hidden">Wiki</span>
-              </.link>
-            </li>
-            <li class="is-drawer-close:hidden"></li>
-          </ul>
+      <div class="drawer drawer-open">
+        <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" />
+        <div class="drawer-content p-4 sm:px-8">
+          <!-- Page content here -->
+          {render_slot(@inner_block)}
+        </div>
 
-          <div class="w-full flex justify-center is-drawer-close:hidden">
-            <.theme_toggle />
+        <div class="drawer-side is-drawer-close:overflow-visible h-auto">
+          <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
+          <div class={[
+            "flex min-h-full flex-col items-start bg-base-300/50",
+            "is-drawer-close:w-16 px-1 is-drawer-open:w-32",
+            "border-r border-base-100"
+          ]}>
+            <!-- Sidebar content here -->
+            <ul class="menu gap-1 w-full font-semibold grow">
+              <li>
+                <.link
+                  navigate={~p"/"}
+                  class={[
+                    "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                    @active == "home" && active_class
+                  ]}
+                  data-tip="Homepage"
+                >
+                  <.icon name="hero-home-mini" />
+                  <span class="is-drawer-close:hidden">Home</span>
+                </.link>
+              </li>
+              <li>
+                <.link
+                  navigate={~p"/wiki"}
+                  class={[
+                    "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                    @active == "page" && active_class,
+                    @active == "wiki" && active_class
+                  ]}
+                  data-tip="Wiki"
+                >
+                  <.icon name="hero-book-open-mini" />
+                  <span class="is-drawer-close:hidden">Wiki</span>
+                </.link>
+              </li>
+            </ul>
+
+            <div class={[
+              "border-y border-base-100 py-4",
+              "w-full flex justify-center",
+              "is-drawer-close:hidden"
+            ]}>
+              <.theme_toggle />
+            </div>
           </div>
         </div>
       </div>

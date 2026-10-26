@@ -109,7 +109,7 @@ defmodule LexWeb.PageLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="page">
-      <div class="flex justify-between pt-6 gap-4 pb-4">
+      <div class="flex justify-between pt-6 gap-4 mb-4 pb-1 border-b border-base-100">
         <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 
         <div class="flex gap-2">
@@ -119,7 +119,11 @@ defmodule LexWeb.PageLive do
       </div>
 
       <div
-        class={@live_action == :revisions && "hidden"}
+        class={[
+          @live_action == :revisions && "hidden",
+          @live_action != :editing && "mt-12",
+          "max-w-[90ch]"
+        ]}
         id="current-page-editor"
       >
         <div

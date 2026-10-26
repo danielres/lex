@@ -66,7 +66,7 @@ defmodule LexWeb.WikiLive do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} active="wiki">
-      <div class="space-y-4 mt-8">
+      <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">
           <.link navigate={~p"/wiki/home"} class="btn btn-info px-2 rounded-box">
             <.icon name="hero-home-micro" />
