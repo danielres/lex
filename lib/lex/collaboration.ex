@@ -29,12 +29,42 @@ defmodule Lex.Collaboration do
     end
   end
 
-  def checkpoint(_page, []), do: {:error, :missing_document_snapshots}
+  def checkpoint(page, documents, restored_from_revision_id \\ nil)
 
-  def checkpoint(page, documents) when is_list(documents) do
-    Enum.reduce_while(documents, {:ok, %{saved: 0, unchanged: 0}}, fn document, result ->
-      with {:ok, snapshot} <- snapshot(document),
-           {:ok, status} <- checkpoint_document(page, snapshot) do
+  def checkpoint(_page, [], _restored_from_revision_id),
+    do: {:error, :missing_document_snapshots}
+
+  def checkpoint(page, documents, restored_from_revision_id) when is_list(documents) do
+    with :ok <- validate_source_revision(page, restored_from_revision_id),
+         {:ok, snapshots} <- snapshots(documents),
+         {:ok, main_snapshot} <- main_snapshot(snapshots),
+         {:ok, counts} <- checkpoint_documents(page, snapshots),
+         {:ok, revision} <-
+           Page.set_checkpoint(
+             page,
+             %{
+               lexical_state: main_snapshot.lexical_state,
+               search_text: search_text(snapshots)
+             },
+             restored_from_revision_id
+           ) do
+      {:ok, Map.put(counts, :revision, revision)}
+    end
+  end
+
+  defp validate_source_revision(_page, nil), do: :ok
+
+  defp validate_source_revision(page, revision_id) do
+    case Page.get_revision(page, revision_id) do
+      {:ok, nil} -> {:error, :revision_not_found}
+      {:ok, _revision} -> :ok
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  defp checkpoint_documents(page, snapshots) do
+    Enum.reduce_while(snapshots, {:ok, %{saved: 0, unchanged: 0}}, fn snapshot, result ->
+      with {:ok, status} <- checkpoint_document(page, snapshot) do
         {:ok, counts} = result
         counts = Map.update!(counts, status, &(&1 + 1))
         {:cont, {:ok, counts}}
@@ -89,6 +119,34 @@ defmodule Lex.Collaboration do
   end
 
   defp snapshot(_document), do: {:error, :invalid_document_snapshot}
+
+  defp snapshots(documents) do
+    documents
+    |> Enum.reduce_while({:ok, []}, fn document, {:ok, snapshots} ->
+      case snapshot(document) do
+        {:ok, snapshot} -> {:cont, {:ok, [snapshot | snapshots]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, snapshots} -> {:ok, Enum.sort_by(snapshots, & &1.document_key)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp main_snapshot(snapshots) do
+    case Enum.find(snapshots, &(&1.document_key == "main")) do
+      nil -> {:error, :missing_main_document_snapshot}
+      snapshot -> {:ok, snapshot}
+    end
+  end
+
+  defp search_text(snapshots) do
+    snapshots
+    |> Enum.map(&String.trim(&1.search_text))
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.join("\n")
+  end
 
   defp start_document(room, document_ref) do
     child_spec = %{

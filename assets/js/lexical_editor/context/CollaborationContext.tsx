@@ -11,6 +11,7 @@ import type {ProviderFactory} from '../collaboration';
 import type {DocumentSnapshotRegistry} from '../documentSnapshots';
 
 interface CollaborationConfig {
+  collaborative: boolean;
   cursorColor: string;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
@@ -27,10 +28,12 @@ const ANIMALS = ['Badger', 'Fox', 'Heron', 'Otter', 'Wren'];
 
 export function CollaborationContext({
   children,
+  collaborative = true,
   providerFactory,
   snapshotRegistry,
 }: {
   children: ReactNode;
+  collaborative?: boolean;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
 }): JSX.Element {
@@ -40,12 +43,13 @@ export function CollaborationContext({
     const adjectiveIndex = Math.floor(Math.random() * ADJECTIVES.length);
 
     return {
+      collaborative,
       cursorColor: COLORS[colorIndex],
       providerFactory,
       snapshotRegistry,
       username: `${ADJECTIVES[adjectiveIndex]} ${ANIMALS[animalIndex]}`,
     };
-  }, [providerFactory, snapshotRegistry]);
+  }, [collaborative, providerFactory, snapshotRegistry]);
 
   return (
     <LexicalCollaboration>

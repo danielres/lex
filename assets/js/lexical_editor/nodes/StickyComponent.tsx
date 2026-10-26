@@ -25,6 +25,7 @@ import {type JSX, useEffect, useLayoutEffect, useRef} from 'react';
 
 import {useCollaborationConfig} from '../context/CollaborationContext';
 import DocumentSnapshotPlugin from '../plugins/DocumentSnapshotPlugin';
+import ReadOnlyPlugin from '../plugins/ReadOnlyPlugin';
 import {$isStickyNode} from './StickyNode';
 
 interface Positioning {
@@ -62,7 +63,8 @@ export default function StickyComponent({
   y: number;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const {cursorColor, providerFactory, username} = useCollaborationConfig();
+  const {collaborative, cursorColor, providerFactory, username} =
+    useCollaborationConfig();
   const stickyContainerRef = useRef<null | HTMLDivElement>(null);
   const dragCleanupRef = useRef<(() => void) | null>(null);
   useEffect(() => () => dragCleanupRef.current?.(), []);
@@ -234,14 +236,20 @@ export default function StickyComponent({
           <i className="bucket" />
         </button>
         <LexicalExtensionEditorComposer initialEditor={caption}>
-          <CollaborationPlugin
-            cursorColor={cursorColor}
-            id={caption.getKey()}
-            providerFactory={providerFactory}
-            shouldBootstrap={true}
-            username={username}
-          />
-          <DocumentSnapshotPlugin documentKey={caption.getKey()} />
+          {collaborative ? (
+            <>
+              <CollaborationPlugin
+                cursorColor={cursorColor}
+                id={caption.getKey()}
+                providerFactory={providerFactory}
+                shouldBootstrap={true}
+                username={username}
+              />
+              <DocumentSnapshotPlugin documentKey={caption.getKey()} />
+            </>
+          ) : (
+            <ReadOnlyPlugin />
+          )}
         </LexicalExtensionEditorComposer>
       </div>
     </div>

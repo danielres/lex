@@ -6,6 +6,7 @@ defmodule LexWeb.PageLiveTest do
   alias Lex.Collaboration
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
+  alias Lex.Wiki.PageRevision
   alias Yex.Sync.SharedDoc
 
   test "a direct visit creates the page and binds the editor to its id", %{conn: conn} do
@@ -90,6 +91,9 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "button[aria-label='Enable editing']")
     assert [page_document] = Ash.read!(PageDocument)
     assert page_document.search_text == "Home content"
+    assert [revision] = Ash.read!(PageRevision)
+    assert revision.lexical_state == document_snapshot("main", "Home content")["lexical_state"]
+    assert revision.search_text == "Home content"
 
     monitor = Process.monitor(shared_doc)
     :ok = Collaboration.close_document(shared_doc)
@@ -259,6 +263,96 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(view, "#page-title-form")
   end
 
+  test "browses revisions with URL-backed previous and next navigation", %{conn: conn} do
+    page = Page.ensure!("Home")
+    first_revision = create_revision(page, "First version")
+    second_revision = create_revision(page, "Second version")
+
+    {:ok, view, _html} = live(conn, ~p"/wiki/home/revisions")
+
+    assert has_element?(view, "#revision-preview-#{second_revision.id}")
+    assert has_element?(view, "a#previous-revision")
+    assert has_element?(view, "button#next-revision[disabled]")
+
+    view
+    |> element("a#previous-revision")
+    |> render_click()
+
+    assert_patch(view, ~p"/wiki/home/revisions/#{first_revision.id}")
+    assert has_element?(view, "#revision-preview-#{first_revision.id}")
+    assert has_element?(view, "button#previous-revision[disabled]")
+    assert has_element?(view, "a#next-revision")
+    assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")
+  end
+
+  test "shows an empty history before the first checkpoint", %{conn: conn} do
+    Page.ensure!("Home")
+    {:ok, view, _html} = live(conn, ~p"/wiki/home/revisions")
+
+    assert render(view) =~ "No revisions yet"
+    refute has_element?(view, "button[aria-label='Restore revision']")
+  end
+
+  test "does not open another page's revision", %{conn: conn} do
+    Page.ensure!("Home")
+    other_page = Page.ensure!("Other Page")
+    revision = create_revision(other_page, "Other content")
+
+    assert_raise Ash.Error.Query.NotFound, fn ->
+      live(conn, ~p"/wiki/home/revisions/#{revision.id}")
+    end
+  end
+
+  test "preserves the current document before restoring a revision", %{
+    conn: conn
+  } do
+    page = Page.ensure!("Home")
+    source_revision = create_revision(page, "First version")
+    _current_revision = create_revision(page, "Current version")
+    {:ok, shared_doc} = Collaboration.open_document("#{page.id}/main")
+    :ok = SharedDoc.observe(shared_doc)
+
+    {:ok, view, _html} = live(conn, ~p"/wiki/home/revisions/#{source_revision.id}")
+
+    view
+    |> element("button[aria-label='Restore revision']")
+    |> render_click()
+
+    lexical_state = source_revision.lexical_state
+    revision_id = source_revision.id
+
+    assert_push_event(view, "revision_restore_requested", %{
+      lexical_state: ^lexical_state,
+      revision_id: ^revision_id
+    })
+
+    render_hook(view, "revisions:preserve", %{
+      "documents" => [document_snapshot("main", "Unsaved collaborative edits")]
+    })
+
+    [preserved_revision | _revisions] = Page.list_revisions!(page)
+    assert preserved_revision.restored_from_revision_id == nil
+    assert preserved_revision.search_text == "Unsaved collaborative edits"
+
+    render_hook(view, "revisions:checkpoint", %{
+      "documents" => [document_snapshot("main", "First version restored")],
+      "revision_id" => source_revision.id
+    })
+
+    assert_patch(view, ~p"/wiki/home")
+
+    [restored_revision, preserved_revision_after_restore | _revisions] =
+      Page.list_revisions!(page)
+
+    assert restored_revision.restored_from_revision_id == source_revision.id
+    assert restored_revision.search_text == "First version restored"
+    assert preserved_revision_after_restore.id == preserved_revision.id
+
+    monitor = Process.monitor(shared_doc)
+    :ok = Collaboration.close_document(shared_doc)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+  end
+
   test "invalid slugs return not found and do not create pages", %{conn: conn} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->
@@ -288,5 +382,19 @@ defmodule LexWeb.PageLiveTest do
       },
       "search_text" => text
     }
+  end
+
+  defp create_revision(page, text) do
+    assert {:ok, :saved} =
+             Page.set_checkpoint(
+               page,
+               %{
+                 lexical_state: document_snapshot("main", text)["lexical_state"],
+                 search_text: text
+               },
+               nil
+             )
+
+    page |> Page.list_revisions!() |> List.first()
   end
 end

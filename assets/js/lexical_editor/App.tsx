@@ -26,10 +26,7 @@ import {
   TabIndentationExtension,
 } from '@lexical/extension';
 import {HashtagExtension} from '@lexical/hashtag';
-import {
-  $createLinkNode,
-  LinkExtension,
-} from '@lexical/link';
+import {$createLinkNode, LinkExtension} from '@lexical/link';
 import {
   $createListItemNode,
   $createListNode,
@@ -56,21 +53,17 @@ import {
 } from 'lexical';
 import {type JSX, useEffect, useMemo, useRef} from 'react';
 import type {ProviderFactory} from './collaboration';
-import {
-  CollaborationContext,
-  useCollaborationConfig,
-} from './context/CollaborationContext';
+import {useCollaborationConfig} from './context/CollaborationContext';
 import type {DocumentSnapshotRegistry} from './documentSnapshots';
-import {FlashMessageContext} from './context/FlashMessageContext';
-import {SettingsContext, useSettings} from './context/SettingsContext';
+import {useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
 import {
   type WikiPageReference,
   type WikiPageRepository,
-  WikiPagesProvider,
 } from './context/WikiPagesContext';
 import Editor from './Editor';
-import useAppTheme from './hooks/useAppTheme';
+import {CollaborativeEditorEnvironment} from './EditorEnvironment';
+import EditorSurface from './EditorSurface';
 import {registerSettingsSynchronization} from './hooks/useSynchronizeSettings';
 import {KeywordsExtension} from './nodes/KeywordNode';
 import {PlaygroundImportExtension} from './nodes/PlaygroundImportExtension';
@@ -337,21 +330,12 @@ function EditableController({editable}: {editable: boolean}): null {
   return null;
 }
 
-function EditorShell({
-  appTheme,
-  isShadowDOM,
-}: {
-  appTheme: string;
-  isShadowDOM: boolean;
-}): JSX.Element {
+function EditorShell({isShadowDOM}: {isShadowDOM: boolean}): JSX.Element {
   const isEditable = useLexicalEditable();
   const editor = (
-    <div
-      className="editor-shell wiki-editor"
-      data-app-theme={appTheme}
-      data-editable={isEditable}>
+    <EditorSurface editable={isEditable}>
       <Editor />
-    </div>
+    </EditorSurface>
   );
 
   return isShadowDOM ? <ShadowDomWrapper>{editor}</ShadowDomWrapper> : editor;
@@ -359,7 +343,6 @@ function EditorShell({
 
 function App({editable}: {editable: boolean}): JSX.Element {
   const initialEditable = useRef(editable).current;
-  const appTheme = useAppTheme();
   const {
     settings: {emptyEditor, isRichText, isShadowDOM, measureTypingPerf},
   } = useSettings();
@@ -392,7 +375,7 @@ function App({editable}: {editable: boolean}): JSX.Element {
       <DocumentSnapshotPlugin documentKey="main" />
       <EditableController editable={editable} />
       <ToolbarContext>
-        <EditorShell appTheme={appTheme} isShadowDOM={isShadowDOM} />
+        <EditorShell isShadowDOM={isShadowDOM} />
         <Settings />
         {measureTypingPerf ? <TypingPerfPlugin /> : null}
       </ToolbarContext>
@@ -414,18 +397,13 @@ export default function PlaygroundApp({
   wikiPageRepository: WikiPageRepository;
 }): JSX.Element {
   return (
-    <WikiPagesProvider
-      initialPages={initialPages}
-      repository={wikiPageRepository}>
-      <CollaborationContext
-        providerFactory={providerFactory}
-        snapshotRegistry={snapshotRegistry}>
-        <SettingsContext>
-          <FlashMessageContext>
-            <App editable={editable} />
-          </FlashMessageContext>
-        </SettingsContext>
-      </CollaborationContext>
-    </WikiPagesProvider>
+    <CollaborativeEditorEnvironment
+      pages={initialPages}
+      providerFactory={providerFactory}
+      snapshotRegistry={snapshotRegistry}
+      wikiPageRepository={wikiPageRepository}
+    >
+      <App editable={editable} />
+    </CollaborativeEditorEnvironment>
   );
 }

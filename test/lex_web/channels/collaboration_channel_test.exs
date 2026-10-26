@@ -8,6 +8,7 @@ defmodule LexWeb.CollaborationChannelTest do
   alias Lex.Collaboration
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
+  alias Lex.Wiki.PageRevision
   alias Yex.Sync
   alias Yex.Sync.SharedDoc
 
@@ -78,6 +79,7 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_eventually(fn -> Registry.lookup(Lex.Collaboration.Registry, room) == [] end)
     assert checkpoint_count(room) == 1
     assert persisted_text(room) == "checkpoint text"
+    assert Ash.read!(PageRevision) == []
   end
 
   test "a checkpoint hydrates the document when its room reopens" do
@@ -151,13 +153,20 @@ defmodule LexWeb.CollaborationChannelTest do
       document_snapshot("caption-1", "Caption")
     ]
 
-    assert {:ok, %{saved: 2, unchanged: 0}} = Collaboration.checkpoint(page, documents)
-    assert {:ok, %{saved: 0, unchanged: 2}} = Collaboration.checkpoint(page, documents)
+    assert {:ok, %{revision: :saved, saved: 2, unchanged: 0}} =
+             Collaboration.checkpoint(page, documents)
+
+    assert {:ok, %{revision: :unchanged, saved: 0, unchanged: 2}} =
+             Collaboration.checkpoint(page, documents)
 
     page_documents = PageDocument |> Ash.Query.sort(:document_key) |> Ash.read!()
 
     assert Enum.map(page_documents, & &1.document_key) == ["caption-1", "main"]
     assert Enum.map(page_documents, & &1.search_text) == ["Caption", "Main"]
+
+    assert [revision] = Ash.read!(PageRevision)
+    assert revision.lexical_state == document_snapshot("main", "Main")["lexical_state"]
+    assert revision.search_text == "Caption\nMain"
 
     main_monitor = Process.monitor(main_shared_doc)
     caption_monitor = Process.monitor(caption_shared_doc)
@@ -165,6 +174,23 @@ defmodule LexWeb.CollaborationChannelTest do
     :ok = Collaboration.close_document(caption_shared_doc)
     assert_receive {:DOWN, ^main_monitor, :process, ^main_shared_doc, :normal}
     assert_receive {:DOWN, ^caption_monitor, :process, ^caption_shared_doc, :normal}
+  end
+
+  test "update confirmation acknowledges preceding document updates" do
+    room = unique_room()
+    socket = join(room)
+
+    push(socket, "yjs", {:binary, document_update_message("before confirmation")})
+    reference = push(socket, "confirm_updates_applied", %{})
+    assert_reply reference, :ok, %{}
+
+    assert {:ok, shared_doc} = Collaboration.open_document(room)
+    doc = SharedDoc.get_doc(shared_doc)
+    assert doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string() == "before confirmation"
+
+    monitor = Process.monitor(shared_doc)
+    close_channel(socket)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
   test "semantic checkpointing requires active document rooms" do

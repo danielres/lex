@@ -27,6 +27,14 @@ import topbar from "topbar"
 import { AutoAnimate } from "./hooks/AutoAnimate"
 import { CapitalizeFirstLetter } from "./hooks/CapitalizeFirstLetter"
 import { mountLexicalEditor } from "./lexical_editor/mount"
+import { mountRevisionPreview } from "./lexical_editor/revisionPreviewMount"
+
+const snapshotsToParams = snapshots =>
+  snapshots.map(snapshot => ({
+    document_key: snapshot.documentKey,
+    lexical_state: snapshot.lexicalState,
+    search_text: snapshot.searchText
+  }))
 
 const LexicalEditor = {
   mounted() {
@@ -35,6 +43,9 @@ const LexicalEditor = {
     const ensurePageEvent = this.el.dataset.ensurePageEvent
     const resolvePageEvent = this.el.dataset.resolvePageEvent
     const checkpointEvent = this.el.dataset.checkpointEvent
+    const restoreCheckpointEvent = this.el.dataset.restoreCheckpointEvent
+    const restorePreserveEvent = this.el.dataset.restorePreserveEvent
+    const restoreRequestEvent = this.el.dataset.restoreRequestEvent
     const snapshotRequestEvent = this.el.dataset.snapshotRequestEvent
 
     const wikiPageRepository = {
@@ -59,18 +70,41 @@ const LexicalEditor = {
     this.snapshotRequestRef = this.handleEvent(snapshotRequestEvent, () => {
       try {
         this.lexicalEditor?.setEditable(false)
-        const documents =
-          this.lexicalEditor?.getDocumentSnapshots().map(snapshot => ({
-            document_key: snapshot.documentKey,
-            lexical_state: snapshot.lexicalState,
-            search_text: snapshot.searchText
-          })) || []
+        const documents = snapshotsToParams(this.lexicalEditor?.getDocumentSnapshots() || [])
 
         this.pushEvent(checkpointEvent, { documents })
       } catch (_error) {
         this.pushEvent(checkpointEvent, { error: "snapshot_failed" })
       }
     })
+
+    this.restoreRequestRef = this.handleEvent(
+      restoreRequestEvent,
+      async ({ lexical_state, revision_id }) => {
+        try {
+          if (!this.lexicalEditor) throw new Error("Lexical editor is not mounted")
+
+          const currentSnapshots = await this.lexicalEditor.getConfirmedDocumentSnapshots()
+          const preserveReply = await requestPage(restorePreserveEvent, {
+            documents: snapshotsToParams(currentSnapshots)
+          })
+
+          if (!preserveReply.ok) return
+
+          const snapshots = await this.lexicalEditor.restoreRevision(lexical_state)
+
+          this.pushEvent(restoreCheckpointEvent, {
+            documents: snapshotsToParams(snapshots),
+            revision_id
+          })
+        } catch (_error) {
+          this.pushEvent(restoreCheckpointEvent, {
+            error: "restore_failed",
+            revision_id
+          })
+        }
+      }
+    )
   },
 
   updated() {
@@ -80,8 +114,23 @@ const LexicalEditor = {
 
   destroyed() {
     this.removeHandleEvent(this.snapshotRequestRef)
+    this.removeHandleEvent(this.restoreRequestRef)
     this.lexicalEditor?.unmount()
+  }
+}
+
+const LexicalRevisionPreview = {
+  mounted() {
+    this.unmountPreview = mountRevisionPreview(
+      this.el,
+      JSON.parse(this.el.dataset.lexicalState),
+      JSON.parse(this.el.dataset.pages || "[]")
+    )
   },
+
+  destroyed() {
+    this.unmountPreview?.()
+  }
 }
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -94,7 +143,8 @@ const liveSocket = new LiveSocket("/live", Socket, {
     ...colocatedHooks,
     AutoAnimate,
     CapitalizeFirstLetter,
-    LexicalEditor
+    LexicalEditor,
+    LexicalRevisionPreview
   },
 })
 

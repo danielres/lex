@@ -19,7 +19,11 @@ import {
 import './setupEnv';
 
 export interface MountedLexicalEditor {
+  getConfirmedDocumentSnapshots(): Promise<DocumentSnapshot[]>;
   getDocumentSnapshots(): DocumentSnapshot[];
+  restoreRevision(
+    lexicalState: DocumentSnapshot['lexicalState'],
+  ): Promise<DocumentSnapshot[]>;
   setEditable(editable: boolean): void;
   setPages(pages: WikiPageReference[]): void;
   unmount(): void;
@@ -60,7 +64,17 @@ export function mountLexicalEditor(
   render();
 
   return {
+    async getConfirmedDocumentSnapshots() {
+      const snapshots = snapshotRegistry.snapshots();
+      await collaboration.confirmUpdatesApplied();
+      return snapshots;
+    },
     getDocumentSnapshots() {
+      return snapshotRegistry.snapshots();
+    },
+    async restoreRevision(lexicalState) {
+      await snapshotRegistry.restoreMain(lexicalState);
+      await collaboration.confirmUpdatesApplied();
       return snapshotRegistry.snapshots();
     },
     setEditable(nextEditable) {

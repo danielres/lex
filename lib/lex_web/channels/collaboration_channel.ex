@@ -33,6 +33,11 @@ defmodule LexWeb.CollaborationChannel do
     {:noreply, socket}
   end
 
+  def handle_in("confirm_updates_applied", _payload, socket) do
+    _doc = SharedDoc.get_doc(socket.assigns.shared_doc)
+    {:reply, {:ok, %{}}, socket}
+  end
+
   @impl true
   def handle_info({:yjs, message, shared_doc}, %{assigns: %{shared_doc: shared_doc}} = socket) do
     push(socket, "yjs", {:binary, message})

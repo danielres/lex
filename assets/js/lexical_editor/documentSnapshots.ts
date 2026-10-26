@@ -34,6 +34,27 @@ export class DocumentSnapshotRegistry {
     this.editors.forEach(editor => editor.setEditable(editable));
   }
 
+  async restoreMain(lexicalState: SerializedEditorState): Promise<void> {
+    const editor = this.editors.get('main');
+
+    if (editor === undefined) {
+      throw new Error('Main editor is not mounted');
+    }
+
+    await new Promise<void>(resolve => {
+      const unregister = editor.registerUpdateListener(() => {
+        unregister();
+        resolve();
+      });
+      const editorState = editor.parseEditorState(lexicalState);
+      editor.setEditorState(editorState, {tag: 'revision-restore'});
+    });
+
+    await new Promise<void>(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  }
+
   snapshots(): DocumentSnapshot[] {
     return Array.from(this.editors.entries())
       .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))

@@ -52,6 +52,7 @@ import {useCollaborationConfig} from '../context/CollaborationContext';
 import {useSettings} from '../context/SettingsContext';
 import brokenImage from '../images/image-broken.svg';
 import DocumentSnapshotPlugin from '../plugins/DocumentSnapshotPlugin';
+import ReadOnlyPlugin from '../plugins/ReadOnlyPlugin';
 import TreeViewPlugin from '../plugins/TreeViewPlugin';
 import ImageResizer from '../ui/ImageResizer';
 import {$isCaptionEditorEmpty, $isImageNode} from './ImageNode';
@@ -458,7 +459,8 @@ export default function ImageComponent({
   const {
     settings: {showNestedEditorTreeView},
   } = useSettings();
-  const {cursorColor, providerFactory, username} = useCollaborationConfig();
+  const {collaborative, cursorColor, providerFactory, username} =
+    useCollaborationConfig();
 
   const draggable = isInNodeSelection && !isResizing;
   const isFocused = (isSelected || isResizing) && isEditable;
@@ -489,14 +491,20 @@ export default function ImageComponent({
         {showCaption && (
           <div className="image-caption-container">
             <LexicalExtensionEditorComposer initialEditor={caption}>
-              <CollaborationPlugin
-                cursorColor={cursorColor}
-                id={caption.getKey()}
-                providerFactory={providerFactory}
-                shouldBootstrap={true}
-                username={username}
-              />
-              <DocumentSnapshotPlugin documentKey={caption.getKey()} />
+              {collaborative ? (
+                <>
+                  <CollaborationPlugin
+                    cursorColor={cursorColor}
+                    id={caption.getKey()}
+                    providerFactory={providerFactory}
+                    shouldBootstrap={true}
+                    username={username}
+                  />
+                  <DocumentSnapshotPlugin documentKey={caption.getKey()} />
+                </>
+              ) : (
+                <ReadOnlyPlugin />
+              )}
               <DisableCaptionOnBlur setShowCaption={setShowCaption} />
               {showNestedEditorTreeView === true ? <TreeViewPlugin /> : null}
             </LexicalExtensionEditorComposer>

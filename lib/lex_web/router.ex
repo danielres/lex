@@ -19,7 +19,9 @@ defmodule LexWeb.Router do
 
     live "/", HomeLive
     live "/wiki", WikiLive
-    live "/wiki/:page_slug", PageLive
+    live "/wiki/:page_slug", PageLive, :show
+    live "/wiki/:page_slug/revisions", PageLive, :revisions
+    live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
     post "", AshTypescriptRpcController, :run
     post "", AshTypescriptRpcController, :validate
     get "/ash-typescript", PageController, :index

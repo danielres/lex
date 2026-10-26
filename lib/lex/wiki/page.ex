@@ -3,6 +3,7 @@ defmodule Lex.Wiki.Page do
 
   alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
+  alias Lex.Wiki.PageRevision
   alias Lex.Wiki.PageSlug
   alias Lex.Wiki.PageTitle
 
@@ -119,13 +120,26 @@ defmodule Lex.Wiki.Page do
     Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
   end
 
+  def list_revisions!(page) do
+    PageRevision
+    |> Ash.Query.filter(page_id == ^page.id)
+    |> Ash.Query.sort(inserted_at: :desc, id: :desc)
+    |> Ash.read!()
+  end
+
+  def get_revision(page, revision_id) do
+    PageRevision
+    |> Ash.Query.filter(page_id == ^page.id and id == ^revision_id)
+    |> Ash.read_one()
+  end
+
   def restore(page, document_key, doc) do
     with {:ok, page_document} <- get_page_document(page, document_key) do
       restore_page_document(page_document, doc)
     end
   end
 
-  def set_checkpoint(page, document_key, doc) do
+  def set_checkpoint(page, document_key, doc) when is_binary(document_key) do
     with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
          {:ok, page_document} <- get_page_document(page, document_key) do
       if page_document != nil and page_document.yjs_state == yjs_state do
@@ -133,6 +147,33 @@ defmodule Lex.Wiki.Page do
       else
         with {:ok, _page_document} <- save_page_document(page, document_key, yjs_state) do
           :ok
+        end
+      end
+    end
+  end
+
+  def set_checkpoint(
+        page,
+        %{lexical_state: lexical_state, search_text: search_text},
+        restored_from_revision_id
+      ) do
+    content_hash = content_hash(lexical_state)
+
+    with :ok <- validate_source_revision(page, restored_from_revision_id),
+         {:ok, latest_revision} <- latest_revision(page) do
+      if latest_revision != nil and latest_revision.content_hash == content_hash do
+        {:ok, :unchanged}
+      else
+        page
+        |> create_revision(
+          lexical_state,
+          search_text,
+          content_hash,
+          restored_from_revision_id
+        )
+        |> case do
+          {:ok, _revision} -> {:ok, :saved}
+          {:error, error} -> {:error, error}
         end
       end
     end
@@ -199,6 +240,23 @@ defmodule Lex.Wiki.Page do
     |> Ash.read_one()
   end
 
+  defp latest_revision(page) do
+    PageRevision
+    |> Ash.Query.filter(page_id == ^page.id)
+    |> Ash.Query.sort(inserted_at: :desc, id: :desc)
+    |> Ash.read_first()
+  end
+
+  defp validate_source_revision(_page, nil), do: :ok
+
+  defp validate_source_revision(page, revision_id) do
+    case get_revision(page, revision_id) do
+      {:ok, nil} -> invalid_attribute(:restored_from_revision_id, revision_id, "does not exist")
+      {:ok, _revision} -> :ok
+      {:error, error} -> {:error, error}
+    end
+  end
+
   defp title_collision(title, slug) do
     invalid_attribute(
       :title,
@@ -261,6 +319,24 @@ defmodule Lex.Wiki.Page do
       page_id: page.id,
       search_text: search_text,
       yjs_state: yjs_state
+    })
+    |> Ash.create()
+  end
+
+  defp create_revision(
+         page,
+         lexical_state,
+         search_text,
+         content_hash,
+         restored_from_revision_id
+       ) do
+    PageRevision
+    |> Ash.Changeset.for_create(:create, %{
+      content_hash: content_hash,
+      lexical_state: lexical_state,
+      page_id: page.id,
+      restored_from_revision_id: restored_from_revision_id,
+      search_text: search_text
     })
     |> Ash.create()
   end
