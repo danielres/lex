@@ -51,14 +51,14 @@ defmodule LexWeb.Layouts do
     ~H"""
     <% active_class = "bg-info text-white" %>
     <div class="min-h-svh grid grid-rows-[auto_1fr]">
-      <div class="bg-base-300 items-center flex sm:px-5 py-2 gap-4 border-b border-base-100">
+      <div class="bg-base-300 items-center flex px-3 py-2 gap-2 border-b border-base-100">
         <label
           for="my-drawer-4"
           aria-label="open sidebar"
           class={[
             "hover:bg-base-100 transition",
             "cursor-pointer",
-            "aspect-square p-1.5 rounded",
+            "size-8 rounded",
             "flex items-center justify-center"
           ]}
         >
@@ -78,12 +78,25 @@ defmodule LexWeb.Layouts do
           <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
           <div class={[
             "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
-            "is-drawer-close:w-16 px-1 is-drawer-open:w-40",
+            "is-drawer-close:w-15 px-1 is-drawer-open:w-40 pr-3",
             "border-r border-base-100",
-            "max-sm:min-h-svh"
+            "max-sm:min-h-svh",
+            "py-4"
           ]}>
             <!-- Sidebar content here -->
-            <ul class="menu gap-1 w-full font-semibold">
+            <ul class={[
+              "grid gap-2 w-full font-semibold",
+              "[&_a]:h-8",
+              "[&_li]:ml-2",
+              "[&_a]:is-drawer-close:aspect-square",
+              "[&_a]:is-drawer-open:px-2",
+              "[&_a]:flex",
+              "[&_a]:items-center",
+              "[&_a]:gap-2",
+              "[&_a]:is-drawer-close:justify-center",
+              "[&_a]:rounded",
+              "[&_a]:text-sm"
+            ]}>
               <li>
                 <.link
                   navigate={~p"/"}
