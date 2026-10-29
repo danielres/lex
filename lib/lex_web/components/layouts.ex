@@ -112,7 +112,7 @@ defmodule LexWeb.Layouts do
               </li>
               <li>
                 <.link
-                  navigate={~p"/wiki"}
+                  navigate={~p"/wiki/home"}
                   class={[
                     "is-drawer-close:tooltip is-drawer-close:tooltip-right",
                     @active == "page" && active_class,
