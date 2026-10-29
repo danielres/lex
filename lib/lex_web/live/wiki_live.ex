@@ -76,7 +76,7 @@ defmodule LexWeb.WikiLive do
         </div>
 
         <div class="bg-base-100 p-0 rounded-box">
-          <table class="table">
+          <table class="table max-sm:table-sm">
             <thead class="text-base">
               <tr>
                 <th aria-sort={aria_sort(@sort_by, @sort_direction, :title)} class="w-1/3">
