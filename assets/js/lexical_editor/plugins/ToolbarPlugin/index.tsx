@@ -809,9 +809,9 @@ export default function ToolbarPlugin({
               className={
                 'toolbar-item spaced ' + (toolbarState.isCode ? 'active' : '')
               }
-              title={`Insert code block (${shortcut('INSERT_CODE_BLOCK')})`}
+              title={`Code (${shortcut('INSERT_CODE_BLOCK')})`}
               type="button"
-              aria-label="Insert code block">
+              aria-label="Code">
               <i className="format code" />
             </button>
           )}
