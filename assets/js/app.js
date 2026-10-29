@@ -24,6 +24,8 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import { hooks as colocatedHooks } from "phoenix-colocated/lex"
 import topbar from "topbar"
+import Toast from "../../deps/toast/assets/js/toast.js"
+
 import { AutoAnimate } from "./hooks/AutoAnimate"
 import { CapitalizeFirstLetter } from "./hooks/CapitalizeFirstLetter"
 import { mountLexicalEditor } from "./lexical_editor/mount"
@@ -142,10 +144,11 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken, tz: timeZone },
   hooks: {
     ...colocatedHooks,
+    Toast,
     AutoAnimate,
     CapitalizeFirstLetter,
     LexicalEditor,
-    LexicalRevisionPreview
+    LexicalRevisionPreview,
   },
 })
 

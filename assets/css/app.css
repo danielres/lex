@@ -7,6 +7,9 @@
 @source "../css";
 @source "../js";
 @source "../../lib/lex_web";
+@import "../../deps/toast/assets/css/toast.css";
+
+
 /* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
 @source "../../_build/dev/phoenix-colocated/lex/*/";
 
@@ -17,6 +20,7 @@
 /* daisyUI Tailwind Plugin. */
 @plugin "daisyui/packages/bundle/daisyui" {
   themes: false;
+  exclude: toast;
 }
 
 /* daisyUI theme plugin.
@@ -106,6 +110,11 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+.live-toast-group .toast {
+  --toast-bg: var(--color-base-300); 
+  @apply border-2;
+}
 
 html, body {
   @apply bg-base-200;

@@ -43,7 +43,8 @@ defmodule LexWeb.Layouts do
       </main>
     </.drawer>
 
-    <.flash_group flash={@flash} />
+    <Toast.toast_group flash={@flash} connection_toasts={true} theme="system" rich_colors={false} />
+    <%!-- <Toast.flash_group flash={@flash} /> --%>
     """
   end
 

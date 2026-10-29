@@ -41,6 +41,7 @@ defmodule Lex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:toast, "~> 0.3.1"},
       {:tzdata, "~> 1.1"},
       {:y_ex, "~> 0.13.0"},
       {:live_delegate, "~> 0.1.2"},
