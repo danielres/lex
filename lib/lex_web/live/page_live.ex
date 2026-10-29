@@ -60,6 +60,7 @@ defmodule LexWeb.PageLive do
     socket =
       if revision.page_id == socket.assigns.page.id do
         Revisions.reload(socket, socket.assigns.page, requested_revision_id(socket))
+        |> Toast.put_toast(:success, "Page saved", duration: 3000)
       else
         socket
       end
