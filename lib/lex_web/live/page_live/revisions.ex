@@ -198,6 +198,8 @@ defmodule LexWeb.PageLive.Revisions do
     <div
       :if={@revisions.selected}
       class="lexical-playground"
+      data-collaborator-display-name={@collaborator.display_name}
+      data-collaborator-hue={@collaborator.hue}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
       data-pages={assigns[:"data-pages"]}
       data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}

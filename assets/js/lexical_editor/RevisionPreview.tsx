@@ -7,6 +7,7 @@ import {type JSX, useCallback, useEffect, useState} from 'react';
 
 import differ from '../../vendor/htmldiffer';
 
+import type {Collaborator} from './context/CollaborationContext';
 import type {WikiPageReference} from './context/WikiPagesContext';
 import {ReadOnlyEditorEnvironment} from './EditorEnvironment';
 import EditorSurface from './EditorSurface';
@@ -140,10 +141,12 @@ function PreviewEditor({
 }
 
 export default function RevisionPreview({
+  collaborator,
   lexicalState,
   pages,
   previousLexicalState,
 }: {
+  collaborator: Collaborator;
   lexicalState: SerializedEditorState;
   pages: WikiPageReference[];
   previousLexicalState: SerializedEditorState | null;
@@ -162,7 +165,7 @@ export default function RevisionPreview({
       : renderDiff(previousHtml, currentHtml);
 
   return (
-    <ReadOnlyEditorEnvironment pages={pages}>
+    <ReadOnlyEditorEnvironment collaborator={collaborator} pages={pages}>
       <div aria-hidden="true" className="hidden">
         <PreviewEditor
           lexicalState={previousLexicalState}

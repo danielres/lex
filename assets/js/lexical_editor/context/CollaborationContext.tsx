@@ -13,43 +13,45 @@ import type {DocumentSnapshotRegistry} from '../documentSnapshots';
 interface CollaborationConfig {
   collaborative: boolean;
   cursorColor: string;
+  displayName: string;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
-  username: string;
+}
+
+export interface Collaborator {
+  displayName: string;
+  hue: number;
 }
 
 const CollaborationConfigContext = createContext<CollaborationConfig | null>(
   null,
 );
 
-const COLORS = ['#d13b40', '#2f7dd1', '#2f9b65', '#8a55c5', '#d27619'];
-const ADJECTIVES = ['Bright', 'Calm', 'Curious', 'Kind', 'Swift'];
-const ANIMALS = ['Badger', 'Fox', 'Heron', 'Otter', 'Wren'];
-
 export function CollaborationContext({
   children,
   collaborative = true,
+  collaborator,
   providerFactory,
   snapshotRegistry,
 }: {
   children: ReactNode;
   collaborative?: boolean;
+  collaborator: Collaborator;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
 }): JSX.Element {
-  const config = useMemo(() => {
-    const colorIndex = Math.floor(Math.random() * COLORS.length);
-    const animalIndex = Math.floor(Math.random() * ANIMALS.length);
-    const adjectiveIndex = Math.floor(Math.random() * ADJECTIVES.length);
-
-    return {
+  const config = useMemo(
+    () => ({
       collaborative,
-      cursorColor: COLORS[colorIndex],
+      cursorColor:
+        'oklch(var(--collaboration-color-lightness) ' +
+        `var(--collaboration-color-chroma) ${collaborator.hue}deg)`,
+      displayName: collaborator.displayName,
       providerFactory,
       snapshotRegistry,
-      username: `${ADJECTIVES[adjectiveIndex]} ${ANIMALS[animalIndex]}`,
-    };
-  }, [collaborative, providerFactory, snapshotRegistry]);
+    }),
+    [collaborative, collaborator, providerFactory, snapshotRegistry],
+  );
 
   return (
     <LexicalCollaboration>

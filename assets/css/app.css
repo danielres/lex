@@ -9,6 +9,10 @@
 @source "../../lib/lex_web";
 @import "../../deps/toast/assets/css/toast.css";
 
+:root {
+  --collaboration-color-lightness: 65%;
+  --collaboration-color-chroma: 0.16;
+}
 
 /* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
 @source "../../_build/dev/phoenix-colocated/lex/*/";

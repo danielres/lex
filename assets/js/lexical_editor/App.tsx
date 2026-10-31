@@ -53,7 +53,10 @@ import {
 } from 'lexical';
 import {type JSX, useEffect, useMemo, useRef} from 'react';
 import type {ProviderFactory} from './collaboration';
-import {useCollaborationConfig} from './context/CollaborationContext';
+import {
+  type Collaborator,
+  useCollaborationConfig,
+} from './context/CollaborationContext';
 import type {DocumentSnapshotRegistry} from './documentSnapshots';
 import {useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
@@ -360,7 +363,7 @@ function App({editable}: {editable: boolean}): JSX.Element {
       }),
     [emptyEditor, initialEditable, isRichText],
   );
-  const {cursorColor, providerFactory, username} = useCollaborationConfig();
+  const {cursorColor, displayName, providerFactory} = useCollaborationConfig();
 
   return (
     <LexicalExtensionComposer extension={app} contentEditable={null}>
@@ -370,7 +373,7 @@ function App({editable}: {editable: boolean}): JSX.Element {
         initialEditorState={emptyEditor ? undefined : $prepopulatedRichText}
         providerFactory={providerFactory}
         shouldBootstrap={true}
-        username={username}
+        username={displayName}
       />
       <DocumentSnapshotPlugin documentKey="main" />
       <EditableController editable={editable} />
@@ -384,12 +387,14 @@ function App({editable}: {editable: boolean}): JSX.Element {
 }
 
 export default function PlaygroundApp({
+  collaborator,
   editable,
   initialPages,
   providerFactory,
   snapshotRegistry,
   wikiPageRepository,
 }: {
+  collaborator: Collaborator;
   editable: boolean;
   initialPages: WikiPageReference[];
   providerFactory: ProviderFactory;
@@ -398,6 +403,7 @@ export default function PlaygroundApp({
 }): JSX.Element {
   return (
     <CollaborativeEditorEnvironment
+      collaborator={collaborator}
       pages={initialPages}
       providerFactory={providerFactory}
       snapshotRegistry={snapshotRegistry}

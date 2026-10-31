@@ -459,7 +459,7 @@ export default function ImageComponent({
   const {
     settings: {showNestedEditorTreeView},
   } = useSettings();
-  const {collaborative, cursorColor, providerFactory, username} =
+  const {collaborative, cursorColor, displayName, providerFactory} =
     useCollaborationConfig();
 
   const draggable = isInNodeSelection && !isResizing;
@@ -498,7 +498,7 @@ export default function ImageComponent({
                     id={caption.getKey()}
                     providerFactory={providerFactory}
                     shouldBootstrap={true}
-                    username={username}
+                    username={displayName}
                   />
                   <DocumentSnapshotPlugin documentKey={caption.getKey()} />
                 </>

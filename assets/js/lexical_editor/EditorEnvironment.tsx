@@ -2,7 +2,10 @@ import type {JSX, ReactNode} from 'react';
 import {useMemo} from 'react';
 
 import type {ProviderFactory} from './collaboration';
-import {CollaborationContext} from './context/CollaborationContext';
+import {
+  type Collaborator,
+  CollaborationContext,
+} from './context/CollaborationContext';
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext} from './context/SettingsContext';
 import {
@@ -26,6 +29,7 @@ const readOnlyWikiPageRepository: WikiPageRepository = {
 function EditorEnvironment({
   children,
   collaborative,
+  collaborator,
   pages,
   providerFactory,
   snapshotRegistry,
@@ -33,6 +37,7 @@ function EditorEnvironment({
 }: {
   children: ReactNode;
   collaborative: boolean;
+  collaborator: Collaborator;
   pages: WikiPageReference[];
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
@@ -42,6 +47,7 @@ function EditorEnvironment({
     <WikiPagesProvider initialPages={pages} repository={wikiPageRepository}>
       <CollaborationContext
         collaborative={collaborative}
+        collaborator={collaborator}
         providerFactory={providerFactory}
         snapshotRegistry={snapshotRegistry}
       >
@@ -55,12 +61,14 @@ function EditorEnvironment({
 
 export function CollaborativeEditorEnvironment({
   children,
+  collaborator,
   pages,
   providerFactory,
   snapshotRegistry,
   wikiPageRepository,
 }: {
   children: ReactNode;
+  collaborator: Collaborator;
   pages: WikiPageReference[];
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
@@ -69,6 +77,7 @@ export function CollaborativeEditorEnvironment({
   return (
     <EditorEnvironment
       collaborative={true}
+      collaborator={collaborator}
       pages={pages}
       providerFactory={providerFactory}
       snapshotRegistry={snapshotRegistry}
@@ -81,9 +90,11 @@ export function CollaborativeEditorEnvironment({
 
 export function ReadOnlyEditorEnvironment({
   children,
+  collaborator,
   pages,
 }: {
   children: ReactNode;
+  collaborator: Collaborator;
   pages: WikiPageReference[];
 }): JSX.Element {
   const snapshotRegistry = useMemo(
@@ -94,6 +105,7 @@ export function ReadOnlyEditorEnvironment({
   return (
     <EditorEnvironment
       collaborative={false}
+      collaborator={collaborator}
       pages={pages}
       providerFactory={readOnlyProviderFactory}
       snapshotRegistry={snapshotRegistry}

@@ -4,6 +4,7 @@ defmodule LexWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+    plug LexWeb.Collaborator
     plug :fetch_live_flash
     plug :put_root_layout, html: {LexWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -17,11 +18,16 @@ defmodule LexWeb.Router do
   scope "/", LexWeb do
     pipe_through :browser
 
-    live "/", HomeLive
-    live "/wiki", WikiLive
-    live "/wiki/:page_slug", PageLive, :show
-    live "/wiki/:page_slug/revisions", PageLive, :revisions
-    live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
+    live_session :app,
+      on_mount: LexWeb.Collaborator,
+      session: {LexWeb.Collaborator, :live_session, []} do
+      live "/", HomeLive
+      live "/wiki", WikiLive
+      live "/wiki/:page_slug", PageLive, :show
+      live "/wiki/:page_slug/revisions", PageLive, :revisions
+      live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
+    end
+
     post "", AshTypescriptRpcController, :run
     post "", AshTypescriptRpcController, :validate
     get "/ash-typescript", PageController, :index

@@ -137,6 +137,8 @@ defmodule LexWeb.PageLive do
         <div
           class="lexical-playground"
           data-checkpoint-event={Editing.checkpoint_event()}
+          data-collaborator-display-name={@collaborator.display_name}
+          data-collaborator-hue={@collaborator.hue}
           data-document-id={@page.id}
           data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
           data-ensure-page-event={WikiLinkMap.ensure_event()}
@@ -155,10 +157,11 @@ defmodule LexWeb.PageLive do
 
       <section :if={@live_action == :revisions} id="page-revisions" class="max-w-[80ch]">
         <Revisions.render
-          revisions={@revisions}
-          page={@page}
-          wiki_link_map={@wiki_link_map}
+          collaborator={@collaborator}
           data-pages={WikiLinkMap.encode(@wiki_link_map)}
+          page={@page}
+          revisions={@revisions}
+          wiki_link_map={@wiki_link_map}
         />
       </section>
     </Layouts.app>

@@ -63,7 +63,7 @@ export default function StickyComponent({
   y: number;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
-  const {collaborative, cursorColor, providerFactory, username} =
+  const {collaborative, cursorColor, displayName, providerFactory} =
     useCollaborationConfig();
   const stickyContainerRef = useRef<null | HTMLDivElement>(null);
   const dragCleanupRef = useRef<(() => void) | null>(null);
@@ -243,7 +243,7 @@ export default function StickyComponent({
                 id={caption.getKey()}
                 providerFactory={providerFactory}
                 shouldBootstrap={true}
-                username={username}
+                username={displayName}
               />
               <DocumentSnapshotPlugin documentKey={caption.getKey()} />
             </>

@@ -38,6 +38,17 @@ const snapshotsToParams = snapshots =>
     search_text: snapshot.searchText
   }))
 
+const collaboratorFromElement = element => {
+  const displayName = element.dataset.collaboratorDisplayName
+  const hue = Number(element.dataset.collaboratorHue)
+
+  if (!displayName || !Number.isInteger(hue) || hue < 0 || hue > 359) {
+    throw new Error("Invalid collaborator data")
+  }
+
+  return { displayName, hue }
+}
+
 const LexicalEditor = {
   mounted() {
     const requestPage = (event, payload) =>
@@ -63,6 +74,7 @@ const LexicalEditor = {
     }
 
     this.lexicalEditor = mountLexicalEditor(this.el, {
+      collaborator: collaboratorFromElement(this.el),
       documentId: this.el.dataset.documentId,
       initialEditable: this.el.dataset.editable === "true",
       initialPages: JSON.parse(this.el.dataset.pages || "[]"),
@@ -125,6 +137,7 @@ const LexicalRevisionPreview = {
   mounted() {
     this.unmountPreview = mountRevisionPreview(
       this.el,
+      collaboratorFromElement(this.el),
       JSON.parse(this.el.dataset.lexicalState),
       JSON.parse(this.el.dataset.previousLexicalState),
       JSON.parse(this.el.dataset.pages || "[]")

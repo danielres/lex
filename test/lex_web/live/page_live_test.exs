@@ -15,6 +15,8 @@ defmodule LexWeb.PageLiveTest do
 
     assert html =~ ~s(data-document-id="#{page.id}")
     assert html =~ ~s(id="lexical-editor-#{page.id}")
+    assert html =~ ~r/data-collaborator-display-name="[^"]+"/
+    assert html =~ ~r/data-collaborator-hue="\d+"/
     assert page.title == "Home"
   end
 
@@ -282,6 +284,18 @@ defmodule LexWeb.PageLiveTest do
 
     assert render(view) =~ "No revisions yet"
     refute has_element?(view, "button[aria-label='Restore revision']")
+  end
+
+  test "passes the collaborator to revision previews", %{conn: conn} do
+    page = Page.ensure!("Home")
+    revision = create_revision(page, "First version")
+
+    {:ok, view, _html} = live(conn, ~p"/wiki/home/revisions")
+
+    assert has_element?(
+             view,
+             "#revision-preview-#{revision.id}[data-collaborator-display-name][data-collaborator-hue]"
+           )
   end
 
   test "does not open another page's revision", %{conn: conn} do
