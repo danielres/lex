@@ -29,6 +29,11 @@
   background-image: url(../../images/icons/draggable-block-menu.svg);
 }
 
+.draggable-block-menu .icon:hover {
+  opacity: 1;
+  /* background-color: #efefef; */
+}
+
 .draggable-block-menu .icon-plus {
   display: inline-block;
   border: none;
@@ -39,10 +44,6 @@
 
 .draggable-block-menu:active {
   cursor: grabbing;
-}
-
-.draggable-block-menu .icon:hover {
-  background-color: #efefef;
 }
 
 .draggable-block-target-line {
