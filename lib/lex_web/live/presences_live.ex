@@ -78,7 +78,7 @@ defmodule LexWeb.PresencesLive do
         >
           {length(@presences)}
         </span>
-        <.icon name="hero-users-micro" />
+        <.icon name="hero-users-micro" class="opacity-50" />
       </button>
     </div>
     """
