@@ -11,10 +11,12 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Revisions
   alias LexWeb.PageLive.WikiLinkMap
+  alias LexWeb.Presences
 
   delegate(:editing, Editing, info: false)
   delegate(:revisions, Revisions, info: false)
   delegate(:wiki_link_map, WikiLinkMap, info: false)
+  delegate(:presences, Presences, info: [:group])
 
   @impl true
   def mount(params, session, socket) do
@@ -109,14 +111,19 @@ defmodule LexWeb.PageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} active="page">
+    <Layouts.app
+      active="page"
+      flash={@flash}
+      presences={@presences}
+      user={@collaborator}
+    >
       <div class="text-base-content/50">
         <.link class="hover:text-base-content transition" navigate={~p"/wiki"}>Wiki</.link>
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
       <div class={[
         "flex justify-between gap-4 mb-4",
-        "pb-2 border-b-2 border-base-content/10"
+        "pb-2 border-b-2 border-base-content10"
       ]}>
         <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 

@@ -1,9 +1,13 @@
 defmodule LexWeb.WikiLive do
   use LexWeb, :live_view
+  use LiveDelegate
 
   alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
+  alias LexWeb.Presences
+
+  delegate(:presences, Presences, info: [:group])
 
   @sort_fields %{
     "inserted_at" => :inserted_at,
@@ -11,8 +15,10 @@ defmodule LexWeb.WikiLive do
     "title" => :title
   }
 
-  def mount(_params, _session, socket) do
+  def mount(params, session, socket) do
     if connected?(socket), do: Page.subscribe()
+
+    socket = delegate_mount(socket, params, session)
 
     tz =
       case get_connect_params(socket) do
@@ -65,8 +71,17 @@ defmodule LexWeb.WikiLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} active="wiki">
+    <Layouts.app
+      active="wiki"
+      flash={@flash}
+      presences={@presences}
+      user={@collaborator}
+    >
       <div class="space-y-4 max-w-[80ch]">
+        <div class="flex justify-end">
+          <Presences.render presences={@presences} />
+        </div>
+
         <div class="flex justify-end">
           <.link navigate={~p"/wiki/home"} class="btn btn-info px-2 rounded-box">
             <.icon name="hero-home-micro" />

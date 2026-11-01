@@ -5,6 +5,9 @@ defmodule LexWeb.Layouts do
   """
   use LexWeb, :html
 
+  alias LexWeb.Components.Avatar
+  alias LexWeb.Presences
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
@@ -32,108 +35,143 @@ defmodule LexWeb.Layouts do
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   attr :active, :string, default: ""
+  attr :presences, :list, default: []
+  attr :user, :map, required: true
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <.drawer {assigns}>
-      <main>
-        {render_slot(@inner_block)}
-      </main>
-    </.drawer>
+    <div class="min-h-svh grid grid-rows-[auto_1fr]">
+      <.navbar user={@user} />
+
+      <.drawer {assigns} presences={@presences}>
+        <main>
+          {render_slot(@inner_block)}
+        </main>
+      </.drawer>
+    </div>
 
     <Toast.toast_group flash={@flash} connection_toasts={true} theme="system" rich_colors={false} />
-    <%!-- <Toast.flash_group flash={@flash} /> --%>
+    """
+  end
+
+  def navbar(assigns) do
+    ~H"""
+    <div class="bg-base-300 items-center flex px-3 py-2 gap-2 border-b border-base-100">
+      <label
+        for="my-drawer-4"
+        aria-label="open sidebar"
+        class={[
+          "hover:bg-base-100 transition",
+          "cursor-pointer",
+          "size-8 rounded",
+          "flex items-center justify-center"
+        ]}
+      >
+        <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
+      </label>
+
+      <span class="grow">Navbar</span>
+
+      <Avatar.render user={@user} />
+    </div>
     """
   end
 
   def drawer(assigns) do
     ~H"""
     <% active_class = "bg-info text-white" %>
-    <div class="min-h-svh grid grid-rows-[auto_1fr]">
-      <div class="bg-base-300 items-center flex px-3 py-2 gap-2 border-b border-base-100">
-        <label
-          for="my-drawer-4"
-          aria-label="open sidebar"
-          class={[
-            "hover:bg-base-100 transition",
-            "cursor-pointer",
-            "size-8 rounded",
-            "flex items-center justify-center"
-          ]}
-        >
-          <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
-        </label>
-        <span class="">Navbar</span>
+
+    <div class="drawer sm:drawer-open">
+      <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" checked={false} />
+
+      <div class="drawer-content p-4 sm:px-8">
+        <!-- Page content here -->
+        {render_slot(@inner_block)}
       </div>
 
-      <div class="drawer sm:drawer-open">
-        <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" />
-        <div class="drawer-content p-4 sm:px-8">
-          <!-- Page content here -->
-          {render_slot(@inner_block)}
-        </div>
+      <div class="drawer-side is-drawer-close:overflow-visible h-auto">
+        <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
 
-        <div class="drawer-side is-drawer-close:overflow-visible h-auto">
-          <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-          <div class={[
-            "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
-            "is-drawer-close:w-15 px-1 is-drawer-open:w-40 pr-3",
-            "border-r border-base-100",
-            "max-sm:min-h-svh",
-            "py-4"
+        <div class={[
+          "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
+          "is-drawer-close:w-15 px-1 is-drawer-open:w-40 pr-3",
+          "border-r border-base-100",
+          "max-sm:min-h-svh",
+          "py-4"
+        ]}>
+          <!-- Sidebar content here -->
+
+          <ul class={[
+            "grid gap-2 w-full font-semibold",
+            "[&_a]:h-8",
+            "[&_li]:ml-2",
+            "[&_a]:is-drawer-close:aspect-square",
+            "[&_a]:is-drawer-open:px-2",
+            "[&_a]:flex",
+            "[&_a]:items-center",
+            "[&_a]:gap-2",
+            "[&_a]:is-drawer-close:justify-center",
+            "[&_a]:rounded",
+            "[&_a]:text-sm",
+            "pb-6"
           ]}>
-            <!-- Sidebar content here -->
-            <ul class={[
-              "grid gap-2 w-full font-semibold",
-              "[&_a]:h-8",
-              "[&_li]:ml-2",
-              "[&_a]:is-drawer-close:aspect-square",
-              "[&_a]:is-drawer-open:px-2",
-              "[&_a]:flex",
-              "[&_a]:items-center",
-              "[&_a]:gap-2",
-              "[&_a]:is-drawer-close:justify-center",
-              "[&_a]:rounded",
-              "[&_a]:text-sm"
-            ]}>
-              <li>
-                <.link
-                  navigate={~p"/"}
-                  class={[
-                    "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                    @active == "dashboard" && active_class
-                  ]}
-                  data-tip="Dashboard"
-                >
-                  <.icon name="hero-squares-2x2-solid" />
-                  <span class="is-drawer-close:hidden">Dashboard</span>
-                </.link>
-              </li>
-              <li>
-                <.link
-                  navigate={~p"/wiki/home"}
-                  class={[
-                    "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                    @active == "page" && active_class,
-                    @active == "wiki" && active_class
-                  ]}
-                  data-tip="Wiki"
-                >
-                  <.icon name="hero-book-open-mini" />
-                  <span class="is-drawer-close:hidden">Wiki</span>
-                </.link>
-              </li>
-            </ul>
+            <li>
+              <.link
+                navigate={~p"/"}
+                class={[
+                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                  @active == "dashboard" && active_class
+                ]}
+                data-tip="Dashboard"
+              >
+                <.icon name="hero-squares-2x2-solid" />
+                <span class="is-drawer-close:hidden">Dashboard</span>
+              </.link>
+            </li>
+            <li>
+              <.link
+                navigate={~p"/wiki/home"}
+                class={[
+                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
+                  @active == "page" && active_class,
+                  @active == "wiki" && active_class
+                ]}
+                data-tip="Wiki"
+              >
+                <.icon name="hero-book-open-mini" />
+                <span class="is-drawer-close:hidden">Wiki</span>
+              </.link>
+            </li>
+          </ul>
 
-            <div class={[
-              "border-t border-base-100 py-2 mt-2",
-              "w-full flex justify-center",
-              "is-drawer-close:hidden"
-            ]}>
-              <.theme_toggle />
+          <div
+            :if={@presences.data |> length() > 1}
+            class={[
+              "w-full",
+              "px-2",
+              "is-drawer-close:hidden",
+              "space-y-2",
+              "border-t py-6 border-base-content/20"
+            ]}
+          >
+            <h3 class="flex items-baseline justify-between">
+              <span class="small-caps tracking-wide">Online</span>
+              <span class="badge badge-xs">{@presences.data |> length()}</span>
+            </h3>
+
+            <div class="flex flex-wrap gap-1 w-31">
+              <Presences.render presences={@presences} />
             </div>
+          </div>
+
+          <div class={[
+            "w-full flex justify-center",
+            "is-drawer-close:hidden",
+            "border-t py-6 border-base-content/20"
+          ]}>
+            <.theme_toggle />
           </div>
         </div>
       </div>
