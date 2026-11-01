@@ -33,7 +33,7 @@ defmodule LexWeb.Presences do
   defp get_presences() do
     Group.members(:lex, @room_key)
     |> Enum.map(fn {pid, presence} -> presence end)
-    # |> Enum.uniq_by(fn user -> user.display_name end)
+    |> Enum.uniq_by(fn user -> user.display_name end)
     |> Enum.sort_by(fn user -> user.display_name end)
   end
 
