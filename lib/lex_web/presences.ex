@@ -33,6 +33,7 @@ defmodule LexWeb.Presences do
   defp get_presences() do
     Group.members(:lex, @room_key)
     |> Enum.map(fn {pid, presence} -> presence end)
+    # |> Enum.uniq_by(fn user -> user.display_name end)
     |> Enum.sort_by(fn user -> user.display_name end)
   end
 
@@ -43,12 +44,13 @@ defmodule LexWeb.Presences do
 
   def render(assigns) do
     ~H"""
-    <div
-      :for={presence <- @presences.data}
-      phx-hook="AutoAnimate"
-      id={"presence-#{presence.display_name}"}
-    >
-      <Avatar.render user={presence} />
+    <div phx-hook="AutoAnimate" id="presences-list" class="contents">
+      <div
+        :for={presence <- @presences.data}
+        id={"presence-#{presence.display_name}"}
+      >
+        <Avatar.render user={presence} />
+      </div>
     </div>
     """
   end
