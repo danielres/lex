@@ -6,17 +6,25 @@ defmodule LexWeb.HomeLive do
   alias LexWeb.UI
 
   delegate(:presences, Presences, info: [:group])
-  # delegate(:ui, UI)
+  delegate(:ui, UI)
 
   def mount(params, session, socket) do
-    # socket = delegate_mount(socket, params, session)
+    socket = delegate_mount(socket, params, session)
 
     {:ok, socket}
   end
 
   def render(assigns) do
     ~H"""
-    hello
+    <Layouts.app
+      active="dashboard"
+      flash={@flash}
+      presences={@presences}
+      ui={@ui}
+      user={@collaborator}
+    >
+      Hello
+    </Layouts.app>
     """
   end
 end
