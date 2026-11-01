@@ -89,7 +89,7 @@ defmodule LexWeb.PresencesLive do
     :lex
     |> Group.members(@room_key)
     |> Enum.map(fn {_pid, presence} -> presence end)
-    |> Enum.uniq_by(& &1.display_name)
+    # |> Enum.uniq_by(& &1.display_name)
     |> Enum.sort_by(& &1.display_name)
   end
 end
