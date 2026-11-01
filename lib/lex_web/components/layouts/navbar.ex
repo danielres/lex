@@ -13,7 +13,7 @@ defmodule LexWeb.Layouts.Navbar do
     ~H"""
     <div class={[
       "bg-base-300",
-      "p-2 max-sm:pl-0",
+      "p-2 pr-4 max-sm:pl-0",
       "flex items-center gap-3",
       "border-b border-base-100"
     ]}>

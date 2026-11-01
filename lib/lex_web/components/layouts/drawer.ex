@@ -24,7 +24,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <div class={[
         @open? && "w-42",
-        !@open? && "w-12 -left-4",
+        !@open? && "w-12 overflow-hidden",
         "max-sm:fixed",
         "max-sm:inset-0",
         !@open? && "max-sm:-left-13",
@@ -68,7 +68,7 @@ defmodule LexWeb.Layouts.Drawer do
             >
               <span class={[
                 "indicator-item",
-                "badge badge-xs",
+                "badge badge-xs px-0.5",
                 count > 1 && "badge-accent",
                 "font-semibold"
               ]}>{count}</span>
