@@ -30,7 +30,7 @@ defmodule LexWeb.Components.Avatar do
         ]}
         style={"background: #{@color}"}
       >
-        <div class="avatar text-[0.7rem] font-bold small-caps">{@initials}</div>
+        <div class="avatar text-[0.7rem] font-bold small-caps text-white">{@initials}</div>
       </div>
     </div>
     """
