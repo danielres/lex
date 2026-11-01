@@ -132,3 +132,10 @@ html, body {
   font-variant-caps: small-caps;
 }
 
+.stacked {
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
