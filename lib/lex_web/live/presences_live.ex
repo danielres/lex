@@ -62,8 +62,7 @@ defmodule LexWeb.PresencesLive do
       "transition p-4"
     ]}>
       <button
-        class="indicator tooltip tooltip-right cursor-pointer"
-        data-tip={"#{length(@presences)} members online"}
+        class="indicator"
         data-testid="presences-toggle"
         phx-click={JS.exec("phx-click", to: "#drawer-toggle")}
         type="button"
