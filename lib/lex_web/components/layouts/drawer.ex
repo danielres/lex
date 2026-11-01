@@ -13,7 +13,8 @@ defmodule LexWeb.Layouts.Drawer do
   def render(assigns) do
     ~H"""
     <div class={[
-      "sm:grid sm:grid-cols-[auto_1fr]"
+      "sm:grid sm:grid-cols-[auto_1fr]",
+      "h-full"
     ]}>
       <div class="order-2">
         {render_slot(@inner_block)}
@@ -87,7 +88,6 @@ defmodule LexWeb.Layouts.Drawer do
     </div>
     """
   end
-
 
   attr :class, :string, default: ""
 

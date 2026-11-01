@@ -11,9 +11,21 @@ defmodule LexWeb.Layouts.Navbar do
 
   def render(assigns) do
     ~H"""
-    <div class="bg-base-300 items-center flex px-2 py-2 gap-3 border-b border-base-100">
-      <.toggle_button {assigns} />
-      <span class="grow">Berlin hikers</span>
+    <div class={[
+      "bg-base-300",
+      "p-2 max-sm:pl-0",
+      "flex items-center gap-3",
+      "border-b border-base-100"
+    ]}>
+      <div class={[
+        "max-sm:fixed",
+        "top-1",
+        "left-1",
+        "z-50"
+      ]}>
+        <.toggle_button {assigns} />
+      </div>
+      <span class="grow max-sm:ml-12">Berlin hikers</span>
       <Avatar.render user={@user} />
     </div>
     """
@@ -23,37 +35,41 @@ defmodule LexWeb.Layouts.Navbar do
 
   def toggle_button(assigns) do
     ~H"""
-    <button
-      type="button"
-      phx-click={delegate_event("toggle_drawer")}
-      aria-label="open sidebar"
-      class={[
-        "stacked",
-        "hover:bg-base-100 transition",
-        "cursor-pointer",
-        "size-8 rounded",
-        "flex items-center justify-center"
-      ]}
-    >
-      <.icon
-        name="hero-bars-3-micro"
+    <div class={[
+      @drawer_open? && "max-sm:hidden"
+    ]}>
+      <button
+        type="button"
+        phx-click={delegate_event("toggle_drawer")}
+        aria-label="open sidebar"
         class={[
-          "size-5",
-          !@drawer_open? && "opacity-100",
-          @drawer_open? && "opacity-0",
-          "transition"
+          "stacked",
+          "bg-base-300 hover:bg-base-100 transition",
+          "cursor-pointer",
+          "size-8 rounded",
+          "flex items-center justify-center"
         ]}
-      />
-      <.icon
-        name="hero-x-mark-micro"
-        class={[
-          "size-5",
-          @drawer_open? && "opacity-100",
-          !@drawer_open? && "opacity-0",
-          "transition"
-        ]}
-      />
-    </button>
+      >
+        <.icon
+          name="hero-bars-3-micro"
+          class={[
+            "size-5",
+            !@drawer_open? && "opacity-100",
+            @drawer_open? && "opacity-0",
+            "transition"
+          ]}
+        />
+        <.icon
+          name="hero-x-mark-micro"
+          class={[
+            "size-5",
+            @drawer_open? && "opacity-100",
+            !@drawer_open? && "opacity-0",
+            "transition"
+          ]}
+        />
+      </button>
+    </div>
     """
   end
 end

@@ -44,7 +44,7 @@ defmodule LexWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <div class="min-h-svh grid grid-rows-[auto_1fr]">
+    <div class="h-full">
       <Navbar.render
         drawer_open?={@ui.drawer_open?}
         user={@user}
@@ -55,7 +55,7 @@ defmodule LexWeb.Layouts do
         open?={@ui.drawer_open?}
         presences={@presences}
       >
-        <main class="p-4 sm:p-8">
+        <main class="p-2 sm:p-8">
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
