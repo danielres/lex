@@ -20,20 +20,7 @@ defmodule LexWeb.Layouts.Drawer do
         {render_slot(@inner_block)}
       </div>
 
-      <button
-        type="button"
-        phx-click={delegate_event("toggle_drawer")}
-        aria-label="open sidebar"
-        class={[
-          "sm:hidden",
-          "cursor-pointer",
-          !@open? && "pointer-events-none",
-          "transition",
-          @open? && "bg-black/20 backdrop-blur",
-          "fixed",
-          "inset-0"
-        ]}
-      ></button>
+      <.backdrop open?={@open?} />
 
       <div class={[
         @open? && "w-42",
@@ -49,24 +36,45 @@ defmodule LexWeb.Layouts.Drawer do
           <.main_links {assigns} />
         </div>
 
-        <% render_presences? = @presences.data |> length() > 0 %>
+        <.separator />
 
-        <.separator
-          :if={render_presences?}
-          class={[
+        <div class="stacked">
+          <div class={[
             @open? && "opacity-100",
-            !@open? && "opacity-0",
-            "transition"
-          ]}
-        />
+            !@open? && "opacity-0 pointer-events-none",
+            "transition",
+            "pt-2 pb-4 pl-4 pr-4"
+          ]}>
+            <.presences {assigns} />
+          </div>
 
-        <div class={[
-          @open? && "opacity-100",
-          !@open? && "opacity-0",
-          "transition",
-          "pt-2 pb-4 pl-4 pr-4"
-        ]}>
-          <.presences {assigns} />
+          <div class={[
+            !@open? && "opacity-100",
+            @open? && "opacity-0 pointer-events-none",
+            "transition",
+            "p-4"
+          ]}>
+            <% count = @presences.data |> length() %>
+
+            <button
+              type="button"
+              phx-click={delegate_event("toggle_drawer")}
+              class={[
+                "indicator",
+                "tooltip tooltip-right",
+                "cursor-pointer"
+              ]}
+              data-tip={"#{count} members online"}
+            >
+              <span class={[
+                "indicator-item",
+                "badge badge-xs",
+                count > 1 && "badge-accent",
+                "font-semibold"
+              ]}>{count}</span>
+              <.icon name="hero-users-micro" />
+            </button>
+          </div>
         </div>
 
         <.separator class={[
@@ -86,6 +94,25 @@ defmodule LexWeb.Layouts.Drawer do
         </div>
       </div>
     </div>
+    """
+  end
+
+  def backdrop(assigns) do
+    ~H"""
+    <button
+      type="button"
+      phx-click={delegate_event("toggle_drawer")}
+      aria-label="open sidebar"
+      class={[
+        "sm:hidden",
+        "cursor-pointer",
+        !@open? && "pointer-events-none",
+        "transition",
+        @open? && "bg-black/20 backdrop-blur",
+        "fixed",
+        "inset-0"
+      ]}
+    ></button>
     """
   end
 
@@ -160,7 +187,7 @@ defmodule LexWeb.Layouts.Drawer do
       "space-y-2"
     ]}>
       <h3 class="flex items-baseline justify-between">
-        <span class="small-caps tracking-wide">Online</span>
+        <span class="small-caps tracking-wide">Online now</span>
         <span class="badge badge-xs">{@presences.data |> length()}</span>
       </h3>
 
