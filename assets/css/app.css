@@ -10,8 +10,8 @@
 @import "../../deps/toast/assets/css/toast.css";
 
 :root {
-  --collaboration-color-lightness: 65%;
-  --collaboration-color-chroma: 0.16;
+  --collaboration-color-lightness: 58%;
+  --collaboration-color-chroma: 0.12;
 }
 
 /* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
