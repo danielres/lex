@@ -5,9 +5,9 @@ defmodule LexWeb.Layouts do
   """
   use LexWeb, :html
 
-  alias LexWeb.Components.Avatar
-  alias LexWeb.Presences
   alias LexWeb.Layouts.Drawer
+  alias LexWeb.Layouts.Navbar
+  alias LexWeb.Presences
 
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
@@ -36,50 +36,32 @@ defmodule LexWeb.Layouts do
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   attr :active, :string, default: ""
-  attr :presences, :list, default: []
+  attr :presences, :map, default: %{data: []}
   attr :user, :map, required: true
+  attr :ui, :map, required: true
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
     <div class="min-h-svh grid grid-rows-[auto_1fr]">
-      <% drawer_dom_id = "layout-drawer" %>
-      <.navbar user={@user} drawer_dom_id={drawer_dom_id} />
+      <Navbar.render
+        drawer_open?={@ui.drawer_open?}
+        user={@user}
+      />
 
-      <Drawer.render {assigns} presences={@presences} dom_id={drawer_dom_id}>
-        <main>
+      <Drawer.render
+        {assigns}
+        open?={@ui.drawer_open?}
+        presences={@presences}
+      >
+        <main class="p-4 sm:p-8">
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
     </div>
 
     <Toast.toast_group flash={@flash} connection_toasts={true} theme="system" rich_colors={false} />
-    """
-  end
-
-  attr :drawer_dom_id, :string, required: true
-
-  def navbar(assigns) do
-    ~H"""
-    <div class="bg-base-300 items-center flex px-2 py-2 gap-3 border-b border-base-100">
-      <label
-        for={@drawer_dom_id}
-        aria-label="open sidebar"
-        class={[
-          "hover:bg-base-100 transition",
-          "cursor-pointer",
-          "size-8 rounded",
-          "flex items-center justify-center"
-        ]}
-      >
-        <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
-      </label>
-
-      <span class="grow">Berlin hikers</span>
-
-      <Avatar.render user={@user} />
-    </div>
     """
   end
 

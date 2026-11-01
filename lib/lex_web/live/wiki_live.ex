@@ -6,8 +6,10 @@ defmodule LexWeb.WikiLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias LexWeb.Presences
+  alias LexWeb.UI
 
   delegate(:presences, Presences, info: [:group])
+  delegate(:ui, UI)
 
   @sort_fields %{
     "inserted_at" => :inserted_at,
@@ -75,13 +77,10 @@ defmodule LexWeb.WikiLive do
       active="wiki"
       flash={@flash}
       presences={@presences}
+      ui={@ui}
       user={@collaborator}
     >
       <div class="space-y-4 max-w-[80ch]">
-        <div class="flex justify-end">
-          <Presences.render presences={@presences} />
-        </div>
-
         <div class="flex justify-end">
           <.link navigate={~p"/wiki/home"} class="btn btn-info px-2 rounded-box">
             <.icon name="hero-home-micro" />

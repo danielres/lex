@@ -1,62 +1,93 @@
 defmodule LexWeb.Layouts.Drawer do
   use LexWeb, :html
 
+  use LiveDelegate, path: [:ui]
+
   alias LexWeb.Components.Avatar
   alias LexWeb.Layouts.ThemeToggle
   alias LexWeb.Presences
 
   attr :dom_id, :string, required: true
+  attr :open?, :boolean, required: true
 
   def render(assigns) do
     ~H"""
-    <div class="drawer sm:drawer-open">
-      <input
-        id={@dom_id}
-        type="checkbox"
-        class="drawer-toggle inline"
-        checked={false}
-      />
-
-      <div class="drawer-content p-4 sm:px-8">
+    <div class={[
+      "sm:grid sm:grid-cols-[auto_1fr]"
+    ]}>
+      <div class="order-2">
         {render_slot(@inner_block)}
       </div>
 
-      <div class="drawer-side is-drawer-close:overflow-visible h-auto">
-        <label for={@dom_id} aria-label="close sidebar" class="drawer-overlay"></label>
+      <button
+        type="button"
+        phx-click={delegate_event("toggle_drawer")}
+        aria-label="open sidebar"
+        class={[
+          "sm:hidden",
+          "cursor-pointer",
+          !@open? && "pointer-events-none",
+          "transition",
+          @open? && "bg-black/20 backdrop-blur",
+          "fixed",
+          "inset-0"
+        ]}
+      ></button>
+
+      <div class={[
+        @open? && "w-42",
+        !@open? && "w-12 -left-4",
+        "max-sm:fixed",
+        "max-sm:inset-0",
+        !@open? && "max-sm:-left-13",
+        "transition-[width] translition-[left] duration-200 ease-in-out",
+        "bg-base-300/50 backdrop-blur-lg",
+        "border-r border-base-100"
+      ]}>
+        <div class="p-2 py-4">
+          <.main_links {assigns} />
+        </div>
+
+        <% render_presences? = @presences.data |> length() > 0 %>
+
+        <.separator
+          :if={render_presences?}
+          class={[
+            @open? && "opacity-100",
+            !@open? && "opacity-0",
+            "transition"
+          ]}
+        />
 
         <div class={[
-          "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
-          "is-drawer-close:w-13 is-drawer-open:w-40",
-          "border-r border-base-100",
-          "max-sm:min-h-svh"
+          @open? && "opacity-100",
+          !@open? && "opacity-0",
+          "transition",
+          "pt-2 pb-4 pl-4 pr-4"
         ]}>
-          <!-- Sidebar content here -->
-          <div class="w-full">
-            <div class="p-2"><.main_links {assigns} /></div>
+          <.presences {assigns} />
+        </div>
 
-            <% render_presences? = @presences.data |> length() > 1 %>
+        <.separator class={[
+          @open? && "opacity-100",
+          !@open? && "opacity-0",
+          "transition"
+        ]} />
 
-            <.separator :if={render_presences?} />
-
-            <div :if={render_presences?} class="pt-2 pb-4 pl-4 pr-4">
-              <.presences {assigns} />
-            </div>
-
-            <.separator class="is-drawer-close:hidden" />
-
-            <div class={[
-              "mx-auto w-fit",
-              "p-2",
-              "is-drawer-close:hidden"
-            ]}>
-              <ThemeToggle.render />
-            </div>
-          </div>
+        <div class={[
+          @open? && "opacity-100",
+          !@open? && "opacity-0",
+          "transition",
+          "mx-auto w-fit",
+          "p-2"
+        ]}>
+          <ThemeToggle.render />
         </div>
       </div>
     </div>
     """
   end
+
 
   attr :class, :string, default: ""
 
@@ -73,11 +104,11 @@ defmodule LexWeb.Layouts.Drawer do
     ~H"""
     <ul class="grid gap-2">
       <% link_class = [
-        "is-drawer-close:tooltip",
-        "is-drawer-close:tooltip-right",
-        "is-drawer-close:aspect-square",
-        "is-drawer-close:justify-center",
-        "is-drawer-open:px-2",
+        !@open? && "tooltip",
+        !@open? && "tooltip-right",
+        !@open? && "aspect-square",
+        !@open? && "justify-center",
+        "px-2",
         "font-semibold",
         "flex items-center gap-2",
         "h-8 rounded",
@@ -96,7 +127,9 @@ defmodule LexWeb.Layouts.Drawer do
           data-tip="Dashboard"
         >
           <.icon name="hero-squares-2x2-solid" />
-          <span class="is-drawer-close:hidden">Dashboard</span>
+          <span :if={@open?}>
+            Dashboard
+          </span>
         </.link>
       </li>
 
@@ -111,7 +144,9 @@ defmodule LexWeb.Layouts.Drawer do
           data-tip="Wiki"
         >
           <.icon name="hero-book-open-mini" />
-          <span class="is-drawer-close:hidden">Wiki</span>
+          <span :if={@open?}>
+            Wiki
+          </span>
         </.link>
       </li>
     </ul>

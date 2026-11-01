@@ -12,11 +12,13 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Revisions
   alias LexWeb.PageLive.WikiLinkMap
   alias LexWeb.Presences
+  alias LexWeb.UI
 
   delegate(:editing, Editing, info: false)
   delegate(:revisions, Revisions, info: false)
   delegate(:wiki_link_map, WikiLinkMap, info: false)
   delegate(:presences, Presences, info: [:group])
+  delegate(:ui, UI)
 
   @impl true
   def mount(params, session, socket) do
@@ -116,6 +118,7 @@ defmodule LexWeb.PageLive do
       flash={@flash}
       presences={@presences}
       user={@collaborator}
+      ui={@ui}
     >
       <div class="text-base-content/50">
         <.link class="hover:text-base-content transition" navigate={~p"/wiki"}>Wiki</.link>
