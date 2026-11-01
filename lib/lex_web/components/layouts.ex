@@ -7,6 +7,7 @@ defmodule LexWeb.Layouts do
 
   alias LexWeb.Components.Avatar
   alias LexWeb.Presences
+  alias LexWeb.Layouts.Drawer
 
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
@@ -43,24 +44,27 @@ defmodule LexWeb.Layouts do
   def app(assigns) do
     ~H"""
     <div class="min-h-svh grid grid-rows-[auto_1fr]">
-      <.navbar user={@user} />
+      <% drawer_dom_id = "layout-drawer" %>
+      <.navbar user={@user} drawer_dom_id={drawer_dom_id} />
 
-      <.drawer {assigns} presences={@presences}>
+      <Drawer.render {assigns} presences={@presences} dom_id={drawer_dom_id}>
         <main>
           {render_slot(@inner_block)}
         </main>
-      </.drawer>
+      </Drawer.render>
     </div>
 
     <Toast.toast_group flash={@flash} connection_toasts={true} theme="system" rich_colors={false} />
     """
   end
 
+  attr :drawer_dom_id, :string, required: true
+
   def navbar(assigns) do
     ~H"""
-    <div class="bg-base-300 items-center flex px-3 py-2 gap-2 border-b border-base-100">
+    <div class="bg-base-300 items-center flex px-2 py-2 gap-3 border-b border-base-100">
       <label
-        for="my-drawer-4"
+        for={@drawer_dom_id}
         aria-label="open sidebar"
         class={[
           "hover:bg-base-100 transition",
@@ -72,109 +76,9 @@ defmodule LexWeb.Layouts do
         <.icon name="hero-bars-3-micro is-drawer-close:hidden" />
       </label>
 
-      <span class="grow">Navbar</span>
+      <span class="grow">Berlin hikers</span>
 
       <Avatar.render user={@user} />
-    </div>
-    """
-  end
-
-  def drawer(assigns) do
-    ~H"""
-    <% active_class = "bg-info text-white" %>
-
-    <div class="drawer sm:drawer-open">
-      <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" checked={false} />
-
-      <div class="drawer-content p-4 sm:px-8">
-        <!-- Page content here -->
-        {render_slot(@inner_block)}
-      </div>
-
-      <div class="drawer-side is-drawer-close:overflow-visible h-auto">
-        <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-
-        <div class={[
-          "flex min-h-full flex-col items-start bg-base-300/50 backdrop-blur",
-          "is-drawer-close:w-15 px-1 is-drawer-open:w-40 pr-3",
-          "border-r border-base-100",
-          "max-sm:min-h-svh",
-          "py-4"
-        ]}>
-          <!-- Sidebar content here -->
-
-          <ul class={[
-            "grid gap-2 w-full font-semibold",
-            "[&_a]:h-8",
-            "[&_li]:ml-2",
-            "[&_a]:is-drawer-close:aspect-square",
-            "[&_a]:is-drawer-open:px-2",
-            "[&_a]:flex",
-            "[&_a]:items-center",
-            "[&_a]:gap-2",
-            "[&_a]:is-drawer-close:justify-center",
-            "[&_a]:rounded",
-            "[&_a]:text-sm",
-            "pb-6"
-          ]}>
-            <li>
-              <.link
-                navigate={~p"/"}
-                class={[
-                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  @active == "dashboard" && active_class
-                ]}
-                data-tip="Dashboard"
-              >
-                <.icon name="hero-squares-2x2-solid" />
-                <span class="is-drawer-close:hidden">Dashboard</span>
-              </.link>
-            </li>
-            <li>
-              <.link
-                navigate={~p"/wiki/home"}
-                class={[
-                  "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  @active == "page" && active_class,
-                  @active == "wiki" && active_class
-                ]}
-                data-tip="Wiki"
-              >
-                <.icon name="hero-book-open-mini" />
-                <span class="is-drawer-close:hidden">Wiki</span>
-              </.link>
-            </li>
-          </ul>
-
-          <div
-            :if={@presences.data |> length() > 1}
-            class={[
-              "w-full",
-              "px-2",
-              "is-drawer-close:hidden",
-              "space-y-2",
-              "border-t py-6 border-base-content/20"
-            ]}
-          >
-            <h3 class="flex items-baseline justify-between">
-              <span class="small-caps tracking-wide">Online</span>
-              <span class="badge badge-xs">{@presences.data |> length()}</span>
-            </h3>
-
-            <div class="flex flex-wrap gap-1 w-31">
-              <Presences.render presences={@presences} />
-            </div>
-          </div>
-
-          <div class={[
-            "w-full flex justify-center",
-            "is-drawer-close:hidden",
-            "border-t py-6 border-base-content/20"
-          ]}>
-            <.theme_toggle />
-          </div>
-        </div>
-      </div>
     </div>
     """
   end
@@ -224,43 +128,6 @@ defmodule LexWeb.Layouts do
         {gettext("Attempting to reconnect")}
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
-    </div>
-    """
-  end
-
-  @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
-  """
-  def theme_toggle(assigns) do
-    ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 [[data-theme-source=system]_&]:!left-0 transition-[left]" />
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="light"
-      >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="dark"
-      >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
     </div>
     """
   end
