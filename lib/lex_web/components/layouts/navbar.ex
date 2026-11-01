@@ -19,6 +19,8 @@ defmodule LexWeb.Layouts.Navbar do
     """
   end
 
+  attr :drawer_open?, :boolean, required: true
+
   def toggle_button(assigns) do
     ~H"""
     <button
@@ -26,13 +28,31 @@ defmodule LexWeb.Layouts.Navbar do
       phx-click={delegate_event("toggle_drawer")}
       aria-label="open sidebar"
       class={[
+        "stacked",
         "hover:bg-base-100 transition",
         "cursor-pointer",
         "size-8 rounded",
         "flex items-center justify-center"
       ]}
     >
-      <.icon name="hero-bars-3-micro" class="size-5" />
+      <.icon
+        name="hero-bars-3-micro"
+        class={[
+          "size-5",
+          !@drawer_open? && "opacity-100",
+          @drawer_open? && "opacity-0",
+          "transition"
+        ]}
+      />
+      <.icon
+        name="hero-x-mark-micro"
+        class={[
+          "size-5",
+          @drawer_open? && "opacity-100",
+          !@drawer_open? && "opacity-0",
+          "transition"
+        ]}
+      />
     </button>
     """
   end
