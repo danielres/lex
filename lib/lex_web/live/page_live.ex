@@ -123,7 +123,7 @@ defmodule LexWeb.PageLive do
       </div>
       <div class={[
         "flex justify-between gap-4 mb-4",
-        "pb-2 border-b-2 border-base-content10"
+        "pb-2 border-b-2 border-base-content/10"
       ]}>
         <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 
