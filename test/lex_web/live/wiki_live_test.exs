@@ -9,35 +9,49 @@ defmodule LexWeb.WikiLiveTest do
     Page.ensure!("Home")
     Page.ensure!("Summer Activities")
 
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    assert has_element?(view, ~s|a[href="/wiki/home"]|, "Home")
-    assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
+    assert has_element?(view, ~s|a[href="/test-space/wiki/home"]|, "Home")
+
+    assert has_element?(
+             view,
+             ~s|a[href="/test-space/wiki/summer-activities"]|,
+             "Summer Activities"
+           )
   end
 
   test "updates a page link after the page is renamed", %{conn: conn} do
     page = Page.ensure!("Summer Activities")
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     Page.rename!(page, "Winter Activities")
 
-    assert has_element?(view, ~s|a[href="/wiki/winter-activities"]|, "Winter Activities")
-    refute has_element?(view, ~s|a[href="/wiki/summer-activities"]|)
+    assert has_element?(
+             view,
+             ~s|a[href="/test-space/wiki/winter-activities"]|,
+             "Winter Activities"
+           )
+
+    refute has_element?(view, ~s|a[href="/test-space/wiki/summer-activities"]|)
   end
 
   test "adds a page link after the page is created", %{conn: conn} do
     Page.ensure!("Home")
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     Page.ensure!("Summer Activities")
 
-    assert has_element?(view, ~s|a[href="/wiki/summer-activities"]|, "Summer Activities")
+    assert has_element?(
+             view,
+             ~s|a[href="/test-space/wiki/summer-activities"]|,
+             "Summer Activities"
+           )
   end
 
   test "sorts pages by a column and toggles its direction", %{conn: conn} do
     Page.ensure!("Winter Activities")
     Page.ensure!("Summer Activities")
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     assert has_element?(
              view,
@@ -62,7 +76,7 @@ defmodule LexWeb.WikiLiveTest do
   test "keeps the selected sort when pages change", %{conn: conn} do
     page = Page.ensure!("Summer Activities")
     Page.ensure!("Winter Activities")
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     view
     |> element("button[phx-value-sort-by=title]")
@@ -77,7 +91,7 @@ defmodule LexWeb.WikiLiveTest do
   test "sorts and refreshes pages by their latest document checkpoint", %{conn: conn} do
     first_page = Page.ensure!("First Page")
     Page.ensure!("Second Page")
-    {:ok, view, _html} = live(conn, ~p"/wiki")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     assert :ok = Page.set_checkpoint(first_page, "main", document("updated"))
 

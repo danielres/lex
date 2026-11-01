@@ -12,9 +12,9 @@ defmodule LexWeb.PageLive.WikiLinkMap do
     delegate_assign(socket, :pages, Page.list!())
   end
 
-  def encode(wiki_link_map) do
+  def encode(wiki_link_map, space) do
     wiki_link_map.pages
-    |> Enum.map(&page_reference/1)
+    |> Enum.map(&page_reference(&1, space))
     |> Jason.encode!()
   end
 
@@ -24,22 +24,28 @@ defmodule LexWeb.PageLive.WikiLinkMap do
   @impl true
   def handle_event("ensure", %{"title" => title}, socket) do
     case Page.ensure(title) do
-      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
-      {:error, error} -> {:reply, %{ok: false, error: Exception.message(error)}, socket}
+      {:ok, page} ->
+        {:reply, %{ok: true, page: page_reference(page, socket.assigns.space)}, socket}
+
+      {:error, error} ->
+        {:reply, %{ok: false, error: Exception.message(error)}, socket}
     end
   end
 
   def handle_event("resolve", %{"id" => id}, socket) do
     case Page.get(id) do
-      {:ok, page} -> {:reply, %{ok: true, page: page_reference(page)}, socket}
-      {:error, _error} -> {:reply, %{ok: false}, socket}
+      {:ok, page} ->
+        {:reply, %{ok: true, page: page_reference(page, socket.assigns.space)}, socket}
+
+      {:error, _error} ->
+        {:reply, %{ok: false}, socket}
     end
   end
 
-  defp page_reference(page) do
+  defp page_reference(page, space) do
     %{
       id: page.id,
-      path: ~p"/wiki/#{page.slug}",
+      path: ~p"/#{space.slug}/wiki/#{page.slug}",
       slug: page.slug,
       title: page.title
     }

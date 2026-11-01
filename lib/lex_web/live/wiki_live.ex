@@ -5,8 +5,10 @@ defmodule LexWeb.WikiLive do
   alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
+  alias LexWeb.Space
   alias LexWeb.UI
 
+  delegate(:space, Space)
   delegate(:ui, UI)
 
   @sort_fields %{
@@ -75,12 +77,16 @@ defmodule LexWeb.WikiLive do
       active="wiki"
       flash={@flash}
       socket={@socket}
+      space={@space}
       ui={@ui}
       user={@collaborator}
     >
       <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">
-          <.link navigate={~p"/wiki/home"} class="btn btn-info px-2 rounded-box">
+          <.link
+            navigate={~p"/#{@space.slug}/wiki/home"}
+            class="btn btn-info px-2 rounded-box"
+          >
             <.icon name="hero-home-micro" />
             <span>Home</span>
             <.icon name="hero-chevron-right-micro" />
@@ -133,7 +139,7 @@ defmodule LexWeb.WikiLive do
                       "hover:text-info",
                       "transition"
                     ]}
-                    navigate={~p"/wiki/#{page.slug}"}
+                    navigate={~p"/#{@space.slug}/wiki/#{page.slug}"}
                   >
                     {page.title}
                     <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />

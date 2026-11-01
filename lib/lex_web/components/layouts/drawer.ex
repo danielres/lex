@@ -8,6 +8,7 @@ defmodule LexWeb.Layouts.Drawer do
   attr :collaborator, :map, required: true
   attr :open?, :boolean, required: true
   attr :socket, :any, required: true
+  attr :space, :map, required: true
   slot :inner_block, required: true
 
   def render(assigns) do
@@ -118,10 +119,10 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/"}
+          navigate={~p"/#{@space.slug}"}
           class={[
             link_class,
-            @active == "dashboard" && active_class
+            @active == "space" && active_class
           ]}
           data-tip="Dashboard"
         >
@@ -134,7 +135,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/wiki/home"}
+          navigate={~p"/#{@space.slug}/wiki/home"}
           class={[
             link_class,
             @active == "page" && active_class,

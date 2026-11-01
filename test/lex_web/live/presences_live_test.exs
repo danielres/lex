@@ -4,7 +4,7 @@ defmodule LexWeb.PresencesLiveTest do
   import Phoenix.LiveViewTest
 
   test "renders the connected collaborator", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/test-space")
 
     assert has_element?(view, "[data-testid=presence]")
     assert has_element?(view, "[data-testid=presences-expanded-count]", "1")
@@ -12,13 +12,13 @@ defmodule LexWeb.PresencesLiveTest do
   end
 
   test "renders as a sticky child LiveView", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/test-space")
 
     assert has_element?(view, "[data-testid=presences-live][data-phx-sticky]")
   end
 
   test "collapsed presence control delegates to the parent drawer toggle", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/test-space")
 
     assert has_element?(
              view,

@@ -5,6 +5,7 @@ defmodule LexWeb.Layouts.Navbar do
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
+  attr :space, :map, required: true
   attr :user, :map, required: true
 
   def render(assigns) do
@@ -23,7 +24,7 @@ defmodule LexWeb.Layouts.Navbar do
       ]}>
         <.toggle_button {assigns} />
       </div>
-      <span class="grow max-sm:ml-12">Berlin hikers</span>
+      <span class="grow max-sm:ml-12">{@space.slug}</span>
       <Avatar.render user={@user} />
     </div>
     """

@@ -5,7 +5,7 @@ defmodule LexWeb.PageControllerTest do
     conn = get(conn, ~p"/")
     response = html_response(conn, 200)
 
-    assert response =~ "Hello"
+    assert response =~ "Home"
     refute response =~ ~s(data-document-id=)
   end
 end

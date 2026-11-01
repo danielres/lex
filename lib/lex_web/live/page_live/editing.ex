@@ -44,7 +44,10 @@ defmodule LexWeb.PageLive.Editing do
           socket
           |> delegate_assign(:checkpointing?, false)
           |> assign(:live_action, :show)
-          |> push_patch(replace: true, to: ~p"/wiki/#{socket.assigns.page.slug}")
+          |> push_patch(
+            replace: true,
+            to: ~p"/#{socket.assigns.space.slug}/wiki/#{socket.assigns.page.slug}"
+          )
 
         {:reply, %{ok: true, result: counts}, socket}
 

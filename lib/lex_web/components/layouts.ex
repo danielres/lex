@@ -36,6 +36,7 @@ defmodule LexWeb.Layouts do
 
   attr :active, :string, default: ""
   attr :socket, :any, required: true
+  attr :space, :map, required: true
   attr :user, :map, required: true
   attr :ui, :map, required: true
 
@@ -46,6 +47,7 @@ defmodule LexWeb.Layouts do
     <div class="h-full">
       <Navbar.render
         drawer_open?={@ui.drawer_open?}
+        space={@space}
         user={@user}
       />
 
@@ -54,6 +56,7 @@ defmodule LexWeb.Layouts do
         collaborator={@user}
         open?={@ui.drawer_open?}
         socket={@socket}
+        space={@space}
       >
         <main class="p-2 sm:p-8">
           {render_slot(@inner_block)}

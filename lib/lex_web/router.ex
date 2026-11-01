@@ -22,10 +22,14 @@ defmodule LexWeb.Router do
       on_mount: LexWeb.Collaborator,
       session: {LexWeb.Collaborator, :live_session, []} do
       live "/", HomeLive
-      live "/wiki", WikiLive
-      live "/wiki/:page_slug", PageLive, :show
-      live "/wiki/:page_slug/revisions", PageLive, :revisions
-      live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
+
+      scope "/:space_slug" do
+        live "/", SpaceLive
+        live "/wiki", WikiLive
+        live "/wiki/:page_slug", PageLive, :show
+        live "/wiki/:page_slug/revisions", PageLive, :revisions
+        live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
+      end
     end
 
     post "", AshTypescriptRpcController, :run

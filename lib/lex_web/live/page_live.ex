@@ -11,11 +11,13 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Revisions
   alias LexWeb.PageLive.WikiLinkMap
+  alias LexWeb.Space
   alias LexWeb.UI
 
   delegate(:editing, Editing, info: false)
   delegate(:revisions, Revisions, info: false)
   delegate(:wiki_link_map, WikiLinkMap, info: false)
+  delegate(:space, Space)
   delegate(:ui, UI)
 
   @impl true
@@ -115,11 +117,14 @@ defmodule LexWeb.PageLive do
       active="page"
       flash={@flash}
       socket={@socket}
+      space={@space}
       user={@collaborator}
       ui={@ui}
     >
       <div class="text-base-content/50">
-        <.link class="hover:text-base-content transition" navigate={~p"/wiki"}>Wiki</.link>
+        <.link class="hover:text-base-content transition" navigate={~p"/#{@space.slug}/wiki"}>
+          Wiki
+        </.link>
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
       <div class={[
@@ -129,7 +134,11 @@ defmodule LexWeb.PageLive do
         <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 
         <div class="flex gap-2">
-          <Revisions.ButtonToggle.render active?={@live_action == :revisions} page={@page} />
+          <Revisions.ButtonToggle.render
+            active?={@live_action == :revisions}
+            page={@page}
+            space={@space}
+          />
           <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
         </div>
       </div>
@@ -150,7 +159,7 @@ defmodule LexWeb.PageLive do
           data-document-id={@page.id}
           data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
           data-ensure-page-event={WikiLinkMap.ensure_event()}
-          data-pages={WikiLinkMap.encode(@wiki_link_map)}
+          data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
           data-resolve-page-event={WikiLinkMap.resolve_event()}
           data-restore-checkpoint-event={Revisions.checkpoint_event()}
           data-restore-preserve-event={Revisions.preserve_event()}
@@ -166,9 +175,10 @@ defmodule LexWeb.PageLive do
       <section :if={@live_action == :revisions} id="page-revisions" class="max-w-[80ch]">
         <Revisions.render
           collaborator={@collaborator}
-          data-pages={WikiLinkMap.encode(@wiki_link_map)}
+          data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
           page={@page}
           revisions={@revisions}
+          space={@space}
           wiki_link_map={@wiki_link_map}
         />
       </section>
@@ -183,14 +193,24 @@ defmodule LexWeb.PageLive do
   defp requested_revision_id(_socket), do: nil
 
   defp page_path(
-         %{assigns: %{live_action: :revisions, revisions: %{requested_id: revision_id}}},
+         %{
+           assigns: %{
+             live_action: :revisions,
+             revisions: %{requested_id: revision_id},
+             space: %{slug: space_slug}
+           }
+         },
          page
        )
        when revision_id != nil,
-       do: ~p"/wiki/#{page.slug}/revisions/#{revision_id}"
+       do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions/#{revision_id}"
 
-  defp page_path(%{assigns: %{live_action: :revisions}}, page),
-    do: ~p"/wiki/#{page.slug}/revisions"
+  defp page_path(
+         %{assigns: %{live_action: :revisions, space: %{slug: space_slug}}},
+         page
+       ),
+       do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions"
 
-  defp page_path(_socket, page), do: ~p"/wiki/#{page.slug}"
+  defp page_path(%{assigns: %{space: %{slug: space_slug}}}, page),
+    do: ~p"/#{space_slug}/wiki/#{page.slug}"
 end

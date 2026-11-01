@@ -14,15 +14,7 @@ defmodule LexWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    <Layouts.app
-      active="dashboard"
-      flash={@flash}
-      socket={@socket}
-      ui={@ui}
-      user={@collaborator}
-    >
-      Hello
-    </Layouts.app>
+    Home
     """
   end
 end
