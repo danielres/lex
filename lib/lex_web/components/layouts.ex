@@ -7,7 +7,6 @@ defmodule LexWeb.Layouts do
 
   alias LexWeb.Layouts.Drawer
   alias LexWeb.Layouts.Navbar
-  alias LexWeb.Presences
 
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
@@ -36,7 +35,7 @@ defmodule LexWeb.Layouts do
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   attr :active, :string, default: ""
-  attr :presences, :map, default: %{data: []}
+  attr :socket, :any, required: true
   attr :user, :map, required: true
   attr :ui, :map, required: true
 
@@ -52,8 +51,9 @@ defmodule LexWeb.Layouts do
 
       <Drawer.render
         {assigns}
+        collaborator={@user}
         open?={@ui.drawer_open?}
-        presences={@presences}
+        socket={@socket}
       >
         <main class="p-2 sm:p-8">
           {render_slot(@inner_block)}

@@ -11,13 +11,11 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Revisions
   alias LexWeb.PageLive.WikiLinkMap
-  alias LexWeb.Presences
   alias LexWeb.UI
 
   delegate(:editing, Editing, info: false)
   delegate(:revisions, Revisions, info: false)
   delegate(:wiki_link_map, WikiLinkMap, info: false)
-  delegate(:presences, Presences, info: [:group])
   delegate(:ui, UI)
 
   @impl true
@@ -116,7 +114,7 @@ defmodule LexWeb.PageLive do
     <Layouts.app
       active="page"
       flash={@flash}
-      presences={@presences}
+      socket={@socket}
       user={@collaborator}
       ui={@ui}
     >

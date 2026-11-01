@@ -1,21 +1,25 @@
 defmodule LexWeb.Layouts.Drawer do
   use LexWeb, :html
 
-  use LiveDelegate, path: [:ui]
-
-  alias LexWeb.Components.Avatar
   alias LexWeb.Layouts.ThemeToggle
-  alias LexWeb.Presences
+  alias LexWeb.PresencesLive
+  alias LexWeb.UI
 
-  attr :dom_id, :string, required: true
+  attr :collaborator, :map, required: true
   attr :open?, :boolean, required: true
+  attr :socket, :any, required: true
+  slot :inner_block, required: true
 
   def render(assigns) do
     ~H"""
-    <div class={[
-      "sm:grid sm:grid-cols-[auto_1fr]",
-      "h-full"
-    ]}>
+    <div
+      class={[
+        "sm:grid sm:grid-cols-[auto_1fr]",
+        "h-full"
+      ]}
+      data-drawer-open={to_string(@open?)}
+      data-testid="drawer"
+    >
       <div class="order-2">
         {render_slot(@inner_block)}
       </div>
@@ -38,44 +42,12 @@ defmodule LexWeb.Layouts.Drawer do
 
         <.separator />
 
-        <div class="stacked">
-          <div class={[
-            @open? && "opacity-100",
-            !@open? && "opacity-0 pointer-events-none",
-            "transition",
-            "pt-2 pb-4 pl-4 pr-4"
-          ]}>
-            <.presences {assigns} />
-          </div>
-
-          <div class={[
-            !@open? && "opacity-100",
-            @open? && "opacity-0 pointer-events-none",
-            "transition",
-            "p-4"
-          ]}>
-            <% count = @presences.data |> length() %>
-
-            <button
-              type="button"
-              phx-click={delegate_event("toggle_drawer")}
-              class={[
-                "indicator",
-                "tooltip tooltip-right",
-                "cursor-pointer"
-              ]}
-              data-tip={"#{count} members online"}
-            >
-              <span class={[
-                "indicator-item",
-                "badge badge-xs px-0.5",
-                count > 1 && "badge-accent",
-                "font-semibold"
-              ]}>{count}</span>
-              <.icon name="hero-users-micro" />
-            </button>
-          </div>
-        </div>
+        {live_render(@socket, PresencesLive,
+          container: {:div, class: "stacked", data: [testid: "presences-live"]},
+          id: "app-presences",
+          session: %{"collaborator" => @collaborator},
+          sticky: true
+        )}
 
         <.separator class={[
           @open? && "opacity-100",
@@ -101,7 +73,7 @@ defmodule LexWeb.Layouts.Drawer do
     ~H"""
     <button
       type="button"
-      phx-click={delegate_event("toggle_drawer")}
+      phx-click={UI.toggle_drawer_event()}
       aria-label="open sidebar"
       class={[
         "sm:hidden",
@@ -116,7 +88,7 @@ defmodule LexWeb.Layouts.Drawer do
     """
   end
 
-  attr :class, :string, default: ""
+  attr :class, :any, default: nil
 
   defp separator(assigns) do
     ~H"""
@@ -177,24 +149,6 @@ defmodule LexWeb.Layouts.Drawer do
         </.link>
       </li>
     </ul>
-    """
-  end
-
-  defp presences(assigns) do
-    ~H"""
-    <div class={[
-      "is-drawer-close:hidden",
-      "space-y-2"
-    ]}>
-      <h3 class="flex items-baseline justify-between">
-        <span class="small-caps tracking-wide">Online now</span>
-        <span class="badge badge-xs">{@presences.data |> length()}</span>
-      </h3>
-
-      <div class="flex flex-wrap gap-1 w-31">
-        <Presences.render presences={@presences} />
-      </div>
-    </div>
     """
   end
 end

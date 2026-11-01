@@ -5,10 +5,8 @@ defmodule LexWeb.WikiLive do
   alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
-  alias LexWeb.Presences
   alias LexWeb.UI
 
-  delegate(:presences, Presences, info: [:group])
   delegate(:ui, UI)
 
   @sort_fields %{
@@ -76,7 +74,7 @@ defmodule LexWeb.WikiLive do
     <Layouts.app
       active="wiki"
       flash={@flash}
-      presences={@presences}
+      socket={@socket}
       ui={@ui}
       user={@collaborator}
     >

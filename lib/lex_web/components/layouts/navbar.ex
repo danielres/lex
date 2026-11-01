@@ -1,13 +1,11 @@
 defmodule LexWeb.Layouts.Navbar do
   use LexWeb, :html
 
-  use LiveDelegate, path: [:ui]
-
   alias LexWeb.Components.Avatar
-  alias LexWeb.Layouts.ThemeToggle
-  alias LexWeb.Presences
+  alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
+  attr :user, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -39,8 +37,10 @@ defmodule LexWeb.Layouts.Navbar do
       @drawer_open? && "max-sm:hidden"
     ]}>
       <button
+        data-testid="drawer-toggle"
+        id="drawer-toggle"
         type="button"
-        phx-click={delegate_event("toggle_drawer")}
+        phx-click={UI.toggle_drawer_event()}
         aria-label="open sidebar"
         class={[
           "stacked",
