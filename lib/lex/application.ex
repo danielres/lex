@@ -8,6 +8,7 @@ defmodule Lex.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Group, name: :lex},
       LexWeb.Telemetry,
       Lex.Repo,
       {Ecto.Migrator, repos: Application.fetch_env!(:lex, :ecto_repos), skip: skip_migrations?()},
