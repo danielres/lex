@@ -49,7 +49,6 @@ defmodule Lex.MixProject do
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:ash_typescript, "~> 0.19"},
       {:usage_rules, "~> 1.0", only: [:dev]},
-      {:tidewave, "~> 0.9", only: [:dev]},
       {:live_debugger, "~> 1.0", only: [:dev]},
       {:ash_admin, "~> 1.0"},
       {:ash_sqlite, "~> 0.2"},
