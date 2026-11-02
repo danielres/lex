@@ -2,6 +2,7 @@ defmodule LexWeb.PresencesLive do
   use LexWeb, :live_view
 
   alias LexWeb.Components.Avatar
+  alias LexWeb.Components.Tooltip
 
   @room_key "DEFAULT_TEMP_ROOM"
 
@@ -50,7 +51,10 @@ defmodule LexWeb.PresencesLive do
           data-testid="presence"
           id={"presence-#{presence.display_name}"}
         >
-          <Avatar.render user={presence} />
+          <Tooltip.render alignment="start">
+            <Avatar.render user={presence} />
+            <:tooltip>{presence.display_name}</:tooltip>
+          </Tooltip.render>
         </div>
       </div>
     </div>

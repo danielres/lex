@@ -2,6 +2,7 @@ defmodule LexWeb.Layouts.Navbar do
   use LexWeb, :html
 
   alias LexWeb.Components.Avatar
+  alias LexWeb.Components.Tooltip
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
@@ -18,7 +19,11 @@ defmodule LexWeb.Layouts.Navbar do
     ]}>
       <.toggle_button {assigns} />
       <span class="grow">{@space.slug}</span>
-      <Avatar.render user={@user} />
+
+      <Tooltip.render alignment="end">
+        <Avatar.render user={@user} />
+        <:tooltip>{@user.display_name}</:tooltip>
+      </Tooltip.render>
     </div>
     """
   end
