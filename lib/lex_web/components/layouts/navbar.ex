@@ -18,7 +18,14 @@ defmodule LexWeb.Layouts.Navbar do
       "border-b border-base-content/20"
     ]}>
       <.toggle_button {assigns} />
-      <span class="grow">{@space.slug}</span>
+      <div class="grow">
+        <.link
+          navigate={~p"/#{@space.slug}"}
+          class="opacity-80 hover:opacity-100 transition cursor-pointer"
+        >
+          {@space.slug}
+        </.link>
+      </div>
 
       <Tooltip.render alignment="end">
         <Avatar.render user={@user} />
