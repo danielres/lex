@@ -25,7 +25,7 @@ config :ash_typescript,
   valibot_schema_suffix: "ValibotSchema",
   phoenix_import_path: "phoenix"
 
-config :lex, Lex.Repo, timeout: 15_000, busy_timeout: 16_000
+config :lex, Lex.Repo, timeout: 15_000
 
 # These enable behaviors that will become the default in the next major
 # version of Ash. Setting them now opts your application into the new

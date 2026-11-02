@@ -9,10 +9,10 @@ defmodule Lex.Wiki.Page do
 
   use Ash.Resource,
     domain: Lex.Wiki,
-    data_layer: AshSqlite.DataLayer,
+    data_layer: AshPostgres.DataLayer,
     notifiers: [Ash.Notifier.PubSub]
 
-  sqlite do
+  postgres do
     table "pages"
     repo Lex.Repo
   end
@@ -73,7 +73,7 @@ defmodule Lex.Wiki.Page do
               :utc_datetime_usec,
               expr(
                 fragment(
-                  "MAX(?, COALESCE((SELECT MAX(updated_at) FROM page_documents WHERE page_id = ?), ?))",
+                  "GREATEST(?, COALESCE((SELECT MAX(updated_at) FROM page_documents WHERE page_id = ?), ?))",
                   updated_at,
                   id,
                   updated_at

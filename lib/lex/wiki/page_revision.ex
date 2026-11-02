@@ -3,10 +3,10 @@ defmodule Lex.Wiki.PageRevision do
 
   use Ash.Resource,
     domain: Lex.Wiki,
-    data_layer: AshSqlite.DataLayer,
+    data_layer: AshPostgres.DataLayer,
     notifiers: [Ash.Notifier.PubSub]
 
-  sqlite do
+  postgres do
     table "page_revisions"
     repo Lex.Repo
   end

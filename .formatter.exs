@@ -2,7 +2,7 @@
   import_deps: [
     :ash_typescript,
     :ash_admin,
-    :ash_sqlite,
+    :ash_postgres,
     :ash_phoenix,
     :ash,
     :reactor,

@@ -1,10 +1,10 @@
 defmodule Lex.Repo do
-  use AshSqlite.Repo,
+  use AshPostgres.Repo,
     otp_app: :lex
 
-  # Let Ash wrap write actions in a transaction, so a multi-step action
-  # rolls back as a unit. Requires a non-zero `busy_timeout`, which the
-  # driver sets by default.
   @impl true
-  def write_transactions?, do: true
+  def installed_extensions, do: ["ash-functions"]
+
+  @impl true
+  def min_pg_version, do: %Version{major: 17, minor: 9, patch: 0}
 end
