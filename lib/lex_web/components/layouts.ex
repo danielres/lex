@@ -45,11 +45,20 @@ defmodule LexWeb.Layouts do
   def app(assigns) do
     ~H"""
     <div class="h-full">
-      <Navbar.render
-        drawer_open?={@ui.drawer_open?}
-        space={@space}
-        user={@user}
-      />
+      <div class={[
+        "max-sm:fixed",
+        "max-sm:top-0",
+        "max-sm:w-full",
+        "max-sm:z-40",
+        "max-sm:transition",
+        @ui.drawer_open? && "max-sm:opacity-0"
+      ]}>
+        <Navbar.render
+          drawer_open?={@ui.drawer_open?}
+          space={@space}
+          user={@user}
+        />
+      </div>
 
       <Drawer.render
         {assigns}

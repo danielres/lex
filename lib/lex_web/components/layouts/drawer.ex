@@ -21,13 +21,14 @@ defmodule LexWeb.Layouts.Drawer do
       data-drawer-open={to_string(@open?)}
       data-testid="drawer"
     >
-      <div class="order-2">
+      <div class="order-2 max-sm:mt-14">
         {render_slot(@inner_block)}
       </div>
 
       <.backdrop open?={@open?} />
 
       <div class={[
+        "max-sm:z-50",
         @open? && "w-42",
         !@open? && "w-12 overflow-hidden",
         "max-sm:fixed",
@@ -81,7 +82,7 @@ defmodule LexWeb.Layouts.Drawer do
         "cursor-pointer",
         !@open? && "pointer-events-none",
         "transition",
-        @open? && "bg-black/20 backdrop-blur",
+        @open? && "bg-base-200/50 Xbackdrop-blur-xs",
         "fixed",
         "inset-0"
       ]}

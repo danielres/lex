@@ -16,15 +16,8 @@ defmodule LexWeb.Layouts.Navbar do
       "flex items-center gap-3",
       "border-b border-base-100"
     ]}>
-      <div class={[
-        "max-sm:fixed",
-        "top-1",
-        "left-1",
-        "z-50"
-      ]}>
-        <.toggle_button {assigns} />
-      </div>
-      <span class="grow max-sm:ml-12">{@space.slug}</span>
+      <.toggle_button {assigns} />
+      <span class="grow">{@space.slug}</span>
       <Avatar.render user={@user} />
     </div>
     """
