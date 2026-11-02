@@ -76,16 +76,21 @@ defmodule Lex.Wiki.PageTest do
     end
   end
 
-  describe "open/1" do
-    test "creates a titled page for a valid route slug" do
-      page = Page.open!("summer-activities")
+  describe "fetch_by_slug/1" do
+    test "returns nil for a valid slug that does not exist" do
+      assert {:ok, nil} = Page.fetch_by_slug("summer-activities")
+      assert Ash.read!(Page) == []
+    end
 
-      assert page.title == "Summer Activities"
-      assert page.slug == "summer-activities"
+    test "returns an existing page" do
+      page = Page.ensure!("Summer Activities")
+
+      assert {:ok, fetched_page} = Page.fetch_by_slug("summer-activities")
+      assert fetched_page.id == page.id
     end
 
     test "rejects invalid route slugs" do
-      assert {:error, _error} = Page.open("Summer Activities")
+      assert {:error, _error} = Page.fetch_by_slug("Summer Activities")
     end
   end
 

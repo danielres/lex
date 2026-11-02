@@ -8,12 +8,14 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
+  alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Revisions
   alias LexWeb.PageLive.WikiLinkMap
   alias LexWeb.Space
   alias LexWeb.UI
 
+  delegate(:creation, Creation, info: false)
   delegate(:editing, Editing, info: false)
   delegate(:revisions, Revisions, info: false)
   delegate(:wiki_link_map, WikiLinkMap, info: false)
@@ -29,16 +31,15 @@ defmodule LexWeb.PageLive do
 
   @impl true
   def handle_params(%{"page_slug" => slug} = params, _uri, socket) do
-    case Page.open(slug) do
-      {:ok, page} ->
-        socket =
-          socket
-          |> assign(page: page)
-          |> Editing.reload(page)
-          |> Revisions.reload(page, params["revision_id"])
-          |> WikiLinkMap.reload()
+    case Page.fetch_by_slug(slug) do
+      {:ok, nil} ->
+        {:noreply,
+         socket
+         |> assign(page: nil)
+         |> Creation.reload(slug)}
 
-        {:noreply, socket}
+      {:ok, page} ->
+        {:noreply, load_page(socket, page, params["revision_id"])}
 
       {:error, %Error.Invalid{}} ->
         raise NotFound, resource: Page, primary_key: %{slug: slug}
@@ -62,21 +63,28 @@ defmodule LexWeb.PageLive do
         socket
       ) do
     socket =
-      if revision.page_id == socket.assigns.page.id do
-        Revisions.reload(socket, socket.assigns.page, requested_revision_id(socket))
-        |> Toast.put_toast(:success, "Page saved", duration: 3000)
-      else
-        socket
+      case socket.assigns.page do
+        %{id: page_id} = page when revision.page_id == page_id ->
+          Revisions.reload(socket, page, requested_revision_id(socket))
+          |> Toast.put_toast(:success, "Page saved", duration: 3000)
+
+        _page ->
+          socket
       end
 
     {:noreply, socket}
   end
 
   def handle_info(
-        %Notification{resource: Page, action: %{name: :create}},
+        %Notification{resource: Page, action: %{name: :create}, data: created_page},
         socket
       ) do
-    socket = WikiLinkMap.reload(socket)
+    socket =
+      if socket.assigns.page == nil and created_page.slug == socket.assigns.creation.slug do
+        load_page(socket, created_page, nil)
+      else
+        WikiLinkMap.reload(socket)
+      end
 
     {:noreply, socket}
   end
@@ -90,7 +98,7 @@ defmodule LexWeb.PageLive do
     live_action = socket.assigns.live_action
     socket = WikiLinkMap.reload(socket)
 
-    if current_page.id == renamed_page.id do
+    if current_page != nil and current_page.id == renamed_page.id do
       socket =
         socket
         |> assign(page: renamed_page)
@@ -123,7 +131,7 @@ defmodule LexWeb.PageLive do
       editing?={@live_action == :editing}
     >
       <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
-        <div class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
+        <div :if={@page} class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
           <Revisions.ButtonToggle.render
             active?={@live_action == :revisions}
             page={@page}
@@ -133,14 +141,16 @@ defmodule LexWeb.PageLive do
         </div>
       </div>
 
-      <div class="text-base-content/50">
+      <div :if={@page != nil} class="text-base-content/50">
         <.link class="hover:text-base-content transition" navigate={~p"/#{@space.slug}/wiki"}>
           Wiki
         </.link>
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
 
-      <div class="min-w-0">
+      <Creation.render :if={@page == nil} creation={@creation} />
+
+      <div :if={@page} class="min-w-0">
         <div class="mb-4 pb-2 border-b-2 border-base-content/10">
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
         </div>
@@ -198,6 +208,14 @@ defmodule LexWeb.PageLive do
   end
 
   defp requested_revision_id(_socket), do: nil
+
+  defp load_page(socket, page, revision_id) do
+    socket
+    |> assign(page: page)
+    |> Editing.reload(page)
+    |> Revisions.reload(page, revision_id)
+    |> WikiLinkMap.reload()
+  end
 
   defp page_path(
          %{

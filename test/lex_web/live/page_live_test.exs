@@ -9,18 +9,43 @@ defmodule LexWeb.PageLiveTest do
   alias Lex.Wiki.PageRevision
   alias Yex.Sync.SharedDoc
 
-  test "a direct visit creates the page and binds the editor to its id", %{conn: conn} do
-    {:ok, _view, html} = live(conn, ~p"/test-space/wiki/home")
-    [page] = Ash.read!(Page)
+  test "a direct visit offers to create a missing page with a title", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/new-page")
 
-    assert html =~ ~s(data-document-id="#{page.id}")
-    assert html =~ ~s(id="lexical-editor-#{page.id}")
-    assert html =~ ~r/data-collaborator-display-name="[^"]+"/
-    assert html =~ ~r/data-collaborator-hue="\d+"/
-    assert page.title == "Home"
+    assert has_element?(view, "[data-testid='missing-page']", "This page doesn’t exist")
+    assert has_element?(view, "[data-testid='page-creation-form']")
+    assert has_element?(view, "[data-testid='page-creation-form'] input[value='New Page']")
+    assert has_element?(view, "[data-testid='page-slug-preview']", "wiki/new-page")
+    assert Ash.read!(Page) == []
+
+    view
+    |> form("[data-testid='page-creation-form']", page: %{title: "Different Page"})
+    |> render_change()
+
+    assert has_element?(view, "[data-testid='page-slug-preview']", "wiki/different-page")
+
+    view
+    |> form("[data-testid='page-creation-form']", page: %{title: ""})
+    |> render_change()
+
+    refute has_element?(view, "[data-testid='page-slug-preview']")
+
+    view
+    |> form("[data-testid='page-creation-form']", page: %{title: "No"})
+    |> render_change()
+
+    refute has_element?(view, "[data-testid='page-slug-preview']")
+
+    view
+    |> form("[data-testid='page-creation-form']", page: %{title: "A Better Title"})
+    |> render_submit()
+
+    assert_redirect(view, ~p"/test-space/wiki/a-better-title")
+    assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page)
   end
 
   test "preloads page references and creates missing link targets", %{conn: conn} do
+    Page.ensure!("Home")
     Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
@@ -32,7 +57,19 @@ defmodule LexWeb.PageLiveTest do
     assert Page.list!() |> Enum.any?(&(&1.title == "Winter Plans"))
   end
 
+  test "opens a missing page when it is created by another viewer", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/new-page")
+
+    assert has_element?(view, "[data-testid='missing-page']")
+
+    page = Page.ensure!("New Page")
+
+    assert has_element?(view, "[phx-hook='LexicalEditor'][data-document-id='#{page.id}']")
+    refute has_element?(view, "[data-testid='missing-page']")
+  end
+
   test "revisiting a slug reuses its page id", %{conn: conn} do
+    Page.ensure!("Summer Activities")
     {:ok, _view, first_html} = live(conn, ~p"/test-space/wiki/summer-activities")
     [page] = Ash.read!(Page)
 
@@ -44,6 +81,8 @@ defmodule LexWeb.PageLiveTest do
   end
 
   test "different slugs use different collaboration document ids", %{conn: conn} do
+    Page.ensure!("Home")
+    Page.ensure!("Summer Activities")
     {:ok, _view, home_html} = live(conn, ~p"/test-space/wiki/home")
     {:ok, _view, summer_html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
 
@@ -64,6 +103,7 @@ defmodule LexWeb.PageLiveTest do
   end
 
   test "the lock button toggles whether the editor is editable", %{conn: conn} do
+    Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
     [page] = Ash.read!(Page)
     {:ok, shared_doc} = Collaboration.open_document("#{page.id}/main")
@@ -104,6 +144,7 @@ defmodule LexWeb.PageLiveTest do
   end
 
   test "restores edit mode when checkpointing fails", %{conn: conn} do
+    Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     enable_editing(view)
@@ -242,6 +283,7 @@ defmodule LexWeb.PageLiveTest do
   end
 
   test "does not offer title editing for the home page", %{conn: conn} do
+    Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     enable_editing(view)

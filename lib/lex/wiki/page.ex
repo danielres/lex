@@ -31,7 +31,9 @@ defmodule Lex.Wiki.Page do
     end
 
     create :create do
-      accept [:title, :slug]
+      accept [:title]
+
+      change SetTitleAndSlug
     end
 
     update :rename do
@@ -99,22 +101,16 @@ defmodule Lex.Wiki.Page do
 
   def ensure!(title), do: unwrap_or_raise!(ensure(title))
 
-  def open(slug) do
+  def fetch_by_slug(slug) do
     with true <- PageSlug.valid?(slug),
          {:ok, slug} <- Ash.Type.cast_input(PageSlug, slug) do
-      case get_by_slug(slug) do
-        {:ok, nil} -> ensure(PageTitle.from_slug(slug))
-        {:ok, page} -> {:ok, page}
-        {:error, error} -> {:error, error}
-      end
+      get_by_slug(slug)
     else
       false -> invalid_attribute(:slug, slug, "is not a valid page slug")
       :error -> invalid_attribute(:slug, slug, "is not a valid page slug")
       {:error, error} -> {:error, error}
     end
   end
-
-  def open!(slug), do: unwrap_or_raise!(open(slug))
 
   def subscribe do
     Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
@@ -218,7 +214,7 @@ defmodule Lex.Wiki.Page do
 
   defp create_page(title, slug) do
     __MODULE__
-    |> Ash.Changeset.for_create(:create, %{title: title, slug: slug})
+    |> Ash.Changeset.for_create(:create, %{title: title})
     |> Ash.create()
     |> recover_concurrent_create(title, slug)
   end
