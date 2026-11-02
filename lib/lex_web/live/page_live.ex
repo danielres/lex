@@ -127,61 +127,63 @@ defmodule LexWeb.PageLive do
         </.link>
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
-      <div class={[
-        "flex justify-between gap-4 mb-4",
-        "pb-2 border-b-2 border-base-content/10"
-      ]}>
-        <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
 
-        <div class="flex gap-2">
-          <Revisions.ButtonToggle.render
-            active?={@live_action == :revisions}
-            page={@page}
-            space={@space}
-          />
-          <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
+      <div>
+        <div class="sticky top-14 sm:top-2 z-30 flex justify-end">
+          <div class="flex gap-2 bg-base-200 p-1 rounded-box">
+            <Revisions.ButtonToggle.render
+              active?={@live_action == :revisions}
+              page={@page}
+              space={@space}
+            />
+            <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
+          </div>
         </div>
-      </div>
 
-      <div
-        class={[
-          @live_action == :revisions && "hidden",
-          @live_action != :editing && "mt-12",
-          "max-w-[90ch]"
-        ]}
-        id="current-page-editor"
-      >
+        <div class="mb-4 pb-2 border-b-2 border-base-content/10">
+          <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
+        </div>
+
         <div
-          class="lexical-playground"
-          data-checkpoint-event={Editing.checkpoint_event()}
-          data-collaborator-display-name={@collaborator.display_name}
-          data-collaborator-hue={@collaborator.hue}
-          data-document-id={@page.id}
-          data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
-          data-ensure-page-event={WikiLinkMap.ensure_event()}
-          data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
-          data-resolve-page-event={WikiLinkMap.resolve_event()}
-          data-restore-checkpoint-event={Revisions.checkpoint_event()}
-          data-restore-preserve-event={Revisions.preserve_event()}
-          data-restore-request-event={Revisions.restore_request_event()}
-          data-snapshot-request-event={Editing.snapshot_request_event()}
-          id={"lexical-editor-#{@page.id}"}
-          phx-hook="LexicalEditor"
-          phx-update="ignore"
+          class={[
+            @live_action == :revisions && "hidden",
+            @live_action != :editing && "mt-12",
+            "max-w-[90ch]"
+          ]}
+          id="current-page-editor"
         >
+          <div
+            class="lexical-playground"
+            data-checkpoint-event={Editing.checkpoint_event()}
+            data-collaborator-display-name={@collaborator.display_name}
+            data-collaborator-hue={@collaborator.hue}
+            data-document-id={@page.id}
+            data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
+            data-ensure-page-event={WikiLinkMap.ensure_event()}
+            data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
+            data-resolve-page-event={WikiLinkMap.resolve_event()}
+            data-restore-checkpoint-event={Revisions.checkpoint_event()}
+            data-restore-preserve-event={Revisions.preserve_event()}
+            data-restore-request-event={Revisions.restore_request_event()}
+            data-snapshot-request-event={Editing.snapshot_request_event()}
+            id={"lexical-editor-#{@page.id}"}
+            phx-hook="LexicalEditor"
+            phx-update="ignore"
+          >
+          </div>
         </div>
-      </div>
 
-      <section :if={@live_action == :revisions} id="page-revisions" class="max-w-[80ch]">
-        <Revisions.render
-          collaborator={@collaborator}
-          data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
-          page={@page}
-          revisions={@revisions}
-          space={@space}
-          wiki_link_map={@wiki_link_map}
-        />
-      </section>
+        <section :if={@live_action == :revisions} id="page-revisions" class="max-w-[80ch]">
+          <Revisions.render
+            collaborator={@collaborator}
+            data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
+            page={@page}
+            revisions={@revisions}
+            space={@space}
+            wiki_link_map={@wiki_link_map}
+          />
+        </section>
+      </div>
     </Layouts.app>
     """
   end
