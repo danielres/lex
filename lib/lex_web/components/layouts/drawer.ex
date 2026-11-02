@@ -36,7 +36,7 @@ defmodule LexWeb.Layouts.Drawer do
         !@open? && "max-sm:-left-13",
         "transition-[width] translition-[left] duration-200 ease-in-out",
         "bg-base-300/50 backdrop-blur-lg",
-        "border-r border-base-100"
+        "border-r border-base-content/20"
       ]}>
         <div class="p-2 py-4">
           <.main_links {assigns} />
