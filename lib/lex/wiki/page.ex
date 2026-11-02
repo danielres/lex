@@ -70,6 +70,13 @@ defmodule Lex.Wiki.Page do
     update_timestamp :updated_at
   end
 
+  relationships do
+    belongs_to :space, Lex.Accounts.Space do
+      destination_attribute :id
+      allow_nil? false
+    end
+  end
+
   calculations do
     calculate :last_updated_at,
               :utc_datetime_usec,
