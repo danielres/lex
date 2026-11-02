@@ -105,8 +105,6 @@ defmodule LexWeb.Layouts.Drawer do
     ~H"""
     <ul class="grid gap-2">
       <% link_class = [
-        !@open? && "tooltip",
-        !@open? && "tooltip-right",
         !@open? && "aspect-square",
         !@open? && "justify-center",
         "px-2",
@@ -125,12 +123,9 @@ defmodule LexWeb.Layouts.Drawer do
             link_class,
             @active == "space" && active_class
           ]}
-          data-tip="Dashboard"
         >
           <.icon name="hero-squares-2x2-solid" />
-          <span :if={@open?}>
-            Dashboard
-          </span>
+          <span :if={@open?}>Dashboard</span>
         </.link>
       </li>
 
@@ -142,12 +137,9 @@ defmodule LexWeb.Layouts.Drawer do
             @active == "page" && active_class,
             @active == "wiki" && active_class
           ]}
-          data-tip="Wiki"
         >
           <.icon name="hero-book-open-mini" />
-          <span :if={@open?}>
-            Wiki
-          </span>
+          <span :if={@open?}>Wiki</span>
         </.link>
       </li>
     </ul>
