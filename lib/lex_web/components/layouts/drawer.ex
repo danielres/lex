@@ -82,9 +82,10 @@ defmodule LexWeb.Layouts.Drawer do
         "cursor-pointer",
         !@open? && "pointer-events-none",
         "transition",
-        @open? && "bg-base-200/50 Xbackdrop-blur-xs",
+        @open? && "bg-base-200/50",
         "fixed",
-        "inset-0"
+        "inset-0",
+        "z-40"
       ]}
     ></button>
     """
