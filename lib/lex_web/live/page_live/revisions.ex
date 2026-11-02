@@ -135,7 +135,7 @@ defmodule LexWeb.PageLive.Revisions do
       :if={@revisions.selected}
       class={[
         "flex items-center justify-between gap-3 mb-8",
-        "bg-base-300 px-4 py-2 rounded-box border-2 border-base-100 shadow"
+        "bg-info/25 px-4 py-2 rounded-box border-2 border-info/20 shadow"
       ]}
     >
       <div>
