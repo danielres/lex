@@ -121,6 +121,17 @@ defmodule LexWeb.PageLive do
       user={@collaborator}
       ui={@ui}
     >
+      <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
+        <div class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
+          <Revisions.ButtonToggle.render
+            active?={@live_action == :revisions}
+            page={@page}
+            space={@space}
+          />
+          <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
+        </div>
+      </div>
+
       <div class="text-base-content/50">
         <.link class="hover:text-base-content transition" navigate={~p"/#{@space.slug}/wiki"}>
           Wiki
@@ -129,17 +140,6 @@ defmodule LexWeb.PageLive do
       </div>
 
       <div>
-        <div class="sticky top-14 sm:top-2 z-30 flex justify-end">
-          <div class="flex gap-2 bg-base-200 p-1 rounded-box">
-            <Revisions.ButtonToggle.render
-              active?={@live_action == :revisions}
-              page={@page}
-              space={@space}
-            />
-            <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
-          </div>
-        </div>
-
         <div class="mb-4 pb-2 border-b-2 border-base-content/10">
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
         </div>

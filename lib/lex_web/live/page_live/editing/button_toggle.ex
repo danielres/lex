@@ -8,7 +8,7 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
       aria-label={button_label(@live_action, @editing.checkpointing?)}
       aria-pressed={@live_action == :editing}
       class={[
-        "btn btn-square rounded-box",
+        "btn btn-sm btn-circle btn-neutral hover:btn-info",
         @live_action == :editing && "btn-info"
       ]}
       disabled={@editing.checkpointing?}
