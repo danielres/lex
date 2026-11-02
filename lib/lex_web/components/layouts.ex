@@ -35,6 +35,7 @@ defmodule LexWeb.Layouts do
     doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   attr :active, :string, default: ""
+  attr :editing?, :boolean, default: false
   attr :socket, :any, required: true
   attr :space, :map, required: true
   attr :user, :map, required: true
@@ -51,7 +52,8 @@ defmodule LexWeb.Layouts do
         "max-sm:w-full",
         "max-sm:z-40",
         "max-sm:transition",
-        @ui.drawer_open? && "max-sm:opacity-0"
+        @ui.drawer_open? && "max-sm:opacity-0",
+        @editing? && "max-sm:opacity-0"
       ]}>
         <Navbar.render
           drawer_open?={@ui.drawer_open?}

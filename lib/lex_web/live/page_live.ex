@@ -120,6 +120,7 @@ defmodule LexWeb.PageLive do
       space={@space}
       user={@collaborator}
       ui={@ui}
+      editing?={@live_action == :editing}
     >
       <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
         <div class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
