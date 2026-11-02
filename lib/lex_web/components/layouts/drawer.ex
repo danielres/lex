@@ -15,13 +15,13 @@ defmodule LexWeb.Layouts.Drawer do
     ~H"""
     <div
       class={[
-        "sm:grid sm:grid-cols-[auto_1fr]",
+        "sm:grid sm:grid-cols-[auto_minmax(0,1fr)]",
         "h-full"
       ]}
       data-drawer-open={to_string(@open?)}
       data-testid="drawer"
     >
-      <div class="order-2 max-sm:mt-14">
+      <div class="order-2 min-w-0 max-sm:mt-14">
         {render_slot(@inner_block)}
       </div>
 

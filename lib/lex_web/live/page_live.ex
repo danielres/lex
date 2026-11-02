@@ -139,7 +139,7 @@ defmodule LexWeb.PageLive do
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
 
-      <div>
+      <div class="min-w-0">
         <div class="mb-4 pb-2 border-b-2 border-base-content/10">
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
         </div>
@@ -148,7 +148,7 @@ defmodule LexWeb.PageLive do
           class={[
             @live_action == :revisions && "hidden",
             @live_action != :editing && "mt-12",
-            "max-w-[90ch]"
+            "min-w-0 max-w-[90ch]"
           ]}
           id="current-page-editor"
         >
@@ -173,7 +173,11 @@ defmodule LexWeb.PageLive do
           </div>
         </div>
 
-        <section :if={@live_action == :revisions} id="page-revisions" class="max-w-[80ch]">
+        <section
+          :if={@live_action == :revisions}
+          class="w-full min-w-0 max-w-[80ch]"
+          id="page-revisions"
+        >
           <Revisions.render
             collaborator={@collaborator}
             data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}

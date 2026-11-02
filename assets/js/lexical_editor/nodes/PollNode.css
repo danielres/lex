@@ -11,8 +11,10 @@
   border: 1px solid #eee;
   background-color: #fcfcfc;
   border-radius: 10px;
+  box-sizing: border-box;
   max-width: 600px;
-  min-width: 400px;
+  min-width: 0;
+  width: min(600px, 100%);
   cursor: pointer;
   user-select: none;
 }

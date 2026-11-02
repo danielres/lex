@@ -14,7 +14,7 @@ body .lexical-playground {
 }
 
 .editor-shell.wiki-editor {
-  @apply m-0 max-w-full text-base-content;
+  @apply m-0 min-w-0 max-w-full text-base-content;
 
   .toolbar { @apply bg-base-300 border-b border-base-300 rounded-box mb-2; }
   .editor-container { @apply bg-transparent; }
@@ -29,7 +29,7 @@ body .lexical-playground {
   }
 
   .ContentEditable__root {
-    @apply bg-transparent p-0;
+    @apply min-w-0 max-w-full bg-transparent p-0;
     > * { @apply my-[1em] first:mt-0; }
   }
 
@@ -38,7 +38,27 @@ body .lexical-playground {
   }
 }
 
+.lexical-revision-preview {
+  @apply min-w-0 max-w-full overflow-x-auto;
+}
+
 .lexical-revision-diff {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+
+  .excalidraw-button,
+  .excalidraw-button > div,
+  img,
+  svg {
+    max-width: 100%;
+  }
+
+  .excalidraw-button > div,
+  svg {
+    height: auto !important;
+  }
+
   del:not(:has(.excalidraw-button)), 
   del .excalidraw-button {
     @apply bg-error/25 text-base-content no-underline;
