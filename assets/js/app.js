@@ -28,6 +28,7 @@ import Toast from "../../deps/toast/assets/js/toast.js"
 
 import { AutoAnimate } from "./hooks/AutoAnimate"
 import { CapitalizeFirstLetter } from "./hooks/CapitalizeFirstLetter"
+import * as localSettings from "./localSettings"
 import { mountLexicalEditor } from "./lexical_editor/mount"
 import { mountRevisionPreview } from "./lexical_editor/revisionPreviewMount"
 
@@ -152,9 +153,15 @@ const LexicalRevisionPreview = {
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+localSettings.initialize()
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: { _csrf_token: csrfToken, tz: timeZone },
+  params: () => ({
+    _csrf_token: csrfToken,
+    tz: timeZone,
+    local_settings: localSettings.read(),
+  }),
   hooks: {
     ...colocatedHooks,
     Toast,

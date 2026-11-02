@@ -31,6 +31,29 @@ defmodule LexWeb.PresencesLiveTest do
     |> element("[data-testid=drawer-toggle]")
     |> render_click()
 
+    assert_push_event(view, "local-settings-changed", %{drawer: %{open: true}})
     assert has_element?(view, "[data-testid=drawer][data-drawer-open=true]")
+  end
+
+  test "initializes the drawer from local settings", %{conn: conn} do
+    conn =
+      put_connect_params(conn, %{
+        "local_settings" => %{"drawer" => %{"open" => true}}
+      })
+
+    {:ok, view, _html} = live(conn, ~p"/test-space")
+
+    assert has_element?(view, "[data-testid=drawer][data-drawer-open=true]")
+  end
+
+  test "ignores an invalid stored drawer state", %{conn: conn} do
+    conn =
+      put_connect_params(conn, %{
+        "local_settings" => %{"drawer" => %{"open" => "true"}}
+      })
+
+    {:ok, view, _html} = live(conn, ~p"/test-space")
+
+    assert has_element?(view, "[data-testid=drawer][data-drawer-open=false]")
   end
 end
