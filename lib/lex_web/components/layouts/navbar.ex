@@ -23,7 +23,7 @@ defmodule LexWeb.Layouts.Navbar do
           navigate={~p"/#{@space.slug}"}
           class="opacity-80 hover:opacity-100 transition cursor-pointer"
         >
-          {@space.slug}
+          {@space.name}
         </.link>
       </div>
 

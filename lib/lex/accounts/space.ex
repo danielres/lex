@@ -14,6 +14,7 @@ defmodule Lex.Accounts.Space do
 
   code_interface do
     define :create, action: :create
+    define :get_by_slug, action: :read, get_by: [:slug]
     define :list, action: :list
   end
 
