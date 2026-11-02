@@ -15,17 +15,10 @@ defmodule LexWeb.Components.Avatar do
       |> assign(color: color)
 
     ~H"""
-    <div
-      class={[
-        "avatar",
-        "tooltip tooltip-bottom",
-        "cursor-default"
-      ]}
-      data-tip={@user.display_name}
-    >
+    <div class="avatar">
       <div
         class={[
-          "size-6 rounded-full bg-base-100",
+          "size-6 rounded-full",
           "flex items-center justify-center"
         ]}
         style={"background: #{@color}"}
