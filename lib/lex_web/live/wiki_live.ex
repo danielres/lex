@@ -93,7 +93,7 @@ defmodule LexWeb.WikiLive do
           </.link>
         </div>
 
-        <div class="bg-base-100 p-0 rounded-box">
+        <div class="bg-base-300 p-0 rounded-box">
           <table class="table max-sm:table-sm">
             <thead>
               <tr>
