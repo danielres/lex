@@ -5,7 +5,7 @@ defmodule LexWeb.Components.Tooltip do
   slot :tooltip, required: true
   attr :alignment, :string, default: "center", values: ~w(center start end)
   attr :direction, :string, default: "bottom", values: ~w(top bottom left right)
-  attr :class, :string, default: ""
+  attr :class, :string, default: "tooltip"
 
   def render(assigns) do
     alignment_class =
@@ -30,10 +30,9 @@ defmodule LexWeb.Components.Tooltip do
 
     ~H"""
     <div class={[
-      "tooltip",
+      @class,
       @alignment_class,
-      @direction_class,
-      @class
+      @direction_class
     ]}>
       {render_slot(@inner_block)}
       <div class="tooltip-content">{render_slot(@tooltip)}</div>
