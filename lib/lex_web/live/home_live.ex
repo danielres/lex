@@ -12,7 +12,7 @@ defmodule LexWeb.HomeLive do
     socket =
       socket
       |> delegate_mount(params, session)
-      |> assign(:creating_space?, true)
+      |> assign(:creating_space?, false)
       |> assign(:space_form, space_form())
       |> assign(:spaces, Space.list!())
 
@@ -82,7 +82,9 @@ defmodule LexWeb.HomeLive do
               "block",
               "size-32",
               "bg-base-100 rounded",
-              "opacity-80 hover:opacity-100 transition"
+              "opacity-80 hover:opacity-100 transition",
+              "font-semibold",
+              "flex items-center justify-center"
             ]}
           >
             {space.name}
@@ -97,7 +99,7 @@ defmodule LexWeb.HomeLive do
               "block",
               "size-32",
               "bg-base-100 rounded",
-              "opacity-80 hover:opacity-100 transition",
+              "opacity-80 hover:opacity-100 hover:bg-info transition",
               "cursor-pointer"
             ]}
           >
