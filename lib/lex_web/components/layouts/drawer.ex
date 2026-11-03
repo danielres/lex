@@ -125,8 +125,8 @@ defmodule LexWeb.Layouts.Drawer do
             @active == "space" && active_class
           ]}
         >
-          <.icon name="hero-squares-2x2-solid" />
-          <span :if={@open?}>Dashboard</span>
+          <.icon name="hero-chart-bar-micro" />
+          <span :if={@open?}>Overview</span>
         </.link>
       </li>
 
