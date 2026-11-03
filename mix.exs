@@ -41,6 +41,7 @@ defmodule Lex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:group, "~> 0.3.1"},
       {:toast, "~> 0.3.1"},
       {:tzdata, "~> 1.1"},
