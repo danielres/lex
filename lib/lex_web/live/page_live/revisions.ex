@@ -129,6 +129,7 @@ defmodule LexWeb.PageLive.Revisions do
   defp selected_index(_entries, nil), do: nil
   defp selected_index(entries, selected), do: Enum.find_index(entries, &(&1.id == selected.id))
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div

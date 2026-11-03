@@ -53,7 +53,7 @@ defmodule LexWeb.PageLive.Creation do
 
     ~H"""
     <section class="mx-auto mt-16 max-w-2xs space-y-2 text-center" data-testid="missing-page">
-      <div class="">
+      <div>
         <h1 class="text-xl font-semibold">This page doesn’t exist</h1>
         <p class="text-base-content/60">
           Choose a title to create a new page.
