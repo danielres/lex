@@ -33,6 +33,9 @@ defmodule Lex.Wiki.Page do
     create :create do
       accept [:title]
 
+      argument :space_id, :uuid, allow_nil?: false
+
+      change set_attribute(:space_id, arg(:space_id))
       change SetTitleAndSlug
     end
 
@@ -91,27 +94,34 @@ defmodule Lex.Wiki.Page do
   end
 
   identities do
-    identity :unique_slug, [:slug],
+    identity :unique_slug, [:space_id, :slug],
       eager_check?: true,
       field_names: [:title],
       message: "Not available"
   end
 
-  def ensure(title) do
+  def ensure(space, title) do
     with {:ok, title} <- PageTitle.normalize(title),
          {:ok, slug} <- PageTitle.slug(title) do
-      ensure_title_and_slug(title, slug)
+      space |> ensure_title_and_slug(title, slug)
     else
       {:error, message} -> invalid_attribute(:title, title, message)
     end
   end
 
-  def ensure!(title), do: unwrap_or_raise!(ensure(title))
+  def ensure!(space, title) do
+    space
+    |> ensure(title)
+    |> case do
+      {:ok, page} -> page
+      {:error, error} -> raise Ash.Error.to_error_class(error)
+    end
+  end
 
-  def fetch_by_slug(slug) do
+  def fetch_by_slug(space, slug) do
     with true <- PageSlug.valid?(slug),
          {:ok, slug} <- Ash.Type.cast_input(PageSlug, slug) do
-      get_by_slug(slug)
+      space |> get_by_slug(slug)
     else
       false -> invalid_attribute(:slug, slug, "is not a valid page slug")
       :error -> invalid_attribute(:slug, slug, "is not a valid page slug")
@@ -210,26 +220,30 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  defp ensure_title_and_slug(title, slug) do
-    case get_by_slug(slug) do
-      {:ok, nil} -> create_page(title, slug)
+  defp ensure_title_and_slug(space, title, slug) do
+    space
+    |> get_by_slug(slug)
+    |> case do
+      {:ok, nil} -> space |> create_page(title, slug)
       {:ok, %{title: ^title} = page} -> {:ok, page}
       {:ok, _page} -> title_collision(title, slug)
       {:error, error} -> {:error, error}
     end
   end
 
-  defp create_page(title, slug) do
+  defp create_page(space, title, slug) do
     __MODULE__
-    |> Ash.Changeset.for_create(:create, %{title: title})
+    |> Ash.Changeset.for_create(:create, %{space_id: space.id, title: title})
     |> Ash.create()
-    |> recover_concurrent_create(title, slug)
+    |> recover_concurrent_create(space, title, slug)
   end
 
-  defp recover_concurrent_create({:ok, page}, _title, _slug), do: {:ok, page}
+  defp recover_concurrent_create({:ok, page}, _space, _title, _slug), do: {:ok, page}
 
-  defp recover_concurrent_create({:error, original_error}, title, slug) do
-    case get_by_slug(slug) do
+  defp recover_concurrent_create({:error, original_error}, space, title, slug) do
+    space
+    |> get_by_slug(slug)
+    |> case do
       {:ok, %{title: ^title} = page} -> {:ok, page}
       {:ok, nil} -> {:error, original_error}
       {:ok, _page} -> title_collision(title, slug)
@@ -237,9 +251,11 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  defp get_by_slug(slug) do
+  defp get_by_slug(space, slug) do
+    space_id = space.id
+
     __MODULE__
-    |> Ash.Query.filter(slug == ^slug)
+    |> Ash.Query.filter(space_id == ^space_id and slug == ^slug)
     |> Ash.read_one()
   end
 
@@ -278,9 +294,6 @@ defmodule Lex.Wiki.Page do
 
     {:error, Ash.Error.to_error_class(error)}
   end
-
-  defp unwrap_or_raise!({:ok, value}), do: value
-  defp unwrap_or_raise!({:error, error}), do: raise(Ash.Error.to_error_class(error))
 
   defp get_page_document(page, document_key) do
     page_id = page.id

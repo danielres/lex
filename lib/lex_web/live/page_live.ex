@@ -25,21 +25,35 @@ defmodule LexWeb.PageLive do
   @impl true
   def mount(params, session, socket) do
     if connected?(socket), do: Page.subscribe()
-    socket = delegate_mount(socket, params, session)
+    socket = socket |> delegate_mount(params, session)
     {:ok, socket}
   end
 
   @impl true
   def handle_params(%{"page_slug" => slug} = params, _uri, socket) do
-    case Page.fetch_by_slug(slug) do
+    space = socket.assigns.space
+
+    space
+    |> Page.fetch_by_slug(slug)
+    |> case do
+      {:ok, nil} when slug == "home" ->
+        page = space |> Page.ensure!("Home")
+        socket = socket |> load_page(page, params["revision_id"])
+
+        {:noreply, socket}
+
       {:ok, nil} ->
-        {:noreply,
-         socket
-         |> assign(page: nil)
-         |> Creation.reload(slug)}
+        socket =
+          socket
+          |> assign(page: nil)
+          |> Creation.reload(space, slug)
+
+        {:noreply, socket}
 
       {:ok, page} ->
-        {:noreply, load_page(socket, page, params["revision_id"])}
+        socket = socket |> load_page(page, params["revision_id"])
+
+        {:noreply, socket}
 
       {:error, %Error.Invalid{}} ->
         raise NotFound, resource: Page, primary_key: %{slug: slug}
@@ -62,10 +76,15 @@ defmodule LexWeb.PageLive do
         %Notification{resource: PageRevision, action: %{name: :create}, data: revision},
         socket
       ) do
+    page = socket.assigns.page
+
     socket =
-      case socket.assigns.page do
+      case page do
         %{id: page_id} = page when revision.page_id == page_id ->
-          Revisions.reload(socket, page, requested_revision_id(socket))
+          revision_id = requested_revision_id(socket)
+
+          socket
+          |> Revisions.reload(page, revision_id)
           |> Toast.put_toast(:success, "Page saved", duration: 3000)
 
         _page ->
@@ -79,11 +98,15 @@ defmodule LexWeb.PageLive do
         %Notification{resource: Page, action: %{name: :create}, data: created_page},
         socket
       ) do
+    page = socket.assigns.page
+    space = socket.assigns.space
+    creation = socket.assigns.creation
+
     socket =
-      if socket.assigns.page == nil and created_page.slug == socket.assigns.creation.slug do
-        load_page(socket, created_page, nil)
+      if page == nil and created_page.space_id == space.id and created_page.slug == creation.slug do
+        socket |> load_page(created_page, nil)
       else
-        WikiLinkMap.reload(socket)
+        socket |> WikiLinkMap.reload()
       end
 
     {:noreply, socket}
@@ -96,7 +119,7 @@ defmodule LexWeb.PageLive do
     current_page = socket.assigns.page
 
     live_action = socket.assigns.live_action
-    socket = WikiLinkMap.reload(socket)
+    socket = socket |> WikiLinkMap.reload()
 
     if current_page != nil and current_page.id == renamed_page.id do
       socket =
@@ -109,7 +132,9 @@ defmodule LexWeb.PageLive do
         if live_action == :editing do
           socket
         else
-          push_patch(socket, to: page_path(socket, renamed_page))
+          path = page_path(socket, renamed_page)
+
+          socket |> push_patch(to: path)
         end
 
       {:noreply, socket}

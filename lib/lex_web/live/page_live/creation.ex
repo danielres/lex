@@ -6,26 +6,41 @@ defmodule LexWeb.PageLive.Creation do
   alias Lex.Wiki.PageTitle
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{form: creation_form(), slug: nil})
+    socket |> delegate_assign(%{form: nil, slug: nil})
   end
 
-  def reload(socket, slug) do
-    delegate_assign(socket, %{form: creation_form(slug), slug: slug})
+  def reload(socket, space, slug) do
+    form = space |> creation_form(slug)
+
+    socket |> delegate_assign(%{form: form, slug: slug})
   end
 
   @impl true
   def handle_event("validate", %{"page" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.creation.form, params)
-    {:noreply, delegate_assign(socket, :form, form)}
+    form = socket.assigns.creation.form
+    form = form |> AshPhoenix.Form.validate(params)
+    socket = socket |> delegate_assign(:form, form)
+
+    {:noreply, socket}
   end
 
   def handle_event("create", %{"page" => params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.creation.form, params: params) do
+    form = socket.assigns.creation.form
+    space = socket.assigns.space
+
+    form
+    |> AshPhoenix.Form.submit(params: params)
+    |> case do
       {:ok, page} ->
-        {:noreply, push_navigate(socket, to: ~p"/#{socket.assigns.space.slug}/wiki/#{page.slug}")}
+        path = ~p"/#{space.slug}/wiki/#{page.slug}"
+        socket = socket |> push_navigate(to: path)
+
+        {:noreply, socket}
 
       {:error, form} ->
-        {:noreply, delegate_assign(socket, :form, form)}
+        socket = socket |> delegate_assign(:form, form)
+
+        {:noreply, socket}
     end
   end
 
@@ -33,8 +48,8 @@ defmodule LexWeb.PageLive.Creation do
 
   @impl true
   def render(assigns) do
-    assigns =
-      assign(assigns, :path_preview, path_preview(assigns.creation.form[:title].value))
+    path_preview = path_preview(assigns.creation.form[:title].value)
+    assigns = assigns |> assign(:path_preview, path_preview)
 
     ~H"""
     <section class="mx-auto mt-16 max-w-2xs space-y-2 text-center" data-testid="missing-page">
@@ -74,17 +89,16 @@ defmodule LexWeb.PageLive.Creation do
     """
   end
 
-  defp creation_form do
-    Page
-    |> AshPhoenix.Form.for_create(:create, as: "page")
-    |> to_form()
-  end
+  defp creation_form(space, slug) do
+    title = PageTitle.from_slug(slug)
 
-  defp creation_form(slug) do
     Page
     |> AshPhoenix.Form.for_create(:create,
       as: "page",
-      params: %{"title" => PageTitle.from_slug(slug)}
+      params: %{"title" => title},
+      prepare_source: fn changeset ->
+        Ash.Changeset.set_argument(changeset, :space_id, space.id)
+      end
     )
     |> to_form()
   end

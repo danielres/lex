@@ -5,16 +5,19 @@ defmodule LexWeb.PageLive.WikiLinkMap do
   alias Lex.Wiki.Page
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{pages: []})
+    socket |> delegate_assign(%{pages: []})
   end
 
   def reload(socket) do
-    delegate_assign(socket, :pages, Page.list!())
+    space = socket.assigns.space
+    pages = Page.list!(query: [filter: [space_id: space.id]])
+
+    socket |> delegate_assign(:pages, pages)
   end
 
   def encode(wiki_link_map, space) do
     wiki_link_map.pages
-    |> Enum.map(&page_reference(&1, space))
+    |> Enum.map(fn page -> space |> page_reference(page) end)
     |> Jason.encode!()
   end
 
@@ -23,26 +26,41 @@ defmodule LexWeb.PageLive.WikiLinkMap do
 
   @impl true
   def handle_event("ensure", %{"title" => title}, socket) do
-    case Page.ensure(title) do
+    space = socket.assigns.space
+
+    space
+    |> Page.ensure(title)
+    |> case do
       {:ok, page} ->
-        {:reply, %{ok: true, page: page_reference(page, socket.assigns.space)}, socket}
+        reference = space |> page_reference(page)
+
+        {:reply, %{ok: true, page: reference}, socket}
 
       {:error, error} ->
-        {:reply, %{ok: false, error: Exception.message(error)}, socket}
+        message = Exception.message(error)
+
+        {:reply, %{ok: false, error: message}, socket}
     end
   end
 
   def handle_event("resolve", %{"id" => id}, socket) do
+    space = socket.assigns.space
+
     case Page.get(id) do
-      {:ok, page} ->
-        {:reply, %{ok: true, page: page_reference(page, socket.assigns.space)}, socket}
+      {:ok, page} when page.space_id == space.id ->
+        reference = space |> page_reference(page)
+
+        {:reply, %{ok: true, page: reference}, socket}
+
+      {:ok, _page} ->
+        {:reply, %{ok: false}, socket}
 
       {:error, _error} ->
         {:reply, %{ok: false}, socket}
     end
   end
 
-  defp page_reference(page, space) do
+  defp page_reference(space, page) do
     %{
       id: page.id,
       path: ~p"/#{space.slug}/wiki/#{page.slug}",
