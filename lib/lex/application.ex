@@ -17,7 +17,8 @@ defmodule Lex.Application do
       {Registry, keys: :unique, name: Lex.Collaboration.Registry},
       {DynamicSupervisor, name: Lex.Collaboration.DocumentSupervisor, strategy: :one_for_one},
       # Start to serve requests, typically the last entry
-      LexWeb.Endpoint
+      LexWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :lex]}
     ]
 
     # See https://elixir.hexdocs.pm/Supervisor.html

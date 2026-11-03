@@ -21,23 +21,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "document_key",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
       "source": "content_hash",
       "type": "text"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -57,8 +45,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "search_text",
-      "type": "text"
+      "source": "restored_from_revision_id",
+      "type": "uuid"
     },
     {
       "allow_nil?": false,
@@ -69,8 +57,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "yjs_state",
-      "type": "binary"
+      "source": "search_text",
+      "type": "text"
     },
     {
       "allow_nil?": false,
@@ -82,18 +70,6 @@
       "scale": null,
       "size": null,
       "source": "inserted_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "updated_at",
       "type": "utc_datetime_usec"
     },
     {
@@ -117,7 +93,7 @@
           "global": false,
           "strategy": "attribute"
         },
-        "name": "page_documents_page_id_fkey",
+        "name": "page_revisions_page_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
@@ -136,27 +112,8 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "AE2E8067FB1069235A9E93EA4CB4341AA9D5D444BFB2D310FAA204B357B07B94",
-  "identities": [
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "page_documents_unique_page_document_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "page_id"
-        },
-        {
-          "type": "atom",
-          "value": "document_key"
-        }
-      ],
-      "name": "unique_page_document",
-      "nils_distinct?": true,
-      "where": null
-    }
-  ],
+  "hash": "9E293B17C018B2337E274C2BCAA12D7A969CE184865D3057DCC2C86A51CB17B6",
+  "identities": [],
   "multitenancy": {
     "attribute": null,
     "global": null,
@@ -164,6 +121,6 @@
   },
   "repo": "Elixir.Lex.Repo",
   "schema": null,
-  "table": "page_documents",
+  "table": "page_revisions",
   "temporal": null
 }

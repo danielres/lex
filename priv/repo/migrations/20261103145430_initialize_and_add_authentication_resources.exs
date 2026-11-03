@@ -1,4 +1,4 @@
-defmodule Lex.Repo.Migrations.MigrateResources1 do
+defmodule Lex.Repo.Migrations.InitializeAndAddAuthenticationResources do
   @moduledoc """
   Updates resources based on their most recent snapshots.
 
@@ -35,9 +35,33 @@ defmodule Lex.Repo.Migrations.MigrateResources1 do
     drop_if_exists unique_index(:pages, [:space_id, :slug], name: "pages_unique_slug_index")
 
     create unique_index(:pages, [:space_id, :slug], name: "pages_unique_slug_index")
+
+    create table(:tokens, primary_key: false) do
+      add :jti, :text, null: false, primary_key: true
+      add :subject, :text, null: false
+      add :expires_at, :utc_datetime, null: false
+      add :purpose, :text, null: false
+      add :extra_data, :map
+
+      add :created_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+
+      add :updated_at, :utc_datetime_usec,
+        null: false,
+        default: fragment("(now() AT TIME ZONE 'utc')")
+    end
+
+    create table(:users, primary_key: false) do
+      add :id, :uuid, null: false, default: fragment("gen_random_uuid()"), primary_key: true
+    end
   end
 
   def down do
+    drop table(:users)
+
+    drop table(:tokens)
+
     drop_if_exists unique_index(:pages, [:space_id, :slug], name: "pages_unique_slug_index")
 
     create unique_index(:pages, [:space_id, :slug], name: "pages_unique_slug_index")

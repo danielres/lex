@@ -2,6 +2,7 @@
    https://tailwindcss.com/docs/configuration */
 
 @import "tailwindcss" source(none);
+@source "../../deps/ash_authentication_phoenix";
 @import "phoenix-colocated/lex/colocated.css";
 @import "../js/lexical_editor/themes/WikiEditor.css";
 @source "../css";

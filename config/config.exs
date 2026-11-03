@@ -46,13 +46,18 @@ config :ash,
   redact_sensitive_values_in_errors?: true,
   default_string_length_count: :codepoints,
   infer_generic_action_reactors?: false,
-  many_to_many_destroy_destination_on_match?: true
+  many_to_many_destroy_destination_on_match?: true,
+  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec]
 
 config :spark,
   formatter: [
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :authentication,
+        :token,
+        :user_identity,
+        :postgres,
         :admin,
         :resource,
         :code_interface,

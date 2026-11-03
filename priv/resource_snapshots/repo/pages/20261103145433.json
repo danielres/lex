@@ -21,7 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "content_hash",
+      "source": "title",
       "type": "text"
     },
     {
@@ -33,31 +33,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "lexical_state",
-      "type": "map"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "restored_from_revision_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "search_text",
+      "source": "slug",
       "type": "text"
     },
     {
@@ -70,6 +46,18 @@
       "scale": null,
       "size": null,
       "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
       "type": "utc_datetime_usec"
     },
     {
@@ -89,20 +77,20 @@
         "match_type": null,
         "match_with": null,
         "multitenancy": {
-          "attribute": "space_id",
-          "global": false,
-          "strategy": "attribute"
+          "attribute": null,
+          "global": null,
+          "strategy": null
         },
-        "name": "page_revisions_page_id_fkey",
+        "name": "pages_space_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "pages"
+        "table": "spaces"
       },
       "scale": null,
       "size": null,
-      "source": "page_id",
+      "source": "space_id",
       "type": "uuid"
     }
   ],
@@ -112,15 +100,30 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "BD7F6362E6C2DFB5F5B4162600E64AD93BE5272432B6D5E4DB0CE0289047911C",
-  "identities": [],
+  "hash": "CDA9C493378BA1EEC524749D149736FB0DF5395243DAD129A2F7657241B0A958",
+  "identities": [
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "pages_unique_slug_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "slug"
+        }
+      ],
+      "name": "unique_slug",
+      "nils_distinct?": true,
+      "where": null
+    }
+  ],
   "multitenancy": {
-    "attribute": null,
-    "global": null,
-    "strategy": null
+    "attribute": "space_id",
+    "global": false,
+    "strategy": "attribute"
   },
   "repo": "Elixir.Lex.Repo",
   "schema": null,
-  "table": "page_revisions",
+  "table": "pages",
   "temporal": null
 }

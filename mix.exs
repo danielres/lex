@@ -41,6 +41,9 @@ defmodule Lex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:picosat_elixir, "~> 0.2"},
+      {:ash_authentication_phoenix, "~> 2.0"},
+      {:ash_authentication, "~> 4.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:group, "~> 0.3.1"},
       {:toast, "~> 0.3.1"},
@@ -100,7 +103,7 @@ defmodule Lex.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
