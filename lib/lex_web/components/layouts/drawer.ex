@@ -4,8 +4,10 @@ defmodule LexWeb.Layouts.Drawer do
   alias LexWeb.Layouts.ThemeToggle
   alias LexWeb.PresencesLive
   alias LexWeb.UI
+  alias LexWeb.Components
 
-  attr :collaborator, :map, required: true
+  attr :active, :string, required: true
+  attr :user, :map, required: true
   attr :open?, :boolean, required: true
   attr :socket, :any, required: true
   attr :space, :map, required: true
@@ -13,49 +15,26 @@ defmodule LexWeb.Layouts.Drawer do
 
   def render(assigns) do
     ~H"""
-    <div
-      class={[
-        "sm:grid sm:grid-cols-[auto_minmax(0,1fr)]",
-        "h-full"
-      ]}
-      data-drawer-open={to_string(@open?)}
-      data-testid="drawer"
+    <Components.Drawer.render
+      open?={@open?}
+      close_event={UI.toggle_drawer_event()}
     >
-      <div class="order-2 min-w-0 max-sm:mt-14">
-        {render_slot(@inner_block)}
-      </div>
+      {render_slot(@inner_block)}
 
-      <.backdrop open?={@open?} />
-
-      <div class={[
-        "max-sm:z-50",
-        @open? && "w-42",
-        !@open? && "w-12 overflow-hidden",
-        "max-sm:fixed",
-        "max-sm:inset-0",
-        !@open? && "max-sm:-left-13",
-        "transition-[width] translition-[left] duration-200 ease-in-out",
-        "bg-base-300/50 backdrop-blur-lg",
-        "border-r border-base-content/20"
-      ]}>
+      <:aside>
         <div class="p-2 py-4">
-          <.main_links {assigns} />
+          <.main_links
+            active={@active}
+            open?={@open?}
+            space={@space}
+          />
         </div>
 
         <.separator />
 
-        {live_render(@socket, PresencesLive,
-          container: {:div, class: "stacked", data: [testid: "presences-live"]},
-          id: "app-presences",
-          session: %{"collaborator" => @collaborator},
-          sticky: true
-        )}
+        <.presences user={@user} socket={@socket} />
 
-        <.separator class={[
-          @open? && "opacity-100",
-          !@open? && "opacity-0",
-          "transition"
-        ]} />
+        <.separator visible?={@open?} />
 
         <div class={[
           @open? && "opacity-100",
@@ -66,41 +45,38 @@ defmodule LexWeb.Layouts.Drawer do
         ]}>
           <ThemeToggle.render />
         </div>
-      </div>
-    </div>
+      </:aside>
+    </Components.Drawer.render>
     """
   end
 
-  def backdrop(assigns) do
+  defp presences(assigns) do
     ~H"""
-    <button
-      type="button"
-      phx-click={UI.toggle_drawer_event()}
-      aria-label="open sidebar"
-      class={[
-        "sm:hidden",
-        "cursor-pointer",
-        !@open? && "pointer-events-none",
-        "transition",
-        @open? && "bg-base-200/50",
-        "fixed",
-        "inset-0",
-        "z-40"
-      ]}
-    ></button>
+    {live_render(@socket, PresencesLive,
+      container: {:div, class: "stacked", data: [testid: "presences-live"]},
+      id: "app-presences",
+      session: %{"collaborator" => @user},
+      sticky: true
+    )}
     """
   end
 
-  attr :class, :any, default: nil
+  attr :visible?, :boolean, default: true
 
   defp separator(assigns) do
     ~H"""
     <hr class={[
       "border-base-content/20",
-      @class
+      @visible? && "opacity-100",
+      !@visible? && "opacity-0",
+      "transition"
     ]} />
     """
   end
+
+  attr :active, :string, required: true
+  attr :open?, :boolean, required: true
+  attr :space, :map, required: true
 
   defp main_links(assigns) do
     ~H"""

@@ -63,11 +63,11 @@ defmodule LexWeb.Layouts do
       </div>
 
       <Drawer.render
-        {assigns}
-        collaborator={@user}
+        active={@active}
         open?={@ui.drawer_open?}
         socket={@socket}
         space={@space}
+        user={@user}
       >
         <main class="min-w-0 max-w-full p-2 sm:p-8">
           {render_slot(@inner_block)}
