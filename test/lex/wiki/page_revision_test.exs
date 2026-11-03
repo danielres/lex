@@ -3,8 +3,12 @@ defmodule Lex.Wiki.PageRevisionTest do
 
   alias Lex.Wiki.Page
 
-  test "stores immutable semantic revisions and skips consecutive duplicates" do
-    page = Page.ensure!("Home")
+  setup do
+    {:ok, scope: create_scope()}
+  end
+
+  test "stores immutable semantic revisions and skips consecutive duplicates", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
     first_state = lexical_state("First version")
     second_state = lexical_state("Second version")
 
@@ -37,9 +41,11 @@ defmodule Lex.Wiki.PageRevisionTest do
     assert first_revision.search_text == "First version"
   end
 
-  test "records restore provenance and requires the source revision to belong to the page" do
-    page = Page.ensure!("Home")
-    other_page = Page.ensure!("Other Page")
+  test "records restore provenance and requires the source revision to belong to the page", %{
+    scope: scope
+  } do
+    page = scope |> Page.ensure!("Home")
+    other_page = scope |> Page.ensure!("Other Page")
     first_state = lexical_state("First version")
 
     assert {:ok, :saved} =

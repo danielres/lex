@@ -5,9 +5,13 @@ defmodule LexWeb.WikiLiveTest do
 
   alias Lex.Wiki.Page
 
-  test "lists links to pages other than home", %{conn: conn} do
-    Page.ensure!("Home")
-    Page.ensure!("Summer Activities")
+  setup do
+    {:ok, scope: create_scope()}
+  end
+
+  test "lists links to pages other than home", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    scope |> Page.ensure!("Summer Activities")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
@@ -20,11 +24,11 @@ defmodule LexWeb.WikiLiveTest do
            )
   end
 
-  test "updates a page link after the page is renamed", %{conn: conn} do
-    page = Page.ensure!("Summer Activities")
+  test "updates a page link after the page is renamed", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    Page.rename!(page, "Winter Activities")
+    Page.rename!(page, "Winter Activities", scope: scope)
 
     assert has_element?(
              view,
@@ -35,11 +39,11 @@ defmodule LexWeb.WikiLiveTest do
     refute has_element?(view, ~s|a[href="/test-space/wiki/summer-activities"]|)
   end
 
-  test "adds a page link after the page is created", %{conn: conn} do
-    Page.ensure!("Home")
+  test "adds a page link after the page is created", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    Page.ensure!("Summer Activities")
+    scope |> Page.ensure!("Summer Activities")
 
     assert has_element?(
              view,
@@ -48,9 +52,9 @@ defmodule LexWeb.WikiLiveTest do
            )
   end
 
-  test "sorts pages by a column and toggles its direction", %{conn: conn} do
-    Page.ensure!("Winter Activities")
-    Page.ensure!("Summer Activities")
+  test "sorts pages by a column and toggles its direction", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Winter Activities")
+    scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     assert has_element?(
@@ -73,24 +77,27 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(view, "tbody tr:first-child", "Winter Activities")
   end
 
-  test "keeps the selected sort when pages change", %{conn: conn} do
-    page = Page.ensure!("Summer Activities")
-    Page.ensure!("Winter Activities")
+  test "keeps the selected sort when pages change", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Summer Activities")
+    scope |> Page.ensure!("Winter Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     view
     |> element("button[phx-value-sort-by=title]")
     |> render_click()
 
-    Page.rename!(page, "Autumn Activities")
+    Page.rename!(page, "Autumn Activities", scope: scope)
 
     assert has_element?(view, "th[aria-sort=ascending] button[phx-value-sort-by=title]")
     assert has_element?(view, "tbody tr:first-child", "Autumn Activities")
   end
 
-  test "sorts and refreshes pages by their latest document checkpoint", %{conn: conn} do
-    first_page = Page.ensure!("First Page")
-    Page.ensure!("Second Page")
+  test "sorts and refreshes pages by their latest document checkpoint", %{
+    conn: conn,
+    scope: scope
+  } do
+    first_page = scope |> Page.ensure!("First Page")
+    scope |> Page.ensure!("Second Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
     assert :ok = Page.set_checkpoint(first_page, "main", document("updated"))

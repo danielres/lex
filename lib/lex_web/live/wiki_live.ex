@@ -21,7 +21,7 @@ defmodule LexWeb.WikiLive do
     if connected?(socket), do: Page.subscribe()
 
     socket = socket |> delegate_mount(params, session)
-    space = socket.assigns.space
+    scope = socket.assigns.scope
 
     tz =
       case get_connect_params(socket) do
@@ -29,7 +29,7 @@ defmodule LexWeb.WikiLive do
         _ -> "Etc/UTC"
       end
 
-    pages = space |> list_pages(:last_updated_at, :desc)
+    pages = scope |> list_pages(:last_updated_at, :desc)
 
     socket =
       socket
@@ -45,8 +45,8 @@ defmodule LexWeb.WikiLive do
       when action in [:create, :rename] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
-    space = socket.assigns.space
-    pages = space |> list_pages(sort_by, sort_direction)
+    scope = socket.assigns.scope
+    pages = scope |> list_pages(sort_by, sort_direction)
 
     socket = socket |> assign(:pages, pages)
 
@@ -57,8 +57,8 @@ defmodule LexWeb.WikiLive do
       when action in [:save, :save_snapshot] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
-    space = socket.assigns.space
-    pages = space |> list_pages(sort_by, sort_direction)
+    scope = socket.assigns.scope
+    pages = scope |> list_pages(sort_by, sort_direction)
 
     socket = socket |> assign(:pages, pages)
 
@@ -68,8 +68,8 @@ defmodule LexWeb.WikiLive do
   def handle_event("sort", %{"sort-by" => sort_by_param}, socket) do
     sort_by = Map.fetch!(@sort_fields, sort_by_param)
     sort_direction = next_sort_direction(socket.assigns, sort_by)
-    space = socket.assigns.space
-    pages = space |> list_pages(sort_by, sort_direction)
+    scope = socket.assigns.scope
+    pages = scope |> list_pages(sort_by, sort_direction)
 
     socket =
       socket
@@ -211,8 +211,8 @@ defmodule LexWeb.WikiLive do
     end
   end
 
-  defp list_pages(space, sort_by, sort_direction) do
-    Page.list!(query: [filter: [space_id: space.id], sort: [{sort_by, sort_direction}]])
+  defp list_pages(scope, sort_by, sort_direction) do
+    Page.list!(query: [sort: [{sort_by, sort_direction}]], scope: scope)
   end
 
   defp next_sort_direction(%{sort_by: sort_by, sort_direction: :asc}, sort_by), do: :desc

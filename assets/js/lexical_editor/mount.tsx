@@ -37,16 +37,18 @@ export function mountLexicalEditor(
     documentId,
     initialEditable,
     initialPages,
+    spaceId,
     wikiPageRepository,
   }: {
     collaborator: Collaborator;
     documentId: string;
     initialEditable: boolean;
     initialPages: WikiPageReference[];
+    spaceId: string;
     wikiPageRepository: WikiPageRepository;
   },
 ): MountedLexicalEditor {
-  const collaboration = createPhoenixCollaboration(documentId);
+  const collaboration = createPhoenixCollaboration(documentId, spaceId);
   const snapshotRegistry = new DocumentSnapshotRegistry(initialEditable);
   const root = createRoot(element);
   let editable = initialEditable;

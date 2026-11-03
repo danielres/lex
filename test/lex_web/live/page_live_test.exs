@@ -9,14 +9,18 @@ defmodule LexWeb.PageLiveTest do
   alias Lex.Wiki.PageRevision
   alias Yex.Sync.SharedDoc
 
-  test "a direct visit offers to create a missing page with a title", %{conn: conn} do
+  setup do
+    {:ok, scope: create_scope()}
+  end
+
+  test "a direct visit offers to create a missing page with a title", %{conn: conn, scope: scope} do
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/new-page")
 
     assert has_element?(view, "[data-testid='missing-page']", "This page doesn’t exist")
     assert has_element?(view, "[data-testid='page-creation-form']")
     assert has_element?(view, "[data-testid='page-creation-form'] input[value='New Page']")
     assert has_element?(view, "[data-testid='page-slug-preview']", "wiki/new-page")
-    assert Ash.read!(Page) == []
+    assert Ash.read!(Page, scope: scope) == []
 
     view
     |> form("[data-testid='page-creation-form']", page: %{title: "Different Page"})
@@ -41,12 +45,12 @@ defmodule LexWeb.PageLiveTest do
     |> render_submit()
 
     assert_redirect(view, ~p"/test-space/wiki/a-better-title")
-    assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page)
+    assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
   end
 
-  test "preloads page references and creates missing link targets", %{conn: conn} do
-    Page.ensure!("Home")
-    Page.ensure!("Summer Activities")
+  test "preloads page references and creates missing link targets", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
@@ -54,47 +58,47 @@ defmodule LexWeb.PageLiveTest do
 
     render_hook(view, "wiki_link_map:ensure", %{"title" => "Winter Plans"})
 
-    assert Page.list!() |> Enum.any?(&(&1.title == "Winter Plans"))
+    assert Page.list!(scope: scope) |> Enum.any?(&(&1.title == "Winter Plans"))
   end
 
-  test "opens a missing page when it is created by another viewer", %{conn: conn} do
+  test "opens a missing page when it is created by another viewer", %{conn: conn, scope: scope} do
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/new-page")
 
     assert has_element?(view, "[data-testid='missing-page']")
 
-    page = Page.ensure!("New Page")
+    page = scope |> Page.ensure!("New Page")
 
     assert has_element?(view, "[phx-hook='LexicalEditor'][data-document-id='#{page.id}']")
     refute has_element?(view, "[data-testid='missing-page']")
   end
 
-  test "revisiting a slug reuses its page id", %{conn: conn} do
-    Page.ensure!("Summer Activities")
+  test "revisiting a slug reuses its page id", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Summer Activities")
     {:ok, _view, first_html} = live(conn, ~p"/test-space/wiki/summer-activities")
-    [page] = Ash.read!(Page)
+    [page] = Ash.read!(Page, scope: scope)
 
     {:ok, _view, second_html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
 
     assert first_html =~ ~s(data-document-id="#{page.id}")
     assert second_html =~ ~s(data-document-id="#{page.id}")
-    assert length(Ash.read!(Page)) == 1
+    assert length(Ash.read!(Page, scope: scope)) == 1
   end
 
-  test "different slugs use different collaboration document ids", %{conn: conn} do
-    Page.ensure!("Home")
-    Page.ensure!("Summer Activities")
+  test "different slugs use different collaboration document ids", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    scope |> Page.ensure!("Summer Activities")
     {:ok, _view, home_html} = live(conn, ~p"/test-space/wiki/home")
     {:ok, _view, summer_html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
 
-    [home, summer] = Page |> Ash.Query.sort(:slug) |> Ash.read!()
+    [home, summer] = Page |> Ash.Query.sort(:slug) |> Ash.read!(scope: scope)
 
     assert home_html =~ ~s(data-document-id="#{home.id}")
     assert summer_html =~ ~s(data-document-id="#{summer.id}")
     refute home.id == summer.id
   end
 
-  test "remains alive when a document checkpoint is saved", %{conn: conn} do
-    page = Page.ensure!("Home")
+  test "remains alive when a document checkpoint is saved", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     assert :ok = Page.set_checkpoint(page, "main", document("updated"))
@@ -102,11 +106,11 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
   end
 
-  test "the lock button toggles whether the editor is editable", %{conn: conn} do
-    Page.ensure!("Home")
+  test "the lock button toggles whether the editor is editable", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
-    [page] = Ash.read!(Page)
-    {:ok, shared_doc} = Collaboration.open_document("#{page.id}/main")
+    [page] = Ash.read!(Page, scope: scope)
+    {:ok, shared_doc} = Collaboration.open_document(scope, "#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
@@ -143,8 +147,8 @@ defmodule LexWeb.PageLiveTest do
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
-  test "restores edit mode when checkpointing fails", %{conn: conn} do
-    Page.ensure!("Home")
+  test "restores edit mode when checkpointing fails", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     enable_editing(view)
@@ -162,8 +166,8 @@ defmodule LexWeb.PageLiveTest do
     assert render(view) =~ "Could not save the document"
   end
 
-  test "renames a page while remaining in edit mode", %{conn: conn} do
-    page = Page.ensure!("Summer Activities")
+  test "renames a page while remaining in edit mode", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(view)
@@ -176,13 +180,13 @@ defmodule LexWeb.PageLiveTest do
 
     assert_push_event(view, "page_title_blur", %{})
     refute_patched(view)
-    assert Page.get!(page.id).title == "Winter Activities"
-    assert Page.get!(page.id).slug == "winter-activities"
+    assert Page.get!(page.id, scope: scope).title == "Winter Activities"
+    assert Page.get!(page.id, scope: scope).slug == "winter-activities"
     assert has_element?(view, "#page-title-form input[value='Winter Activities']")
   end
 
-  test "propagates a rename to other viewers of the same page", %{conn: conn} do
-    Page.ensure!("Summer Activities")
+  test "propagates a rename to other viewers of the same page", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Summer Activities")
     {:ok, first_view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
     {:ok, second_view, _html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
 
@@ -196,28 +200,28 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(second_view, "h1", "Winter Activities")
   end
 
-  test "refreshes page references when another page is renamed", %{conn: conn} do
-    Page.ensure!("Home")
-    summer = Page.ensure!("Summer Activities")
+  test "refreshes page references when another page is renamed", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    summer = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    Page.rename!(summer, "Winter Activities")
+    Page.rename!(summer, "Winter Activities", scope: scope)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Winter Activities']")
     refute has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
   end
 
-  test "refreshes page references when another page is created", %{conn: conn} do
-    Page.ensure!("Home")
+  test "refreshes page references when another page is created", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    Page.ensure!("Summer Activities")
+    scope |> Page.ensure!("Summer Activities")
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
   end
 
-  test "resets an unsaved page title", %{conn: conn} do
-    Page.ensure!("Summer Activities")
+  test "resets an unsaved page title", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(view)
@@ -233,8 +237,8 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
   end
 
-  test "resets an unsaved page title when the input loses focus", %{conn: conn} do
-    Page.ensure!("Summer Activities")
+  test "resets an unsaved page title when the input loses focus", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(view)
@@ -250,8 +254,8 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
   end
 
-  test "resets an unsaved page title with Escape", %{conn: conn} do
-    Page.ensure!("Summer Activities")
+  test "resets an unsaved page title with Escape", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(view)
@@ -267,9 +271,9 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#page-title-form input[value='Summer Activities']")
   end
 
-  test "shows title errors without renaming the page", %{conn: conn} do
-    Page.ensure!("Winter Activities")
-    page = Page.ensure!("Summer Activities")
+  test "shows title errors without renaming the page", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Winter Activities")
+    page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(view)
@@ -279,11 +283,11 @@ defmodule LexWeb.PageLiveTest do
     |> render_submit()
 
     assert render(view) =~ "Not available"
-    assert Page.get!(page.id).title == "Summer Activities"
+    assert Page.get!(page.id, scope: scope).title == "Summer Activities"
   end
 
-  test "does not offer title editing for the home page", %{conn: conn} do
-    Page.ensure!("Home")
+  test "does not offer title editing for the home page", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
     enable_editing(view)
@@ -291,8 +295,11 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(view, "#page-title-form")
   end
 
-  test "browses revisions with URL-backed previous and next navigation", %{conn: conn} do
-    page = Page.ensure!("Home")
+  test "browses revisions with URL-backed previous and next navigation", %{
+    conn: conn,
+    scope: scope
+  } do
+    page = scope |> Page.ensure!("Home")
     first_revision = create_revision(page, "First version")
     second_revision = create_revision(page, "Second version")
 
@@ -321,16 +328,16 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")
   end
 
-  test "shows an empty history before the first checkpoint", %{conn: conn} do
-    Page.ensure!("Home")
+  test "shows an empty history before the first checkpoint", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
     assert render(view) =~ "No revisions yet"
     refute has_element?(view, "button[aria-label='Restore revision']")
   end
 
-  test "passes the collaborator to revision previews", %{conn: conn} do
-    page = Page.ensure!("Home")
+  test "passes the collaborator to revision previews", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Home")
     revision = create_revision(page, "First version")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
@@ -341,9 +348,9 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
-  test "does not open another page's revision", %{conn: conn} do
-    Page.ensure!("Home")
-    other_page = Page.ensure!("Other Page")
+  test "does not open another page's revision", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    other_page = scope |> Page.ensure!("Other Page")
     revision = create_revision(other_page, "Other content")
 
     assert_raise Ash.Error.Query.NotFound, fn ->
@@ -352,12 +359,13 @@ defmodule LexWeb.PageLiveTest do
   end
 
   test "preserves the current document before restoring a revision", %{
-    conn: conn
+    conn: conn,
+    scope: scope
   } do
-    page = Page.ensure!("Home")
+    page = scope |> Page.ensure!("Home")
     source_revision = create_revision(page, "First version")
     _current_revision = create_revision(page, "Current version")
-    {:ok, shared_doc} = Collaboration.open_document("#{page.id}/main")
+    {:ok, shared_doc} = Collaboration.open_document(scope, "#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/#{source_revision.id}")
@@ -401,14 +409,14 @@ defmodule LexWeb.PageLiveTest do
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
-  test "invalid slugs return not found and do not create pages", %{conn: conn} do
+  test "invalid slugs return not found and do not create pages", %{conn: conn, scope: scope} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->
         get(conn, "/test-space/wiki/Summer-Activities")
       end
 
     assert Plug.Exception.status(error) == 404
-    assert Ash.read!(Page) == []
+    assert Ash.read!(Page, scope: scope) == []
   end
 
   defp document(text) do

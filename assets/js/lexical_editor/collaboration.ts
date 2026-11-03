@@ -51,8 +51,9 @@ function confirmProviderUpdatesApplied(
 
 export function createPhoenixCollaboration(
   documentId: string,
+  spaceId: string,
 ): PhoenixCollaboration {
-  const socket = new Socket('/socket');
+  const socket = new Socket('/socket', {params: {space_id: spaceId}});
   const providers = new Set<PhoenixChannelProvider>();
   socket.connect();
 

@@ -31,13 +31,13 @@ defmodule LexWeb.PageLive do
 
   @impl true
   def handle_params(%{"page_slug" => slug} = params, _uri, socket) do
-    space = socket.assigns.space
+    scope = socket.assigns.scope
 
-    space
+    scope
     |> Page.fetch_by_slug(slug)
     |> case do
       {:ok, nil} when slug == "home" ->
-        page = space |> Page.ensure!("Home")
+        page = scope |> Page.ensure!("Home")
         socket = socket |> load_page(page, params["revision_id"])
 
         {:noreply, socket}
@@ -46,7 +46,7 @@ defmodule LexWeb.PageLive do
         socket =
           socket
           |> assign(page: nil)
-          |> Creation.reload(space, slug)
+          |> Creation.reload(scope, slug)
 
         {:noreply, socket}
 
@@ -202,6 +202,7 @@ defmodule LexWeb.PageLive do
             data-restore-preserve-event={Revisions.preserve_event()}
             data-restore-request-event={Revisions.restore_request_event()}
             data-snapshot-request-event={Editing.snapshot_request_event()}
+            data-space-id={@space.id}
             id={"lexical-editor-#{@page.id}"}
             phx-hook="LexicalEditor"
             phx-update="ignore"

@@ -6,7 +6,7 @@ defmodule LexWeb.CollaborationChannel do
 
   @impl true
   def join("y_doc:" <> room, _payload, socket) when room != "" do
-    with {:ok, shared_doc} <- Collaboration.open_document(room),
+    with {:ok, shared_doc} <- Collaboration.open_document(socket.assigns.scope, room),
          :ok <- SharedDoc.observe(shared_doc) do
       {:ok, assign(socket, :shared_doc, shared_doc)}
     else

@@ -9,8 +9,8 @@ defmodule LexWeb.PageLive.WikiLinkMap do
   end
 
   def reload(socket) do
-    space = socket.assigns.space
-    pages = Page.list!(query: [filter: [space_id: space.id]])
+    scope = socket.assigns.scope
+    pages = Page.list!(scope: scope)
 
     socket |> delegate_assign(:pages, pages)
   end
@@ -26,9 +26,10 @@ defmodule LexWeb.PageLive.WikiLinkMap do
 
   @impl true
   def handle_event("ensure", %{"title" => title}, socket) do
+    scope = socket.assigns.scope
     space = socket.assigns.space
 
-    space
+    scope
     |> Page.ensure(title)
     |> case do
       {:ok, page} ->
@@ -44,16 +45,14 @@ defmodule LexWeb.PageLive.WikiLinkMap do
   end
 
   def handle_event("resolve", %{"id" => id}, socket) do
+    scope = socket.assigns.scope
     space = socket.assigns.space
 
-    case Page.get(id) do
-      {:ok, page} when page.space_id == space.id ->
+    case Page.get(id, scope: scope) do
+      {:ok, page} ->
         reference = space |> page_reference(page)
 
         {:reply, %{ok: true, page: reference}, socket}
-
-      {:ok, _page} ->
-        {:reply, %{ok: false}, socket}
 
       {:error, _error} ->
         {:reply, %{ok: false}, socket}

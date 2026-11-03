@@ -35,4 +35,6 @@ defmodule LexWeb.ConnCase do
     Lex.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  defdelegate create_scope(name \\ "Test Space"), to: Lex.DataCase
 end

@@ -13,9 +13,9 @@ defmodule Lex.Collaboration do
   @registry __MODULE__.Registry
   @supervisor __MODULE__.DocumentSupervisor
 
-  def open_document(room) when is_binary(room) do
+  def open_document(scope, room) when is_binary(room) do
     with {:ok, document_ref} <- parse_room(room),
-         {:ok, page} <- load_page(document_ref.page_id) do
+         {:ok, page} <- load_page(scope, document_ref.page_id) do
       document_ref = %{document_key: document_ref.document_key, page: page}
       find_or_start_document(room, document_ref)
     end
@@ -181,8 +181,8 @@ defmodule Lex.Collaboration do
     end
   end
 
-  defp load_page(page_id) do
-    case Page.get(page_id, not_found_error?: false) do
+  defp load_page(scope, page_id) do
+    case Page.get(page_id, not_found_error?: false, scope: scope) do
       {:ok, nil} -> {:error, :page_not_found}
       {:ok, page} -> {:ok, page}
       {:error, error} -> {:error, error}

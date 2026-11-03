@@ -40,6 +40,11 @@ defmodule Lex.DataCase do
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 
+  def create_scope(name \\ "Test Space") do
+    space = Lex.Accounts.Space.create!(%{name: name})
+    %Lex.Scope{space_id: space.id}
+  end
+
   @doc """
   A helper that transforms changeset errors into a map of messages.
 

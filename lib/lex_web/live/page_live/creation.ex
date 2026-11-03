@@ -9,8 +9,8 @@ defmodule LexWeb.PageLive.Creation do
     socket |> delegate_assign(%{form: nil, slug: nil})
   end
 
-  def reload(socket, space, slug) do
-    form = space |> creation_form(slug)
+  def reload(socket, scope, slug) do
+    form = scope |> creation_form(slug)
 
     socket |> delegate_assign(%{form: form, slug: slug})
   end
@@ -89,16 +89,14 @@ defmodule LexWeb.PageLive.Creation do
     """
   end
 
-  defp creation_form(space, slug) do
+  defp creation_form(scope, slug) do
     title = PageTitle.from_slug(slug)
 
     Page
     |> AshPhoenix.Form.for_create(:create,
       as: "page",
       params: %{"title" => title},
-      prepare_source: fn changeset ->
-        Ash.Changeset.set_argument(changeset, :space_id, space.id)
-      end
+      scope: scope
     )
     |> to_form()
   end

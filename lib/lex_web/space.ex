@@ -6,7 +6,10 @@ defmodule LexWeb.Space do
 
   def on_mount(%{"space_slug" => slug}, _session, socket) do
     space = Accounts.Space.get_by_slug!(slug)
+    scope = %Lex.Scope{space_id: space.id}
 
-    delegate_assign(socket, space)
+    socket
+    |> delegate_assign(space)
+    |> assign(:scope, scope)
   end
 end

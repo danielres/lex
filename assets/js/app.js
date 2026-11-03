@@ -79,6 +79,7 @@ const LexicalEditor = {
       documentId: this.el.dataset.documentId,
       initialEditable: this.el.dataset.editable === "true",
       initialPages: JSON.parse(this.el.dataset.pages || "[]"),
+      spaceId: this.el.dataset.spaceId,
       wikiPageRepository,
     })
 
