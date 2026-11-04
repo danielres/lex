@@ -85,10 +85,10 @@ defmodule LexWeb.WikiLive do
     <Layouts.app
       active="wiki"
       flash={@flash}
+      scope={@scope}
       socket={@socket}
       space={@space}
       ui={@ui}
-      user={@collaborator}
     >
       <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">

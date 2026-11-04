@@ -7,13 +7,21 @@ defmodule LexWeb.PresencesLive do
   @room_key "DEFAULT_TEMP_ROOM"
 
   @impl true
-  def mount(_params, %{"collaborator" => collaborator}, socket) do
-    socket = assign(socket, collaborator: collaborator, presences: get_presences())
+  def mount(_params, %{"scope" => scope}, socket) do
+    current_user = scope.current_user
+
+    presence = %{
+      id: current_user.id,
+      display_name: current_user.display_name,
+      hue: current_user.hue
+    }
+
+    socket = assign(socket, presence: presence, presences: get_presences(), scope: scope)
 
     socket =
       if connected?(socket) do
         :ok = Group.monitor(:lex, @room_key)
-        :ok = Group.join(:lex, @room_key, collaborator)
+        :ok = Group.join(:lex, @room_key, presence)
 
         assign(socket, :presences, get_presences())
       else
@@ -49,7 +57,7 @@ defmodule LexWeb.PresencesLive do
         <div
           :for={presence <- @presences}
           data-testid="presence"
-          id={"presence-#{presence.display_name}"}
+          id={"presence-#{presence.id}"}
         >
           <Tooltip.render alignment="start">
             <Avatar.render user={presence} />
@@ -92,7 +100,7 @@ defmodule LexWeb.PresencesLive do
     :lex
     |> Group.members(@room_key)
     |> Enum.map(fn {_pid, presence} -> presence end)
-    # |> Enum.uniq_by(& &1.display_name)
+    |> Enum.uniq_by(& &1.id)
     |> Enum.sort_by(& &1.display_name)
   end
 end

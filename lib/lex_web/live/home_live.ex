@@ -9,12 +9,17 @@ defmodule LexWeb.HomeLive do
 
   @impl true
   def mount(params, session, socket) do
+    socket = socket |> delegate_mount(params, session)
+    scope = socket.assigns.scope
+
+    space_form = scope |> space_form()
+    spaces = Space.list!(scope: scope)
+
     socket =
       socket
-      |> delegate_mount(params, session)
       |> assign(:creating_space?, false)
-      |> assign(:space_form, space_form())
-      |> assign(:spaces, Space.list!())
+      |> assign(:space_form, space_form)
+      |> assign(:spaces, spaces)
 
     {:ok, socket}
   end
@@ -25,10 +30,13 @@ defmodule LexWeb.HomeLive do
   end
 
   def handle_event("cancel_space_creation", _params, socket) do
+    scope = socket.assigns.scope
+    space_form = scope |> space_form()
+
     socket =
       socket
       |> assign(:creating_space?, false)
-      |> assign(:space_form, space_form())
+      |> assign(:space_form, space_form)
 
     {:noreply, socket}
   end
@@ -42,10 +50,13 @@ defmodule LexWeb.HomeLive do
   def handle_event("create_space", %{"space" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.space_form, params: params) do
       {:ok, space} ->
+        scope = socket.assigns.scope
+        space_form = scope |> space_form()
+
         socket =
           socket
           |> assign(:creating_space?, false)
-          |> assign(:space_form, space_form())
+          |> assign(:space_form, space_form)
           |> update(:spaces, fn spaces ->
             Enum.sort_by([space | spaces], & &1.name)
           end)
@@ -146,9 +157,9 @@ defmodule LexWeb.HomeLive do
     """
   end
 
-  defp space_form do
+  defp space_form(scope) do
     Space
-    |> AshPhoenix.Form.for_create(:create, as: "space")
+    |> AshPhoenix.Form.for_create(:create, as: "space", scope: scope)
     |> to_form()
   end
 end

@@ -76,6 +76,7 @@ const LexicalEditor = {
 
     this.lexicalEditor = mountLexicalEditor(this.el, {
       collaborator: collaboratorFromElement(this.el),
+      csrfToken,
       documentId: this.el.dataset.documentId,
       initialEditable: this.el.dataset.editable === "true",
       initialPages: JSON.parse(this.el.dataset.pages || "[]"),

@@ -19,10 +19,10 @@ defmodule LexWeb.SpaceLive do
     <Layouts.app
       active="space"
       flash={@flash}
+      scope={@scope}
       socket={@socket}
       space={@space}
       ui={@ui}
-      user={@collaborator}
     >
       <div class="space-y-2">
         <div>

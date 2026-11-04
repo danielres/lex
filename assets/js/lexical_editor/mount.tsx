@@ -34,6 +34,7 @@ export function mountLexicalEditor(
   element: HTMLElement,
   {
     collaborator,
+    csrfToken,
     documentId,
     initialEditable,
     initialPages,
@@ -41,6 +42,7 @@ export function mountLexicalEditor(
     wikiPageRepository,
   }: {
     collaborator: Collaborator;
+    csrfToken: string;
     documentId: string;
     initialEditable: boolean;
     initialPages: WikiPageReference[];
@@ -48,7 +50,11 @@ export function mountLexicalEditor(
     wikiPageRepository: WikiPageRepository;
   },
 ): MountedLexicalEditor {
-  const collaboration = createPhoenixCollaboration(documentId, spaceId);
+  const collaboration = createPhoenixCollaboration(
+    documentId,
+    spaceId,
+    csrfToken,
+  );
   const snapshotRegistry = new DocumentSnapshotRegistry(initialEditable);
   const root = createRoot(element);
   let editable = initialEditable;
