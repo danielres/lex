@@ -59,5 +59,20 @@ defmodule Lex.Accounts.User do
 
   attributes do
     uuid_primary_key :id
+
+    attribute :display_name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :hue, :integer do
+      allow_nil? false
+      constraints min: 0, max: 359
+      public? true
+    end
+  end
+
+  identities do
+    identity :unique_display_name, [:display_name]
   end
 end
