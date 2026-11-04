@@ -82,82 +82,99 @@ defmodule LexWeb.HomeLive do
       "flex items-center justify-center"
     ]}>
       <div class="w-full max-w-md">
-        <h1
+        <.list_spaces
           :if={!@creating_space?}
-          class="text-xl font-semibold border-b border-base-content/20 pb-2 mb-4"
-        >
-          Your spaces
-        </h1>
+          spaces={@spaces}
+        />
 
-        <div :if={!@creating_space?} class="flex flex-wrap gap-2">
-          <.link
-            :for={space <- @spaces}
-            navigate={~p"/#{space.slug}"}
-            data-testid="space"
-            class={[
-              "p-4",
-              "block",
-              "size-32",
-              "bg-base-100 rounded",
-              "opacity-80 hover:opacity-100 transition",
-              "font-semibold",
-              "flex items-center justify-center"
-            ]}
-          >
-            {space.name}
-          </.link>
-
-          <button
-            type="button"
-            phx-click="show_space_form"
-            data-testid="show-space-form"
-            class={[
-              "p-4",
-              "block",
-              "size-32",
-              "bg-base-100 rounded",
-              "opacity-80 hover:opacity-100 hover:bg-info transition",
-              "cursor-pointer"
-            ]}
-          >
-            <.icon name="hero-plus-micro" class="size-6" />
-          </button>
-        </div>
-
-        <.form
+        <.creation_form
           :if={@creating_space?}
-          for={@space_form}
-          id="space-creation-form"
-          class="space-y-3"
-          data-testid="space-creation-form"
-          phx-change="validate_space"
-          phx-submit="create_space"
-        >
-          <.input
-            autocomplete="off"
-            field={@space_form[:name]}
-            placeholder="Name"
-            phx-hook="CapitalizeFirstLetter"
-          />
-          <.input field={@space_form[:description]} placeholder="Description" type="textarea" />
+          space_form={@space_form}
+        />
+      </div>
+    </div>
+    """
+  end
 
-          <div class="flex justify-between">
-            <button
-              class="btn btn-ghost hover:btn-neutral"
-              data-testid="cancel-space-creation"
-              phx-click="cancel_space_creation"
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              class="btn btn-info"
-              type="submit"
-            >
-              <span>Create space</span>
-            </button>
-          </div>
-        </.form>
+  defp creation_form(assigns) do
+    ~H"""
+    <.form
+      for={@space_form}
+      id="space-creation-form"
+      class="space-y-3"
+      data-testid="space-creation-form"
+      phx-change="validate_space"
+      phx-submit="create_space"
+    >
+      <.input
+        autocomplete="off"
+        field={@space_form[:name]}
+        placeholder="Name"
+        phx-hook="CapitalizeFirstLetter"
+      />
+      <.input field={@space_form[:description]} placeholder="Description" type="textarea" />
+
+      <div class="flex justify-between">
+        <button
+          class="btn btn-ghost hover:btn-neutral"
+          data-testid="cancel-space-creation"
+          phx-click="cancel_space_creation"
+          type="button"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn-info"
+          type="submit"
+        >
+          <span>Create space</span>
+        </button>
+      </div>
+    </.form>
+    """
+  end
+
+  defp list_spaces(assigns) do
+    grid_item_class = [
+      "reactive",
+      "p-4",
+      "block",
+      "aspect-square",
+      "bg-base-100 rounded"
+    ]
+
+    ~H"""
+    <div>
+      <h1 class="text-xl font-semibold border-b border-base-content/20 pb-2 mb-4">
+        Your spaces
+      </h1>
+
+      <div class="autogrid gap-4 [--autogrid-min:8rem]">
+        <.link
+          :for={space <- @spaces}
+          navigate={~p"/#{space.slug}"}
+          data-testid="space"
+          class={[
+            grid_item_class,
+            "font-semibold",
+            "leading-tight"
+          ]}
+        >
+          {space.name}
+        </.link>
+
+        <button
+          type="button"
+          phx-click="show_space_form"
+          data-testid="show-space-form"
+          class={[
+            grid_item_class,
+            "hover:bg-info",
+            "cursor-pointer"
+          ]}
+        >
+          <.icon name="hero-plus-micro" class="size-6" />
+        </button>
       </div>
     </div>
     """
