@@ -209,6 +209,52 @@
     var(--color-warning) 35%,
     white
   );
+  --lexical-table-background: color-mix(
+    in oklab,
+    var(--color-base-100) 50%,
+    transparent
+  );
+  --lexical-table-border-color: var(--color-base-300);
+  --lexical-table-control-background: var(--color-base-200);
+  --lexical-table-control-hover-background: var(--color-base-300);
+  --lexical-table-control-text-color: var(--color-base-content);
+  --lexical-table-floating-control-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  --lexical-table-frozen-cell-background: color-mix(
+    in oklab,
+    var(--color-base-100) 25%,
+    transparent
+  );
+  --lexical-table-header-background: color-mix(
+    in oklab,
+    var(--color-base-100) 50%,
+    transparent
+  );
+  --lexical-table-resizer-color: var(--color-info);
+  --lexical-table-scroll-shadow-color: color-mix(
+    in oklab,
+    var(--color-base-content) 15%,
+    transparent
+  );
+  --lexical-table-scrollbar-thumb: color-mix(
+    in oklab,
+    var(--color-base-content) 30%,
+    transparent
+  );
+  --lexical-table-scrollbar-track: color-mix(
+    in oklab,
+    var(--color-base-content) 5%,
+    transparent
+  );
+  --lexical-table-selection-background: color-mix(
+    in oklab,
+    var(--color-info) 30%,
+    transparent
+  );
+  --lexical-table-stripe-background: color-mix(
+    in oklab,
+    var(--color-base-200) 50%,
+    transparent
+  );
   --lexical-toolbar-background: var(--color-base-300);
   --lexical-toolbar-border-bottom: 1px solid var(--color-base-300);
   --lexical-toolbar-border-radius: var(--radius-box);

@@ -110,37 +110,12 @@
   .wiki-link-cancel { @apply self-end; }
   .wiki-link-error { @apply text-sm text-error; }
 
-  .PlaygroundEditorTheme__table { @apply bg-base-100/50; }
-  .PlaygroundEditorTheme__tableCell { @apply border-base-300; }
-  .PlaygroundEditorTheme__tableCellHeader,
-  .PlaygroundEditorTheme__tableFrozenColumn tr > th:first-child,
-  .PlaygroundEditorTheme__tableFrozenRow tr:nth-of-type(1) > th { @apply bg-base-100/50; }
-  .PlaygroundEditorTheme__tableFrozenColumn tr > td:first-child,
-  .PlaygroundEditorTheme__tableFrozenRow tr:nth-of-type(1) > td { @apply bg-base-100/25; }
-  .PlaygroundEditorTheme__tableAddColumns,
-  .PlaygroundEditorTheme__tableAddRows,
-  .PlaygroundEditorTheme__tableCellActionButton { @apply bg-base-200 text-base-content; }
-  .PlaygroundEditorTheme__tableAddColumns:hover,
-  .PlaygroundEditorTheme__tableAddRows:hover,
-  .PlaygroundEditorTheme__tableCellActionButton:hover { @apply bg-base-300; }
-
   .editor-image {
     img { @apply rounded-box; }
     .image-caption-container { @apply backdrop-blur; }
   }
 
 }
-
-.editor-shell .PlaygroundEditorTheme__tableRowStriping tr:nth-child(even),
-.editor-shell .PlaygroundEditorTheme__tableFrozenColumn
-  .PlaygroundEditorTheme__table.PlaygroundEditorTheme__tableRowStriping
-  tr:nth-child(even)
-  > td:first-child {
-  @apply bg-base-200/50;
-}
-
-
-
 
 .editor-shell .action-button:hover {
   @apply bg-base-300 text-base-content;

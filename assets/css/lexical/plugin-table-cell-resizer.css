@@ -14,7 +14,7 @@
 
 @media (pointer: coarse) {
   .TableCellResizer__resizer {
-    background-color: #adf;
+    background-color: var(--lexical-table-resizer-color, #adf);
     mix-blend-mode: color;
   }
 }

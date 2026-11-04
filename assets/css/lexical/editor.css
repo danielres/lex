@@ -1479,9 +1479,14 @@ i.paragraph,
   top: 10px;
   right: 10px;
   border-radius: 15px;
-  color: #222;
+  background-color: var(--lexical-table-control-background, transparent);
+  color: var(--lexical-table-control-text-color, #222);
   display: inline-block;
   cursor: pointer;
+}
+
+.table-cell-action-button:hover {
+  background-color: var(--lexical-table-control-hover-background, #ddd);
 }
 
 i.chevron-down {
