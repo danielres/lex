@@ -66,9 +66,12 @@ config :lex, LexWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
-# Enable dev routes for dashboard and mailbox
-config :lex, dev_routes: true, token_signing_secret: "d/vh6HPSY89SEbXpwsg2LFBBcROZjkAF"
-config :ash_authentication_development, enabled: true
+# Enable development-only routes
+config :ash_authentication_dev_users, enabled: true
+
+config :lex,
+  dev_routes: true,
+  token_signing_secret: "d/vh6HPSY89SEbXpwsg2LFBBcROZjkAF"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

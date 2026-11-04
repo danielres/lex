@@ -7,7 +7,7 @@
 # General application configuration
 import Config
 
-config :ash_authentication_development, enabled: false
+config :ash_authentication_dev_users, enabled: false
 
 config :ash_typescript,
   manifest: Lex.AshTypescriptManifest,

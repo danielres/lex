@@ -4,11 +4,11 @@ defmodule Lex.Accounts.User do
     domain: Lex.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication, AshAuthenticationDevelopment.Strategy]
+    extensions: [AshAuthentication, AshAuthenticationDevUsers.Strategy]
 
   authentication do
     strategies do
-      development do
+      dev_users do
         identity(:unique_display_name)
 
         users(
