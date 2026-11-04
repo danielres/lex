@@ -2,7 +2,7 @@ defmodule LexWeb.Layouts.Navbar do
   use LexWeb, :html
 
   alias LexWeb.Components.Avatar
-  alias LexWeb.Components.Tooltip
+  alias LexWeb.Components.Dropdown
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
@@ -28,11 +28,39 @@ defmodule LexWeb.Layouts.Navbar do
         </.link>
       </div>
 
-      <Tooltip.render alignment="end">
+      <Dropdown.render id="navbar-user-dropdown">
         <Avatar.render user={current_user} />
-        <:tooltip>{current_user.display_name}</:tooltip>
-      </Tooltip.render>
+
+        <:content>
+          <div class={[
+            "bg-base-300 p-4 mr-4 mt-5",
+            "min-w-36",
+            "rounded-box",
+            "shadow",
+            "border border-base-content/20",
+            "grid gap-2"
+          ]}>
+            <div class={[
+              "text-sm"
+            ]}>
+              {current_user.display_name}
+            </div>
+
+            <.button_sign_out />
+          </div>
+        </:content>
+      </Dropdown.render>
     </div>
+    """
+  end
+
+  def button_sign_out(assigns) do
+    ~H"""
+    <.form for={%{}} action={~p"/sign-out"} method="delete" class="contents">
+      <button type="submit" class="btn btn-sm">
+        Sign out <.icon name="hero-chevron-right-micro" />
+      </button>
+    </.form>
     """
   end
 
