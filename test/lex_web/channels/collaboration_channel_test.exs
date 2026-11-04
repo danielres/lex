@@ -24,13 +24,13 @@ defmodule LexWeb.CollaborationChannelTest do
     room = unique_room(scope)
     other_room = unique_room(scope)
 
-    first_socket = join(scope, room)
-    second_socket = join(scope, room)
-    other_socket = join(scope, other_room)
+    first_socket = scope |> join_channel(room)
+    second_socket = scope |> join_channel(room)
+    other_socket = scope |> join_channel(other_room)
 
-    assert {:ok, shared_doc} = Collaboration.open_document(scope, room)
-    assert {:ok, ^shared_doc} = Collaboration.open_document(scope, room)
-    assert {:ok, other_shared_doc} = Collaboration.open_document(scope, other_room)
+    assert {:ok, shared_doc} = scope |> Collaboration.open_document(room)
+    assert {:ok, ^shared_doc} = scope |> Collaboration.open_document(room)
+    assert {:ok, other_shared_doc} = scope |> Collaboration.open_document(other_room)
     refute shared_doc == other_shared_doc
 
     push(first_socket, "yjs_sync", {:binary, sync_step1_message()})
@@ -69,36 +69,36 @@ defmodule LexWeb.CollaborationChannelTest do
 
   test "a document exits only after its final observing channel closes", %{scope: scope} do
     room = unique_room(scope)
-    first_socket = join(scope, room)
-    second_socket = join(scope, room)
-    {:ok, shared_doc} = Collaboration.open_document(scope, room)
+    first_socket = scope |> join_channel(room)
+    second_socket = scope |> join_channel(room)
+    {:ok, shared_doc} = scope |> Collaboration.open_document(room)
     monitor = Process.monitor(shared_doc)
 
     push(first_socket, "yjs", {:binary, document_update_message("checkpoint text")})
     close_channel(first_socket)
     assert Process.alive?(shared_doc)
-    assert {:ok, ^shared_doc} = Collaboration.open_document(scope, room)
+    assert {:ok, ^shared_doc} = scope |> Collaboration.open_document(room)
     assert checkpoint_count(room) == 0
 
     close_channel(second_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
     assert_eventually(fn -> Registry.lookup(Lex.Collaboration.Registry, room) == [] end)
     assert checkpoint_count(room) == 1
-    assert persisted_text(scope, room) == "checkpoint text"
+    assert scope |> persisted_text(room) == "checkpoint text"
     assert Ash.read!(PageRevision) == []
   end
 
   test "a checkpoint hydrates the document when its room reopens", %{scope: scope} do
     room = unique_room(scope)
-    socket = join(scope, room)
-    {:ok, shared_doc} = Collaboration.open_document(scope, room)
+    socket = scope |> join_channel(room)
+    {:ok, shared_doc} = scope |> Collaboration.open_document(room)
     monitor = Process.monitor(shared_doc)
 
     push(socket, "yjs", {:binary, document_update_message("persistent text")})
     close_channel(socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
 
-    reopened_socket = join(scope, room)
+    reopened_socket = scope |> join_channel(room)
     push(reopened_socket, "yjs_sync", {:binary, sync_step1_message()})
     assert_push "yjs", {:binary, sync_reply}
     assert {:ok, {:sync, {:sync_step2, update}}} = Sync.message_decode(sync_reply)
@@ -107,7 +107,7 @@ defmodule LexWeb.CollaborationChannelTest do
     assert :ok = Yex.apply_update(synced_doc, update)
     assert Yex.Doc.get_text(synced_doc, "content") |> Yex.Text.to_string() == "persistent text"
 
-    {:ok, reopened_shared_doc} = Collaboration.open_document(scope, room)
+    {:ok, reopened_shared_doc} = scope |> Collaboration.open_document(room)
     reopened_monitor = Process.monitor(reopened_shared_doc)
     close_channel(reopened_socket)
     assert_receive {:DOWN, ^reopened_monitor, :process, ^reopened_shared_doc, :normal}
@@ -117,10 +117,10 @@ defmodule LexWeb.CollaborationChannelTest do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"
     caption_room = "#{page.id}/caption-1"
-    main_socket = join(scope, main_room)
-    caption_socket = join(scope, caption_room)
-    {:ok, main_shared_doc} = Collaboration.open_document(scope, main_room)
-    {:ok, caption_shared_doc} = Collaboration.open_document(scope, caption_room)
+    main_socket = scope |> join_channel(main_room)
+    caption_socket = scope |> join_channel(caption_room)
+    {:ok, main_shared_doc} = scope |> Collaboration.open_document(main_room)
+    {:ok, caption_shared_doc} = scope |> Collaboration.open_document(caption_room)
     main_monitor = Process.monitor(main_shared_doc)
     caption_monitor = Process.monitor(caption_shared_doc)
 
@@ -131,8 +131,8 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^main_monitor, :process, ^main_shared_doc, :normal}
     assert_receive {:DOWN, ^caption_monitor, :process, ^caption_shared_doc, :normal}
 
-    assert persisted_text(scope, main_room) == "main text"
-    assert persisted_text(scope, caption_room) == "caption text"
+    assert scope |> persisted_text(main_room) == "main text"
+    assert scope |> persisted_text(caption_room) == "caption text"
   end
 
   test "semantic checkpoints save changed active documents and skip unchanged ones", %{
@@ -141,8 +141,8 @@ defmodule LexWeb.CollaborationChannelTest do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"
     caption_room = "#{page.id}/caption-1"
-    {:ok, main_shared_doc} = Collaboration.open_document(scope, main_room)
-    {:ok, caption_shared_doc} = Collaboration.open_document(scope, caption_room)
+    {:ok, main_shared_doc} = scope |> Collaboration.open_document(main_room)
+    {:ok, caption_shared_doc} = scope |> Collaboration.open_document(caption_room)
     :ok = SharedDoc.observe(main_shared_doc)
     :ok = SharedDoc.observe(caption_shared_doc)
 
@@ -162,10 +162,10 @@ defmodule LexWeb.CollaborationChannelTest do
     ]
 
     assert {:ok, %{revision: :saved, saved: 2, unchanged: 0}} =
-             Collaboration.checkpoint(page, documents)
+             scope |> Collaboration.checkpoint(page, documents)
 
     assert {:ok, %{revision: :unchanged, saved: 0, unchanged: 2}} =
-             Collaboration.checkpoint(page, documents)
+             scope |> Collaboration.checkpoint(page, documents)
 
     page_documents = PageDocument |> Ash.Query.sort(:document_key) |> Ash.read!()
 
@@ -186,13 +186,13 @@ defmodule LexWeb.CollaborationChannelTest do
 
   test "update confirmation acknowledges preceding document updates", %{scope: scope} do
     room = unique_room(scope)
-    socket = join(scope, room)
+    socket = scope |> join_channel(room)
 
     push(socket, "yjs", {:binary, document_update_message("before confirmation")})
     reference = push(socket, "confirm_updates_applied", %{})
     assert_reply reference, :ok, %{}
 
-    assert {:ok, shared_doc} = Collaboration.open_document(scope, room)
+    assert {:ok, shared_doc} = scope |> Collaboration.open_document(room)
     doc = SharedDoc.get_doc(shared_doc)
     assert doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string() == "before confirmation"
 
@@ -205,13 +205,14 @@ defmodule LexWeb.CollaborationChannelTest do
     page = scope |> Page.ensure!(unique_slug())
 
     assert {:error, :document_not_open} =
-             Collaboration.checkpoint(page, [document_snapshot("main", "Missing")])
+             scope
+             |> Collaboration.checkpoint(page, [document_snapshot("main", "Missing")])
   end
 
   test "awareness is not included in the persisted document", %{scope: scope} do
     room = unique_room(scope)
-    socket = join(scope, room)
-    {:ok, shared_doc} = Collaboration.open_document(scope, room)
+    socket = scope |> join_channel(room)
+    {:ok, shared_doc} = scope |> Collaboration.open_document(room)
     monitor = Process.monitor(shared_doc)
     doc = Yex.Doc.new()
     {:ok, awareness} = Yex.Awareness.new(doc)
@@ -223,20 +224,24 @@ defmodule LexWeb.CollaborationChannelTest do
     close_channel(socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
 
-    assert persisted_text(scope, room) == ""
+    assert scope |> persisted_text(room) == ""
   end
 
   test "invalid and nonexistent page rooms cannot join", %{scope: scope} do
-    assert {:error, %{reason: ":invalid_room"}} = join_error(scope, "not-a-page/main")
+    assert {:error, %{reason: ":invalid_room"}} = scope |> join_error("not-a-page/main")
 
     page = scope |> Page.ensure!(unique_slug())
-    assert {:error, %{reason: ":invalid_room"}} = join_error(scope, "#{page.id}/")
+    assert {:error, %{reason: ":invalid_room"}} = scope |> join_error("#{page.id}/")
 
     document_key = String.duplicate("x", 256)
-    assert {:error, %{reason: ":invalid_room"}} = join_error(scope, "#{page.id}/#{document_key}")
+
+    assert {:error, %{reason: ":invalid_room"}} =
+             scope |> join_error("#{page.id}/#{document_key}")
 
     missing_page_id = Ash.UUIDv7.generate()
-    assert {:error, %{reason: ":page_not_found"}} = join_error(scope, "#{missing_page_id}/main")
+
+    assert {:error, %{reason: ":page_not_found"}} =
+             scope |> join_error("#{missing_page_id}/main")
   end
 
   test "a corrupt checkpoint prevents the room from opening", %{scope: scope} do
@@ -250,7 +255,7 @@ defmodule LexWeb.CollaborationChannelTest do
     })
     |> Ash.create!()
 
-    assert {:error, %{reason: reason}} = join_error(scope, "#{page.id}/main")
+    assert {:error, %{reason: reason}} = scope |> join_error("#{page.id}/main")
     assert reason =~ "could not restore Yjs document"
   end
 
@@ -281,7 +286,7 @@ defmodule LexWeb.CollaborationChannelTest do
     }
   end
 
-  defp join(scope, room) do
+  defp join_channel(scope, room) do
     LexWeb.CollaborationSocket
     |> socket(nil, %{scope: scope})
     |> subscribe_and_join!(LexWeb.CollaborationChannel, "y_doc:#{room}")
@@ -320,7 +325,7 @@ defmodule LexWeb.CollaborationChannelTest do
     [page_id, document_key] = String.split(room, "/", parts: 2)
     page = Page.get!(page_id, scope: scope)
     doc = Yex.Doc.new()
-    :ok = Page.restore(page, document_key, doc)
+    :ok = scope |> Page.restore(page, document_key, doc)
     doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string()
   end
 

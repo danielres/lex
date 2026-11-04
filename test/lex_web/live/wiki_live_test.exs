@@ -5,8 +5,10 @@ defmodule LexWeb.WikiLiveTest do
 
   alias Lex.Wiki.Page
 
-  setup do
-    {:ok, scope: create_scope()}
+  setup :authenticate
+
+  setup %{current_user: current_user} do
+    {:ok, scope: create_scope("Test Space", current_user)}
   end
 
   test "lists links to pages other than home", %{conn: conn, scope: scope} do
@@ -100,7 +102,7 @@ defmodule LexWeb.WikiLiveTest do
     scope |> Page.ensure!("Second Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    assert :ok = Page.set_checkpoint(first_page, "main", document("updated"))
+    assert :ok = scope |> Page.set_checkpoint(first_page, "main", document("updated"))
 
     assert has_element?(view, "tbody tr:first-child", "First Page")
   end

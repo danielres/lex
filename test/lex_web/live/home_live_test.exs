@@ -5,8 +5,14 @@ defmodule LexWeb.HomeLiveTest do
 
   alias Lex.Accounts.Space
 
-  test "lists existing spaces and creates a space", %{conn: conn} do
-    existing_space = Space.create!(%{name: "Existing Space"})
+  setup :authenticate
+
+  test "lists existing spaces and creates a space", %{
+    conn: conn,
+    current_user: current_user
+  } do
+    scope = %Lex.Scope{current_user: current_user}
+    existing_space = Space.create!(%{name: "Existing Space"}, scope: scope)
 
     {:ok, view, _html} = live(conn, ~p"/")
 
@@ -54,6 +60,6 @@ defmodule LexWeb.HomeLiveTest do
 
     assert has_element?(view, "[data-testid='space'][href='/new-space']", "New Space")
     refute has_element?(view, "[data-testid='space-creation-form']")
-    assert [%{name: "Existing Space"}, %{name: "New Space"}] = Space.list!()
+    assert [%{name: "Existing Space"}, %{name: "New Space"}] = Space.list!(scope: scope)
   end
 end

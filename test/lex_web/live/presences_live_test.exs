@@ -3,10 +3,17 @@ defmodule LexWeb.PresencesLiveTest do
 
   import Phoenix.LiveViewTest
 
-  test "renders the connected collaborator", %{conn: conn} do
+  setup :authenticate
+
+  setup %{current_user: current_user} do
+    {:ok, scope: create_scope("Test Space", current_user)}
+  end
+
+  test "renders the authenticated user", %{conn: conn, current_user: current_user} do
     {:ok, view, _html} = live(conn, ~p"/test-space")
 
     assert has_element?(view, "[data-testid=presence]")
+    assert has_element?(view, "[data-testid=presence]", current_user.display_name)
     assert has_element?(view, "[data-testid=presences-expanded-count]", "1")
     assert has_element?(view, "[data-testid=presences-collapsed-count]", "1")
   end

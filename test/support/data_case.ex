@@ -40,9 +40,14 @@ defmodule Lex.DataCase do
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 
-  def create_scope(name \\ "Test Space") do
-    space = Lex.Accounts.Space.create!(%{name: name})
-    %Lex.Scope{space_id: space.id}
+  def create_user(display_name \\ "Test User") do
+    Ash.Seed.seed!(Lex.Accounts.User, %{display_name: display_name, hue: 200})
+  end
+
+  def create_scope(name \\ "Test Space", current_user \\ create_user()) do
+    scope = %Lex.Scope{current_user: current_user}
+    space = Lex.Accounts.Space.create!(%{name: name}, scope: scope)
+    %{scope | space_id: space.id}
   end
 
   @doc """

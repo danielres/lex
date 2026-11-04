@@ -13,27 +13,30 @@ defmodule Lex.Wiki.PageRevisionTest do
     second_state = lexical_state("Second version")
 
     assert {:ok, :saved} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
              )
 
     assert {:ok, :unchanged} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
              )
 
     assert {:ok, :saved} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{lexical_state: second_state, search_text: "Second version"},
                nil
              )
 
-    [second_revision, first_revision] = Page.list_revisions!(page)
+    [second_revision, first_revision] = scope |> Page.list_revisions!(page)
 
     assert second_revision.lexical_state == second_state
     assert second_revision.search_text == "Second version"
@@ -49,16 +52,18 @@ defmodule Lex.Wiki.PageRevisionTest do
     first_state = lexical_state("First version")
 
     assert {:ok, :saved} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
              )
 
-    [source_revision] = Page.list_revisions!(page)
+    [source_revision] = scope |> Page.list_revisions!(page)
 
     assert {:ok, :saved} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{
                  lexical_state: lexical_state("Restored version"),
@@ -67,17 +72,18 @@ defmodule Lex.Wiki.PageRevisionTest do
                source_revision.id
              )
 
-    [restored_revision, ^source_revision] = Page.list_revisions!(page)
+    [restored_revision, ^source_revision] = scope |> Page.list_revisions!(page)
     assert restored_revision.restored_from_revision_id == source_revision.id
 
     assert {:error, _error} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                other_page,
                %{lexical_state: lexical_state("Invalid"), search_text: "Invalid"},
                source_revision.id
              )
 
-    assert Page.list_revisions!(other_page) == []
+    assert scope |> Page.list_revisions!(other_page) == []
   end
 
   defp lexical_state(text) do
