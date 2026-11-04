@@ -33,10 +33,11 @@ defmodule LexWeb.Layouts.Navbar do
 
         <:content>
           <div class={[
-            "bg-base-300 p-4 mr-4 mt-5",
+            "bg-base-300",
+            "px-4 py-3 mr-4 mt-5",
             "min-w-36",
             "rounded-box",
-            "shadow",
+            "shadow-lg",
             "border border-base-content/20",
             "grid gap-2"
           ]}>
