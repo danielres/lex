@@ -6,7 +6,8 @@
  *
  */
 
-.lexical-editor select {
+.lexical-editor select,
+.lexical-portal select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -23,20 +24,19 @@
   outline: none;
 }
 
-.lexical-editor {
-  --select-border: #393939;
-  --select-focus: #101484;
-  --select-arrow: var(--select-border);
-}
-
 .select {
   min-width: 160px;
   max-width: 290px;
-  border: 1px solid var(--select-border);
+  border: 1px solid var(--lexical-select-border-color, #393939);
   border-radius: 0.25em;
   padding: 0.25em 0.5em;
   font-size: 1rem;
   cursor: pointer;
   line-height: 1.4;
-  background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+  background: linear-gradient(
+    to bottom,
+    var(--lexical-select-background-start, #ffffff) 0%,
+    var(--lexical-select-background-end, #e5e5e5) 100%
+  );
+  color: var(--lexical-editor-text-color, inherit);
 }

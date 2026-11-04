@@ -16,12 +16,14 @@
 .Input__label {
   display: flex;
   flex: 1;
-  color: #666;
+  color: var(--lexical-input-label-color, #666);
 }
 .Input__input {
   display: flex;
   flex: 2;
-  border: 1px solid #999;
+  border: 1px solid var(--lexical-control-border-color, #999);
+  background: var(--lexical-control-surface, field);
+  color: var(--lexical-editor-text-color, fieldtext);
   padding-top: 7px;
   padding-bottom: 7px;
   padding-left: 10px;
