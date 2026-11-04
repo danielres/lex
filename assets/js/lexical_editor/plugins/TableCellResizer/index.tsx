@@ -483,7 +483,7 @@ function TableCellResizer({editor}: {editor: LexicalEditor}): JSX.Element {
   const resizerStyles = getResizers();
 
   return (
-    <div ref={resizerRef}>
+    <div className="lexical-portal" ref={resizerRef}>
       {activeCell != null && (
         <>
           <div

@@ -632,7 +632,7 @@ function TableHoverActionsV2({
           ...floatingStyles,
           opacity: isVisible ? 1 : 0,
         }}
-        className="floating-top-actions">
+        className="lexical-portal floating-top-actions">
         <button
           ref={dragHandleRef}
           className="floating-drag-indicator"
@@ -655,7 +655,7 @@ function TableHoverActionsV2({
           </DropDownItem>
         </DropDown>
         <button
-          className="floating-add-indicator"
+          className="lexical-portal floating-add-indicator"
           aria-label="Add column"
           type="button"
           onClick={handleAddColumn}
@@ -670,7 +670,7 @@ function TableHoverActionsV2({
           ...leftFloatingStyles,
           opacity: isLeftVisible ? 1 : 0,
         }}
-        className="floating-add-indicator"
+        className="lexical-portal floating-add-indicator"
         aria-label="Add row"
         type="button"
         onClick={handleAddRow}

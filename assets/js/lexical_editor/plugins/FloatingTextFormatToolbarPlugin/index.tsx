@@ -212,7 +212,7 @@ function TextFormatFloatingToolbar({
   return (
     <div
       ref={mergedRef}
-      className="floating-text-format-popup"
+      className="lexical-portal floating-text-format-popup"
       role="toolbar"
       aria-label="Floating text format toolbar">
       {isEditable && (

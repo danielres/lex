@@ -61,7 +61,7 @@ function PortalImpl({
 
   return (
     <div
-      className="Modal__overlay"
+      className="lexical-portal Modal__overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}>

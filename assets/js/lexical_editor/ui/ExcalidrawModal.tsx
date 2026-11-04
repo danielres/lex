@@ -197,7 +197,7 @@ export default function ExcalidrawModal({
   };
 
   return createPortal(
-    <div className="ExcalidrawModal__overlay" role="dialog">
+    <div className="lexical-portal ExcalidrawModal__overlay" role="dialog">
       <div
         className="ExcalidrawModal__modal"
         ref={excaliDrawModelRef}

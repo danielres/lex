@@ -115,7 +115,7 @@ function AddCommentBox({
   }, [anchorKey, editor, updatePosition]);
 
   return (
-    <div className="CommentPlugin_AddCommentBox" ref={boxRef}>
+    <div className="lexical-portal CommentPlugin_AddCommentBox" ref={boxRef}>
       <button
         className="CommentPlugin_AddCommentBox_button"
         onClick={onAddComment}>
@@ -349,7 +349,7 @@ function CommentInputBox({
   const onChange = useOnChange(setContent, setCanSubmit);
 
   return (
-    <div className="CommentPlugin_CommentInputBox" ref={boxRef}>
+    <div className="lexical-portal CommentPlugin_CommentInputBox" ref={boxRef}>
       <PlainTextEditor
         className="CommentPlugin_CommentInputBox_Editor"
         onEscape={onEscape}
@@ -696,7 +696,7 @@ function CommentsPanel({
   const isEmpty = comments.length === 0;
 
   return (
-    <div className="CommentPlugin_CommentsPanel">
+    <div className="lexical-portal CommentPlugin_CommentsPanel">
       <h2 className="CommentPlugin_CommentsPanel_Heading">Comments</h2>
       {isEmpty ? (
         <div className="CommentPlugin_CommentsPanel_Empty">No Comments</div>
@@ -985,7 +985,7 @@ export default function CommentPlugin({
         )}
       {createPortal(
         <Button
-          className={`CommentPlugin_ShowCommentsButton ${
+          className={`lexical-portal CommentPlugin_ShowCommentsButton ${
             showComments ? 'active' : ''
           }`}
           onClick={() => setShowComments(!showComments)}

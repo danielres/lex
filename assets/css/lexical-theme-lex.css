@@ -5,15 +5,15 @@
  * the integration with the application's DaisyUI theme and responsive layout.
  */
 
-body .lexical-playground {
+.lexical-editor {
   @apply bg-transparent px-0 text-base-content rounded-box;
   @apply border border-transparent;
 }
 
- .lexical-playground[data-editable='true']  {
+ .lexical-editor[data-editable='true']  {
 }
 
-.editor-shell.wiki-editor {
+.editor-shell {
   @apply m-0 min-w-0 max-w-full text-base-content;
 
   .toolbar { @apply bg-base-300 border-b border-base-300 rounded-box mb-2; }
@@ -73,59 +73,59 @@ body .lexical-playground {
   }
 }
 
-.editor-shell.wiki-editor .link-editor,
-.editor-shell.wiki-editor .dropdown,
-.editor-shell.wiki-editor .dropdown .item,
-.editor-shell.wiki-editor .typeahead-popover,
-.editor-shell.wiki-editor .typeahead-popover li,
-body > .dropdown,
-body > .dropdown .item {
+.editor-shell .link-editor,
+.editor-shell .lexical-dropdown,
+.editor-shell .lexical-dropdown .item,
+.editor-shell .typeahead-popover,
+.editor-shell .typeahead-popover li,
+.lexical-portal.lexical-dropdown,
+.lexical-portal.lexical-dropdown .item {
   @apply bg-base-100 text-base-content;
 }
 
-body > .dropdown{
+.lexical-portal.lexical-dropdown{
   @apply shadow-lg border border-base-content/20;
 }
 
-.editor-shell.wiki-editor .ContentEditable__placeholder,
-.editor-shell.wiki-editor .characters-limit,
-.editor-shell.wiki-editor .dropdown .item .shortcut,
-.editor-shell.wiki-editor .toolbar .toolbar-item .text,
-body > .dropdown .item .shortcut {
+.editor-shell .ContentEditable__placeholder,
+.editor-shell .characters-limit,
+.editor-shell .lexical-dropdown .item .shortcut,
+.editor-shell .toolbar .toolbar-item .text,
+.lexical-portal.lexical-dropdown .item .shortcut {
   @apply text-base-content/60;
 }
 
-.editor-shell.wiki-editor .toolbar .divider   {
+.editor-shell .toolbar .divider   {
   @apply self-center;
 }
 
-.editor-shell.wiki-editor .toolbar .divider,
-.editor-shell.wiki-editor .dropdown .divider,
-.editor-shell.wiki-editor .floating-text-format-popup .divider,
-body > .dropdown .divider,
-body > .dropdown > hr {
+.editor-shell .toolbar .divider,
+.editor-shell .lexical-dropdown .divider,
+.editor-shell .floating-text-format-popup .divider,
+.lexical-portal.lexical-dropdown .divider,
+.lexical-portal.lexical-dropdown > hr {
   @apply bg-base-300;
 }
 
-.editor-shell.wiki-editor .toolbar-item:hover:not([disabled]),
-.editor-shell.wiki-editor .dropdown .item:hover,
-.editor-shell.wiki-editor .typeahead-popover li:hover,
-.editor-shell.wiki-editor .typeahead-popover ul li.selected,
-.editor-shell.wiki-editor .floating-text-format-popup .popup-item:hover:not([disabled]),
-.editor-shell.wiki-editor .link-editor .button.hovered,
-body > .dropdown .item:hover {
+.editor-shell .toolbar-item:hover:not([disabled]),
+.editor-shell .lexical-dropdown .item:hover,
+.editor-shell .typeahead-popover li:hover,
+.editor-shell .typeahead-popover ul li.selected,
+.editor-shell .floating-text-format-popup .popup-item:hover:not([disabled]),
+.editor-shell .link-editor .button.hovered,
+.lexical-portal.lexical-dropdown .item:hover {
   @apply bg-base-200;
 }
 
-.editor-shell.wiki-editor button.toolbar-item.active,
-.editor-shell.wiki-editor .floating-text-format-popup button.popup-item.active,
-.editor-shell.wiki-editor .link-editor .button.active,
-body > .dropdown .dropdown-item-active {
+.editor-shell button.toolbar-item.active,
+.editor-shell .floating-text-format-popup button.popup-item.active,
+.editor-shell .link-editor .button.active,
+.lexical-portal.lexical-dropdown .dropdown-item-active {
   @apply bg-primary/15;
 }
 
 
-.editor-shell.wiki-editor {
+.editor-shell {
   .action-button {
     @apply hidden;
     @apply bg-base-200 text-base-content;
@@ -208,8 +208,8 @@ body > .dropdown .dropdown-item-active {
 
 }
 
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableRowStriping tr:nth-child(even),
-.editor-shell.wiki-editor .PlaygroundEditorTheme__tableFrozenColumn
+.editor-shell .PlaygroundEditorTheme__tableRowStriping tr:nth-child(even),
+.editor-shell .PlaygroundEditorTheme__tableFrozenColumn
   .PlaygroundEditorTheme__table.PlaygroundEditorTheme__tableRowStriping
   tr:nth-child(even)
   > td:first-child {
@@ -219,65 +219,67 @@ body > .dropdown .dropdown-item-active {
 
 
 
-.editor-shell.wiki-editor .action-button:hover {
+.editor-shell .action-button:hover {
   @apply bg-base-300 text-base-content;
 }
 
-.editor-shell.wiki-editor .action-button[data-active="true"] {
+.editor-shell .action-button[data-active="true"] {
   @apply bg-primary/15 text-primary filter-none;
 }
 
-.editor-shell.wiki-editor .action-button[data-active="true"]:hover {
+.editor-shell .action-button[data-active="true"]:hover {
   @apply bg-primary/25 text-primary filter-none;
 }
 
-.editor-shell.wiki-editor button.action-button:disabled {
+.editor-shell button.action-button:disabled {
   @apply bg-base-200 text-base-content/50;
 }
 
-.editor-shell.wiki-editor .actions i {
+.editor-shell .actions i {
   @apply bg-current;
 }
 
-.editor-shell.wiki-editor[data-app-theme="dark"]
+.editor-shell[data-app-theme="dark"]
   .draggable-block-menu
   .icon {
   @apply brightness-0 invert opacity-60;
 }
 
-.editor-shell.wiki-editor[data-app-theme="dark"]
+.editor-shell[data-app-theme="dark"]
   .draggable-block-menu
   .icon:hover {
   @apply opacity-100;
 }
 
-body .Input__label {
+.lexical-portal .Input__label {
   @apply text-base-content/70;
 }
 
-body .Input__input {
+.lexical-portal .Input__input {
   @apply border-base-300 bg-base-100 text-base-content;
 }
 
-body .Button__root,
-body .Modal__closeButton {
+.lexical-portal.Button__root,
+.lexical-portal .Button__root,
+.lexical-portal .Modal__closeButton {
   @apply bg-base-200 text-base-content;
 }
 
-body .Button__root:hover,
-body .Modal__closeButton:hover {
+.lexical-portal.Button__root:hover,
+.lexical-portal .Button__root:hover,
+.lexical-portal .Modal__closeButton:hover {
   @apply bg-base-300;
 }
 
-body .Modal__overlay {
+.lexical-portal.Modal__overlay {
   @apply bg-neutral/60;
 }
 
-body .Modal__modal {
+.lexical-portal .Modal__modal {
   @apply bg-base-100 text-base-content shadow-xl;
 }
 
-body .Modal__title {
+.lexical-portal .Modal__title {
   @apply border-base-300 text-base-content;
 }
 

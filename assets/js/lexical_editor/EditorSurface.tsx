@@ -12,7 +12,7 @@ export default function EditorSurface({
   editable: boolean;
 }): JSX.Element {
   const appTheme = useAppTheme();
-  const classes = ['editor-shell', 'wiki-editor', className]
+  const classes = ['editor-shell', className]
     .filter(Boolean)
     .join(' ');
 

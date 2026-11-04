@@ -189,7 +189,7 @@ defmodule LexWeb.PageLive do
           id="current-page-editor"
         >
           <div
-            class="lexical-playground"
+            class="lexical-editor"
             data-checkpoint-event={Editing.checkpoint_event()}
             data-collaborator-display-name={@scope.current_user.display_name}
             data-collaborator-hue={@scope.current_user.hue}

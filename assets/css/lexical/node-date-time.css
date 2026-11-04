@@ -8,9 +8,9 @@
  */
 
 .dateTimePill {
+  background: #ddd;
   cursor: pointer;
   width: fit-content;
-  background: #ddd;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0px 4px 0px 4px;

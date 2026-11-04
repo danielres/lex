@@ -18,7 +18,7 @@ export default function FlashMessage({
   children,
 }: FlashMessageProps): JSX.Element {
   return createPortal(
-    <div className="FlashMessage__overlay" role="dialog">
+    <div className="lexical-portal FlashMessage__overlay" role="dialog">
       <p className="FlashMessage__alert" role="alert">
         {children}
       </p>

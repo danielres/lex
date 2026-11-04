@@ -6,7 +6,7 @@
  *
  */
 
-.lexical-playground select {
+.lexical-editor select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -23,7 +23,7 @@
   outline: none;
 }
 
-.lexical-playground {
+.lexical-editor {
   --select-border: #393939;
   --select-focus: #101484;
   --select-arrow: var(--select-border);

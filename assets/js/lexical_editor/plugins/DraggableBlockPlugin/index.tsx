@@ -237,7 +237,7 @@ export default function DraggableBlockPlugin({
       {isPickerOpen && pickerPosition
         ? ReactDOM.createPortal(
             <div
-              className="typeahead-popover component-picker-menu draggable-block-component-picker"
+              className="lexical-portal typeahead-popover component-picker-menu draggable-block-component-picker"
               ref={pickerRef}
               style={{
                 left: pickerPosition.left,
@@ -276,7 +276,7 @@ export default function DraggableBlockPlugin({
         menuRef={menuRef}
         targetLineRef={targetLineRef}
         menuComponent={
-          <div ref={menuRef} className="icon draggable-block-menu">
+          <div ref={menuRef} className="lexical-portal icon draggable-block-menu">
             <button
               title="Click to add below"
               className="icon icon-plus"
@@ -286,7 +286,7 @@ export default function DraggableBlockPlugin({
           </div>
         }
         targetLineComponent={
-          <div ref={targetLineRef} className="draggable-block-target-line" />
+          <div ref={targetLineRef} className="lexical-portal draggable-block-target-line" />
         }
         isOnMenu={isOnMenu}
         onElementChanged={setDraggableElement}

@@ -188,7 +188,7 @@ export default function StickyComponent({
   };
 
   return (
-    <div ref={stickyContainerRef} className="sticky-note-container">
+    <div ref={stickyContainerRef} className="lexical-portal sticky-note-container">
       <div
         className={`sticky-note ${color}`}
         onPointerDown={event => {

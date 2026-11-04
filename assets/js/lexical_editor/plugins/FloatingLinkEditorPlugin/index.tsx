@@ -458,7 +458,7 @@ function FloatingLinkEditor({
         editorRef.current = el;
         refs.setFloating(el);
       }}
-      className="link-editor"
+      className="lexical-portal link-editor"
       style={{
         ...floatingStyles,
         opacity: visible ? 1 : 0,

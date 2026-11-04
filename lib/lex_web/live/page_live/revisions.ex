@@ -209,7 +209,7 @@ defmodule LexWeb.PageLive.Revisions do
 
     <div
       :if={@revisions.selected}
-      class="lexical-playground"
+      class="lexical-editor"
       data-collaborator-display-name={current_user.display_name}
       data-collaborator-hue={current_user.hue}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}

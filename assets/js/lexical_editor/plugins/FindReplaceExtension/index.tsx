@@ -896,7 +896,7 @@ function FindReplacePanel({
 
   return createPortal(
     <div
-      className="find-replace-panel"
+      className="lexical-portal find-replace-panel"
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-label="Find and Replace">
