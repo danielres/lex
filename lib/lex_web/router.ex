@@ -26,7 +26,7 @@ defmodule LexWeb.Router do
 
     if Application.compile_env(:ash_authentication_dev_users, :enabled, false) do
       live "/dev/auth/sign-in", DevAuthLive
-      auth_routes AuthController, Lex.Accounts.User, path: "/dev/auth"
+      auth_routes DevAuthController, Lex.Accounts.User, path: "/dev/auth"
     end
 
     post "", AshTypescriptRpcController, :run
