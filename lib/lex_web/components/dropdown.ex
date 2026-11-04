@@ -9,6 +9,7 @@ defmodule LexWeb.Components.Dropdown do
   def render(assigns) do
     ~H"""
     <button
+      type="button"
       class={@class}
       popovertarget={@id}
       style={"anchor-name:--anchor-#{@id}"}
