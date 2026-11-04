@@ -49,6 +49,21 @@
     var(--color-base-content) 60%,
     transparent
   );
+  --lexical-comment-accent-hover: color-mix(
+    in oklab,
+    var(--color-info) 85%,
+    black
+  );
+  --lexical-comment-control-shadow: var(--lexical-control-shadow);
+  --lexical-comment-input-arrow-shadow: -3px 3px 3px 0 rgb(0 0 0 / 5%);
+  --lexical-comment-input-shadow: var(--lexical-control-shadow);
+  --lexical-comment-panel-shadow: var(--lexical-control-shadow);
+  --lexical-comment-quote-background: var(--lexical-highlight-background);
+  --lexical-comment-thread-background: color-mix(
+    in oklab,
+    var(--color-base-200) 50%,
+    transparent
+  );
   --lexical-control-active-surface: color-mix(
     in oklab,
     var(--color-primary) 15%,
@@ -172,6 +187,20 @@
   --lexical-quote-text-color: color-mix(
     in oklab,
     var(--color-base-content) 65%,
+    transparent
+  );
+  --lexical-review-author-color: color-mix(
+    in oklab,
+    var(--color-base-content) 70%,
+    transparent
+  );
+  --lexical-review-background: var(--color-base-100);
+  --lexical-review-border-color: var(--color-base-300);
+  --lexical-review-placeholder-color: var(--lexical-muted-text-color);
+  --lexical-review-star-active-color: var(--color-warning);
+  --lexical-review-star-color: color-mix(
+    in oklab,
+    var(--color-base-content) 25%,
     transparent
   );
   --lexical-selection-color: var(--color-info);

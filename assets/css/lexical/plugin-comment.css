@@ -11,10 +11,10 @@
   display: block;
   position: fixed;
   border-radius: 20px;
-  background-color: white;
+  background-color: var(--lexical-control-surface, white);
   width: 40px;
   height: 60px;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--lexical-comment-control-shadow, 0 0 3px rgba(0, 0, 0, 0.2));
   z-index: 10;
 }
 
@@ -28,10 +28,11 @@
   top: 0;
   left: 0;
   cursor: pointer;
+  color: var(--lexical-editor-text-color, inherit);
 }
 
 .CommentPlugin_AddCommentBox_button:hover {
-  background-color: #f6f6f6;
+  background-color: var(--lexical-control-hover-surface, #f6f6f6);
 }
 
 i.add-comment {
@@ -40,7 +41,15 @@ i.add-comment {
   height: 20px;
   width: 20px;
   vertical-align: -10px;
-  background-image: url(/assets/lexical/images/icons/chat-left-text.svg);
+  background-color: currentColor;
+  -webkit-mask-image: url(/assets/lexical/images/icons/chat-left-text.svg);
+  mask-image: url(/assets/lexical/images/icons/chat-left-text.svg);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 @media (max-width: 600px) {
@@ -54,8 +63,9 @@ i.add-comment {
   position: absolute;
   width: 250px;
   min-height: 80px;
-  background-color: #fff;
-  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+  background-color: var(--lexical-control-surface, #fff);
+  color: var(--lexical-editor-text-color, inherit);
+  box-shadow: var(--lexical-comment-input-shadow, 0 0 5px 0 rgba(0, 0, 0, 0.1));
   border-radius: 5px;
   z-index: 24;
   animation: show-input-box 0.4s ease;
@@ -71,11 +81,15 @@ i.add-comment {
   top: 0;
   left: calc(50% + 0.25em);
   box-sizing: border-box;
-  border: 0.5em solid black;
-  border-color: transparent transparent #fff #fff;
+  border: 0.5em solid transparent;
+  border-color: transparent transparent var(--lexical-control-surface, #fff)
+    var(--lexical-control-surface, #fff);
   transform-origin: 0 0;
   transform: rotate(135deg);
-  box-shadow: -3px 3px 3px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: var(
+    --lexical-comment-input-arrow-shadow,
+    -3px 3px 3px 0 rgba(0, 0, 0, 0.05)
+  );
 }
 
 @keyframes show-input-box {
@@ -101,26 +115,26 @@ i.add-comment {
 }
 
 .CommentPlugin_CommentInputBox_Button.primary {
-  background-color: rgb(66, 135, 245);
+  background-color: var(--lexical-selection-color, rgb(66, 135, 245));
   font-weight: bold;
-  color: #fff;
+  color: var(--lexical-selection-content-color, #fff);
 }
 
 .CommentPlugin_CommentInputBox_Button.primary:hover {
-  background-color: rgb(53, 114, 211);
+  background-color: var(--lexical-comment-accent-hover, rgb(53, 114, 211));
 }
 
 .CommentPlugin_CommentInputBox_Button[disabled] {
-  background-color: #eee;
+  background-color: var(--lexical-button-background, #eee);
   opacity: 0.5;
   cursor: not-allowed;
   font-weight: normal;
-  color: #444;
+  color: var(--lexical-muted-text-color, #444);
 }
 
 .CommentPlugin_CommentInputBox_Button[disabled]:hover {
   opacity: 0.5;
-  background-color: #eee;
+  background-color: var(--lexical-button-background, #eee);
 }
 
 .CommentPlugin_CommentInputBox_EditorContainer {
@@ -131,25 +145,26 @@ i.add-comment {
 
 .CommentPlugin_CommentInputBox_Editor {
   position: relative;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--lexical-control-border-color, #ccc);
+  background-color: var(--lexical-control-surface, #fff);
   border-radius: 5px;
   font-size: var(--playground-font-size);
-  caret-color: rgb(5, 5, 5);
+  caret-color: var(--lexical-editor-text-color, rgb(5, 5, 5));
+  color: var(--lexical-editor-text-color, inherit);
   display: block;
   padding: 9px 10px 10px 9px;
   min-height: 80px;
 }
 
 .CommentPlugin_CommentInputBox_Editor:focus {
-  outline: 1px solid rgb(66, 135, 245);
+  outline: 1px solid var(--lexical-selection-color, rgb(66, 135, 245));
 }
 
 .CommentPlugin_ShowCommentsButton {
   position: fixed;
   top: 10px;
   right: 10px;
-  background-color: #ddd;
+  background-color: var(--lexical-button-hover-background, #ddd);
   border-radius: 10px;
 }
 
@@ -159,7 +174,15 @@ i.comments {
   height: 20px;
   width: 20px;
   vertical-align: -10px;
-  background-image: url(/assets/lexical/images/icons/comments.svg);
+  background-color: currentColor;
+  -webkit-mask-image: url(/assets/lexical/images/icons/comments.svg);
+  mask-image: url(/assets/lexical/images/icons/comments.svg);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
   opacity: 0.5;
   transition: opacity 0.2s linear;
 }
@@ -175,7 +198,7 @@ i.comments {
 }
 
 .CommentPlugin_ShowCommentsButton.active {
-  background-color: #ccc;
+  background-color: var(--lexical-control-active-surface, #ccc);
 }
 
 .CommentPlugin_CommentsPanel {
@@ -184,9 +207,10 @@ i.comments {
   width: 300px;
   height: calc(100% - 88px);
   top: 88px;
-  background-color: #fff;
+  background-color: var(--lexical-control-surface, #fff);
+  color: var(--lexical-editor-text-color, inherit);
   border-top-left-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--lexical-comment-panel-shadow, 0 0 10px rgba(0, 0, 0, 0.1));
   animation: show-comments 0.2s ease;
   z-index: 25;
 }
@@ -207,21 +231,22 @@ i.comments {
   padding-top: 10px;
   margin: 0;
   height: 34px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--lexical-control-divider-color, #eee);
   font-size: 20px;
   display: block;
   width: 100%;
-  color: #444;
+  color: var(--lexical-editor-text-color, #444);
   overflow: hidden;
 }
 
 .CommentPlugin_CommentsPanel_Editor {
   position: relative;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--lexical-control-border-color, #ccc);
+  background-color: var(--lexical-control-surface, #fff);
   border-radius: 5px;
   font-size: var(--playground-font-size);
-  caret-color: rgb(5, 5, 5);
+  caret-color: var(--lexical-editor-text-color, rgb(5, 5, 5));
+  color: var(--lexical-editor-text-color, inherit);
   display: block;
   padding: 9px 10px 10px 9px;
   min-height: 20px;
@@ -239,6 +264,7 @@ i.comments {
   right: 10px;
   top: 8px;
   background: none;
+  color: var(--lexical-muted-text-color, inherit);
 }
 
 .CommentPlugin_CommentsPanel_SendButton:hover {
@@ -251,15 +277,23 @@ i.send {
   height: 20px;
   width: 20px;
   vertical-align: -10px;
-  background-image: url(/assets/lexical/images/icons/send.svg);
+  background-color: currentColor;
+  -webkit-mask-image: url(/assets/lexical/images/icons/send.svg);
+  mask-image: url(/assets/lexical/images/icons/send.svg);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  color: var(--lexical-muted-text-color, inherit);
   opacity: 0.5;
   transition: opacity 0.2s linear;
 }
 
 .CommentPlugin_CommentsPanel_SendButton:hover i.send {
   opacity: 1;
-  filter: invert(45%) sepia(98%) saturate(2299%) hue-rotate(201deg)
-    brightness(100%) contrast(92%);
+  color: var(--lexical-selection-color, rgb(66, 135, 245));
 }
 
 .CommentPlugin_CommentsPanel_SendButton[disabled] i.send {
@@ -268,11 +302,11 @@ i.send {
 
 .CommentPlugin_CommentsPanel_SendButton:hover[disabled] i.send {
   opacity: 0.3;
-  filter: none;
+  color: var(--lexical-muted-text-color, inherit);
 }
 
 .CommentPlugin_CommentsPanel_Empty {
-  color: #777;
+  color: var(--lexical-muted-text-color, #777);
   text-align: center;
   position: absolute;
   top: calc(50% - 15px);
@@ -308,11 +342,11 @@ i.send {
 
 .CommentPlugin_CommentsPanel_List_Comment p {
   margin: 0;
-  color: #444;
+  color: var(--lexical-editor-text-color, #444);
 }
 
 .CommentPlugin_CommentsPanel_List_Details {
-  color: #444;
+  color: var(--lexical-editor-text-color, #444);
   padding-bottom: 5px;
   vertical-align: top;
 }
@@ -323,17 +357,17 @@ i.send {
 }
 
 .CommentPlugin_CommentsPanel_List_Comment_Time {
-  color: #999;
+  color: var(--lexical-muted-text-color, #999);
 }
 
 .CommentPlugin_CommentsPanel_List_Thread {
   padding: 0 0 0 0;
   margin: 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid var(--lexical-control-divider-color, #eee);
+  border-bottom: 1px solid var(--lexical-control-divider-color, #eee);
   position: relative;
   transition: all 0.2s linear;
-  border-left: 0 solid #eee;
+  border-left: 0 solid var(--lexical-control-divider-color, #eee);
 }
 
 .CommentPlugin_CommentsPanel_List_Thread:first-child,
@@ -347,18 +381,18 @@ i.send {
 }
 
 .CommentPlugin_CommentsPanel_List_Thread.interactive:hover {
-  background-color: #fafafa;
+  background-color: var(--lexical-comment-thread-background, #fafafa);
 }
 
 .CommentPlugin_CommentsPanel_List_Thread.active {
-  background-color: #fafafa;
-  border-left: 15px solid #eee;
+  background-color: var(--lexical-comment-thread-background, #fafafa);
+  border-left: 15px solid var(--lexical-control-divider-color, #eee);
   cursor: inherit;
 }
 
 .CommentPlugin_CommentsPanel_List_Thread_QuoteBox {
   padding-top: 10px;
-  color: #ccc;
+  color: var(--lexical-muted-text-color, #ccc);
   display: block;
 }
 
@@ -367,8 +401,11 @@ i.send {
 }
 
 .CommentPlugin_CommentsPanel_List_Thread_Quote span {
-  color: #222;
-  background-color: rgba(255, 212, 0, 0.4);
+  color: var(--lexical-editor-text-color, #222);
+  background-color: var(
+    --lexical-comment-quote-background,
+    rgba(255, 212, 0, 0.4)
+  );
   padding: 1px;
   line-height: 1.4;
   display: inline;
@@ -395,7 +432,7 @@ i.send {
 .CommentPlugin_CommentsPanel_List_Thread_Comments
   .CommentPlugin_CommentsPanel_List_Comment {
   padding-left: 10px;
-  border-left: 5px solid #eee;
+  border-left: 5px solid var(--lexical-control-divider-color, #eee);
   margin-left: 5px;
 }
 
@@ -411,6 +448,7 @@ i.send {
   width: 30px;
   height: 30px;
   background-color: transparent;
+  color: var(--lexical-muted-text-color, inherit);
   opacity: 0;
 }
 
@@ -425,8 +463,7 @@ i.send {
 .CommentPlugin_CommentsPanel_List_DeleteButton:hover {
   background-color: transparent;
   opacity: 1;
-  filter: invert(45%) sepia(98%) saturate(2299%) hue-rotate(201deg)
-    brightness(100%) contrast(92%);
+  color: var(--lexical-selection-color, rgb(66, 135, 245));
 }
 
 .CommentPlugin_CommentsPanel_List_DeleteButton i.delete {
@@ -437,6 +474,19 @@ i.send {
   height: 15px;
   width: 15px;
   vertical-align: -10px;
-  background-image: url(/assets/lexical/images/icons/trash3.svg);
+  background-color: currentColor;
+  -webkit-mask-image: url(/assets/lexical/images/icons/trash3.svg);
+  mask-image: url(/assets/lexical/images/icons/trash3.svg);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  color: var(--lexical-muted-text-color, inherit);
   transition: opacity 0.2s linear;
+}
+
+.CommentPlugin_CommentsPanel_List_DeleteButton:hover i.delete {
+  color: var(--lexical-selection-color, rgb(66, 135, 245));
 }

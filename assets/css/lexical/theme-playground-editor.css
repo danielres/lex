@@ -979,8 +979,8 @@
    NodeState) sits above the editable islands — the testimonial prose
    (getDOMSlot children) and the `author` slot container. */
 .lexical-review-node {
-  background: #fafaf9;
-  border: 1px solid #e7e5e4;
+  background: var(--lexical-review-background, #fafaf9);
+  border: 1px solid var(--lexical-review-border-color, #e7e5e4);
   border-radius: 8px;
   margin: 8px 0;
 }
@@ -997,14 +997,14 @@
 .lexical-review-star {
   background: none;
   border: none;
-  color: #d6d3d1;
+  color: var(--lexical-review-star-color, #d6d3d1);
   cursor: pointer;
   font-size: 20px;
   line-height: 1;
   padding: 0;
 }
 .lexical-review-star-on {
-  color: #f59e0b;
+  color: var(--lexical-review-star-active-color, #f59e0b);
 }
 .lexical-review-children {
   font-style: italic;
@@ -1017,7 +1017,7 @@
   outline: none;
 }
 .lexical-review-author [data-lexical-slot='author'] > * {
-  color: #57534e;
+  color: var(--lexical-review-author-color, #57534e);
   /* Fill the row beside the permanent '— ' prefix so the editable line (and
      its empty-state placeholder overlay) does not collapse to zero width. */
   flex: 1;
@@ -1032,7 +1032,7 @@
    line. */
 .lexical-review-author [data-lexical-slot='author']::before {
   content: '— ';
-  color: #57534e;
+  color: var(--lexical-review-author-color, #57534e);
   font-size: 14px;
   font-weight: 600;
   user-select: none;
@@ -1061,7 +1061,7 @@
   [data-lexical-slot='author']
   > p:has(> br):not(:has(> * + *))::before,
 .lexical-review-children > p:only-of-type:has(> br):not(:has(> * + *))::before {
-  color: #a8a29e;
+  color: var(--lexical-review-placeholder-color, #a8a29e);
   left: 0;
   pointer-events: none;
   position: absolute;
