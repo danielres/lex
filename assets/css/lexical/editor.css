@@ -265,8 +265,11 @@
 }
 
 .typeahead-popover {
-  background: #fff;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  background: var(--lexical-control-surface, #fff);
+  box-shadow: var(
+    --lexical-control-shadow,
+    0px 5px 10px rgba(0, 0, 0, 0.3)
+  );
   border-radius: 8px;
   position: relative;
 }
@@ -299,19 +302,19 @@
 }
 
 .typeahead-popover ul li.selected {
-  background: #eee;
+  background: var(--lexical-control-hover-surface, #eee);
 }
 
 .typeahead-popover li {
   margin: 0 8px 0 8px;
   padding: 8px;
-  color: #050505;
+  color: var(--lexical-editor-text-color, #050505);
   cursor: pointer;
   display: flex;
   align-content: center;
   flex-direction: row;
   flex-shrink: 0;
-  background-color: #fff;
+  background-color: var(--lexical-control-surface, #fff);
   border-radius: 8px;
   border: 0;
 }
@@ -332,7 +335,7 @@
 }
 
 .typeahead-popover li:hover {
-  background-color: #eee;
+  background-color: var(--lexical-control-hover-surface, #eee);
 }
 
 .typeahead-popover li .text {
@@ -696,7 +699,7 @@ i.page-setup,
 
 .link-editor .button.active,
 .toolbar .button.active {
-  background-color: rgb(223, 232, 250);
+  background-color: var(--lexical-control-active-surface, rgb(223, 232, 250));
 }
 
 .link-editor .link-input {
@@ -706,9 +709,9 @@ i.page-setup,
   margin: 12px 12px;
   padding: 8px 12px;
   border-radius: 15px;
-  background-color: #eee;
+  background-color: var(--lexical-link-editor-field-background, #eee);
   font-size: var(--playground-font-size);
-  color: rgb(5, 5, 5);
+  color: var(--lexical-editor-text-color, rgb(5, 5, 5));
   border: 0;
   outline: 0;
   position: relative;
@@ -722,7 +725,8 @@ i.page-setup,
   padding: 8px 12px;
   border-radius: 15px;
   font-size: var(--playground-font-size);
-  color: rgb(5, 5, 5);
+  color: var(--lexical-editor-text-color, rgb(5, 5, 5));
+  background-color: var(--lexical-link-editor-field-background, transparent);
   border: 0;
   outline: 0;
   position: relative;
@@ -794,7 +798,7 @@ i.page-setup,
 }
 
 .link-editor .link-input a {
-  color: rgb(33, 111, 219);
+  color: var(--lexical-link-color, rgb(33, 111, 219));
   text-decoration: underline;
   white-space: nowrap;
   overflow: hidden;
@@ -815,7 +819,10 @@ i.page-setup,
 .link-editor select {
   padding: 6px;
   border: none;
-  background-color: rgba(0, 0, 0, 0.075);
+  background-color: var(
+    --lexical-link-editor-select-background,
+    rgba(0, 0, 0, 0.075)
+  );
   border-radius: 4px;
 }
 
@@ -842,19 +849,22 @@ i.page-setup,
   z-index: 100;
   display: block;
   position: fixed;
-  box-shadow:
+  box-shadow: var(
+    --lexical-dropdown-shadow,
     0 12px 28px 0 rgba(0, 0, 0, 0.2),
     0 2px 4px 0 rgba(0, 0, 0, 0.1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5)
+  );
+  border: var(--lexical-dropdown-border, none);
   border-radius: 8px;
   min-height: 40px;
-  background-color: #fff;
+  background-color: var(--lexical-control-surface, #fff);
 }
 
 .lexical-dropdown .item {
   margin: 0 8px 0 8px;
   padding: 8px;
-  color: #050505;
+  color: var(--lexical-editor-text-color, #050505);
   cursor: pointer;
   line-height: 16px;
   font-size: var(--playground-font-size);
@@ -863,7 +873,7 @@ i.page-setup,
   flex-direction: row;
   flex-shrink: 0;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: var(--lexical-control-surface, #fff);
   border-radius: 8px;
   border: 0;
   max-width: 264px;
@@ -884,7 +894,7 @@ i.page-setup,
 }
 
 .lexical-dropdown .item .shortcut {
-  color: #939393;
+  color: var(--lexical-muted-text-color, #939393);
   align-self: flex-end;
 }
 
@@ -904,7 +914,7 @@ i.page-setup,
 }
 
 .lexical-dropdown .item:hover {
-  background-color: #eee;
+  background-color: var(--lexical-control-hover-surface, #eee);
 }
 
 .lexical-dropdown .item .text {
@@ -950,9 +960,13 @@ i.page-setup,
 
 .lexical-dropdown .divider {
   width: auto;
-  background-color: #eee;
+  background-color: var(--lexical-control-divider-color, #eee);
   margin: 4px 8px;
   height: 1px;
+}
+
+.lexical-dropdown > hr {
+  background-color: var(--lexical-control-divider-color, #eee);
 }
 
 @media screen and (max-width: 1100px) {
@@ -1592,11 +1606,11 @@ button.action-button:disabled {
 
 .toolbar {
   display: flex;
-  margin-bottom: 1px;
-  background: #fff;
+  margin-bottom: var(--lexical-toolbar-margin-bottom, 1px);
+  background: var(--lexical-toolbar-background, #fff);
   padding: 6px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-bottom: var(--lexical-toolbar-border-bottom, none);
+  border-radius: var(--lexical-toolbar-border-radius, 10px 10px 0 0);
   vertical-align: middle;
   overflow: auto;
   scrollbar-width: thin;
@@ -1608,7 +1622,7 @@ button.action-button:disabled {
 }
 
 .toolbar .toolbar-item:focus {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60, 132, 244));
 }
 
 button.toolbar-item {
@@ -1652,7 +1666,10 @@ button.toolbar-item:disabled .chevron-down {
 }
 
 button.toolbar-item.active {
-  background-color: rgba(223, 232, 250, 0.3);
+  background-color: var(
+    --lexical-control-active-surface,
+    rgba(223, 232, 250, 0.3)
+  );
 }
 
 button.toolbar-item.active i {
@@ -1660,7 +1677,7 @@ button.toolbar-item.active i {
 }
 
 .toolbar-item:hover:not([disabled]) {
-  background-color: #eee;
+  background-color: var(--lexical-control-hover-surface, #eee);
 }
 
 .toolbar-item.font-family .text {
@@ -1677,7 +1694,7 @@ button.toolbar-item.active i {
   line-height: 20px;
   vertical-align: middle;
   font-size: 14px;
-  color: #777;
+  color: var(--lexical-muted-text-color, #777);
   text-overflow: ellipsis;
   overflow: hidden;
   height: 20px;
@@ -1723,8 +1740,9 @@ button.toolbar-item.active i {
 
 .toolbar .divider {
   width: 1px;
-  background-color: #eee;
+  background-color: var(--lexical-control-divider-color, #eee);
   margin: 0 4px;
+  align-self: center;
 }
 
 .sticky-note-container {
@@ -1904,7 +1922,10 @@ button.item i {
 }
 
 button.item.dropdown-item-active {
-  background-color: rgba(223, 232, 250, 0.3);
+  background-color: var(
+    --lexical-control-active-surface,
+    rgba(223, 232, 250, 0.3)
+  );
 }
 
 button.item.dropdown-item-active i {

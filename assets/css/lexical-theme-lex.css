@@ -11,8 +11,6 @@
 }
 
 .editor-shell {
-  .toolbar { @apply bg-base-300 border-b border-base-300 rounded-box mb-2; }
-
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
     @apply focus-within:outline-2 outline-info/50 rounded-box;
@@ -24,9 +22,6 @@
     > * { @apply my-[1em] first:mt-0; }
   }
 
-  .floating-text-format-popup {
-    @apply bg-base-200 border border-base-content/30;
-  }
 }
 
 .lexical-revision-preview {
@@ -64,55 +59,9 @@
   }
 }
 
-.editor-shell .link-editor,
-.editor-shell .lexical-dropdown,
-.editor-shell .lexical-dropdown .item,
-.editor-shell .typeahead-popover,
-.editor-shell .typeahead-popover li,
-.lexical-portal.lexical-dropdown,
-.lexical-portal.lexical-dropdown .item {
-  @apply bg-base-100 text-base-content;
-}
-
-.lexical-portal.lexical-dropdown{
-  @apply shadow-lg border border-base-content/20;
-}
-
 .editor-shell .ContentEditable__placeholder,
-.editor-shell .characters-limit,
-.editor-shell .lexical-dropdown .item .shortcut,
-.editor-shell .toolbar .toolbar-item .text,
-.lexical-portal.lexical-dropdown .item .shortcut {
+.editor-shell .characters-limit {
   @apply text-base-content/60;
-}
-
-.editor-shell .toolbar .divider   {
-  @apply self-center;
-}
-
-.editor-shell .toolbar .divider,
-.editor-shell .lexical-dropdown .divider,
-.editor-shell .floating-text-format-popup .divider,
-.lexical-portal.lexical-dropdown .divider,
-.lexical-portal.lexical-dropdown > hr {
-  @apply bg-base-300;
-}
-
-.editor-shell .toolbar-item:hover:not([disabled]),
-.editor-shell .lexical-dropdown .item:hover,
-.editor-shell .typeahead-popover li:hover,
-.editor-shell .typeahead-popover ul li.selected,
-.editor-shell .floating-text-format-popup .popup-item:hover:not([disabled]),
-.editor-shell .link-editor .button.hovered,
-.lexical-portal.lexical-dropdown .item:hover {
-  @apply bg-base-200;
-}
-
-.editor-shell button.toolbar-item.active,
-.editor-shell .floating-text-format-popup button.popup-item.active,
-.editor-shell .link-editor .button.active,
-.lexical-portal.lexical-dropdown .dropdown-item-active {
-  @apply bg-primary/15;
 }
 
 
@@ -174,11 +123,6 @@
   .PlaygroundEditorTheme__tableAddColumns:hover,
   .PlaygroundEditorTheme__tableAddRows:hover,
   .PlaygroundEditorTheme__tableCellActionButton:hover { @apply bg-base-300; }
-
-  .link-editor .link-input,
-  .link-editor .link-view {
-    @apply bg-base-200 text-base-content;
-  }
 
   .editor-image {
     img { @apply rounded-box; }
