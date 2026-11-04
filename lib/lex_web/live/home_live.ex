@@ -26,7 +26,9 @@ defmodule LexWeb.HomeLive do
 
   @impl true
   def handle_event("show_space_form", _params, socket) do
-    {:noreply, assign(socket, :creating_space?, true)}
+    socket = socket |> assign(creating_space?: true)
+
+    {:noreply, socket}
   end
 
   def handle_event("cancel_space_creation", _params, socket) do
@@ -44,7 +46,9 @@ defmodule LexWeb.HomeLive do
   def handle_event("validate_space", %{"space" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.space_form, params)
 
-    {:noreply, assign(socket, :space_form, form)}
+    socket = socket |> assign(space_form: form)
+
+    {:noreply, socket}
   end
 
   def handle_event("create_space", %{"space" => params}, socket) do
@@ -64,7 +68,9 @@ defmodule LexWeb.HomeLive do
         {:noreply, socket}
 
       {:error, form} ->
-        {:noreply, assign(socket, :space_form, form)}
+        socket = socket |> assign(space_form: form)
+
+        {:noreply, socket}
     end
   end
 

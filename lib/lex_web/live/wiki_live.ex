@@ -48,7 +48,7 @@ defmodule LexWeb.WikiLive do
     scope = socket.assigns.scope
     pages = scope |> list_pages(sort_by, sort_direction)
 
-    socket = socket |> assign(:pages, pages)
+    socket = socket |> assign(pages: pages)
 
     {:noreply, socket}
   end
@@ -60,7 +60,7 @@ defmodule LexWeb.WikiLive do
     scope = socket.assigns.scope
     pages = scope |> list_pages(sort_by, sort_direction)
 
-    socket = socket |> assign(:pages, pages)
+    socket = socket |> assign(pages: pages)
 
     {:noreply, socket}
   end

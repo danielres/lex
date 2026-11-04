@@ -16,7 +16,11 @@ defmodule LexWeb.PresencesLive do
       hue: current_user.hue
     }
 
-    socket = assign(socket, presence: presence, presences: get_presences(), scope: scope)
+    socket =
+      socket
+      |> assign(presence: presence)
+      |> assign(presences: get_presences())
+      |> assign(scope: scope)
 
     socket =
       if connected?(socket) do
@@ -33,7 +37,9 @@ defmodule LexWeb.PresencesLive do
 
   @impl true
   def handle_info({:group, _events, _info}, socket) do
-    {:noreply, assign(socket, :presences, get_presences())}
+    socket = socket |> assign(presences: get_presences())
+
+    {:noreply, socket}
   end
 
   @impl true
