@@ -1153,7 +1153,7 @@ i.paragraph,
 }
 
 .editor-shell .editor-image img.focused {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60, 132, 244));
   user-select: none;
 }
 
@@ -1178,10 +1178,13 @@ i.paragraph,
   right: 0;
   padding: 0;
   margin: 0;
-  border-top: 1px solid #fff;
-  background-color: rgba(255, 255, 255, 0.9);
+  border-top: var(--lexical-image-caption-border, 1px solid #fff);
+  background-color: var(
+    --lexical-image-caption-background,
+    rgba(255, 255, 255, 0.9)
+  );
   min-width: 100px;
-  color: #000;
+  color: var(--lexical-image-caption-text-color, #000);
   overflow: hidden;
   box-sizing: border-box;
   max-width: 100%;
@@ -1197,21 +1200,28 @@ i.paragraph,
   width: 30%;
   padding: 10px;
   margin: 0 auto;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid
+    var(--lexical-image-caption-button-border-color, rgba(255, 255, 255, 0.3));
   border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(
+    --lexical-image-caption-button-background,
+    rgba(0, 0, 0, 0.5)
+  );
   min-width: 100px;
-  color: #fff;
+  color: var(--lexical-image-caption-button-text-color, #fff);
   cursor: pointer;
   user-select: none;
 }
 
 .editor-shell .editor-image .image-caption-button:hover {
-  background-color: rgba(60, 132, 244, 0.5);
+  background-color: var(
+    --lexical-image-caption-button-hover-background,
+    rgba(60, 132, 244, 0.5)
+  );
 }
 
 .editor-shell .editor-image .image-edit-button {
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--lexical-control-border-color, rgba(0, 0, 0, 0.3));
   border-radius: 5px;
   background-image: url(/assets/lexical/images/icons/pencil-fill.svg);
   background-size: 16px;
@@ -1228,7 +1238,11 @@ i.paragraph,
 }
 
 .editor-shell .editor-image .image-edit-button:hover {
-  background-color: rgba(60, 132, 244, 0.1);
+  background-color: color-mix(
+    in srgb,
+    var(--lexical-selection-color, rgb(60, 132, 244)) 10%,
+    transparent
+  );
 }
 
 .editor-shell .editor-image .image-resizer {
@@ -1236,8 +1250,8 @@ i.paragraph,
   width: 7px;
   height: 7px;
   position: absolute;
-  background-color: rgb(60, 132, 244);
-  border: 1px solid #fff;
+  background-color: var(--lexical-selection-color, rgb(60, 132, 244));
+  border: 1px solid var(--lexical-selection-content-color, #fff);
 }
 
 .editor-shell .editor-image .image-resizer.image-resizer-n {
@@ -1727,7 +1741,8 @@ button.toolbar-item.active i {
   margin: 25px;
   padding: 20px 10px;
   position: relative;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--lexical-sticky-border-color, #e8e8e8);
+  color: var(--lexical-sticky-text-color, inherit);
   font-family: 'Reenie Beanie', cursive;
   font-size: 24px;
   border-bottom-right-radius: 60px 5px;
@@ -1743,30 +1758,39 @@ button.toolbar-item.active i {
   bottom: 20px;
   width: 120px;
   height: 25px;
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow: 2px 15px 5px rgba(0, 0, 0, 0.4);
+  background: var(--lexical-sticky-shadow-background, rgba(0, 0, 0, 0.2));
+  box-shadow: var(
+    --lexical-sticky-shadow,
+    2px 15px 5px rgba(0, 0, 0, 0.4)
+  );
   transform: matrix(-1, -0.1, 0, 1, 0, 0);
 }
 
 .sticky-note.yellow {
-  border-top: 1px solid #fdfd86;
-  background: linear-gradient(
-    135deg,
-    #ffff88 81%,
-    #ffff88 82%,
-    #ffff88 82%,
-    #ffffc6 100%
+  border-top: 1px solid var(--lexical-sticky-yellow-border-color, #fdfd86);
+  background: var(
+    --lexical-sticky-yellow-background,
+    linear-gradient(
+      135deg,
+      #ffff88 81%,
+      #ffff88 82%,
+      #ffff88 82%,
+      #ffffc6 100%
+    )
   );
 }
 
 .sticky-note.pink {
-  border-top: 1px solid #e7d1e4;
-  background: linear-gradient(
-    135deg,
-    #f7cbe8 81%,
-    #f7cbe8 82%,
-    #f7cbe8 82%,
-    #e7bfe1 100%
+  border-top: 1px solid var(--lexical-sticky-pink-border-color, #e7d1e4);
+  background: var(
+    --lexical-sticky-pink-background,
+    linear-gradient(
+      135deg,
+      #f7cbe8 81%,
+      #f7cbe8 82%,
+      #f7cbe8 82%,
+      #e7bfe1 100%
+    )
   );
 }
 

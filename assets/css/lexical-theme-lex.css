@@ -182,7 +182,7 @@
 
   .editor-image {
     img { @apply rounded-box; }
-    .image-caption-container { @apply bg-base-100/50 backdrop-blur border-none text-base-content/80; }
+    .image-caption-container { @apply backdrop-blur; }
   }
 
 }

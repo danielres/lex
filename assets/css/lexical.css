@@ -35,7 +35,8 @@
 @import "./lexical/ui-shadow-dom-wrapper.css";
 
 /* Application adapter for the structural Lexical styles. */
-.lexical-editor {
+.lexical-editor,
+.lexical-portal {
   --lexical-block-cursor-color: var(--color-base-content);
   --lexical-code-background: var(--color-base-200);
   --lexical-code-gutter-background: var(--color-base-300);
@@ -45,6 +46,13 @@
     var(--color-base-content) 60%,
     transparent
   );
+  --lexical-control-border-color: var(--color-base-300);
+  --lexical-control-hover-surface: var(--color-base-200);
+  --lexical-control-surface: var(--color-base-100);
+  --lexical-date-time-picker-shadow: 0 5px 10px
+    color-mix(in oklab, var(--color-base-content) 30%, transparent);
+  --lexical-date-time-pill-background: var(--color-base-300);
+  --lexical-date-time-pill-border-color: var(--color-base-300);
   --lexical-document-text-color: color-mix(
     in oklab,
     var(--color-base-content) 75%,
@@ -75,6 +83,25 @@
   );
   --lexical-highlight-border: none;
   --lexical-highlight-text-color: var(--color-base-content);
+  --lexical-image-caption-background: color-mix(
+    in oklab,
+    var(--color-base-100) 50%,
+    transparent
+  );
+  --lexical-image-caption-border: none;
+  --lexical-image-caption-button-background: rgb(0 0 0 / 50%);
+  --lexical-image-caption-button-border-color: rgb(255 255 255 / 30%);
+  --lexical-image-caption-button-hover-background: color-mix(
+    in oklab,
+    var(--color-info) 50%,
+    transparent
+  );
+  --lexical-image-caption-button-text-color: white;
+  --lexical-image-caption-text-color: color-mix(
+    in oklab,
+    var(--color-base-content) 80%,
+    transparent
+  );
   --lexical-link-color: var(--color-info);
   --lexical-link-hover-background: color-mix(
     in oklab,
@@ -82,10 +109,54 @@
     transparent
   );
   --lexical-mark-color: var(--color-warning);
+  --lexical-muted-text-color: color-mix(
+    in oklab,
+    var(--color-base-content) 60%,
+    transparent
+  );
+  --lexical-page-break-color: var(--color-base-300);
+  --lexical-poll-background: var(--color-base-100);
+  --lexical-poll-votes-background: color-mix(
+    in oklab,
+    var(--color-info) 10%,
+    transparent
+  );
   --lexical-quote-border-color: var(--color-base-300);
   --lexical-quote-text-color: color-mix(
     in oklab,
     var(--color-base-content) 65%,
     transparent
+  );
+  --lexical-selection-color: var(--color-info);
+  --lexical-selection-content-color: var(--color-info-content);
+  --lexical-sticky-border-color: color-mix(
+    in oklab,
+    var(--color-base-content) 15%,
+    transparent
+  );
+  --lexical-sticky-pink-background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-accent) 35%, white) 81%,
+    color-mix(in oklab, var(--color-accent) 35%, white) 82%,
+    color-mix(in oklab, var(--color-accent) 35%, white) 82%,
+    color-mix(in oklab, var(--color-accent) 20%, white) 100%
+  );
+  --lexical-sticky-pink-border-color: color-mix(
+    in oklab,
+    var(--color-accent) 25%,
+    white
+  );
+  --lexical-sticky-text-color: oklch(21% 0.006 285.885);
+  --lexical-sticky-yellow-background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-warning) 45%, white) 81%,
+    color-mix(in oklab, var(--color-warning) 45%, white) 82%,
+    color-mix(in oklab, var(--color-warning) 45%, white) 82%,
+    color-mix(in oklab, var(--color-warning) 20%, white) 100%
+  );
+  --lexical-sticky-yellow-border-color: color-mix(
+    in oklab,
+    var(--color-warning) 35%,
+    white
   );
 }

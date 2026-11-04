@@ -210,7 +210,7 @@ export default function DateTimeComponent({
           <FloatingOverlay lockScroll={true}>
             <FloatingFocusManager context={context} initialFocus={-1}>
               <div
-                className={'dateTimePicker'}
+                className="lexical-portal dateTimePicker"
                 ref={refs.setFloating}
                 style={floatingStyles}
                 {...getFloatingProps()}>
