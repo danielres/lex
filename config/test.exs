@@ -1,4 +1,5 @@
 import Config
+config :ash_authentication_development, enabled: true
 config :lex, token_signing_secret: "L+eXyy1VvJh1SQ5/8l73Yj5Jf7eux7Ur"
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true

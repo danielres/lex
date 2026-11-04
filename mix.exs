@@ -41,6 +41,7 @@ defmodule Lex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:ash_authentication_development, path: "packages/ash_authentication_development"},
       {:picosat_elixir, "~> 0.2"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_authentication, "~> 4.0"},

@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :ash_authentication_development, enabled: false
+
 config :ash_typescript,
   manifest: Lex.AshTypescriptManifest,
   output_file: "assets/js/ash_rpc.ts",

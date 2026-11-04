@@ -1,7 +1,8 @@
 [
   import_deps: [
-    :ash_authentication_phoenix,
     :ash_authentication,
+    :ash_authentication_development,
+    :ash_authentication_phoenix,
     :ash_typescript,
     :ash_admin,
     :ash_postgres,
@@ -12,7 +13,7 @@
     :ecto_sql,
     :phoenix
   ],
-  subdirectories: ["priv/*/migrations"],
+  subdirectories: ["packages/*", "priv/*/migrations"],
   plugins: [Spark.Formatter, Phoenix.LiveView.HTMLFormatter],
   inputs: ["*.{heex,ex,exs}", "{config,lib,test}/**/*.{heex,ex,exs}", "priv/*/seeds.exs"]
 ]

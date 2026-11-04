@@ -68,6 +68,7 @@ config :lex, LexWeb.Endpoint,
 
 # Enable dev routes for dashboard and mailbox
 config :lex, dev_routes: true, token_signing_secret: "d/vh6HPSY89SEbXpwsg2LFBBcROZjkAF"
+config :ash_authentication_development, enabled: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
