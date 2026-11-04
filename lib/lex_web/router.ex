@@ -8,7 +8,6 @@ defmodule LexWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug LexWeb.Collaborator
     plug :fetch_live_flash
     plug :put_root_layout, html: {LexWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -25,26 +24,20 @@ defmodule LexWeb.Router do
   scope "/", LexWeb do
     pipe_through :browser
 
-    ash_authentication_live_session :authenticated_routes do
-      # in each liveview, add one of the following at the top of the module:
-      #
-      # If an authenticated user must be present:
-      # on_mount {LexWeb.LiveUserAuth, :live_user_required}
-      #
-      # If an authenticated user *may* be present:
-      # on_mount {LexWeb.LiveUserAuth, :live_user_optional}
-      #
-      # If an authenticated user must *not* be present:
-      # on_mount {LexWeb.LiveUserAuth, :live_no_user}
+    if Application.compile_env(:ash_authentication_dev_users, :enabled, false) do
+      live "/dev/auth/sign-in", DevAuthLive
+      auth_routes DevAuthController, Lex.Accounts.User, path: "/dev/auth"
     end
-  end
 
-  scope "/", LexWeb do
-    pipe_through :browser
+    post "", AshTypescriptRpcController, :run
+    post "", AshTypescriptRpcController, :validate
+    get "/ash-typescript", PageController, :index
 
-    live_session :app,
-      on_mount: LexWeb.Collaborator,
-      session: {LexWeb.Collaborator, :live_session, []} do
+    sign_out_route AuthController, "/sign-out",
+      overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+
+    ash_authentication_live_session :app,
+      on_mount: [{LexWeb.LiveUserAuth, :live_user_required}] do
       live "/", HomeLive
 
       scope "/:space_slug" do
@@ -55,36 +48,6 @@ defmodule LexWeb.Router do
         live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
       end
     end
-
-    post "", AshTypescriptRpcController, :run
-    post "", AshTypescriptRpcController, :validate
-    get "/ash-typescript", PageController, :index
-    auth_routes AuthController, Lex.Accounts.User, path: "/auth"
-
-    sign_out_route AuthController, "/sign-out",
-      overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-
-    # Remove these if you'd like to use your own authentication views
-    sign_in_route register_path: "/register",
-                  reset_path: "/reset",
-                  auth_routes_prefix: "/auth",
-                  on_mount: [{LexWeb.LiveUserAuth, :live_no_user}],
-                  overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-
-    # Remove this if you do not want to use the reset password feature
-    reset_route auth_routes_prefix: "/auth",
-                overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-
-    # Remove this if you do not use the confirmation strategy
-    confirm_route Lex.Accounts.User, :confirm_new_user,
-      auth_routes_prefix: "/auth",
-      overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-
-    # Remove this if you do not use the magic link strategy.
-    magic_sign_in_route(Lex.Accounts.User, :magic_link,
-      auth_routes_prefix: "/auth",
-      overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
-    )
   end
 
   # Other scopes may use custom stacks.

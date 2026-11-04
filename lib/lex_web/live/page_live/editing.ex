@@ -9,7 +9,10 @@ defmodule LexWeb.PageLive.Editing do
   end
 
   def reload(socket, page) do
-    delegate_assign(socket, :title_form, title_form(page))
+    scope = socket.assigns.scope
+    form = scope |> title_form(page)
+
+    socket |> delegate_assign(:title_form, form)
   end
 
   def checkpoint_event, do: delegate_event("checkpoint")
@@ -38,7 +41,12 @@ defmodule LexWeb.PageLive.Editing do
 
   def handle_event("checkpoint", %{"documents" => documents}, socket)
       when is_list(documents) do
-    case Collaboration.checkpoint(socket.assigns.page, documents) do
+    scope = socket.assigns.scope
+    page = socket.assigns.page
+
+    scope
+    |> Collaboration.checkpoint(page, documents)
+    |> case do
       {:ok, counts} ->
         socket =
           socket
@@ -86,9 +94,9 @@ defmodule LexWeb.PageLive.Editing do
     end
   end
 
-  defp title_form(page) do
+  defp title_form(scope, page) do
     page
-    |> AshPhoenix.Form.for_update(:rename, as: "page_title")
+    |> AshPhoenix.Form.for_update(:rename, as: "page_title", scope: scope)
     |> to_form()
   end
 

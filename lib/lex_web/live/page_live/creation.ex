@@ -49,7 +49,7 @@ defmodule LexWeb.PageLive.Creation do
   @impl true
   def render(assigns) do
     path_preview = path_preview(assigns.creation.form[:title].value)
-    assigns = assigns |> assign(:path_preview, path_preview)
+    assigns = assigns |> assign(path_preview: path_preview)
 
     ~H"""
     <section class="mx-auto mt-16 max-w-2xs space-y-2 text-center" data-testid="missing-page">

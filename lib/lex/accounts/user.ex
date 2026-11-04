@@ -4,9 +4,22 @@ defmodule Lex.Accounts.User do
     domain: Lex.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication]
+    extensions: [AshAuthentication, AshAuthenticationDevUsers.Strategy]
 
   authentication do
+    strategies do
+      dev_users do
+        identity(:unique_display_name)
+
+        users(
+          tom: %{display_name: "Tom", hue: 25},
+          sandra: %{display_name: "Sandra", hue: 115},
+          john: %{display_name: "John", hue: 205},
+          alice: %{display_name: "Alice", hue: 295}
+        )
+      end
+    end
+
     add_ons do
       log_out_everywhere do
         apply_on_password_change? true
@@ -46,5 +59,20 @@ defmodule Lex.Accounts.User do
 
   attributes do
     uuid_primary_key :id
+
+    attribute :display_name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :hue, :integer do
+      allow_nil? false
+      constraints min: 0, max: 359
+      public? true
+    end
+  end
+
+  identities do
+    identity :unique_display_name, [:display_name]
   end
 end

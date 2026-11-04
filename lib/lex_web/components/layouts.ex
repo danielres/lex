@@ -30,15 +30,11 @@ defmodule LexWeb.Layouts do
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
-
   attr :active, :string, default: ""
   attr :editing?, :boolean, default: false
+  attr :scope, :map, required: true
   attr :socket, :any, required: true
   attr :space, :map, required: true
-  attr :user, :map, required: true
   attr :ui, :map, required: true
 
   slot :inner_block, required: true
@@ -57,17 +53,17 @@ defmodule LexWeb.Layouts do
       ]}>
         <Navbar.render
           drawer_open?={@ui.drawer_open?}
+          scope={@scope}
           space={@space}
-          user={@user}
         />
       </div>
 
       <Drawer.render
         active={@active}
         open?={@ui.drawer_open?}
+        scope={@scope}
         socket={@socket}
         space={@space}
-        user={@user}
       >
         <main class="min-w-0 max-w-full p-2 sm:p-8">
           {render_slot(@inner_block)}

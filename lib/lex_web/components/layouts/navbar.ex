@@ -6,11 +6,12 @@ defmodule LexWeb.Layouts.Navbar do
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
+  attr :scope, :map, required: true
   attr :space, :map, required: true
-  attr :user, :map, required: true
 
   def render(assigns) do
     ~H"""
+    <% current_user = @scope.current_user %>
     <div class={[
       "bg-base-300",
       "p-2 pr-4 max-sm:pl-0",
@@ -28,8 +29,8 @@ defmodule LexWeb.Layouts.Navbar do
       </div>
 
       <Tooltip.render alignment="end">
-        <Avatar.render user={@user} />
-        <:tooltip>{@user.display_name}</:tooltip>
+        <Avatar.render user={current_user} />
+        <:tooltip>{current_user.display_name}</:tooltip>
       </Tooltip.render>
     </div>
     """

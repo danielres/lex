@@ -1,11 +1,12 @@
 defmodule LexWeb.PageControllerTest do
   use LexWeb.ConnCase
 
-  test "GET /", %{conn: conn} do
+  setup :authenticate
+
+  test "GET / renders the spaces home", %{conn: conn} do
     conn = get(conn, ~p"/")
     response = html_response(conn, 200)
 
-    assert response =~ "Home"
-    refute response =~ ~s(data-document-id=)
+    assert response =~ "Your spaces"
   end
 end

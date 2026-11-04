@@ -16,7 +16,8 @@ defmodule LexWeb.PageLive.Revisions do
   end
 
   def reload(socket, page, revision_id \\ nil) do
-    entries = Page.list_revisions!(page)
+    scope = socket.assigns.scope
+    entries = scope |> Page.list_revisions!(page)
     selected = select_revision!(entries, revision_id)
     selected_index = selected_index(entries, selected)
 
@@ -75,9 +76,12 @@ defmodule LexWeb.PageLive.Revisions do
       )
       when is_list(documents) do
     page = socket.assigns.page
+    scope = socket.assigns.scope
     space = socket.assigns.space
 
-    case Collaboration.checkpoint(page, documents, revision_id) do
+    scope
+    |> Collaboration.checkpoint(page, documents, revision_id)
+    |> case do
       {:ok, _result} ->
         socket =
           socket
@@ -96,7 +100,12 @@ defmodule LexWeb.PageLive.Revisions do
 
   def handle_event("preserve", %{"documents" => documents}, socket)
       when is_list(documents) do
-    case Collaboration.checkpoint(socket.assigns.page, documents) do
+    scope = socket.assigns.scope
+    page = socket.assigns.page
+
+    scope
+    |> Collaboration.checkpoint(page, documents)
+    |> case do
       {:ok, _result} ->
         {:reply, %{ok: true}, socket}
 
@@ -132,6 +141,7 @@ defmodule LexWeb.PageLive.Revisions do
   @impl true
   def render(assigns) do
     ~H"""
+    <% current_user = @scope.current_user %>
     <div
       :if={@revisions.selected}
       class={[
@@ -200,8 +210,8 @@ defmodule LexWeb.PageLive.Revisions do
     <div
       :if={@revisions.selected}
       class="lexical-playground"
-      data-collaborator-display-name={@collaborator.display_name}
-      data-collaborator-hue={@collaborator.hue}
+      data-collaborator-display-name={current_user.display_name}
+      data-collaborator-hue={current_user.hue}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
       data-pages={assigns[:"data-pages"]}
       data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}

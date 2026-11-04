@@ -4,36 +4,15 @@ defmodule LexWeb.LiveUserAuth do
   """
 
   import Phoenix.Component
-  use LexWeb, :verified_routes
-
-  # This is used for nested liveviews to fetch the current user.
-  # To use, place the following at the top of that liveview:
-  # on_mount {LexWeb.LiveUserAuth, :current_user}
-  def on_mount(:current_user, _params, session, socket) do
-    {:cont, AshAuthentication.Phoenix.LiveSession.assign_new_resources(socket, session)}
-  end
-
-  def on_mount(:live_user_optional, _params, _session, socket) do
-    if socket.assigns[:current_user] do
-      {:cont, socket}
-    else
-      {:cont, assign(socket, :current_user, nil)}
-    end
-  end
 
   def on_mount(:live_user_required, _params, _session, socket) do
-    if socket.assigns[:current_user] do
-      {:cont, socket}
-    else
-      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
-    end
-  end
+    case socket.assigns[:current_user] do
+      %Lex.Accounts.User{} = current_user ->
+        scope = %Lex.Scope{current_user: current_user}
+        {:cont, assign(socket, :scope, scope)}
 
-  def on_mount(:live_no_user, _params, _session, socket) do
-    if socket.assigns[:current_user] do
-      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
-    else
-      {:cont, assign(socket, :current_user, nil)}
+      nil ->
+        {:halt, Phoenix.LiveView.redirect(socket, to: "/dev/auth/sign-in")}
     end
   end
 end

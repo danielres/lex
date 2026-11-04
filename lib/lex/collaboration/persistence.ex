@@ -7,7 +7,13 @@ defmodule Lex.Collaboration.Persistence do
 
   @impl true
   def bind(document_ref, _room, doc) do
-    case Page.restore(document_ref.page, document_ref.document_key, doc) do
+    scope = document_ref.scope
+    page = document_ref.page
+    document_key = document_ref.document_key
+
+    scope
+    |> Page.restore(page, document_key, doc)
+    |> case do
       :ok ->
         document_ref
 
@@ -18,9 +24,16 @@ defmodule Lex.Collaboration.Persistence do
 
   @impl true
   def unbind(document_ref, room, doc) do
-    with :ok <- Page.set_checkpoint(document_ref.page, document_ref.document_key, doc) do
-      :ok
-    else
+    scope = document_ref.scope
+    page = document_ref.page
+    document_key = document_ref.document_key
+
+    scope
+    |> Page.set_checkpoint(page, document_key, doc)
+    |> case do
+      :ok ->
+        :ok
+
       {:error, error} ->
         Logger.error(
           "Could not checkpoint collaboration room #{inspect(room)}: #{inspect(error)}"

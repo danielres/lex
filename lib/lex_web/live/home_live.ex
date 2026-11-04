@@ -9,26 +9,36 @@ defmodule LexWeb.HomeLive do
 
   @impl true
   def mount(params, session, socket) do
+    socket = socket |> delegate_mount(params, session)
+    scope = socket.assigns.scope
+
+    space_form = scope |> space_form()
+    spaces = Space.list!(scope: scope)
+
     socket =
       socket
-      |> delegate_mount(params, session)
       |> assign(:creating_space?, false)
-      |> assign(:space_form, space_form())
-      |> assign(:spaces, Space.list!())
+      |> assign(:space_form, space_form)
+      |> assign(:spaces, spaces)
 
     {:ok, socket}
   end
 
   @impl true
   def handle_event("show_space_form", _params, socket) do
-    {:noreply, assign(socket, :creating_space?, true)}
+    socket = socket |> assign(creating_space?: true)
+
+    {:noreply, socket}
   end
 
   def handle_event("cancel_space_creation", _params, socket) do
+    scope = socket.assigns.scope
+    space_form = scope |> space_form()
+
     socket =
       socket
       |> assign(:creating_space?, false)
-      |> assign(:space_form, space_form())
+      |> assign(:space_form, space_form)
 
     {:noreply, socket}
   end
@@ -36,16 +46,21 @@ defmodule LexWeb.HomeLive do
   def handle_event("validate_space", %{"space" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.space_form, params)
 
-    {:noreply, assign(socket, :space_form, form)}
+    socket = socket |> assign(space_form: form)
+
+    {:noreply, socket}
   end
 
   def handle_event("create_space", %{"space" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.space_form, params: params) do
       {:ok, space} ->
+        scope = socket.assigns.scope
+        space_form = scope |> space_form()
+
         socket =
           socket
           |> assign(:creating_space?, false)
-          |> assign(:space_form, space_form())
+          |> assign(:space_form, space_form)
           |> update(:spaces, fn spaces ->
             Enum.sort_by([space | spaces], & &1.name)
           end)
@@ -53,7 +68,9 @@ defmodule LexWeb.HomeLive do
         {:noreply, socket}
 
       {:error, form} ->
-        {:noreply, assign(socket, :space_form, form)}
+        socket = socket |> assign(space_form: form)
+
+        {:noreply, socket}
     end
   end
 
@@ -146,9 +163,9 @@ defmodule LexWeb.HomeLive do
     """
   end
 
-  defp space_form do
+  defp space_form(scope) do
     Space
-    |> AshPhoenix.Form.for_create(:create, as: "space")
+    |> AshPhoenix.Form.for_create(:create, as: "space", scope: scope)
     |> to_form()
   end
 end

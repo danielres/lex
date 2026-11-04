@@ -15,8 +15,8 @@ defmodule Lex.Collaboration do
 
   def open_document(scope, room) when is_binary(room) do
     with {:ok, document_ref} <- parse_room(room),
-         {:ok, page} <- load_page(scope, document_ref.page_id) do
-      document_ref = %{document_key: document_ref.document_key, page: page}
+         {:ok, page} <- scope |> load_page(document_ref.page_id) do
+      document_ref = %{document_key: document_ref.document_key, page: page, scope: scope}
       find_or_start_document(room, document_ref)
     end
   end
@@ -29,18 +29,19 @@ defmodule Lex.Collaboration do
     end
   end
 
-  def checkpoint(page, documents, restored_from_revision_id \\ nil)
+  def checkpoint(scope, page, documents, restored_from_revision_id \\ nil)
 
-  def checkpoint(_page, [], _restored_from_revision_id),
+  def checkpoint(_scope, _page, [], _restored_from_revision_id),
     do: {:error, :missing_document_snapshots}
 
-  def checkpoint(page, documents, restored_from_revision_id) when is_list(documents) do
-    with :ok <- validate_source_revision(page, restored_from_revision_id),
+  def checkpoint(scope, page, documents, restored_from_revision_id) when is_list(documents) do
+    with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, snapshots} <- snapshots(documents),
          {:ok, main_snapshot} <- main_snapshot(snapshots),
-         {:ok, counts} <- checkpoint_documents(page, snapshots),
+         {:ok, counts} <- checkpoint_documents(scope, page, snapshots),
          {:ok, revision} <-
-           Page.set_checkpoint(
+           scope
+           |> Page.set_checkpoint(
              page,
              %{
                lexical_state: main_snapshot.lexical_state,
@@ -52,19 +53,21 @@ defmodule Lex.Collaboration do
     end
   end
 
-  defp validate_source_revision(_page, nil), do: :ok
+  defp validate_source_revision(_scope, _page, nil), do: :ok
 
-  defp validate_source_revision(page, revision_id) do
-    case Page.get_revision(page, revision_id) do
+  defp validate_source_revision(scope, page, revision_id) do
+    scope
+    |> Page.get_revision(page, revision_id)
+    |> case do
       {:ok, nil} -> {:error, :revision_not_found}
       {:ok, _revision} -> :ok
       {:error, error} -> {:error, error}
     end
   end
 
-  defp checkpoint_documents(page, snapshots) do
+  defp checkpoint_documents(scope, page, snapshots) do
     Enum.reduce_while(snapshots, {:ok, %{saved: 0, unchanged: 0}}, fn snapshot, result ->
-      with {:ok, status} <- checkpoint_document(page, snapshot) do
+      with {:ok, status} <- scope |> checkpoint_document(page, snapshot) do
         {:ok, counts} = result
         counts = Map.update!(counts, status, &(&1 + 1))
         {:cont, {:ok, counts}}
@@ -74,10 +77,11 @@ defmodule Lex.Collaboration do
     end)
   end
 
-  defp checkpoint_document(page, snapshot) do
+  defp checkpoint_document(scope, page, snapshot) do
     with {:ok, shared_doc} <- active_document(page, snapshot.document_key) do
       doc = SharedDoc.get_doc(shared_doc)
-      Page.set_checkpoint(page, snapshot.document_key, doc, snapshot)
+
+      scope |> Page.set_checkpoint(page, snapshot.document_key, doc, snapshot)
     end
   end
 

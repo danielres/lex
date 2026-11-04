@@ -36,5 +36,24 @@ defmodule LexWeb.ConnCase do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
-  defdelegate create_scope(name \\ "Test Space"), to: Lex.DataCase
+  def authenticate(%{conn: conn}) do
+    current_user = Lex.DataCase.create_user()
+    conn = log_in_user(conn, current_user)
+
+    {:ok, conn: conn, current_user: current_user}
+  end
+
+  def log_in_user(conn, user) do
+    {:ok, token, _claims} = AshAuthentication.Jwt.token_for_user(user)
+    user = Ash.Resource.put_metadata(user, :token, token)
+
+    conn
+    |> Plug.Test.init_test_session(%{})
+    |> AshAuthentication.Plug.Helpers.store_in_session(user)
+  end
+
+  defdelegate create_scope(name \\ "Test Space", current_user \\ Lex.DataCase.create_user()),
+    to: Lex.DataCase
+
+  defdelegate create_user(display_name \\ "Test User"), to: Lex.DataCase
 end

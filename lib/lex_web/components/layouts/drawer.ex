@@ -1,14 +1,14 @@
 defmodule LexWeb.Layouts.Drawer do
   use LexWeb, :html
 
+  alias LexWeb.Components
   alias LexWeb.Layouts.ThemeToggle
   alias LexWeb.PresencesLive
   alias LexWeb.UI
-  alias LexWeb.Components
 
   attr :active, :string, required: true
-  attr :user, :map, required: true
   attr :open?, :boolean, required: true
+  attr :scope, :map, required: true
   attr :socket, :any, required: true
   attr :space, :map, required: true
   slot :inner_block, required: true
@@ -32,7 +32,7 @@ defmodule LexWeb.Layouts.Drawer do
 
         <.separator />
 
-        <.presences user={@user} socket={@socket} />
+        <.presences scope={@scope} socket={@socket} />
 
         <.separator visible?={@open?} />
 
@@ -55,7 +55,7 @@ defmodule LexWeb.Layouts.Drawer do
     {live_render(@socket, PresencesLive,
       container: {:div, class: "stacked", data: [testid: "presences-live"]},
       id: "app-presences",
-      session: %{"collaborator" => @user},
+      session: %{"scope" => @scope},
       sticky: true
     )}
     """

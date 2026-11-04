@@ -9,8 +9,10 @@ defmodule LexWeb.PageLiveTest do
   alias Lex.Wiki.PageRevision
   alias Yex.Sync.SharedDoc
 
-  setup do
-    {:ok, scope: create_scope()}
+  setup :authenticate
+
+  setup %{current_user: current_user} do
+    {:ok, scope: create_scope("Test Space", current_user)}
   end
 
   test "a direct visit offers to create a missing page with a title", %{conn: conn, scope: scope} do
@@ -77,7 +79,8 @@ defmodule LexWeb.PageLiveTest do
     {:ok, _view, first_html} = live(conn, ~p"/test-space/wiki/summer-activities")
     [page] = Ash.read!(Page, scope: scope)
 
-    {:ok, _view, second_html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
+    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    {:ok, _view, second_html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     assert first_html =~ ~s(data-document-id="#{page.id}")
     assert second_html =~ ~s(data-document-id="#{page.id}")
@@ -88,7 +91,8 @@ defmodule LexWeb.PageLiveTest do
     scope |> Page.ensure!("Home")
     scope |> Page.ensure!("Summer Activities")
     {:ok, _view, home_html} = live(conn, ~p"/test-space/wiki/home")
-    {:ok, _view, summer_html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
+    summer_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    {:ok, _view, summer_html} = live(summer_conn, ~p"/test-space/wiki/summer-activities")
 
     [home, summer] = Page |> Ash.Query.sort(:slug) |> Ash.read!(scope: scope)
 
@@ -101,7 +105,7 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert :ok = Page.set_checkpoint(page, "main", document("updated"))
+    assert :ok = scope |> Page.set_checkpoint(page, "main", document("updated"))
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
   end
@@ -110,7 +114,7 @@ defmodule LexWeb.PageLiveTest do
     scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
     [page] = Ash.read!(Page, scope: scope)
-    {:ok, shared_doc} = Collaboration.open_document(scope, "#{page.id}/main")
+    {:ok, shared_doc} = scope |> Collaboration.open_document("#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
@@ -188,7 +192,8 @@ defmodule LexWeb.PageLiveTest do
   test "propagates a rename to other viewers of the same page", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Summer Activities")
     {:ok, first_view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
-    {:ok, second_view, _html} = live(recycle(conn), ~p"/test-space/wiki/summer-activities")
+    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    {:ok, second_view, _html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(first_view)
 
@@ -300,8 +305,8 @@ defmodule LexWeb.PageLiveTest do
     scope: scope
   } do
     page = scope |> Page.ensure!("Home")
-    first_revision = create_revision(page, "First version")
-    second_revision = create_revision(page, "Second version")
+    first_revision = scope |> create_revision(page, "First version")
+    second_revision = scope |> create_revision(page, "Second version")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
@@ -336,9 +341,9 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(view, "button[aria-label='Restore revision']")
   end
 
-  test "passes the collaborator to revision previews", %{conn: conn, scope: scope} do
+  test "passes the authenticated user to revision previews", %{conn: conn, scope: scope} do
     page = scope |> Page.ensure!("Home")
-    revision = create_revision(page, "First version")
+    revision = scope |> create_revision(page, "First version")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
@@ -351,7 +356,7 @@ defmodule LexWeb.PageLiveTest do
   test "does not open another page's revision", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     other_page = scope |> Page.ensure!("Other Page")
-    revision = create_revision(other_page, "Other content")
+    revision = scope |> create_revision(other_page, "Other content")
 
     assert_raise Ash.Error.Query.NotFound, fn ->
       live(conn, ~p"/test-space/wiki/home/revisions/#{revision.id}")
@@ -363,9 +368,9 @@ defmodule LexWeb.PageLiveTest do
     scope: scope
   } do
     page = scope |> Page.ensure!("Home")
-    source_revision = create_revision(page, "First version")
-    _current_revision = create_revision(page, "Current version")
-    {:ok, shared_doc} = Collaboration.open_document(scope, "#{page.id}/main")
+    source_revision = scope |> create_revision(page, "First version")
+    _current_revision = scope |> create_revision(page, "Current version")
+    {:ok, shared_doc} = scope |> Collaboration.open_document("#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/#{source_revision.id}")
@@ -386,7 +391,7 @@ defmodule LexWeb.PageLiveTest do
       "documents" => [document_snapshot("main", "Unsaved collaborative edits")]
     })
 
-    [preserved_revision | _revisions] = Page.list_revisions!(page)
+    [preserved_revision | _revisions] = scope |> Page.list_revisions!(page)
     assert preserved_revision.restored_from_revision_id == nil
     assert preserved_revision.search_text == "Unsaved collaborative edits"
 
@@ -398,7 +403,7 @@ defmodule LexWeb.PageLiveTest do
     assert_patch(view, ~p"/test-space/wiki/home")
 
     [restored_revision, preserved_revision_after_restore | _revisions] =
-      Page.list_revisions!(page)
+      scope |> Page.list_revisions!(page)
 
     assert restored_revision.restored_from_revision_id == source_revision.id
     assert restored_revision.search_text == "First version restored"
@@ -448,9 +453,10 @@ defmodule LexWeb.PageLiveTest do
     }
   end
 
-  defp create_revision(page, text) do
+  defp create_revision(scope, page, text) do
     assert {:ok, :saved} =
-             Page.set_checkpoint(
+             scope
+             |> Page.set_checkpoint(
                page,
                %{
                  lexical_state: document_snapshot("main", text)["lexical_state"],
@@ -459,6 +465,6 @@ defmodule LexWeb.PageLiveTest do
                nil
              )
 
-    page |> Page.list_revisions!() |> List.first()
+    scope |> Page.list_revisions!(page) |> List.first()
   end
 end

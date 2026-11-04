@@ -5,8 +5,9 @@ defmodule LexWeb.Space do
   alias Lex.Accounts
 
   def on_mount(%{"space_slug" => slug}, _session, socket) do
-    space = Accounts.Space.get_by_slug!(slug)
-    scope = %Lex.Scope{space_id: space.id}
+    scope = socket.assigns.scope
+    space = Accounts.Space.get_by_slug!(slug, scope: scope)
+    scope = %{scope | space_id: space.id}
 
     socket
     |> delegate_assign(space)
