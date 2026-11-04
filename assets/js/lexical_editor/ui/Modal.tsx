@@ -6,8 +6,6 @@
  *
  */
 
-import './Modal.css';
-
 import {useMergeRefs} from '@floating-ui/react';
 import {useLexicalFocusTrapRef} from '@lexical/react/useLexicalFocusTrapRef';
 import {isDOMNode, mergeRegister, registerEventListener} from 'lexical';

@@ -6,7 +6,7 @@
  *
  */
 
-import '../../themes/PlaygroundEditorTheme.css';
+import '../../../../css/lexical/theme-playground-editor.css';
 
 import {HorizontalRuleExtension} from '@lexical/extension';
 import {LinkExtension} from '@lexical/link';

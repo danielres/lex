@@ -6,8 +6,6 @@
  *
  */
 
-import './ShortcutsHelpDialog.css';
-
 import {IS_APPLE} from 'lexical';
 import {Fragment, type JSX, useLayoutEffect, useState} from 'react';
 

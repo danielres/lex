@@ -6,7 +6,7 @@
  *
  */
 
-import './index.css';
+import './fonts.css';
 
 import * as React from 'react';
 import {createRoot} from 'react-dom/client';

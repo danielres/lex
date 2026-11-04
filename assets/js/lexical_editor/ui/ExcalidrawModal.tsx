@@ -13,8 +13,6 @@ import type {
   ExcalidrawInitialDataState,
 } from '@excalidraw/excalidraw/types';
 
-import './ExcalidrawModal.css';
-
 import {Excalidraw} from '@excalidraw/excalidraw';
 import {isDOMNode, registerEventListener} from 'lexical';
 import * as React from 'react';

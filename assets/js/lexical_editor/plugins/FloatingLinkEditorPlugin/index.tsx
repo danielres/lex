@@ -6,8 +6,6 @@
  *
  */
 
-import './index.css';
-
 import {
   autoUpdate,
   flip,

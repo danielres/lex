@@ -6,8 +6,6 @@
  *
  */
 
-import './Collapsible.css';
-
 import {
   BlockSchema,
   defineImportRule,

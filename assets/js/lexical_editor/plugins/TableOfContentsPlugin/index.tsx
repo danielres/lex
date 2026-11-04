@@ -7,8 +7,6 @@
  */
 import type {HeadingTagType} from '@lexical/rich-text';
 
-import './index.css';
-
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {
   type TableOfContentsEntry,

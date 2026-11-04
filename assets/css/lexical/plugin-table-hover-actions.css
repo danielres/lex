@@ -7,7 +7,7 @@
  */
 
 .floating-add-indicator {
-  background-image: url(../../images/icons/plus.svg);
+  background-image: url(/assets/lexical/images/icons/plus.svg);
   background-color: #ffffff;
   background-position: center;
   background-repeat: no-repeat;
@@ -25,7 +25,7 @@
 }
 
 .floating-filter-indicator {
-  background-image: url(../../images/icons/filter-left.svg);
+  background-image: url(/assets/lexical/images/icons/filter-left.svg);
   background-color: #ffffff;
   background-position: center;
   background-repeat: no-repeat;
@@ -43,7 +43,7 @@
 }
 
 .floating-drag-indicator {
-  background-image: url(../../images/icons/draggable-block-menu.svg);
+  background-image: url(/assets/lexical/images/icons/draggable-block-menu.svg);
   background-color: #ffffff;
   background-position: center;
   background-repeat: no-repeat;

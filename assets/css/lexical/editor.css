@@ -6,20 +6,6 @@
  *
  */
 
-/* Reenie Beanie is served from the app rather than fetched from Google Fonts.
-   A third-party stylesheet in the critical path delays `load` for every visitor
-   (and every e2e run) on whatever the network does that day, and it hands a
-   request from each of them to a third party. See src/fonts/OFL.txt for the
-   license. */
-@font-face {
-  font-family: 'Reenie Beanie';
-  font-style: normal;
-  font-weight: 400;
-  /* The sticky note is decorative, so let it paint in the fallback and swap. */
-  font-display: swap;
-  src: url(fonts/ReenieBeanie-Regular.woff2) format('woff2');
-}
-
 .lexical-playground {
   --playground-font-size: 16px;
 }
@@ -73,7 +59,7 @@
   display: block;
   width: 220px;
   aspect-ratio: 597 / 131;
-  background-image: url(images/logo.svg);
+  background-image: url(/assets/lexical/images/logo.svg);
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -315,19 +301,19 @@
 }
 
 #options-button::after {
-  background-image: url(images/icons/gear.svg);
+  background-image: url(/assets/lexical/images/icons/gear.svg);
 }
 
 #test-recorder-button::after {
-  background-image: url(images/icons/journal-code.svg);
+  background-image: url(/assets/lexical/images/icons/journal-code.svg);
 }
 
 #paste-log-button::after {
-  background-image: url(images/icons/clipboard.svg);
+  background-image: url(/assets/lexical/images/icons/clipboard.svg);
 }
 
 #docs-button::after {
-  background-image: url(images/icons/file-earmark-text.svg);
+  background-image: url(/assets/lexical/images/icons/file-earmark-text.svg);
 }
 
 #test-recorder-button-snapshot {
@@ -335,15 +321,15 @@
 }
 
 #test-recorder-button-snapshot::after {
-  background-image: url(images/icons/camera.svg);
+  background-image: url(/assets/lexical/images/icons/camera.svg);
 }
 
 #test-recorder-button-copy::after {
-  background-image: url(images/icons/clipboard.svg);
+  background-image: url(/assets/lexical/images/icons/clipboard.svg);
 }
 
 #test-recorder-button-download::after {
-  background-image: url(images/icons/download.svg);
+  background-image: url(/assets/lexical/images/icons/download.svg);
 }
 
 .typeahead-popover {
@@ -448,119 +434,119 @@
 }
 
 i.bucket {
-  -webkit-mask-image: url(images/icons/paint-bucket.svg);
-  mask-image: url(images/icons/paint-bucket.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/paint-bucket.svg);
+  mask-image: url(/assets/lexical/images/icons/paint-bucket.svg);
 }
 
 i.bold {
-  -webkit-mask-image: url(images/icons/type-bold.svg);
-  mask-image: url(images/icons/type-bold.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-bold.svg);
+  mask-image: url(/assets/lexical/images/icons/type-bold.svg);
 }
 
 i.italic {
-  -webkit-mask-image: url(images/icons/type-italic.svg);
-  mask-image: url(images/icons/type-italic.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-italic.svg);
+  mask-image: url(/assets/lexical/images/icons/type-italic.svg);
 }
 
 i.clear {
-  -webkit-mask-image: url(images/icons/trash.svg);
-  mask-image: url(images/icons/trash.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/trash.svg);
+  mask-image: url(/assets/lexical/images/icons/trash.svg);
 }
 
 i.code {
-  -webkit-mask-image: url(images/icons/code.svg);
-  mask-image: url(images/icons/code.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/code.svg);
+  mask-image: url(/assets/lexical/images/icons/code.svg);
 }
 
 i.underline {
-  -webkit-mask-image: url(images/icons/type-underline.svg);
-  mask-image: url(images/icons/type-underline.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-underline.svg);
+  mask-image: url(/assets/lexical/images/icons/type-underline.svg);
 }
 
 i.uppercase {
-  -webkit-mask-image: url(images/icons/type-uppercase.svg);
-  mask-image: url(images/icons/type-uppercase.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-uppercase.svg);
+  mask-image: url(/assets/lexical/images/icons/type-uppercase.svg);
 }
 
 i.lowercase {
-  -webkit-mask-image: url(images/icons/type-lowercase.svg);
-  mask-image: url(images/icons/type-lowercase.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-lowercase.svg);
+  mask-image: url(/assets/lexical/images/icons/type-lowercase.svg);
 }
 
 i.capitalize {
-  -webkit-mask-image: url(images/icons/type-capitalize.svg);
-  mask-image: url(images/icons/type-capitalize.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-capitalize.svg);
+  mask-image: url(/assets/lexical/images/icons/type-capitalize.svg);
 }
 
 i.strikethrough {
-  -webkit-mask-image: url(images/icons/type-strikethrough.svg);
-  mask-image: url(images/icons/type-strikethrough.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-strikethrough.svg);
+  mask-image: url(/assets/lexical/images/icons/type-strikethrough.svg);
 }
 
 i.subscript {
-  -webkit-mask-image: url(images/icons/type-subscript.svg);
-  mask-image: url(images/icons/type-subscript.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-subscript.svg);
+  mask-image: url(/assets/lexical/images/icons/type-subscript.svg);
 }
 
 i.superscript {
-  -webkit-mask-image: url(images/icons/type-superscript.svg);
-  mask-image: url(images/icons/type-superscript.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-superscript.svg);
+  mask-image: url(/assets/lexical/images/icons/type-superscript.svg);
 }
 
 i.highlight {
-  -webkit-mask-image: url(images/icons/highlighter.svg);
-  mask-image: url(images/icons/highlighter.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/highlighter.svg);
+  mask-image: url(/assets/lexical/images/icons/highlighter.svg);
 }
 
 i.link {
-  -webkit-mask-image: url(images/icons/link.svg);
-  mask-image: url(images/icons/link.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/link.svg);
+  mask-image: url(/assets/lexical/images/icons/link.svg);
 }
 
 i.add-comment {
-  -webkit-mask-image: url(images/icons/chat-left-text.svg);
-  mask-image: url(images/icons/chat-left-text.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/chat-left-text.svg);
+  mask-image: url(/assets/lexical/images/icons/chat-left-text.svg);
 }
 
 i.horizontal-rule {
-  -webkit-mask-image: url(images/icons/horizontal-rule.svg);
-  mask-image: url(images/icons/horizontal-rule.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/horizontal-rule.svg);
+  mask-image: url(/assets/lexical/images/icons/horizontal-rule.svg);
 }
 
 .icon.plus {
-  -webkit-mask-image: url(images/icons/plus.svg);
-  mask-image: url(images/icons/plus.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/plus.svg);
+  mask-image: url(/assets/lexical/images/icons/plus.svg);
 }
 
 .icon.caret-right {
-  -webkit-mask-image: url(images/icons/caret-right-fill.svg);
-  mask-image: url(images/icons/caret-right-fill.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/caret-right-fill.svg);
+  mask-image: url(/assets/lexical/images/icons/caret-right-fill.svg);
 }
 
 .icon.dropdown-more {
-  -webkit-mask-image: url(images/icons/dropdown-more.svg);
-  mask-image: url(images/icons/dropdown-more.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/dropdown-more.svg);
+  mask-image: url(/assets/lexical/images/icons/dropdown-more.svg);
 }
 
 .toolbar .toolbar-item .icon.font-color {
-  background-image: url(images/icons/font-color.svg);
+  background-image: url(/assets/lexical/images/icons/font-color.svg);
   background-color: transparent;
 }
 
 .icon.font-family {
-  -webkit-mask-image: url(images/icons/font-family.svg);
-  mask-image: url(images/icons/font-family.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/font-family.svg);
+  mask-image: url(/assets/lexical/images/icons/font-family.svg);
 }
 
 .toolbar .toolbar-item .icon.bg-color {
-  background-image: url(images/icons/bg-color.svg);
+  background-image: url(/assets/lexical/images/icons/bg-color.svg);
   background-color: transparent;
 }
 
 .icon.table {
   background-color: #6c757d;
-  mask-image: url(images/icons/table.svg);
-  -webkit-mask-image: url(images/icons/table.svg);
+  mask-image: url(/assets/lexical/images/icons/table.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/table.svg);
   mask-repeat: no-repeat;
   -webkit-mask-repeat: no-repeat;
   mask-size: contain;
@@ -568,212 +554,212 @@ i.horizontal-rule {
 }
 
 i.image {
-  -webkit-mask-image: url(images/icons/file-image.svg);
-  mask-image: url(images/icons/file-image.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/file-image.svg);
+  mask-image: url(/assets/lexical/images/icons/file-image.svg);
 }
 
 i.table {
-  -webkit-mask-image: url(images/icons/table.svg);
-  mask-image: url(images/icons/table.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/table.svg);
+  mask-image: url(/assets/lexical/images/icons/table.svg);
 }
 
 i.close {
-  -webkit-mask-image: url(images/icons/close.svg);
-  mask-image: url(images/icons/close.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/close.svg);
+  mask-image: url(/assets/lexical/images/icons/close.svg);
 }
 
 i.figma {
-  -webkit-mask-image: url(images/icons/figma.svg);
-  mask-image: url(images/icons/figma.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/figma.svg);
+  mask-image: url(/assets/lexical/images/icons/figma.svg);
 }
 
 i.poll {
-  -webkit-mask-image: url(images/icons/card-checklist.svg);
-  mask-image: url(images/icons/card-checklist.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/card-checklist.svg);
+  mask-image: url(/assets/lexical/images/icons/card-checklist.svg);
 }
 
 i.columns {
-  -webkit-mask-image: url(images/icons/3-columns.svg);
-  mask-image: url(images/icons/3-columns.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/3-columns.svg);
+  mask-image: url(/assets/lexical/images/icons/3-columns.svg);
 }
 
 i.x {
-  -webkit-mask-image: url(images/icons/x.svg);
-  mask-image: url(images/icons/x.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/x.svg);
+  mask-image: url(/assets/lexical/images/icons/x.svg);
 }
 
 i.youtube {
-  -webkit-mask-image: url(images/icons/youtube.svg);
-  mask-image: url(images/icons/youtube.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/youtube.svg);
+  mask-image: url(/assets/lexical/images/icons/youtube.svg);
 }
 
 .icon.left-align,
 i.left-align {
-  -webkit-mask-image: url(images/icons/text-left.svg);
-  mask-image: url(images/icons/text-left.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-left.svg);
+  mask-image: url(/assets/lexical/images/icons/text-left.svg);
 }
 
 .icon.center-align,
 i.center-align {
-  -webkit-mask-image: url(images/icons/text-center.svg);
-  mask-image: url(images/icons/text-center.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-center.svg);
+  mask-image: url(/assets/lexical/images/icons/text-center.svg);
 }
 
 .icon.right-align,
 i.right-align {
-  -webkit-mask-image: url(images/icons/text-right.svg);
-  mask-image: url(images/icons/text-right.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-right.svg);
+  mask-image: url(/assets/lexical/images/icons/text-right.svg);
 }
 
 .icon.justify-align,
 i.justify-align {
-  -webkit-mask-image: url(images/icons/justify.svg);
-  mask-image: url(images/icons/justify.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/justify.svg);
+  mask-image: url(/assets/lexical/images/icons/justify.svg);
 }
 
 .icon.vertical-top,
 i.left-align {
-  -webkit-mask-image: url(images/icons/vertical-top.svg);
-  mask-image: url(images/icons/vertical-top.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/vertical-top.svg);
+  mask-image: url(/assets/lexical/images/icons/vertical-top.svg);
 }
 
 .icon.vertical-middle,
 i.center-align {
-  -webkit-mask-image: url(images/icons/vertical-middle.svg);
-  mask-image: url(images/icons/vertical-middle.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/vertical-middle.svg);
+  mask-image: url(/assets/lexical/images/icons/vertical-middle.svg);
 }
 
 .icon.vertical-bottom,
 i.right-align {
-  -webkit-mask-image: url(images/icons/vertical-bottom.svg);
-  mask-image: url(images/icons/vertical-bottom.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/vertical-bottom.svg);
+  mask-image: url(/assets/lexical/images/icons/vertical-bottom.svg);
 }
 
 i.indent {
-  -webkit-mask-image: url(images/icons/indent.svg);
-  mask-image: url(images/icons/indent.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/indent.svg);
+  mask-image: url(/assets/lexical/images/icons/indent.svg);
 }
 
 i.markdown {
-  -webkit-mask-image: url(images/icons/markdown.svg);
-  mask-image: url(images/icons/markdown.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/markdown.svg);
+  mask-image: url(/assets/lexical/images/icons/markdown.svg);
 }
 
 i.html {
-  -webkit-mask-image: url(images/icons/filetype-html.svg);
-  mask-image: url(images/icons/filetype-html.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/filetype-html.svg);
+  mask-image: url(/assets/lexical/images/icons/filetype-html.svg);
 }
 
 i.outdent {
-  -webkit-mask-image: url(images/icons/outdent.svg);
-  mask-image: url(images/icons/outdent.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/outdent.svg);
+  mask-image: url(/assets/lexical/images/icons/outdent.svg);
 }
 
 i.undo {
-  -webkit-mask-image: url(images/icons/arrow-counterclockwise.svg);
-  mask-image: url(images/icons/arrow-counterclockwise.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/arrow-counterclockwise.svg);
+  mask-image: url(/assets/lexical/images/icons/arrow-counterclockwise.svg);
 }
 
 i.redo {
-  -webkit-mask-image: url(images/icons/arrow-clockwise.svg);
-  mask-image: url(images/icons/arrow-clockwise.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/arrow-clockwise.svg);
+  mask-image: url(/assets/lexical/images/icons/arrow-clockwise.svg);
 }
 
 i.sticky {
-  -webkit-mask-image: url(images/icons/sticky.svg);
-  mask-image: url(images/icons/sticky.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/sticky.svg);
+  mask-image: url(/assets/lexical/images/icons/sticky.svg);
 }
 
 i.star {
-  -webkit-mask-image: url(images/icons/star.svg);
-  mask-image: url(images/icons/star.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/star.svg);
+  mask-image: url(/assets/lexical/images/icons/star.svg);
 }
 
 i.keyboard-shortcuts {
-  -webkit-mask-image: url(images/icons/keyboard.svg);
-  mask-image: url(images/icons/keyboard.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/keyboard.svg);
+  mask-image: url(/assets/lexical/images/icons/keyboard.svg);
 }
 
 i.mic {
-  -webkit-mask-image: url(images/icons/mic.svg);
-  mask-image: url(images/icons/mic.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/mic.svg);
+  mask-image: url(/assets/lexical/images/icons/mic.svg);
 }
 
 i.import {
-  -webkit-mask-image: url(images/icons/upload.svg);
-  mask-image: url(images/icons/upload.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/upload.svg);
+  mask-image: url(/assets/lexical/images/icons/upload.svg);
 }
 
 i.export {
-  -webkit-mask-image: url(images/icons/download.svg);
-  mask-image: url(images/icons/download.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/download.svg);
+  mask-image: url(/assets/lexical/images/icons/download.svg);
 }
 
 i.share {
-  -webkit-mask-image: url(images/icons/send.svg);
-  mask-image: url(images/icons/send.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/send.svg);
+  mask-image: url(/assets/lexical/images/icons/send.svg);
 }
 
 i.diagram-2 {
-  -webkit-mask-image: url(images/icons/diagram-2.svg);
-  mask-image: url(images/icons/diagram-2.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/diagram-2.svg);
+  mask-image: url(/assets/lexical/images/icons/diagram-2.svg);
 }
 
 i.user {
-  -webkit-mask-image: url(images/icons/user.svg);
-  mask-image: url(images/icons/user.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/user.svg);
+  mask-image: url(/assets/lexical/images/icons/user.svg);
 }
 
 i.equation {
-  -webkit-mask-image: url(images/icons/plus-slash-minus.svg);
-  mask-image: url(images/icons/plus-slash-minus.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/plus-slash-minus.svg);
+  mask-image: url(/assets/lexical/images/icons/plus-slash-minus.svg);
 }
 
 i.calendar {
-  -webkit-mask-image: url(images/icons/calendar.svg);
-  mask-image: url(images/icons/calendar.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/calendar.svg);
+  mask-image: url(/assets/lexical/images/icons/calendar.svg);
 }
 
 i.gif {
-  -webkit-mask-image: url(images/icons/filetype-gif.svg);
-  mask-image: url(images/icons/filetype-gif.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/filetype-gif.svg);
+  mask-image: url(/assets/lexical/images/icons/filetype-gif.svg);
 }
 
 i.copy {
-  -webkit-mask-image: url(images/icons/copy.svg);
-  mask-image: url(images/icons/copy.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/copy.svg);
+  mask-image: url(/assets/lexical/images/icons/copy.svg);
 }
 
 i.paste {
-  -webkit-mask-image: url(images/icons/clipboard.svg);
-  mask-image: url(images/icons/clipboard.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/clipboard.svg);
+  mask-image: url(/assets/lexical/images/icons/clipboard.svg);
 }
 
 i.success {
-  -webkit-mask-image: url(images/icons/success.svg);
-  mask-image: url(images/icons/success.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/success.svg);
+  mask-image: url(/assets/lexical/images/icons/success.svg);
 }
 
 i.prettier {
-  -webkit-mask-image: url(images/icons/prettier.svg);
-  mask-image: url(images/icons/prettier.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/prettier.svg);
+  mask-image: url(/assets/lexical/images/icons/prettier.svg);
 }
 
 i.prettier-error {
-  -webkit-mask-image: url(images/icons/prettier-error.svg);
-  mask-image: url(images/icons/prettier-error.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/prettier-error.svg);
+  mask-image: url(/assets/lexical/images/icons/prettier-error.svg);
 }
 
 i.page-break,
 .icon.page-break {
-  -webkit-mask-image: url(images/icons/scissors.svg);
-  mask-image: url(images/icons/scissors.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/scissors.svg);
+  mask-image: url(/assets/lexical/images/icons/scissors.svg);
 }
 
 i.page-setup,
 .icon.page-setup {
-  -webkit-mask-image: url(images/icons/file-earmark-text.svg);
-  mask-image: url(images/icons/file-earmark-text.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/file-earmark-text.svg);
+  mask-image: url(/assets/lexical/images/icons/file-earmark-text.svg);
 }
 
 .link-editor .button.active,
@@ -818,7 +804,7 @@ i.page-setup,
 }
 
 .link-editor div.link-edit {
-  background-image: url(images/icons/pencil-fill.svg);
+  background-image: url(/assets/lexical/images/icons/pencil-fill.svg);
   background-size: 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -832,7 +818,7 @@ i.page-setup,
 }
 
 .link-editor div.link-trash {
-  background-image: url(images/icons/trash.svg);
+  background-image: url(/assets/lexical/images/icons/trash.svg);
   background-size: 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -846,7 +832,7 @@ i.page-setup,
 }
 
 .link-editor div.link-cancel {
-  background-image: url(images/icons/close.svg);
+  background-image: url(/assets/lexical/images/icons/close.svg);
   background-size: 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -861,7 +847,7 @@ i.page-setup,
 }
 
 .link-editor div.link-confirm {
-  background-image: url(images/icons/success-alt.svg);
+  background-image: url(/assets/lexical/images/icons/success-alt.svg);
   background-size: 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -1061,66 +1047,66 @@ i.page-setup,
 
 i.paragraph,
 .icon.paragraph {
-  -webkit-mask-image: url(images/icons/text-paragraph.svg);
-  mask-image: url(images/icons/text-paragraph.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-paragraph.svg);
+  mask-image: url(/assets/lexical/images/icons/text-paragraph.svg);
 }
 
 .icon.h1 {
-  -webkit-mask-image: url(images/icons/type-h1.svg);
-  mask-image: url(images/icons/type-h1.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h1.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h1.svg);
 }
 
 .icon.h2 {
-  -webkit-mask-image: url(images/icons/type-h2.svg);
-  mask-image: url(images/icons/type-h2.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h2.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h2.svg);
 }
 
 .icon.h3 {
-  -webkit-mask-image: url(images/icons/type-h3.svg);
-  mask-image: url(images/icons/type-h3.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h3.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h3.svg);
 }
 
 .icon.h4 {
-  -webkit-mask-image: url(images/icons/type-h4.svg);
-  mask-image: url(images/icons/type-h4.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h4.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h4.svg);
 }
 
 .icon.h5 {
-  -webkit-mask-image: url(images/icons/type-h5.svg);
-  mask-image: url(images/icons/type-h5.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h5.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h5.svg);
 }
 
 .icon.h6 {
-  -webkit-mask-image: url(images/icons/type-h6.svg);
-  mask-image: url(images/icons/type-h6.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/type-h6.svg);
+  mask-image: url(/assets/lexical/images/icons/type-h6.svg);
 }
 
 .icon.bullet-list,
 .icon.bullet {
-  -webkit-mask-image: url(images/icons/list-ul.svg);
-  mask-image: url(images/icons/list-ul.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/list-ul.svg);
+  mask-image: url(/assets/lexical/images/icons/list-ul.svg);
 }
 
 .icon.check-list,
 .icon.check {
-  -webkit-mask-image: url(images/icons/square-check.svg);
-  mask-image: url(images/icons/square-check.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/square-check.svg);
+  mask-image: url(/assets/lexical/images/icons/square-check.svg);
 }
 
 .icon.numbered-list,
 .icon.number {
-  -webkit-mask-image: url(images/icons/list-ol.svg);
-  mask-image: url(images/icons/list-ol.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/list-ol.svg);
+  mask-image: url(/assets/lexical/images/icons/list-ol.svg);
 }
 
 .icon.quote {
-  -webkit-mask-image: url(images/icons/chat-square-quote.svg);
-  mask-image: url(images/icons/chat-square-quote.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/chat-square-quote.svg);
+  mask-image: url(/assets/lexical/images/icons/chat-square-quote.svg);
 }
 
 .icon.code {
-  -webkit-mask-image: url(images/icons/code.svg);
-  mask-image: url(images/icons/code.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/code.svg);
+  mask-image: url(/assets/lexical/images/icons/code.svg);
 }
 
 .switches {
@@ -1295,7 +1281,7 @@ i.paragraph,
 .editor-shell .editor-image .image-edit-button {
   border: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 5px;
-  background-image: url(images/icons/pencil-fill.svg);
+  background-image: url(/assets/lexical/images/icons/pencil-fill.svg);
   background-size: 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -1395,19 +1381,19 @@ i.paragraph,
 }
 
 .emoji.happysmile {
-  background-image: url(images/emoji/1F642.png);
+  background-image: url(/assets/lexical/images/emoji/1F642.png);
 }
 
 .emoji.veryhappysmile {
-  background-image: url(images/emoji/1F600.png);
+  background-image: url(/assets/lexical/images/emoji/1F600.png);
 }
 
 .emoji.unhappysmile {
-  background-image: url(images/emoji/1F641.png);
+  background-image: url(/assets/lexical/images/emoji/1F641.png);
 }
 
 .emoji.heart {
-  background-image: url(images/emoji/2764.png);
+  background-image: url(/assets/lexical/images/emoji/2764.png);
 }
 
 .keyword {
@@ -1444,68 +1430,68 @@ i.paragraph,
 }
 
 .actions i.indent {
-  -webkit-mask-image: url(images/icons/indent.svg);
-  mask-image: url(images/icons/indent.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/indent.svg);
+  mask-image: url(/assets/lexical/images/icons/indent.svg);
 }
 
 .actions i.outdent {
-  -webkit-mask-image: url(images/icons/outdent.svg);
-  mask-image: url(images/icons/outdent.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/outdent.svg);
+  mask-image: url(/assets/lexical/images/icons/outdent.svg);
 }
 
 .actions i.lock {
-  -webkit-mask-image: url(images/icons/lock-fill.svg);
-  mask-image: url(images/icons/lock-fill.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/lock-fill.svg);
+  mask-image: url(/assets/lexical/images/icons/lock-fill.svg);
 }
 
 .actions i.image {
-  -webkit-mask-image: url(images/icons/file-image.svg);
-  mask-image: url(images/icons/file-image.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/file-image.svg);
+  mask-image: url(/assets/lexical/images/icons/file-image.svg);
 }
 
 .actions i.table {
-  -webkit-mask-image: url(images/icons/table.svg);
-  mask-image: url(images/icons/table.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/table.svg);
+  mask-image: url(/assets/lexical/images/icons/table.svg);
 }
 
 .actions i.unlock {
-  -webkit-mask-image: url(images/icons/lock.svg);
-  mask-image: url(images/icons/lock.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/lock.svg);
+  mask-image: url(/assets/lexical/images/icons/lock.svg);
 }
 
 .actions i.left-align {
-  -webkit-mask-image: url(images/icons/text-left.svg);
-  mask-image: url(images/icons/text-left.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-left.svg);
+  mask-image: url(/assets/lexical/images/icons/text-left.svg);
 }
 
 .actions i.center-align {
-  -webkit-mask-image: url(images/icons/text-center.svg);
-  mask-image: url(images/icons/text-center.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-center.svg);
+  mask-image: url(/assets/lexical/images/icons/text-center.svg);
 }
 
 .actions i.right-align {
-  -webkit-mask-image: url(images/icons/text-right.svg);
-  mask-image: url(images/icons/text-right.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/text-right.svg);
+  mask-image: url(/assets/lexical/images/icons/text-right.svg);
 }
 
 .actions i.justify-align {
-  -webkit-mask-image: url(images/icons/justify.svg);
-  mask-image: url(images/icons/justify.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/justify.svg);
+  mask-image: url(/assets/lexical/images/icons/justify.svg);
 }
 
 .actions i.disconnect {
-  -webkit-mask-image: url(images/icons/plug.svg);
-  mask-image: url(images/icons/plug.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/plug.svg);
+  mask-image: url(/assets/lexical/images/icons/plug.svg);
 }
 
 .actions i.connect {
-  -webkit-mask-image: url(images/icons/plug-fill.svg);
-  mask-image: url(images/icons/plug-fill.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/plug-fill.svg);
+  mask-image: url(/assets/lexical/images/icons/plug-fill.svg);
 }
 
 .actions i.versions {
-  -webkit-mask-image: url(images/icons/clock-history.svg);
-  mask-image: url(images/icons/clock-history.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/clock-history.svg);
+  mask-image: url(/assets/lexical/images/icons/clock-history.svg);
 }
 
 .table-cell-action-button-container {
@@ -1544,8 +1530,8 @@ i.chevron-down {
   display: inline-block;
   height: 8px;
   width: 8px;
-  -webkit-mask-image: url(images/icons/chevron-down.svg);
-  mask-image: url(images/icons/chevron-down.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/chevron-down.svg);
+  mask-image: url(/assets/lexical/images/icons/chevron-down.svg);
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -2038,8 +2024,8 @@ button.item.dropdown-item-active i {
   header .logo {
     background-image: none;
     background-color: CanvasText;
-    -webkit-mask-image: url(images/logo.svg);
-    mask-image: url(images/logo.svg);
+    -webkit-mask-image: url(/assets/lexical/images/logo.svg);
+    mask-image: url(/assets/lexical/images/logo.svg);
     -webkit-mask-size: contain;
     mask-size: contain;
     -webkit-mask-repeat: no-repeat;

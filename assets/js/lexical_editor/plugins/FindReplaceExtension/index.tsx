@@ -8,8 +8,6 @@
 
 import type {DecoratorComponentProps} from '@lexical/react/ReactPluginHostExtension';
 
-import './FindReplace.css';
-
 import {
   computed,
   effect,

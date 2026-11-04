@@ -54,7 +54,7 @@
     "vite": "^8.3.3"
   },
   "scripts": {
-    "copy:excalidraw-assets": "node scripts/copy_excalidraw_assets.mjs",
+    "copy:static-assets": "node scripts/copy_static_assets.mjs",
     "typecheck": "tsc --noEmit"
   }
 }

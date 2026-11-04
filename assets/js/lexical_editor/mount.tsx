@@ -2,7 +2,7 @@
  * The editor is derived from Meta's Lexical playground, licensed under MIT.
  */
 
-import './index.css';
+import './fonts.css';
 
 import {createRoot} from 'react-dom/client';
 

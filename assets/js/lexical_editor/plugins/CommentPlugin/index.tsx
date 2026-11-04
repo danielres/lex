@@ -9,8 +9,6 @@
 import type {Provider} from '@lexical/yjs';
 import type {Doc} from 'yjs';
 
-import './index.css';
-
 import {
   $createMarkNode,
   $getMarkIDs,

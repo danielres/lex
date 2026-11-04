@@ -8,8 +8,6 @@
 
 import type {JSX, ReactNode} from 'react';
 
-import './FlashMessage.css';
-
 import {createPortal} from 'react-dom';
 
 export interface FlashMessageProps {

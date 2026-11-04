@@ -6,8 +6,6 @@
  *
  */
 
-import './ShadowDomWrapper.css';
-
 import {objectKlassEquals} from '@lexical/utils';
 import {
   type JSX,

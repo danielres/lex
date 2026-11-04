@@ -7,7 +7,6 @@
  */
 
 import 'react-day-picker/style.css';
-import './DateTimeNode.css';
 
 import {
   autoUpdate,

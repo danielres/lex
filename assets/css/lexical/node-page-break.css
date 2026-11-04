@@ -38,7 +38,7 @@ hr[data-lexical-page-break]::before {
   opacity: 0.5;
 
   background-size: cover;
-  background-image: url(../../images/icons/scissors.svg);
+  background-image: url(/assets/lexical/images/icons/scissors.svg);
   width: 16px;
   height: 16px;
 }

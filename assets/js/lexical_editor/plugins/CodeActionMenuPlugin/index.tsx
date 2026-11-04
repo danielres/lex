@@ -6,8 +6,6 @@
  *
  */
 
-import './index.css';
-
 import {$isCodeNode, CodeNode} from '@lexical/code';
 import {DEFAULT_CODE_LANGUAGE} from '@lexical/code-core';
 import {

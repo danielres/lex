@@ -66,14 +66,14 @@
   mask-position: center;
 }
 .ShortcutsHelpDialog__platformIcon.apple {
-  -webkit-mask-image: url(../../images/icons/apple.svg);
-  mask-image: url(../../images/icons/apple.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/apple.svg);
+  mask-image: url(/assets/lexical/images/icons/apple.svg);
 }
 .ShortcutsHelpDialog__platformIcon.windows {
   width: 13px;
   height: 13px;
-  -webkit-mask-image: url(../../images/icons/windows.svg);
-  mask-image: url(../../images/icons/windows.svg);
+  -webkit-mask-image: url(/assets/lexical/images/icons/windows.svg);
+  mask-image: url(/assets/lexical/images/icons/windows.svg);
 }
 .ShortcutsHelpDialog__heading__action,
 .ShortcutsHelpDialog__heading__shortcut {

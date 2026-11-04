@@ -6,8 +6,6 @@
  *
  */
 
-import './index.css';
-
 import {useMergeRefs} from '@floating-ui/react';
 import {$isCodeNode} from '@lexical/code';
 import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';

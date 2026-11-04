@@ -6,8 +6,6 @@
  *
  */
 
-import './index.css';
-
 import DropIndicator from '@atlaskit/drag-and-drop-indicator/box';
 import {
   draggable,

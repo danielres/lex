@@ -2,13 +2,15 @@
    https://tailwindcss.com/docs/configuration */
 
 @import "tailwindcss" source(none);
-@source "../../deps/ash_authentication_phoenix";
 @import "phoenix-colocated/lex/colocated.css";
-@import "../js/lexical_editor/themes/WikiEditor.css";
+@import "../../deps/toast/assets/css/toast.css";
+@source "../../deps/ash_authentication_phoenix";
+
+@import "./lexical.css";
+
 @source "../css";
 @source "../js";
 @source "../../lib/lex_web";
-@import "../../deps/toast/assets/css/toast.css";
 
 :root {
   --collaboration-color-lightness: 58%;

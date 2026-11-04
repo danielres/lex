@@ -6,8 +6,6 @@
  *
  */
 
-import './StickyNode.css';
-
 import {CollaborationPlugin} from '@lexical/react/LexicalCollaborationPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalExtensionEditorComposer} from '@lexical/react/LexicalExtensionEditorComposer';

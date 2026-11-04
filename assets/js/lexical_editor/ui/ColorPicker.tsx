@@ -6,8 +6,6 @@
  *
  */
 
-import './ColorPicker.css';
-
 import {calculateZoomLevel} from '@lexical/utils';
 import {registerEventListeners} from 'lexical';
 import * as React from 'react';
