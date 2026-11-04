@@ -16,9 +16,8 @@ defmodule AshAuthenticationDevUsers.Strategy do
     name: :dev_users,
     describe: "A configured development-user authentication strategy.",
     target: __MODULE__,
-    args: [{:optional, :name, :dev_users}],
+    auto_set_fields: [name: :dev_users],
     schema: [
-      name: [type: :atom, required: true],
       identity: [type: :atom, required: true],
       users: [type: :keyword_list, required: true]
     ]
