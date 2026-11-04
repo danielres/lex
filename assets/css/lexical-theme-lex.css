@@ -6,22 +6,13 @@
  */
 
 .lexical-editor {
-  @apply bg-transparent px-0 text-base-content rounded-box;
+  @apply rounded-box;
   @apply border border-transparent;
 }
 
- .lexical-editor[data-editable='true']  {
-}
-
 .editor-shell {
-  @apply m-0 min-w-0 max-w-full text-base-content;
-
   .toolbar { @apply bg-base-300 border-b border-base-300 rounded-box mb-2; }
-  .editor-container { @apply bg-transparent; }
 
-  &[data-editable='false'] .ContentEditable__root { 
-    /* @apply p-8;  */
-  }
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
     @apply focus-within:outline-2 outline-info/50 rounded-box;

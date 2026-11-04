@@ -7,10 +7,8 @@
  */
 
 .lexical-editor {
+  --font-family: inherit;
   --playground-font-size: 16px;
-}
-
-.lexical-editor {
   /* The page scrolls at the document level while .toolbar is sticky at the
      top of the viewport (48px rendered: 36px height + 2 * 6px padding).
      scroll-padding keeps scrollIntoViewIfNeeded and native scrolling from
@@ -18,85 +16,19 @@
   scroll-padding-top: 52px;
 }
 
-.lexical-editor {
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    '.SFNSText-Regular',
-    sans-serif;
-  --font-family:
-    system-ui, -apple-system, BlinkMacSystemFont, '.SFNSText-Regular',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #eee;
-  padding: 0 20px;
-}
-
-.lexical-editor header {
-  max-width: 580px;
-  margin: auto;
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-
-.lexical-editor header a {
-  max-width: 220px;
-  margin: 20px 0 0 0;
-  display: block;
-}
-
-.lexical-editor header img {
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-
-.lexical-editor header .logo {
-  display: block;
-  width: 220px;
-  aspect-ratio: 597 / 131;
-  background-image: url(/assets/lexical/images/logo.svg);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.lexical-editor header h1 {
-  text-align: left;
-  color: #333;
-  display: inline-block;
-  margin: 20px 0 0 0;
-}
-
 .editor-shell {
-  margin: 20px auto;
-  border-radius: 2px;
-  max-width: 1128px;
-  color: #000;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--lexical-editor-text-color, #000);
   position: relative;
   line-height: 1.7;
   font-weight: 400;
 }
 
 .editor-shell .editor-container {
-  background: #fff;
+  background: var(--lexical-editor-surface, #fff);
   position: relative;
   display: block;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.editor-shell .editor-container.tree-view {
-  border-radius: 0;
-}
-
-.editor-shell .editor-container.plain-text {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
 }
 
 .editor-scroller {
@@ -2020,17 +1952,5 @@ button.item.dropdown-item-active i {
   }
   .editor-shell .editor-container .ContentEditable__root {
     border: 1px solid CanvasText;
-  }
-  header .logo {
-    background-image: none;
-    background-color: CanvasText;
-    -webkit-mask-image: url(/assets/lexical/images/logo.svg);
-    mask-image: url(/assets/lexical/images/logo.svg);
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
   }
 }

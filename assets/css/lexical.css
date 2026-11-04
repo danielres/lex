@@ -33,3 +33,9 @@
 @import "./lexical/ui-modal.css";
 @import "./lexical/ui-select.css";
 @import "./lexical/ui-shadow-dom-wrapper.css";
+
+/* Application adapter for the structural Lexical styles. */
+.lexical-editor {
+  --lexical-editor-surface: transparent;
+  --lexical-editor-text-color: var(--color-base-content);
+}
