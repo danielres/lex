@@ -1,11 +1,11 @@
-defmodule AshAuthenticationDevelopment.Strategy do
+defmodule AshAuthenticationDevUsers.Strategy do
   @moduledoc """
   An AshAuthentication strategy that signs in a configured development user.
   """
 
-  alias AshAuthenticationDevelopment.Strategy.Transformer
+  alias AshAuthenticationDevUsers.Strategy.Transformer
 
-  defstruct name: :development,
+  defstruct name: :dev_users,
             identity: nil,
             users: [],
             resource: nil,
@@ -13,10 +13,10 @@ defmodule AshAuthenticationDevelopment.Strategy do
             __spark_metadata__: nil
 
   @entity %Spark.Dsl.Entity{
-    name: :development,
-    describe: "A development-only user picker authentication strategy.",
+    name: :dev_users,
+    describe: "A configured development-user authentication strategy.",
     target: __MODULE__,
-    args: [{:optional, :name, :development}],
+    args: [{:optional, :name, :dev_users}],
     schema: [
       name: [type: :atom, required: true],
       identity: [type: :atom, required: true],

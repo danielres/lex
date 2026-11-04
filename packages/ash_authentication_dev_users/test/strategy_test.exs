@@ -1,30 +1,30 @@
-defmodule AshAuthenticationDevelopment.StrategyTest do
+defmodule AshAuthenticationDevUsers.StrategyTest do
   use ExUnit.Case, async: false
 
   alias AshAuthentication.Strategy
-  alias AshAuthenticationDevelopment.Test.User
+  alias AshAuthenticationDevUsers.Test.User
 
   setup do
-    previous = Application.get_env(:ash_authentication_development, :enabled)
-    Application.put_env(:ash_authentication_development, :enabled, true)
+    previous = Application.get_env(:ash_authentication_dev_users, :enabled)
+    Application.put_env(:ash_authentication_dev_users, :enabled, true)
 
     on_exit(fn ->
-      Application.put_env(:ash_authentication_development, :enabled, previous)
+      Application.put_env(:ash_authentication_dev_users, :enabled, previous)
     end)
 
-    strategy = AshAuthentication.Info.strategy!(User, :development)
+    strategy = AshAuthentication.Info.strategy!(User, :dev_users)
     {:ok, strategy: strategy}
   end
 
   test "exposes configured users in display order", %{strategy: strategy} do
-    assert AshAuthenticationDevelopment.users(User) == [
+    assert AshAuthenticationDevUsers.list(User) == [
              tom: %{name: "Tom", hue: 25},
              sandra: %{name: "Sandra", hue: 115}
            ]
 
     assert Strategy.phases(strategy) == [:sign_in]
     assert Strategy.method_for_phase(strategy, :sign_in) == :post
-    assert Strategy.routes(strategy) == [{"/user/development/sign_in", :sign_in}]
+    assert Strategy.routes(strategy) == [{"/sign-in", :sign_in}]
     assert Strategy.tokens_required?(strategy)
   end
 
@@ -50,7 +50,7 @@ defmodule AshAuthenticationDevelopment.StrategyTest do
   end
 
   test "rejects authentication when disabled", %{strategy: strategy} do
-    Application.put_env(:ash_authentication_development, :enabled, false)
+    Application.put_env(:ash_authentication_dev_users, :enabled, false)
 
     assert {:error, %AshAuthentication.Errors.AuthenticationFailed{}} =
              Strategy.action(strategy, :sign_in, %{"user" => "tom"})

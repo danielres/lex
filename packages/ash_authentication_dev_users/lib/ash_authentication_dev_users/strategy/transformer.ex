@@ -1,8 +1,8 @@
-defmodule AshAuthenticationDevelopment.Strategy.Transformer do
+defmodule AshAuthenticationDevUsers.Strategy.Transformer do
   @moduledoc false
 
   alias Ash.Resource
-  alias AshAuthenticationDevelopment.Strategy.Change
+  alias AshAuthenticationDevUsers.Strategy.Change
   alias Spark.Dsl.Transformer
 
   import AshAuthentication.Strategy.Custom.Helpers

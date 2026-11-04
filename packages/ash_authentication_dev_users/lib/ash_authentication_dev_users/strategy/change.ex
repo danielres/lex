@@ -1,15 +1,15 @@
-defmodule AshAuthenticationDevelopment.Strategy.Change do
+defmodule AshAuthenticationDevUsers.Strategy.Change do
   @moduledoc false
 
   use Ash.Resource.Change
 
   alias Ash.{Changeset, Resource}
   alias AshAuthentication.{Errors.AuthenticationFailed, Info, Jwt}
-  alias AshAuthenticationDevelopment, as: Development
+  alias AshAuthenticationDevUsers, as: DevUsers
 
   @impl true
   def change(changeset, opts, context) do
-    with true <- Development.enabled?(),
+    with true <- DevUsers.enabled?(),
          {:ok, strategy} <- Info.find_strategy(changeset, context, opts),
          user_key when is_binary(user_key) <- Changeset.get_argument(changeset, :user),
          {_key, attributes} <- find_user(strategy.users, user_key) do

@@ -1,9 +1,9 @@
-defmodule AshAuthenticationDevelopment.Test.Secret do
+defmodule AshAuthenticationDevUsers.Test.Secret do
   use AshAuthentication.Secret
 
   def secret_for(
         [:authentication, :tokens, :signing_secret],
-        AshAuthenticationDevelopment.Test.User,
+        AshAuthenticationDevUsers.Test.User,
         _opts,
         _context
       ) do
@@ -11,9 +11,9 @@ defmodule AshAuthenticationDevelopment.Test.Secret do
   end
 end
 
-defmodule AshAuthenticationDevelopment.Test.Token do
+defmodule AshAuthenticationDevUsers.Test.Token do
   use Ash.Resource,
-    domain: AshAuthenticationDevelopment.Test.Domain,
+    domain: AshAuthenticationDevUsers.Test.Domain,
     data_layer: Ash.DataLayer.Ets,
     extensions: [AshAuthentication.TokenResource]
 
@@ -88,11 +88,11 @@ defmodule AshAuthenticationDevelopment.Test.Token do
   end
 end
 
-defmodule AshAuthenticationDevelopment.Test.User do
+defmodule AshAuthenticationDevUsers.Test.User do
   use Ash.Resource,
-    domain: AshAuthenticationDevelopment.Test.Domain,
+    domain: AshAuthenticationDevUsers.Test.Domain,
     data_layer: Ash.DataLayer.Ets,
-    extensions: [AshAuthentication, AshAuthenticationDevelopment.Strategy]
+    extensions: [AshAuthentication, AshAuthenticationDevUsers.Strategy]
 
   ets do
     private? true
@@ -102,7 +102,7 @@ defmodule AshAuthenticationDevelopment.Test.User do
     session_identifier :unsafe
 
     strategies do
-      development do
+      dev_users do
         identity(:unique_name)
 
         users(
@@ -114,8 +114,8 @@ defmodule AshAuthenticationDevelopment.Test.User do
 
     tokens do
       enabled? true
-      token_resource AshAuthenticationDevelopment.Test.Token
-      signing_secret AshAuthenticationDevelopment.Test.Secret
+      token_resource AshAuthenticationDevUsers.Test.Token
+      signing_secret AshAuthenticationDevUsers.Test.Secret
       store_all_tokens? false
       require_token_presence_for_authentication? false
     end
@@ -138,15 +138,15 @@ defmodule AshAuthenticationDevelopment.Test.User do
   end
 
   identities do
-    identity :unique_name, [:name], pre_check_with: AshAuthenticationDevelopment.Test.Domain
+    identity :unique_name, [:name], pre_check_with: AshAuthenticationDevUsers.Test.Domain
   end
 end
 
-defmodule AshAuthenticationDevelopment.Test.Domain do
+defmodule AshAuthenticationDevUsers.Test.Domain do
   use Ash.Domain
 
   resources do
-    resource AshAuthenticationDevelopment.Test.Token
-    resource AshAuthenticationDevelopment.Test.User
+    resource AshAuthenticationDevUsers.Test.Token
+    resource AshAuthenticationDevUsers.Test.User
   end
 end

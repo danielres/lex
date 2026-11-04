@@ -1,9 +1,9 @@
-defmodule AshAuthenticationDevelopment.MixProject do
+defmodule AshAuthenticationDevUsers.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :ash_authentication_development,
+      app: :ash_authentication_dev_users,
       version: "0.1.0",
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,

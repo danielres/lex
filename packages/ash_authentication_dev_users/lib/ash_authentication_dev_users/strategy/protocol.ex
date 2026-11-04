@@ -1,6 +1,6 @@
-defimpl AshAuthentication.Strategy, for: AshAuthenticationDevelopment.Strategy do
+defimpl AshAuthentication.Strategy, for: AshAuthenticationDevUsers.Strategy do
   alias Ash.{Changeset, PlugHelpers}
-  alias AshAuthentication.{Errors.AuthenticationFailed, Info}
+  alias AshAuthentication.Errors.AuthenticationFailed
 
   import AshAuthentication.Plug.Helpers, only: [store_authentication_result: 2]
 
@@ -10,9 +10,8 @@ defimpl AshAuthentication.Strategy, for: AshAuthenticationDevelopment.Strategy d
 
   def actions(_strategy), do: [:sign_in]
 
-  def routes(strategy) do
-    subject_name = Info.authentication_subject_name!(strategy.resource)
-    [{"/#{subject_name}/#{strategy.name}/sign_in", :sign_in}]
+  def routes(_strategy) do
+    [{"/sign-in", :sign_in}]
   end
 
   def method_for_phase(_strategy, :sign_in), do: :post
