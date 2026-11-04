@@ -122,31 +122,24 @@
     @apply bg-base-200 text-base-content;
   }
 
-  .PlaygroundEditorTheme__paragraph,
-  .PlaygroundEditorTheme__ul,
-  .PlaygroundEditorTheme__ol1 { @apply text-base-content/75;}
-
   .PlaygroundEditorTheme__h1,
   .PlaygroundEditorTheme__h2,
   .PlaygroundEditorTheme__h3 {
-    @apply text-base-content leading-none normal-case text-balance font-normal;
+    @apply leading-none normal-case text-balance font-normal;
     font-variant-caps: small-caps;
   } 
-  .PlaygroundEditorTheme__h1 { @apply text-2xl border-b border-base-content/30 pb-1; }
+  .PlaygroundEditorTheme__h1 { @apply text-2xl border-b pb-1; }
   .PlaygroundEditorTheme__h2 { @apply text-xl; }
   .PlaygroundEditorTheme__h3 { @apply text-lg; }
 
   .PlaygroundEditorTheme__ul { @apply list-disc; }
   .PlaygroundEditorTheme__ol1,
   .PlaygroundEditorTheme__ol2 { @apply list-decimal; }
-  .PlaygroundEditorTheme__quote { @apply text-base-content/65; }
-  .PlaygroundEditorTheme__quote { @apply border-base-300; }
   .PlaygroundEditorTheme__link {
-    @apply no-underline;
-    @apply text-info after:opacity-50 hover:after:opacity-100 after:transition;
+    @apply after:opacity-50 hover:after:opacity-100 after:transition;
     @apply after:content-['↗'] after:pl-0.5 after:pr-1 after:font-bold;
     @apply opacity-90 hover:opacity-100 transition;
-    @apply hover:bg-info/20 pl-0.5;
+    @apply pl-0.5;
   }
 
   .wiki-link { @apply cursor-pointer text-info hover:bg-info/20 transition; }
@@ -167,11 +160,6 @@
   .wiki-link-cancel { @apply rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm hover:bg-base-300; }
   .wiki-link-cancel { @apply self-end; }
   .wiki-link-error { @apply text-sm text-error; }
-
-  .PlaygroundEditorTheme__code,
-  .PlaygroundEditorTheme__textCode { @apply bg-base-200; }
-  .PlaygroundEditorTheme__code::before { @apply border-base-300 bg-base-300 text-base-content/60; }
-  .PlaygroundEditorTheme__textHighlight { @apply bg-yellow-200/40 border-none text-base-content; }
 
   .PlaygroundEditorTheme__table { @apply bg-base-100/50; }
   .PlaygroundEditorTheme__tableCell { @apply border-base-300; }
