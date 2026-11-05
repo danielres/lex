@@ -204,7 +204,7 @@ defmodule LexWeb.CollaborationChannelTest do
   test "semantic checkpointing requires active document rooms", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
 
-    assert {:error, :document_not_open} =
+    assert {:error, {:document_checkpoint_failed, "main", :document_not_open}} =
              scope
              |> Collaboration.checkpoint(page, [document_snapshot("main", "Missing")])
   end

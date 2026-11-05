@@ -72,7 +72,9 @@ defmodule Lex.Collaboration do
         counts = Map.update!(counts, status, &(&1 + 1))
         {:cont, {:ok, counts}}
       else
-        {:error, reason} -> {:halt, {:error, reason}}
+        {:error, reason} ->
+          error = {:document_checkpoint_failed, snapshot.document_key, reason}
+          {:halt, {:error, error}}
       end
     end)
   end

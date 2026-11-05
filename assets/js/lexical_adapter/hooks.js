@@ -54,16 +54,27 @@ export const createLexicalHooks = csrfToken => ({
         wikiPageRepository,
       })
 
-      this.snapshotRequestRef = this.handleEvent(snapshotRequestEvent, () => {
-        try {
-          this.lexicalEditor?.setEditable(false)
-          const documents = snapshotsToParams(this.lexicalEditor?.getDocumentSnapshots() || [])
+      this.snapshotRequestRef = this.handleEvent(
+        snapshotRequestEvent,
+        async () => {
+          try {
+            if (!this.lexicalEditor) {
+              throw new Error("Lexical editor is not mounted")
+            }
 
-          this.pushEvent(checkpointEvent, { documents })
-        } catch (_error) {
-          this.pushEvent(checkpointEvent, { error: "snapshot_failed" })
+            this.lexicalEditor.setEditable(false)
+            const snapshots =
+              await this.lexicalEditor.getConfirmedDocumentSnapshots()
+            const documents = snapshotsToParams(snapshots)
+
+            this.pushEvent(checkpointEvent, { documents })
+          } catch (error) {
+            const reason =
+              error instanceof Error ? error.message : String(error)
+            this.pushEvent(checkpointEvent, { error: reason })
+          }
         }
-      })
+      )
 
       this.restoreRequestRef = this.handleEvent(
         restoreRequestEvent,

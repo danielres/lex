@@ -69,6 +69,19 @@ export function createPhoenixCollaboration(
       {connect: false, disableBc: true},
     );
     providers.add(provider);
+
+    const connect = provider.connect.bind(provider);
+    provider.connect = () => {
+      providers.add(provider);
+      connect();
+    };
+
+    const disconnect = provider.disconnect.bind(provider);
+    provider.disconnect = () => {
+      providers.delete(provider);
+      disconnect();
+    };
+
     const destroy = provider.destroy.bind(provider);
     provider.destroy = () => {
       providers.delete(provider);
