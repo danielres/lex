@@ -148,7 +148,7 @@ i.add-comment {
   border: 1px solid var(--lexical-control-border-color, #ccc);
   background-color: var(--lexical-control-surface, #fff);
   border-radius: 5px;
-  font-size: var(--playground-font-size);
+  font-size: var(--lexical-font-size);
   caret-color: var(--lexical-editor-text-color, rgb(5, 5, 5));
   color: var(--lexical-editor-text-color, inherit);
   display: block;
@@ -244,7 +244,7 @@ i.comments {
   border: 1px solid var(--lexical-control-border-color, #ccc);
   background-color: var(--lexical-control-surface, #fff);
   border-radius: 5px;
-  font-size: var(--playground-font-size);
+  font-size: var(--lexical-font-size);
   caret-color: var(--lexical-editor-text-color, rgb(5, 5, 5));
   color: var(--lexical-editor-text-color, inherit);
   display: block;

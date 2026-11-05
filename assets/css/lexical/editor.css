@@ -7,8 +7,8 @@
  */
 
 .lexical-editor {
-  --font-family: inherit;
-  --playground-font-size: 16px;
+  --lexical-font-family: inherit;
+  --lexical-font-size: 16px;
   /* The page scrolls at the document level while .lexical-toolbar is sticky at the
      top of the viewport (48px rendered: 36px height + 2 * 6px padding).
      scroll-padding keeps scrollIntoViewIfNeeded and native scrolling from
@@ -800,7 +800,7 @@
       padding: 8px 12px;
       border-radius: 15px;
       background-color: var(--lexical-link-editor-field-background, #eee);
-      font-size: var(--playground-font-size);
+      font-size: var(--lexical-font-size);
       color: var(--lexical-editor-text-color, rgb(5, 5, 5));
       border: 0;
       outline: 0;
@@ -827,7 +827,7 @@
       margin: 8px 12px;
       padding: 8px 12px;
       border-radius: 15px;
-      font-size: var(--playground-font-size);
+      font-size: var(--lexical-font-size);
       color: var(--lexical-editor-text-color, rgb(5, 5, 5));
       background-color: var(--lexical-link-editor-field-background, transparent);
       border: 0;
@@ -943,7 +943,7 @@
   color: var(--lexical-editor-text-color, #050505);
   cursor: pointer;
   line-height: 16px;
-  font-size: var(--playground-font-size);
+  font-size: var(--lexical-font-size);
   display: flex;
   align-content: center;
   flex-direction: row;

@@ -125,7 +125,7 @@
 .PlaygroundEditorTheme__textCode {
   background-color: var(--lexical-code-background, rgb(240, 242, 245));
   padding: 1px 0.25rem;
-  --font-family: Menlo, Consolas, Monaco, monospace;
+  --lexical-font-family: Menlo, Consolas, Monaco, monospace;
   font-family: Menlo, Consolas, Monaco, monospace;
   font-size: 94%;
 }
@@ -177,7 +177,7 @@
 .PlaygroundEditorTheme__code {
   background-color: var(--lexical-code-background, rgb(240, 242, 245));
   font-family: Menlo, Consolas, Monaco, monospace;
-  --font-family: Menlo, Consolas, Monaco, monospace;
+  --lexical-font-family: Menlo, Consolas, Monaco, monospace;
   display: block;
   line-height: 1.53;
   font-size: 13px;
@@ -789,7 +789,7 @@
   color: var(--lexical-editor-text-color, #050505);
   border: 0;
   border-radius: 0px;
-  font-size: var(--playground-font-size);
+  font-size: var(--lexical-font-size);
   text-align: left;
   line-height: 20px;
   padding: 8px;
@@ -836,8 +836,8 @@
 @media screen {
   .PlaygroundEditorTheme__page {
     max-width: 100%;
-    padding: var(--page-margin-top) var(--page-margin-right)
-      var(--page-margin-bottom) var(--page-margin-left);
+    padding: var(--lexical-page-margin-top) var(--lexical-page-margin-right)
+      var(--lexical-page-margin-bottom) var(--lexical-page-margin-left);
     margin-bottom: 24px; /* Space between pages */
     margin-left: auto;
     margin-right: auto;
@@ -849,10 +849,12 @@
   .PlaygroundEditorTheme__page {
     page-break-inside: avoid;
     width: calc(
-      var(--page-width) - var(--page-margin-right) - var(--page-margin-left)
+      var(--lexical-page-width) - var(--lexical-page-margin-right) -
+        var(--lexical-page-margin-left)
     );
     height: calc(
-      var(--page-height) - var(--page-margin-top) - var(--page-margin-bottom)
+      var(--lexical-page-height) - var(--lexical-page-margin-top) -
+        var(--lexical-page-margin-bottom)
     );
   }
   .PlaygroundEditorTheme__page + hr[data-lexical-page-break] {
@@ -860,16 +862,16 @@
   }
 }
 @page {
-  size: var(--page-width) var(--page-height);
-  margin-top: var(--page-margin-top, 0.4in);
-  margin-right: var(--page-margin-right, 0.4in);
-  margin-bottom: var(--page-margin-bottom, 0.4in);
-  margin-left: var(--page-margin-left, 0.4in);
+  size: var(--lexical-page-width) var(--lexical-page-height);
+  margin-top: var(--lexical-page-margin-top, 0.4in);
+  margin-right: var(--lexical-page-margin-right, 0.4in);
+  margin-bottom: var(--lexical-page-margin-bottom, 0.4in);
+  margin-left: var(--lexical-page-margin-left, 0.4in);
 }
 @media screen {
   .PlaygroundEditorTheme__page {
-    width: var(--page-width);
-    min-height: var(--page-height);
+    width: var(--lexical-page-width);
+    min-height: var(--lexical-page-height);
   }
 }
 [data-lexical-visible-non-printing-linebreak]::before {
@@ -889,16 +891,16 @@
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
-  font-size: var(--text-font-size, inherit);
-  font-weight: var(--text-font-weight, inherit);
-  font-family: var(--text-font-family, inherit);
+  font-size: var(--lexical-text-font-size, inherit);
+  font-weight: var(--lexical-text-font-weight, inherit);
+  font-family: var(--lexical-text-font-family, inherit);
   text-decoration: none;
   position: absolute;
 }
 [data-lexical-visible-non-printing-block]:has(br:only-child) {
-  font-size: var(--text-font-size, inherit);
-  font-weight: var(--text-font-weight, inherit);
-  font-family: var(--text-font-family, inherit);
+  font-size: var(--lexical-text-font-size, inherit);
+  font-weight: var(--lexical-text-font-weight, inherit);
+  font-family: var(--lexical-text-font-family, inherit);
 }
 [data-lexical-visible-non-printing-block]:has(br:last-child)::after {
   bottom: 0;

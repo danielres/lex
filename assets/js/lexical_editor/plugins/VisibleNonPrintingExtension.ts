@@ -160,7 +160,7 @@ export const VisibleNonPrintingExtension = defineExtension({
               const nextTextStyle = getStyleObjectFromCSS(node.__textStyle);
               for (const prop of ['font-size', 'font-weight', 'font-family']) {
                 dom.style.setProperty(
-                  `--text-${prop}`,
+                  `--lexical-text-${prop}`,
                   nextTextStyle[prop] || null,
                 );
               }
@@ -186,7 +186,7 @@ export const VisibleNonPrintingExtension = defineExtension({
               const inline =
                 dom.style.fontFamily ||
                 getStyleObjectFromCSS(node.__style)['font-family'] ||
-                'var(--font-family)';
+                'var(--lexical-font-family)';
               if (inline.startsWith(LEXICAL_SPACE_DOT_FONT)) {
                 return;
               }

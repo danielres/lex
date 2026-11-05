@@ -141,7 +141,7 @@ export const PagesExtension = defineExtension({
         );
         pageElement.style.minHeight = 'unset';
         const pageHeight = parseInt(
-          rootElement.style.getPropertyValue('--page-height'),
+          rootElement.style.getPropertyValue('--lexical-page-height'),
           10,
         );
         if (!pageHeight) return [];
@@ -188,7 +188,7 @@ export const PagesExtension = defineExtension({
         }
         pageElement.style.minHeight = 'unset';
         const pageHeight = parseInt(
-          rootElement.style.getPropertyValue('--page-height'),
+          rootElement.style.getPropertyValue('--lexical-page-height'),
           10,
         );
         if (!pageHeight) return [];
@@ -214,7 +214,7 @@ export const PagesExtension = defineExtension({
         const rootElement = editor.getRootElement();
         if (!rootElement) return;
         const pageHeight = parseInt(
-          rootElement.style.getPropertyValue('--page-height'),
+          rootElement.style.getPropertyValue('--lexical-page-height'),
           10,
         );
         const fixedPageHeight = getFixedHeight(node);
@@ -275,7 +275,7 @@ export const PagesExtension = defineExtension({
         const rootElement = editor.getRootElement();
         if (!rootElement) return;
         const PAGE_WIDTH = parseInt(
-          rootElement.style.getPropertyValue('--page-width'),
+          rootElement.style.getPropertyValue('--lexical-page-width'),
           10,
         );
         if (!PAGE_WIDTH) return;
@@ -309,24 +309,36 @@ export const PagesExtension = defineExtension({
               PAGE_SIZES[pageSize][
                 orientation === 'portrait' ? 'height' : 'width'
               ] + 'px';
-            rootElement.style.setProperty('--page-width', pageWidth);
-            rootElement.style.setProperty('--page-height', pageHeight);
+            rootElement.style.setProperty('--lexical-page-width', pageWidth);
+            rootElement.style.setProperty('--lexical-page-height', pageHeight);
             const marginTop = (margins.top * 96).toFixed(1) + 'px';
             const marginRight = (margins.right * 96).toFixed(1) + 'px';
             const marginBottom = (margins.bottom * 96).toFixed(1) + 'px';
             const marginLeft = (margins.left * 96).toFixed(1) + 'px';
-            rootElement.style.setProperty('--page-margin-top', marginTop);
-            rootElement.style.setProperty('--page-margin-right', marginRight);
-            rootElement.style.setProperty('--page-margin-bottom', marginBottom);
-            rootElement.style.setProperty('--page-margin-left', marginLeft);
+            rootElement.style.setProperty(
+              '--lexical-page-margin-top',
+              marginTop,
+            );
+            rootElement.style.setProperty(
+              '--lexical-page-margin-right',
+              marginRight,
+            );
+            rootElement.style.setProperty(
+              '--lexical-page-margin-bottom',
+              marginBottom,
+            );
+            rootElement.style.setProperty(
+              '--lexical-page-margin-left',
+              marginLeft,
+            );
             updateZoom();
           } else {
-            rootElement.style.removeProperty('--page-width');
-            rootElement.style.removeProperty('--page-height');
-            rootElement.style.removeProperty('--page-margin-top');
-            rootElement.style.removeProperty('--page-margin-right');
-            rootElement.style.removeProperty('--page-margin-bottom');
-            rootElement.style.removeProperty('--page-margin-left');
+            rootElement.style.removeProperty('--lexical-page-width');
+            rootElement.style.removeProperty('--lexical-page-height');
+            rootElement.style.removeProperty('--lexical-page-margin-top');
+            rootElement.style.removeProperty('--lexical-page-margin-right');
+            rootElement.style.removeProperty('--lexical-page-margin-bottom');
+            rootElement.style.removeProperty('--lexical-page-margin-left');
             rootElement.style.zoom = '';
           }
         });
@@ -733,12 +745,12 @@ export const PagesExtension = defineExtension({
 
           // Copy page properties to :root before printing so @page can use them
           const PAGE_PROPS = [
-            '--page-width',
-            '--page-height',
-            '--page-margin-top',
-            '--page-margin-right',
-            '--page-margin-bottom',
-            '--page-margin-left',
+            '--lexical-page-width',
+            '--lexical-page-height',
+            '--lexical-page-margin-top',
+            '--lexical-page-margin-right',
+            '--lexical-page-margin-bottom',
+            '--lexical-page-margin-left',
           ];
 
           // Copies page CSS custom properties to :root so CSS @page rules
