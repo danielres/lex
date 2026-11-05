@@ -1,4 +1,4 @@
-import {cpSync, mkdirSync} from "node:fs"
+import {cpSync, mkdirSync, rmSync} from "node:fs"
 import {dirname, resolve} from "node:path"
 import {fileURLToPath} from "node:url"
 
@@ -13,17 +13,14 @@ copyDirectory(
   resolve(assetsDirectory, "../priv/static/assets/fonts"),
 )
 
-copyDirectory(
-  resolve(assetsDirectory, "js/lexical_editor/images/emoji"),
-  resolve(assetsDirectory, "../priv/static/assets/lexical/images/emoji"),
+const lexicalImagesDirectory = resolve(
+  assetsDirectory,
+  "../priv/static/assets/lexical/images",
 )
 
-copyDirectory(
-  resolve(assetsDirectory, "js/lexical_editor/images/icons"),
-  resolve(assetsDirectory, "../priv/static/assets/lexical/images/icons"),
-)
+rmSync(lexicalImagesDirectory, {recursive: true, force: true})
 
-cpSync(
-  resolve(assetsDirectory, "js/lexical_editor/images/logo.svg"),
-  resolve(assetsDirectory, "../priv/static/assets/lexical/images/logo.svg"),
+copyDirectory(
+  resolve(assetsDirectory, "css/lexical/images"),
+  lexicalImagesDirectory,
 )
