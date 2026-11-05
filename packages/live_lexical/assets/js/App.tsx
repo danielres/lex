@@ -50,6 +50,7 @@ import {
   $getRoot,
   configExtension,
   defineExtension,
+  type SerializedEditorState,
 } from 'lexical';
 import {type JSX, useEffect, useMemo, useRef} from 'react';
 import type {Collaborator, ProviderFactory} from './collaboration';
@@ -276,43 +277,39 @@ const AppExtension = defineExtension({
   theme: PlaygroundEditorTheme,
 });
 
-/**
- * The *only* settings that require tearing down and rebuilding the editor,
- * because they change the set of extensions in use (and therefore the initial
- * editor state). Building a dynamic extension from settings at all is an
- * anti-pattern — extensions should be as static as possible — and is tolerated
- * here only because the playground builds fundamentally different editors from
- * the query string.
- *
- * IMPORTANT: Do NOT add a setting here unless changing it genuinely requires a
- * different extension graph. Anything a live editor can react to through an
- * extension's config signals — table behavior toggles, link attributes,
- * character limits, autocomplete, etc. — MUST instead be synced with
- * `useSyncExtensionSignal` in `Editor.tsx`. Adding such a setting here forces a
- * full editor rebuild (discarding content, selection, and history) on every
- * toggle, which is exactly the bug that moving the table settings out of here
- * fixed.
- */
-interface DynamicSettings {
+/** Shared construction-time configuration for interactive editors and read-only previews. */
+interface EditorExtensionConfig {
+  autoFocus: boolean;
   editable: boolean;
-  emptyEditor: boolean;
+  initialEditorState?: SerializedEditorState | null;
   isRichText: boolean;
+  namespace?: string;
 }
 
-function buildExtensionFromSettings(
-  settings: DynamicSettings,
+export function createEditorExtension(
+  config: EditorExtensionConfig,
   integration: EditorIntegration,
 ) {
-  const {editable, isRichText} = settings;
+  const {
+    autoFocus,
+    editable,
+    initialEditorState = null,
+    isRichText,
+    namespace,
+  } = config;
+
   return defineExtension({
-    $initialEditorState: null,
+    $initialEditorState:
+      initialEditorState === null ? null : JSON.stringify(initialEditorState),
     dependencies: [
       AppExtension,
+      configExtension(AutoFocusExtension, {disabled: !autoFocus}),
       integration.extension,
       isRichText ? PlaygroundRichTextExtension : PlainTextExtension,
     ],
     editable,
-    name: '@lexical/playground/dynamic-config',
+    name: '@lexical/playground/editor',
+    namespace,
     // Apply INITIAL_SETTINGS to the extension config signals synchronously as
     // the editor is built, before the React useSynchronizeSettings effect
     // takes over live updates.
@@ -359,10 +356,10 @@ function App({
   // appear here or they would rebuild the whole editor on every change.
   const app = useMemo(
     () =>
-      buildExtensionFromSettings(
+      createEditorExtension(
         {
+          autoFocus: true,
           editable: initialEditable,
-          emptyEditor,
           isRichText,
         },
         integration,

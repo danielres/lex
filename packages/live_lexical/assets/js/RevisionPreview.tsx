@@ -1,18 +1,15 @@
-import {LexicalComposer} from '@lexical/react/LexicalComposer';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
-import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
+import {LexicalExtensionComposer} from '@lexical/react/LexicalExtensionComposer';
 import type {SerializedEditorState} from 'lexical';
-import {type JSX, useCallback, useEffect, useState} from 'react';
+import {type JSX, useCallback, useEffect, useMemo, useState} from 'react';
 
 import differ from '../../vendor/htmldiffer';
 
+import {createEditorExtension} from './App';
 import type {Collaborator} from './collaboration';
 import {ReadOnlyEditorEnvironment} from './EditorEnvironment';
 import EditorSurface from './EditorSurface';
 import type {EditorIntegration} from './integration';
-import PlaygroundNodes from './nodes/PlaygroundNodes';
-import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';
 
 const EXCALIDRAW_SELECTOR = '[data-lexical-excalidraw-id]';
@@ -117,28 +114,28 @@ function PreviewEditor({
   namespace: string;
   onHtml: (html: string) => void;
 }) {
-  return (
-    <LexicalComposer
-      initialConfig={{
-        editable: false,
-        editorState:
-          lexicalState === null ? undefined : JSON.stringify(lexicalState),
-        namespace,
-        nodes: [...PlaygroundNodes, ...integration.nodes],
-        onError: error => {
-          throw error;
+  const extension = useMemo(
+    () =>
+      createEditorExtension(
+        {
+          autoFocus: false,
+          editable: false,
+          initialEditorState: lexicalState,
+          isRichText: true,
+          namespace,
         },
-        theme: PlaygroundEditorTheme,
-      }}
-    >
+        integration,
+      ),
+    [integration, lexicalState, namespace],
+  );
+
+  return (
+    <LexicalExtensionComposer extension={extension} contentEditable={null}>
       <EditorSurface className="lexical-revision-preview" editable={false}>
-        <RichTextPlugin
-          contentEditable={<ContentEditable placeholder="" />}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
+        <ContentEditable placeholder="" />
         <CaptureHtmlPlugin onHtml={onHtml} />
       </EditorSurface>
-    </LexicalComposer>
+    </LexicalExtensionComposer>
   );
 }
 

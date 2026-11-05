@@ -123,8 +123,12 @@ base_esbuild_args = ~w(
     --alias:@=.
     --splitting
     --format=esm
-    --conditions=production
   )
+
+environment_esbuild_args =
+  if config_env() == :prod,
+    do: ~w(--conditions=production),
+    else: ~w(--conditions=development)
 
 live_lexical_esbuild_args = ~w(
     --jsx=automatic
@@ -145,6 +149,7 @@ config :esbuild,
   lex: [
     args:
       base_esbuild_args ++
+        environment_esbuild_args ++
         live_lexical_esbuild_args,
     cd: Path.expand("../assets", __DIR__),
     env: %{
