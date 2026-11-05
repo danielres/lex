@@ -1248,10 +1248,7 @@
 .lexical-editor-surface .editor-image .image-edit-button {
   border: 1px solid var(--lexical-control-border-color, rgba(0, 0, 0, 0.3));
   border-radius: 5px;
-  background-image: url(/assets/lexical/images/icons/pencil-fill.svg);
-  background-size: 16px;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: var(--lexical-button-background, #fff);
   width: 35px;
   height: 35px;
   vertical-align: -0.25em;
@@ -1260,14 +1257,22 @@
   top: 4px;
   cursor: pointer;
   user-select: none;
-}
 
-.lexical-editor-surface .editor-image .image-edit-button:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--lexical-selection-color, rgb(60, 132, 244)) 10%,
-    transparent
-  );
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    background-color: var(--lexical-button-text-color, #050505);
+    -webkit-mask: url(/assets/lexical/images/icons/pencil-fill.svg) center / contain no-repeat;
+    mask: url(/assets/lexical/images/icons/pencil-fill.svg) center / contain no-repeat;
+  }
+
+  &:hover {
+    background-color: var(--lexical-button-hover-background, #eee);
+  }
 }
 
 .lexical-editor-surface .editor-image .image-resizer {
