@@ -26,7 +26,7 @@ export default function Select({
       <label style={{marginTop: '-1em'}} className="Input__label">
         {label}
       </label>
-      <select {...other} className={className || 'select'}>
+      <select {...other} className={className || 'lexical-select'}>
         {children}
       </select>
     </div>

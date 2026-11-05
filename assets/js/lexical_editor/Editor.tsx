@@ -119,8 +119,9 @@ export default function Editor(): JSX.Element {
         />
       )}
       <div
-        className={`editor-container ${showTreeView ? 'tree-view' : ''} ${!isRichText ? 'plain-text' : ''
-          }`}>
+        className={`lexical-editor-container ${showTreeView ? 'tree-view' : ''} ${
+          !isRichText ? 'plain-text' : ''
+        }`}>
         <ComponentPickerPlugin />
         <EmojiPickerPlugin />
         <AutoEmbedPlugin />
@@ -128,8 +129,8 @@ export default function Editor(): JSX.Element {
         <SpeechToTextPlugin />
         {isRichText ? (
           <>
-            <div className="editor-scroller">
-              <div className="editor" ref={onRef}>
+            <div className="lexical-editor-scroller">
+              <div className="lexical-editor-content" ref={onRef}>
                 <ContentEditable placeholder={placeholder} />
               </div>
             </div>

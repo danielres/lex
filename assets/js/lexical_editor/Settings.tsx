@@ -48,7 +48,7 @@ export default function Settings(): JSX.Element {
         onClick={() => setShowSettings(!showSettings)}
       />
       {showSettings ? (
-        <div className="switches">
+        <div className="lexical-switches">
           <Switch
             onClick={() => setOption('showTreeView', !showTreeView)}
             checked={showTreeView}

@@ -9,14 +9,14 @@
 .lexical-editor {
   --font-family: inherit;
   --playground-font-size: 16px;
-  /* The page scrolls at the document level while .toolbar is sticky at the
+  /* The page scrolls at the document level while .lexical-toolbar is sticky at the
      top of the viewport (48px rendered: 36px height + 2 * 6px padding).
      scroll-padding keeps scrollIntoViewIfNeeded and native scrolling from
      leaving the selection hidden underneath it. */
   scroll-padding-top: 52px;
 }
 
-.editor-shell {
+.lexical-editor-surface {
   min-width: 0;
   max-width: 100%;
   color: var(--lexical-editor-text-color, #000);
@@ -25,13 +25,13 @@
   font-weight: 400;
 }
 
-.editor-shell .editor-container {
+.lexical-editor-surface .lexical-editor-container {
   background: var(--lexical-editor-surface, #fff);
   position: relative;
   display: block;
 }
 
-.editor-scroller {
+.lexical-editor-scroller {
   min-height: 150px;
   max-width: 100%;
   border: 0;
@@ -42,7 +42,7 @@
   resize: vertical;
 }
 
-.editor {
+.lexical-editor-content {
   flex: auto;
   max-width: 100%;
   position: relative;
@@ -78,7 +78,7 @@
     display: none !important;
   }
 
-  .editor-shell {
+  .lexical-editor-surface {
     margin: 0 !important;
     border-radius: 0 !important;
     max-width: none !important;
@@ -463,7 +463,7 @@ i.horizontal-rule {
   mask-image: url(/assets/lexical/images/icons/dropdown-more.svg);
 }
 
-.toolbar .toolbar-item .icon.font-color {
+.lexical-toolbar .lexical-toolbar-item .icon.font-color {
   background-image: url(/assets/lexical/images/icons/font-color.svg);
   background-color: transparent;
 }
@@ -473,7 +473,7 @@ i.horizontal-rule {
   mask-image: url(/assets/lexical/images/icons/font-family.svg);
 }
 
-.toolbar .toolbar-item .icon.bg-color {
+.lexical-toolbar .lexical-toolbar-item .icon.bg-color {
   background-image: url(/assets/lexical/images/icons/bg-color.svg);
   background-color: transparent;
 }
@@ -698,7 +698,7 @@ i.page-setup,
 }
 
 .link-editor .button.active,
-.toolbar .button.active {
+.lexical-toolbar .button.active {
   background-color: var(--lexical-control-active-surface, rgb(223, 232, 250));
 }
 
@@ -1055,7 +1055,7 @@ i.paragraph,
   mask-image: url(/assets/lexical/images/icons/code.svg);
 }
 
-.switches {
+.lexical-switches {
   z-index: 20;
   position: fixed;
   left: 10px;
@@ -1066,7 +1066,7 @@ i.paragraph,
   animation: slide-in 0.4s ease;
 }
 
-.switches::after {
+.lexical-switches::after {
   content: '';
   position: sticky;
   bottom: 0;
@@ -1093,7 +1093,7 @@ i.paragraph,
   }
 }
 
-.switch {
+.lexical-switch {
   display: block;
   color: var(--lexical-editor-text-color, #444);
   margin: 5px 0;
@@ -1106,15 +1106,7 @@ i.paragraph,
   border-radius: 10px;
 }
 
-#rich-text-switch {
-  right: 0;
-}
-
-#character-count-switch {
-  right: 130px;
-}
-
-.switch label {
+.lexical-switch label {
   margin-right: 5px;
   line-height: 14px;
   width: 100px;
@@ -1123,7 +1115,7 @@ i.paragraph,
   vertical-align: middle;
 }
 
-.switch button {
+.lexical-switch button {
   background-color: var(--lexical-control-border-color, rgb(206 208 212));
   height: 24px;
   box-sizing: border-box;
@@ -1138,11 +1130,11 @@ i.paragraph,
   border: 2px solid transparent;
 }
 
-.switch button:focus-visible {
+.lexical-switch button:focus-visible {
   border-color: var(--lexical-selection-color, blue);
 }
 
-.switch button span {
+.lexical-switch button span {
   top: 0px;
   left: 0px;
   display: block;
@@ -1154,45 +1146,45 @@ i.paragraph,
   transition: transform 0.2s;
 }
 
-.switch button[aria-checked='true'] {
+.lexical-switch button[aria-checked='true'] {
   background-color: var(--lexical-selection-color, rgb(24 119 242));
 }
 
-.switch button[aria-checked='true'] span {
+.lexical-switch button[aria-checked='true'] span {
   transform: translateX(20px);
 }
 
-.editor-shell span.editor-image {
+.lexical-editor-surface span.editor-image {
   cursor: default;
   display: inline-block;
   position: relative;
   overflow: hidden;
 }
 
-.editor-shell .editor-image img {
+.lexical-editor-surface .editor-image img {
   max-width: 100%;
   cursor: default;
 }
 
-.editor-shell .editor-image img.focused {
+.lexical-editor-surface .editor-image img.focused {
   outline: 2px solid var(--lexical-selection-color, rgb(60, 132, 244));
   user-select: none;
 }
 
-.editor-shell .editor-image img.focused.draggable {
+.lexical-editor-surface .editor-image img.focused.draggable {
   cursor: grab;
 }
 
-.editor-shell .editor-image img.focused.draggable:active {
+.lexical-editor-surface .editor-image img.focused.draggable:active {
   cursor: grabbing;
 }
 
-.editor-shell .editor-image .image-caption-container .tree-view-output {
+.lexical-editor-surface .editor-image .image-caption-container .tree-view-output {
   margin: 0;
   border-radius: 0;
 }
 
-.editor-shell .editor-image .image-caption-container {
+.lexical-editor-surface .editor-image .image-caption-container {
   display: block;
   position: absolute;
   bottom: 4px;
@@ -1213,7 +1205,7 @@ i.paragraph,
   word-wrap: break-word;
 }
 
-.editor-shell .editor-image .image-caption-button {
+.lexical-editor-surface .editor-image .image-caption-button {
   display: block;
   position: absolute;
   bottom: 20px;
@@ -1235,14 +1227,14 @@ i.paragraph,
   user-select: none;
 }
 
-.editor-shell .editor-image .image-caption-button:hover {
+.lexical-editor-surface .editor-image .image-caption-button:hover {
   background-color: var(
     --lexical-image-caption-button-hover-background,
     rgba(60, 132, 244, 0.5)
   );
 }
 
-.editor-shell .editor-image .image-edit-button {
+.lexical-editor-surface .editor-image .image-edit-button {
   border: 1px solid var(--lexical-control-border-color, rgba(0, 0, 0, 0.3));
   border-radius: 5px;
   background-image: url(/assets/lexical/images/icons/pencil-fill.svg);
@@ -1259,7 +1251,7 @@ i.paragraph,
   user-select: none;
 }
 
-.editor-shell .editor-image .image-edit-button:hover {
+.lexical-editor-surface .editor-image .image-edit-button:hover {
   background-color: color-mix(
     in srgb,
     var(--lexical-selection-color, rgb(60, 132, 244)) 10%,
@@ -1267,7 +1259,7 @@ i.paragraph,
   );
 }
 
-.editor-shell .editor-image .image-resizer {
+.lexical-editor-surface .editor-image .image-resizer {
   display: block;
   width: 7px;
   height: 7px;
@@ -1276,49 +1268,49 @@ i.paragraph,
   border: 1px solid var(--lexical-selection-content-color, #fff);
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-n {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-n {
   top: -6px;
   left: 48%;
   cursor: n-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-ne {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-ne {
   top: -6px;
   right: -6px;
   cursor: ne-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-e {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-e {
   bottom: 48%;
   right: -6px;
   cursor: e-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-se {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-se {
   bottom: -2px;
   right: -6px;
   cursor: nwse-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-s {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-s {
   bottom: -2px;
   left: 48%;
   cursor: s-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-sw {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-sw {
   bottom: -2px;
   left: -6px;
   cursor: sw-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-w {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-w {
   bottom: 48%;
   left: -6px;
   cursor: w-resize;
 }
 
-.editor-shell .editor-image .image-resizer.image-resizer-nw {
+.lexical-editor-surface .editor-image .image-resizer.image-resizer-nw {
   top: -6px;
   left: -6px;
   cursor: nw-resize;
@@ -1369,7 +1361,7 @@ i.paragraph,
   font-weight: bold;
 }
 
-.actions {
+.lexical-actions {
   position: absolute;
   text-align: right;
   margin: 10px;
@@ -1377,12 +1369,12 @@ i.paragraph,
   right: 0;
 }
 
-.actions.tree-view {
+.lexical-actions.tree-view {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.actions i {
+.lexical-actions i {
   background-size: contain;
   display: inline-block;
   height: 15px;
@@ -1397,67 +1389,67 @@ i.paragraph,
   mask-position: center;
 }
 
-.actions i.indent {
+.lexical-actions i.indent {
   -webkit-mask-image: url(/assets/lexical/images/icons/indent.svg);
   mask-image: url(/assets/lexical/images/icons/indent.svg);
 }
 
-.actions i.outdent {
+.lexical-actions i.outdent {
   -webkit-mask-image: url(/assets/lexical/images/icons/outdent.svg);
   mask-image: url(/assets/lexical/images/icons/outdent.svg);
 }
 
-.actions i.lock {
+.lexical-actions i.lock {
   -webkit-mask-image: url(/assets/lexical/images/icons/lock-fill.svg);
   mask-image: url(/assets/lexical/images/icons/lock-fill.svg);
 }
 
-.actions i.image {
+.lexical-actions i.image {
   -webkit-mask-image: url(/assets/lexical/images/icons/file-image.svg);
   mask-image: url(/assets/lexical/images/icons/file-image.svg);
 }
 
-.actions i.table {
+.lexical-actions i.table {
   -webkit-mask-image: url(/assets/lexical/images/icons/table.svg);
   mask-image: url(/assets/lexical/images/icons/table.svg);
 }
 
-.actions i.unlock {
+.lexical-actions i.unlock {
   -webkit-mask-image: url(/assets/lexical/images/icons/lock.svg);
   mask-image: url(/assets/lexical/images/icons/lock.svg);
 }
 
-.actions i.left-align {
+.lexical-actions i.left-align {
   -webkit-mask-image: url(/assets/lexical/images/icons/text-left.svg);
   mask-image: url(/assets/lexical/images/icons/text-left.svg);
 }
 
-.actions i.center-align {
+.lexical-actions i.center-align {
   -webkit-mask-image: url(/assets/lexical/images/icons/text-center.svg);
   mask-image: url(/assets/lexical/images/icons/text-center.svg);
 }
 
-.actions i.right-align {
+.lexical-actions i.right-align {
   -webkit-mask-image: url(/assets/lexical/images/icons/text-right.svg);
   mask-image: url(/assets/lexical/images/icons/text-right.svg);
 }
 
-.actions i.justify-align {
+.lexical-actions i.justify-align {
   -webkit-mask-image: url(/assets/lexical/images/icons/justify.svg);
   mask-image: url(/assets/lexical/images/icons/justify.svg);
 }
 
-.actions i.disconnect {
+.lexical-actions i.disconnect {
   -webkit-mask-image: url(/assets/lexical/images/icons/plug.svg);
   mask-image: url(/assets/lexical/images/icons/plug.svg);
 }
 
-.actions i.connect {
+.lexical-actions i.connect {
   -webkit-mask-image: url(/assets/lexical/images/icons/plug-fill.svg);
   mask-image: url(/assets/lexical/images/icons/plug-fill.svg);
 }
 
-.actions i.versions {
+.lexical-actions i.versions {
   -webkit-mask-image: url(/assets/lexical/images/icons/clock-history.svg);
   mask-image: url(/assets/lexical/images/icons/clock-history.svg);
 }
@@ -1513,7 +1505,7 @@ i.chevron-down {
   mask-position: center;
 }
 
-.action-button {
+.lexical-action-button {
   background-color: var(--lexical-button-background, #eee);
   border: 0;
   padding: 8px 12px;
@@ -1525,25 +1517,25 @@ i.chevron-down {
   cursor: pointer;
 }
 
-.action-button[data-active='true'] {
+.lexical-action-button[data-active='true'] {
   background-color: var(--lexical-action-active-background, #e3e8f5);
   color: var(--lexical-action-active-text-color, #216fdb);
 }
 
-.action-button[data-active='true']:hover {
+.lexical-action-button[data-active='true']:hover {
   background-color: var(--lexical-action-active-hover-background, #d6def0);
 }
 
-.action-button:hover {
+.lexical-action-button:hover {
   background-color: var(--lexical-button-hover-background, #ddd);
   color: var(--lexical-button-text-color, #000);
 }
 
-.action-button-mic.active {
+.lexical-action-button-mic.active {
   animation: mic-pulsate-color 3s infinite;
 }
 
-button.action-button:disabled {
+button.lexical-action-button:disabled {
   background: var(--lexical-button-background, #eee);
   color: var(--lexical-action-disabled-text-color, #777);
   cursor: not-allowed;
@@ -1618,7 +1610,7 @@ button.action-button:disabled {
   text-decoration: underline;
 }
 
-.toolbar {
+.lexical-toolbar {
   display: flex;
   margin-bottom: var(--lexical-toolbar-margin-bottom, 1px);
   background: var(--lexical-toolbar-background, #fff);
@@ -1635,11 +1627,11 @@ button.action-button:disabled {
   overflow-y: hidden; /* disable vertical scroll*/
 }
 
-.toolbar .toolbar-item:focus {
+.lexical-toolbar .lexical-toolbar-item:focus {
   outline: 2px solid var(--lexical-selection-color, rgb(60, 132, 244));
 }
 
-button.toolbar-item {
+button.lexical-toolbar-item {
   border: 0;
   display: flex;
   background: none;
@@ -1652,15 +1644,15 @@ button.toolbar-item {
   justify-content: space-between;
 }
 
-button.toolbar-item:disabled {
+button.lexical-toolbar-item:disabled {
   cursor: not-allowed;
 }
 
-button.toolbar-item.spaced {
+button.lexical-toolbar-item.spaced {
   margin-right: 2px;
 }
 
-button.toolbar-item i.format {
+button.lexical-toolbar-item i.format {
   background-color: CanvasText;
   -webkit-mask-size: contain;
   mask-size: contain;
@@ -1672,38 +1664,38 @@ button.toolbar-item i.format {
   opacity: 0.6;
 }
 
-button.toolbar-item:disabled .icon,
-button.toolbar-item:disabled .text,
-button.toolbar-item:disabled i.format,
-button.toolbar-item:disabled .chevron-down {
+button.lexical-toolbar-item:disabled .icon,
+button.lexical-toolbar-item:disabled .text,
+button.lexical-toolbar-item:disabled i.format,
+button.lexical-toolbar-item:disabled .chevron-down {
   opacity: 0.2;
 }
 
-button.toolbar-item.active {
+button.lexical-toolbar-item.active {
   background-color: var(
     --lexical-control-active-surface,
     rgba(223, 232, 250, 0.3)
   );
 }
 
-button.toolbar-item.active i {
+button.lexical-toolbar-item.active i {
   opacity: 1;
 }
 
-.toolbar-item:hover:not([disabled]) {
+.lexical-toolbar-item:hover:not([disabled]) {
   background-color: var(--lexical-control-hover-surface, #eee);
 }
 
-.toolbar-item.font-family .text {
+.lexical-toolbar-item.font-family .text {
   display: block;
   max-width: 40px;
 }
 
-.toolbar .code-language {
+.lexical-toolbar .code-language {
   width: 150px;
 }
 
-.toolbar .toolbar-item .text {
+.lexical-toolbar .lexical-toolbar-item .text {
   display: flex;
   line-height: 20px;
   vertical-align: middle;
@@ -1716,7 +1708,7 @@ button.toolbar-item.active i {
   padding-right: 10px;
 }
 
-.toolbar .toolbar-item .icon {
+.lexical-toolbar .lexical-toolbar-item .icon {
   display: flex;
   width: 20px;
   height: 20px;
@@ -1733,8 +1725,8 @@ button.toolbar-item.active i {
   mask-position: center;
 }
 
-.toolbar i.chevron-down,
-.toolbar-item i.chevron-down {
+.lexical-toolbar i.chevron-down,
+.lexical-toolbar-item i.chevron-down {
   margin-top: 3px;
   width: 16px;
   height: 16px;
@@ -1742,7 +1734,7 @@ button.toolbar-item.active i {
   user-select: none;
 }
 
-.toolbar i.chevron-down.inside {
+.lexical-toolbar i.chevron-down.inside {
   width: 16px;
   height: 16px;
   display: flex;
@@ -1752,7 +1744,7 @@ button.toolbar-item.active i {
   pointer-events: none;
 }
 
-.toolbar .divider {
+.lexical-toolbar .divider {
   width: 1px;
   background-color: var(--lexical-control-divider-color, #eee);
   margin: 0 4px;
@@ -1952,12 +1944,12 @@ button.item.dropdown-item-active i {
   width: 100%;
 }
 
-.toolbar .block-controls {
+.lexical-toolbar .block-controls {
   display: flex;
   align-items: center;
 }
 
-.toolbar .block-controls .dropdown-button-text {
+.lexical-toolbar .block-controls .dropdown-button-text {
   width: 7em;
   text-align: left;
   overflow: hidden;
@@ -1978,25 +1970,25 @@ button.item.dropdown-item-active i {
 }
 
 @media (forced-colors: active) {
-  .toolbar {
+  .lexical-toolbar {
     border-bottom: 1px solid CanvasText;
   }
-  .toolbar .toolbar-item {
+  .lexical-toolbar .lexical-toolbar-item {
     border: 1px solid CanvasText;
   }
-  .toolbar .toolbar-item:focus,
-  .toolbar .toolbar-item:focus-visible {
+  .lexical-toolbar .lexical-toolbar-item:focus,
+  .lexical-toolbar .lexical-toolbar-item:focus-visible {
     outline: 2px solid Highlight;
     outline-offset: 2px;
   }
-  .toolbar .toolbar-item.active {
+  .lexical-toolbar .lexical-toolbar-item.active {
     background-color: Highlight;
     color: HighlightText;
   }
-  button.toolbar-item:not(:disabled) i.format {
+  button.lexical-toolbar-item:not(:disabled) i.format {
     opacity: 1;
   }
-  .toolbar .divider {
+  .lexical-toolbar .divider {
     background-color: CanvasText;
     forced-color-adjust: none;
   }
@@ -2009,7 +2001,7 @@ button.item.dropdown-item-active i {
   .Modal__modal .Button__root {
     border: 1px solid CanvasText;
   }
-  .editor-shell .editor-container .ContentEditable__root {
+  .lexical-editor-surface .lexical-editor-container .ContentEditable__root {
     border: 1px solid CanvasText;
   }
 }

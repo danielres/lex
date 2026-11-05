@@ -13,17 +13,15 @@ export default function Switch({
   checked,
   onClick,
   text,
-  id,
 }: Readonly<{
   checked: boolean;
-  id?: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   text: string;
 }>): JSX.Element {
   // eslint-disable-next-line react-hooks/purity
   const buttonId = useMemo(() => 'id_' + Math.floor(Math.random() * 10000), []);
   return (
-    <div className="switch" id={id}>
+    <div className="lexical-switch">
       <label htmlFor={buttonId}>{text}</label>
       <button
         role="switch"

@@ -363,7 +363,7 @@
   @apply border border-transparent;
 }
 
-.editor-shell {
+.lexical-editor-surface {
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
     @apply focus-within:outline-2 outline-info/50 rounded-box;
@@ -378,7 +378,7 @@
     }
   }
 
-  .action-button {
+  .lexical-action-button {
     @apply hidden;
   }
 
@@ -429,7 +429,7 @@
 }
 
 /* Wiki-link integration. */
-.editor-shell {
+.lexical-editor-surface {
   .wiki-link {
     @apply cursor-pointer text-info hover:bg-info/20 transition;
   }

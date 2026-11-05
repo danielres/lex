@@ -9,7 +9,7 @@
 /*
  * The host establishes the shadow tree but should not introduce any layout of
  * its own; the editor inside the shadow root participates in the
- * .editor-shell layout as if it were rendered directly.
+ * .lexical-editor-surface layout as if it were rendered directly.
  */
 .shadow-dom-host {
   display: block;

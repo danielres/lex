@@ -198,7 +198,7 @@ function BlockFormatDropDown({
   return (
     <DropDown
       disabled={disabled}
-      buttonClassName="toolbar-item block-controls"
+      buttonClassName="lexical-toolbar-item block-controls"
       buttonIconClassName={'icon block-type ' + blockType}
       buttonLabel={blockTypeToBlockName[blockType]}
       buttonAriaLabel="Formatting options for text style">
@@ -306,7 +306,7 @@ function IndentControls({
     <>
       <button
         aria-label="Outdent content"
-        className="toolbar-item spaced"
+        className="lexical-toolbar-item spaced"
         disabled={disabled}
         onClick={() => {
           editor.dispatchCommand(OUTDENT_CONTENT_COMMAND);
@@ -317,7 +317,7 @@ function IndentControls({
       </button>
       <button
         aria-label="Indent content"
-        className="toolbar-item"
+        className="lexical-toolbar-item"
         disabled={disabled}
         onClick={() => {
           editor.dispatchCommand(INDENT_CONTENT_COMMAND);
@@ -623,7 +623,7 @@ export default function ToolbarPlugin({
   return (
     <div
       ref={toolbarRef}
-      className="toolbar"
+      className="lexical-toolbar"
       role="toolbar"
       aria-label="Editor toolbar">
       <button
@@ -633,7 +633,7 @@ export default function ToolbarPlugin({
         }
         title={IS_APPLE ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)'}
         type="button"
-        className="toolbar-item spaced"
+        className="lexical-toolbar-item spaced"
         aria-label="Undo">
         <i className="format undo" />
       </button>
@@ -644,7 +644,7 @@ export default function ToolbarPlugin({
         }
         title={IS_APPLE ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Y)'}
         type="button"
-        className="toolbar-item"
+        className="lexical-toolbar-item"
         aria-label="Redo">
         <i className="format redo" />
       </button>
@@ -666,7 +666,7 @@ export default function ToolbarPlugin({
           {!isCodeShiki && (
             <DropDown
               disabled={!isEditable}
-              buttonClassName="toolbar-item code-language"
+              buttonClassName="lexical-toolbar-item code-language"
               buttonLabel={
                 toolbarState.codeLanguage
                   ? (CODE_LANGUAGE_OPTIONS_PRISM.find(
@@ -703,7 +703,7 @@ export default function ToolbarPlugin({
             <>
               <DropDown
                 disabled={!isEditable}
-                buttonClassName="toolbar-item code-language"
+                buttonClassName="lexical-toolbar-item code-language"
                 buttonLabel={
                   toolbarState.codeLanguage
                     ? (CODE_LANGUAGE_OPTIONS_SHIKI.find(
@@ -737,7 +737,7 @@ export default function ToolbarPlugin({
               </DropDown>
               <DropDown
                 disabled={!isEditable}
-                buttonClassName="toolbar-item code-language"
+                buttonClassName="lexical-toolbar-item code-language"
                 buttonLabel={
                   (CODE_THEME_OPTIONS_SHIKI.find(
                     opt => opt[0] === toolbarState.codeTheme,
@@ -766,7 +766,8 @@ export default function ToolbarPlugin({
             disabled={!isEditable}
             onClick={e => dispatchFormatTextCommand('bold', isKeyboardInput(e))}
             className={
-              'toolbar-item spaced ' + (toolbarState.isBold ? 'active' : '')
+              'lexical-toolbar-item spaced ' +
+              (toolbarState.isBold ? 'active' : '')
             }
             title={`Bold (${shortcut('BOLD')})`}
             type="button"
@@ -779,7 +780,8 @@ export default function ToolbarPlugin({
               dispatchFormatTextCommand('italic', isKeyboardInput(e))
             }
             className={
-              'toolbar-item spaced ' + (toolbarState.isItalic ? 'active' : '')
+              'lexical-toolbar-item spaced ' +
+              (toolbarState.isItalic ? 'active' : '')
             }
             title={`Italic (${shortcut('ITALIC')})`}
             type="button"
@@ -792,7 +794,7 @@ export default function ToolbarPlugin({
               dispatchFormatTextCommand('underline', isKeyboardInput(e))
             }
             className={
-              'toolbar-item spaced ' +
+              'lexical-toolbar-item spaced ' +
               (toolbarState.isUnderline ? 'active' : '')
             }
             title={`Underline (${shortcut('UNDERLINE')})`}
@@ -807,7 +809,8 @@ export default function ToolbarPlugin({
                 dispatchFormatTextCommand('code', isKeyboardInput(e))
               }
               className={
-                'toolbar-item spaced ' + (toolbarState.isCode ? 'active' : '')
+                'lexical-toolbar-item spaced ' +
+                (toolbarState.isCode ? 'active' : '')
               }
               title={`Code (${shortcut('INSERT_CODE_BLOCK')})`}
               type="button"
@@ -819,7 +822,8 @@ export default function ToolbarPlugin({
             disabled={!isEditable}
             onClick={insertLink}
             className={
-              'toolbar-item spaced ' + (toolbarState.isLink ? 'active' : '')
+              'lexical-toolbar-item spaced ' +
+              (toolbarState.isLink ? 'active' : '')
             }
             aria-label="Insert link"
             title={`Insert link (${shortcut('INSERT_LINK')})`}
@@ -828,7 +832,7 @@ export default function ToolbarPlugin({
           </button>
           <DropDown
             disabled={!isEditable}
-            buttonClassName="toolbar-item spaced"
+            buttonClassName="lexical-toolbar-item spaced"
             buttonLabel=""
             buttonAriaLabel="Formatting options for additional text styles"
             buttonIconClassName="icon dropdown-more">
@@ -908,7 +912,7 @@ export default function ToolbarPlugin({
               <Divider />
               <DropDown
                 disabled={!isEditable}
-                buttonClassName="toolbar-item spaced"
+                buttonClassName="lexical-toolbar-item spaced"
                 buttonLabel="Insert"
                 buttonAriaLabel="Insert specialized editor node"
                 buttonIconClassName="icon plus">

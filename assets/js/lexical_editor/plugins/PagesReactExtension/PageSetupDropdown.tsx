@@ -95,7 +95,7 @@ export function PageSetupDropdownComponent({
   return (
     <DropDown
       disabled={disabled}
-      buttonClassName="toolbar-item page-setup"
+      buttonClassName="lexical-toolbar-item page-setup"
       buttonIconClassName="icon page-setup"
       buttonAriaLabel="Page setup: size, orientation, and layout">
       <DropDownItem

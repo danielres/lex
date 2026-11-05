@@ -246,9 +246,9 @@ export default function ActionsPlugin({
   };
 
   return (
-    <div className="actions">
+    <div className="lexical-actions">
       <button
-        className="action-button"
+        className="lexical-action-button"
         title="Keyboard shortcuts"
         aria-label="Show keyboard shortcuts"
         onClick={() =>
@@ -264,7 +264,7 @@ export default function ActionsPlugin({
             setIsSpeechToText(!isSpeechToText);
           }}
           className={
-            'action-button action-button-mic ' +
+            'lexical-action-button lexical-action-button-mic ' +
             (isSpeechToText ? 'active' : '')
           }
           title="Speech To Text"
@@ -275,7 +275,7 @@ export default function ActionsPlugin({
         </button>
       )}
       <button
-        className="action-button import"
+        className="lexical-action-button import"
         onClick={() => importFile(editor)}
         title="Import"
         aria-label="Import editor state from JSON">
@@ -283,7 +283,7 @@ export default function ActionsPlugin({
       </button>
 
       <button
-        className="action-button export"
+        className="lexical-action-button export"
         onClick={() =>
           exportFile(editor, {
             fileName: `Playground ${new Date().toISOString()}`,
@@ -295,7 +295,7 @@ export default function ActionsPlugin({
         <i className="export" />
       </button>
       <button
-        className="action-button share"
+        className="lexical-action-button share"
         onClick={() =>
           shareDoc(
             serializedDocumentFromEditorState(editor.getEditorState(), {
@@ -311,7 +311,7 @@ export default function ActionsPlugin({
         <i className="share" />
       </button>
       <button
-        className="action-button clear"
+        className="lexical-action-button clear"
         disabled={isEditorEmpty}
         onClick={() => {
           showModal('Clear editor', onClose => (
@@ -323,7 +323,7 @@ export default function ActionsPlugin({
         <i className="clear" />
       </button>
       <button
-        className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
+        className={`lexical-action-button ${!isEditable ? 'unlock' : 'lock'}`}
         onClick={() => {
           editor.setEditable(!editor.isEditable());
         }}
@@ -332,7 +332,7 @@ export default function ActionsPlugin({
         <i className={!isEditable ? 'unlock' : 'lock'} />
       </button>
       <button
-        className="action-button"
+        className="lexical-action-button"
         data-active={isMarkdown}
         disabled={isHtml || isPending}
         onClick={() => toggleMode('markdown')}
@@ -343,7 +343,7 @@ export default function ActionsPlugin({
         <i className="markdown" />
       </button>
       <button
-        className="action-button"
+        className="lexical-action-button"
         data-active={isHtml}
         disabled={isMarkdown || isPending}
         onClick={() => toggleMode('html')}

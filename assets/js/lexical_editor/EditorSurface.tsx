@@ -12,7 +12,7 @@ export default function EditorSurface({
   editable: boolean;
 }): JSX.Element {
   const appTheme = useAppTheme();
-  const classes = ['editor-shell', className]
+  const classes = ['lexical-editor-surface', className]
     .filter(Boolean)
     .join(' ');
 

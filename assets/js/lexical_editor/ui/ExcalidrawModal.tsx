@@ -215,10 +215,10 @@ export default function ExcalidrawModal({
             theme={appTheme}
           />
           <div className="ExcalidrawModal__actions">
-            <button className="action-button" onClick={discard}>
+            <button className="lexical-action-button" onClick={discard}>
               Discard
             </button>
-            <button className="action-button" onClick={save}>
+            <button className="lexical-action-button" onClick={save}>
               Save
             </button>
           </div>

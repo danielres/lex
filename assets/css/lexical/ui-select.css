@@ -24,7 +24,7 @@
   outline: none;
 }
 
-.select {
+.lexical-select {
   min-width: 160px;
   max-width: 290px;
   border: 1px solid var(--lexical-select-border-color, #393939);
