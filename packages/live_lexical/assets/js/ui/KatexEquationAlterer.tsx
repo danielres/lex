@@ -55,7 +55,7 @@ export default function KatexEquationAlterer({
             }}
             value={equation}
             autoFocus={true}
-            className="KatexEquationAlterer_textArea"
+            className="lexical-input KatexEquationAlterer_textArea"
             data-test-id="equation-input"
           />
         ) : (
@@ -65,7 +65,7 @@ export default function KatexEquationAlterer({
             }}
             value={equation}
             autoFocus={true}
-            className="KatexEquationAlterer_textArea"
+            className="lexical-input KatexEquationAlterer_textArea"
             data-test-id="equation-input"
           />
         )}

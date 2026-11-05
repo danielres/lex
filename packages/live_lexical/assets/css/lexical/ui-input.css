@@ -18,17 +18,21 @@
   flex: 1;
   color: var(--lexical-input-label-color, #666);
 }
+
+.lexical-input {
+  border: 1px solid var(--lexical-control-border-color, #999);
+  background: var(--lexical-input-background, var(--lexical-control-surface, field));
+  color: var(--lexical-editor-text-color, fieldtext);
+  border-radius: 5px;
+}
+
 .Input__input {
   display: flex;
   flex: 2;
-  border: 1px solid var(--lexical-control-border-color, #999);
-  background: var(--lexical-control-surface, field);
-  color: var(--lexical-editor-text-color, fieldtext);
   padding-top: 7px;
   padding-bottom: 7px;
   padding-left: 10px;
   padding-right: 10px;
   font-size: 16px;
-  border-radius: 5px;
   min-width: 0;
 }

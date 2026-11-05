@@ -29,7 +29,7 @@ export default function FileInput({
       <input
         type="file"
         accept={accept}
-        className="Input__input"
+        className="lexical-input Input__input"
         onChange={e => onChange(e.target.files)}
         data-test-id={dataTestId}
       />

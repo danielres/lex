@@ -34,7 +34,7 @@ export default function TextInput({
       <label className="Input__label">{label}</label>
       <input
         type={type}
-        className="Input__input"
+        className="lexical-input Input__input"
         autoFocus={autoFocus}
         placeholder={placeholder}
         value={value}

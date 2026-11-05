@@ -115,6 +115,7 @@
   --lexical-image-caption-text-color: color-mix(in oklab, var(--color-base-content) 80%, transparent);
 
   /* Inputs and links */
+  --lexical-input-background: var(--color-base-100);
   --lexical-input-label-color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
   --lexical-link-color: var(--color-info);
   --lexical-link-editor-field-background: var(--color-base-200);

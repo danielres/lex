@@ -207,7 +207,7 @@ export function AutoEmbedDialog({
       <div className="Input__wrapper">
         <input
           type="text"
-          className="Input__input"
+          className="lexical-input Input__input"
           placeholder={embedConfig.exampleUrl}
           value={text}
           autoFocus={true}
