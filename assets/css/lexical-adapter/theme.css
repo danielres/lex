@@ -293,3 +293,11 @@
     }
   }
 }
+
+.ExcalidrawModal__overlay {
+  .excalidraw {
+    .main-menu-trigger {
+      display: none;
+    }
+  }
+}
