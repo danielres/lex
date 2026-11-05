@@ -8,8 +8,10 @@
  */
 
 .ExcalidrawModal__overlay {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  justify-content: center;
   position: fixed;
   flex-direction: column;
   top: 0px;
@@ -18,6 +20,7 @@
   right: 0px;
   flex-grow: 0px;
   flex-shrink: 1px;
+  padding: 1rem;
   z-index: 100;
   background-color: var(--lexical-modal-overlay-background, rgb(40 40 40 / 60%));
 }
@@ -34,10 +37,11 @@
   border-radius: 5px;
 }
 .ExcalidrawModal__row {
+  box-sizing: border-box;
   position: relative;
   padding: 40px 5px 5px;
-  width: 70vw;
-  height: 70vh;
+  width: calc(100vw - 2rem);
+  height: calc(100dvh - 2rem);
   border-radius: 8px;
   box-shadow:
     0 12px 28px 0 rgba(0, 0, 0, 0.2),
@@ -50,7 +54,7 @@
 .ExcalidrawModal__modal {
   position: relative;
   z-index: 10;
-  top: 50px;
+  top: auto;
   width: auto;
   left: 0;
   display: flex;
@@ -62,4 +66,21 @@
 .ExcalidrawModal__discardModal {
   margin-top: 60px;
   text-align: center;
+}
+
+@media (max-width: 640px) {
+  .ExcalidrawModal__overlay {
+    padding: 0;
+  }
+
+  .ExcalidrawModal__modal,
+  .ExcalidrawModal__row,
+  .ExcalidrawModal__row > div {
+    border-radius: 0;
+  }
+
+  .ExcalidrawModal__row {
+    width: 100vw;
+    height: 100dvh;
+  }
 }
