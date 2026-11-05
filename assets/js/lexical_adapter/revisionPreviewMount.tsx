@@ -1,6 +1,6 @@
 import type {SerializedEditorState} from 'lexical';
 
-import type {Collaborator} from '../lexical_editor/context/CollaborationContext';
+import type {Collaborator} from '../lexical_editor/collaboration';
 import {mountRevisionPreview as mountEditorRevisionPreview} from '../lexical_editor/revisionPreviewMount';
 import {wikiEditorIntegration} from './wiki/integration';
 import {

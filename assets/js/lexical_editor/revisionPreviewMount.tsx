@@ -2,8 +2,8 @@ import type {SerializedEditorState} from 'lexical';
 import {createRoot} from 'react-dom/client';
 import type {ReactNode} from 'react';
 
-import type {Collaborator} from './context/CollaborationContext';
-import type {EditorIntegration} from './context/EditorIntegrationContext';
+import type {Collaborator} from './collaboration';
+import type {EditorIntegration} from './integration';
 import RevisionPreview from './RevisionPreview';
 
 export function mountRevisionPreview(

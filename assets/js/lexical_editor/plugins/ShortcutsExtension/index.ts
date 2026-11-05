@@ -35,7 +35,7 @@ import {
   OUTDENT_CONTENT_COMMAND,
 } from 'lexical';
 
-import {getSelectedNode} from '../../utils/getSelectedNode';
+import {getSelectedNode} from '../../selection';
 import {
   $clearFormatting,
   $formatBulletList,

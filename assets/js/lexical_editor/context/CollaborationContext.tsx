@@ -7,7 +7,7 @@ import {
   useMemo,
 } from 'react';
 
-import type {ProviderFactory} from '../collaboration';
+import type {Collaborator, ProviderFactory} from '../collaboration';
 import type {DocumentSnapshotRegistry} from '../documentSnapshots';
 
 interface CollaborationConfig {
@@ -16,11 +16,6 @@ interface CollaborationConfig {
   displayName: string;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
-}
-
-export interface Collaborator {
-  displayName: string;
-  hue: number;
 }
 
 const CollaborationConfigContext = createContext<CollaborationConfig | null>(

@@ -10,7 +10,7 @@
 
 import {describe, expect, test} from 'vitest';
 
-import {sanitizeUrl, validateUrl} from '../../utils/url';
+import {sanitizeUrl, validateUrl} from '../../url';
 
 describe('validateUrl', () => {
   // Ports, parenthesised paths, hash routes and a comma in the query are the

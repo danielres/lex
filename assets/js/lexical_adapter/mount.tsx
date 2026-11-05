@@ -1,4 +1,4 @@
-import type {Collaborator} from '../lexical_editor/context/CollaborationContext';
+import type {Collaborator} from '../lexical_editor/collaboration';
 import type {
   WikiPageReference,
   WikiPageRepository,

@@ -7,10 +7,10 @@ import {type JSX, useCallback, useEffect, useState} from 'react';
 
 import differ from '../../vendor/htmldiffer';
 
-import type {Collaborator} from './context/CollaborationContext';
-import type {EditorIntegration} from './context/EditorIntegrationContext';
+import type {Collaborator} from './collaboration';
 import {ReadOnlyEditorEnvironment} from './EditorEnvironment';
 import EditorSurface from './EditorSurface';
+import type {EditorIntegration} from './integration';
 import PlaygroundNodes from './nodes/PlaygroundNodes';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ContentEditable from './ui/ContentEditable';

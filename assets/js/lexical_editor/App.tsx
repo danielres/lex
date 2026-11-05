@@ -52,16 +52,11 @@ import {
   defineExtension,
 } from 'lexical';
 import {type JSX, useEffect, useMemo, useRef} from 'react';
-import type {ProviderFactory} from './collaboration';
-import {
-  type Collaborator,
-  useCollaborationConfig,
-} from './context/CollaborationContext';
-import {
-  type EditorIntegration,
-  EditorIntegrationProvider,
-} from './context/EditorIntegrationContext';
+import type {Collaborator, ProviderFactory} from './collaboration';
+import {useCollaborationConfig} from './context/CollaborationContext';
+import {EditorIntegrationProvider} from './context/EditorIntegrationContext';
 import type {DocumentSnapshotRegistry} from './documentSnapshots';
+import type {EditorIntegration} from './integration';
 import {useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
 import Editor from './Editor';
@@ -104,7 +99,7 @@ import {YouTubeExtension} from './plugins/YouTubeExtension';
 import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import ShadowDomWrapper from './ui/ShadowDomWrapper';
-import {validateUrl} from './utils/url';
+import {validateUrl} from './url';
 
 console.warn(
   'If you are profiling the playground app, please ensure you turn off the debug view. You can disable it by pressing on the settings control in the bottom-left of your screen and toggling the debug view setting.',

@@ -8,13 +8,12 @@ import {createRoot} from 'react-dom/client';
 import type {ReactNode} from 'react';
 
 import PlaygroundApp from './App';
-import type {EditorCollaboration} from './collaboration';
-import type {Collaborator} from './context/CollaborationContext';
-import type {EditorIntegration} from './context/EditorIntegrationContext';
+import type {Collaborator, EditorCollaboration} from './collaboration';
 import {
   type DocumentSnapshot,
   DocumentSnapshotRegistry,
 } from './documentSnapshots';
+import type {EditorIntegration} from './integration';
 import './setupEnv';
 
 export interface MountedEditor {

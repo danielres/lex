@@ -26,7 +26,7 @@ import {expect, onTestFinished} from 'vitest';
 import {PlaygroundImportExtension} from '../../nodes/PlaygroundImportExtension';
 import {CodeHighlightExtension} from '../../plugins/CodeHighlightExtension';
 import TableCellResizerPlugin from '../../plugins/TableCellResizer';
-import {validateUrl} from '../../utils/url';
+import {validateUrl} from '../../url';
 import {normalizeHTML, setupEditor} from './utils';
 
 const pasteExtension = defineExtension({

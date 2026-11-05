@@ -43,7 +43,7 @@ import {
 import {createPortal} from 'react-dom';
 
 import {getDOMRangeRect} from '../../utils/getDOMRangeRect';
-import {getSelectedNode} from '../../utils/getSelectedNode';
+import {getSelectedNode} from '../../selection';
 import {setFloatingElemPosition} from '../../utils/setFloatingElemPosition';
 
 function TextFormatFloatingToolbar({

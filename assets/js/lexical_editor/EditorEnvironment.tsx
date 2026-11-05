@@ -1,11 +1,8 @@
 import type {JSX, ReactNode} from 'react';
 import {useMemo} from 'react';
 
-import type {ProviderFactory} from './collaboration';
-import {
-  type Collaborator,
-  CollaborationContext,
-} from './context/CollaborationContext';
+import type {Collaborator, ProviderFactory} from './collaboration';
+import {CollaborationContext} from './context/CollaborationContext';
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SettingsContext} from './context/SettingsContext';
 import {DocumentSnapshotRegistry} from './documentSnapshots';
