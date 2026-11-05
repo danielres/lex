@@ -1170,7 +1170,6 @@
   cursor: default;
   display: inline-block;
   position: relative;
-  overflow: hidden;
 }
 
 .lexical-editor-surface .editor-image img {
