@@ -21,6 +21,9 @@ const lexicalImagesDirectory = resolve(
 rmSync(lexicalImagesDirectory, {recursive: true, force: true})
 
 copyDirectory(
-  resolve(assetsDirectory, "css/lexical/images"),
+  resolve(
+    assetsDirectory,
+    "../packages/live_lexical/assets/css/lexical/images",
+  ),
   lexicalImagesDirectory,
 )

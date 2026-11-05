@@ -68,8 +68,8 @@ import {
   useWikiPages,
 } from './WikiPagesContext';
 import {$createWikiLinkNode, $isWikiLinkNode} from './WikiLinkNode';
-import {getSelectedNode} from '../../lexical_editor/selection';
-import {sanitizeUrl} from '../../lexical_editor/url';
+import {getSelectedNode} from 'live_lexical/selection';
+import {sanitizeUrl} from 'live_lexical/url';
 
 function $getSelectedLinkNode(selection: RangeSelection): LinkNode | null {
   const node = getSelectedNode(selection);

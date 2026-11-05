@@ -5,7 +5,7 @@ import {Doc} from 'yjs';
 import type {
   EditorCollaboration,
   ProviderFactory,
-} from '../lexical_editor/collaboration';
+} from 'live_lexical/collaboration';
 
 const CONFIRM_UPDATES_APPLIED_TIMEOUT_MS = 5000;
 

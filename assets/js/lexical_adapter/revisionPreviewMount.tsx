@@ -1,7 +1,7 @@
 import type {SerializedEditorState} from 'lexical';
 
-import type {Collaborator} from '../lexical_editor/collaboration';
-import {mountRevisionPreview as mountEditorRevisionPreview} from '../lexical_editor/revisionPreviewMount';
+import type {Collaborator} from 'live_lexical/collaboration';
+import {mountRevisionPreview as mountEditorRevisionPreview} from 'live_lexical/revision-preview';
 import {wikiEditorIntegration} from './wiki/integration';
 import {
   type WikiPageReference,

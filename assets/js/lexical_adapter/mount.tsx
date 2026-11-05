@@ -1,4 +1,4 @@
-import type {Collaborator} from '../lexical_editor/collaboration';
+import type {Collaborator} from 'live_lexical/collaboration';
 import type {
   WikiPageReference,
   WikiPageRepository,
@@ -6,7 +6,7 @@ import type {
 import {
   mountEditor,
   type MountedEditor,
-} from '../lexical_editor/mount';
+} from 'live_lexical/mount';
 import {createPhoenixCollaboration} from './phoenixCollaboration';
 import {wikiEditorIntegration} from './wiki/integration';
 import {WikiPagesProvider} from './wiki/WikiPagesContext';

@@ -1,6 +1,6 @@
 import {defineExtension} from 'lexical';
 
-import type {EditorIntegration} from '../../lexical_editor/integration';
+import type {EditorIntegration} from 'live_lexical/integration';
 import FloatingLinkEditorPlugin from './FloatingLinkEditorPlugin';
 import {WikiClickableLinkExtension} from './WikiClickableLinkExtension';
 import {$isWikiLinkNode, WikiLinkNode} from './WikiLinkNode';

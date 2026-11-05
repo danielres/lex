@@ -6,7 +6,7 @@
 @import "../../deps/toast/assets/css/toast.css";
 @source "../../deps/ash_authentication_phoenix";
 
-@import "./lexical.css";
+@import "live_lexical/styles.css";
 @import "./lexical-adapter/theme.css";
 @import "./lexical-adapter/revision.css";
 @import "./lexical-adapter/wiki.css";
@@ -14,6 +14,7 @@
 @source "../css";
 @source "../js";
 @source "../../lib/lex_web";
+@source "../../packages/live_lexical/assets/js";
 
 :root {
   --collaboration-color-lightness: 58%;
