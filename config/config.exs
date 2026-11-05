@@ -112,8 +112,21 @@ config :phoenix_live_view,
 # at the `config/runtime.exs`.
 config :lex, Lex.Mailer, adapter: Swoosh.Adapters.Local
 
-live_lexical_esbuild_args =
-  ~w(
+base_esbuild_args = ~w(
+    js/index.tsx
+    js/app.js
+    --bundle
+    --target=es2022
+    --outdir=../priv/static/assets
+    --external:/fonts/*
+    --external:/images/*
+    --alias:@=.
+    --splitting
+    --format=esm
+    --conditions=production
+  )
+
+live_lexical_esbuild_args = ~w(
     --jsx=automatic
     --preserve-symlinks
     --loader:.gif=file
@@ -131,19 +144,7 @@ config :esbuild,
   version: "0.25.4",
   lex: [
     args:
-      ~w(
-        js/index.tsx
-        js/app.js
-        --bundle
-        --target=es2022
-        --outdir=../priv/static/assets
-        --external:/fonts/*
-        --external:/images/*
-        --alias:@=.
-        --splitting
-        --format=esm
-        --conditions=production
-      ) ++
+      base_esbuild_args ++
         live_lexical_esbuild_args,
     cd: Path.expand("../assets", __DIR__),
     env: %{
