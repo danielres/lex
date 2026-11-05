@@ -11,7 +11,7 @@
   --lexical-button-text-color: var(--color-base-content);
 
   /* Code and collapsible content */
-  --lexical-code-background: var(--color-base-200);
+  --lexical-code-background: color-mix(in oklab, var(--color-base-300) 50%, transparent);
   --lexical-code-gutter-background: var(--color-base-300);
   --lexical-code-gutter-border-color: var(--color-base-300);
   --lexical-code-gutter-text-color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
