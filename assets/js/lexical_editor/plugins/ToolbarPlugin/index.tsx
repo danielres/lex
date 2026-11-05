@@ -60,6 +60,7 @@ import {
 import {type Dispatch, type JSX, useCallback, useEffect, useState} from 'react';
 
 import {useSettings} from '../../context/SettingsContext';
+import {useEditorIntegration} from '../../context/EditorIntegrationContext';
 import {
   blockTypeToBlockName,
   useToolbarState,
@@ -67,7 +68,6 @@ import {
 import useModal from '../../hooks/useModal';
 import catTypingGif from '../../images/cat-typing.gif';
 import {$createStickyNode} from '../../nodes/StickyNode';
-import {$isWikiLinkNode} from '../../nodes/WikiLinkNode';
 import DropDown, {DropDownItem} from '../../ui/DropDown';
 import {isKeyboardInput} from '../../utils/focusUtils';
 import {getSelectedNode} from '../../utils/getSelectedNode';
@@ -356,6 +356,7 @@ export default function ToolbarPlugin({
   setActiveEditor: Dispatch<LexicalEditor>;
   setIsLinkEditMode: Dispatch<boolean>;
 }): JSX.Element {
+  const {isLinkNode: isIntegrationLinkNode} = useEditorIntegration();
   const [selectedElementKey, setSelectedElementKey] = useState<NodeKey | null>(
     null,
   );
@@ -565,15 +566,15 @@ export default function ToolbarPlugin({
   }, [$updateToolbar, activeEditor, editor, updateToolbarState]);
 
   const insertLink = useCallback(() => {
-    const isWikiLink = activeEditor.read('latest', () => {
+    const isIntegrationLink = activeEditor.read('latest', () => {
       const selection = $getSelection();
       return (
         $isNodeSelection(selection) &&
-        selection.getNodes().some($isWikiLinkNode)
+        selection.getNodes().some(isIntegrationLinkNode)
       );
     });
 
-    if (isWikiLink) {
+    if (isIntegrationLink) {
       setIsLinkEditMode(true);
       return;
     }
@@ -584,7 +585,12 @@ export default function ToolbarPlugin({
       setIsLinkEditMode(false);
       activeEditor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
     }
-  }, [activeEditor, setIsLinkEditMode, toolbarState.isLink]);
+  }, [
+    activeEditor,
+    isIntegrationLinkNode,
+    setIsLinkEditMode,
+    toolbarState.isLink,
+  ]);
 
   const onCodeLanguageSelect = useCallback(
     (value: string | null) => {

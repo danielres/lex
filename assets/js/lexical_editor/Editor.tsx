@@ -15,6 +15,7 @@ import { CAN_USE_DOM, registerEventListener } from 'lexical';
 import { type JSX, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useSettings } from './context/SettingsContext';
+import { useEditorIntegration } from './context/EditorIntegrationContext';
 import { useSynchronizeSettings } from './hooks/useSynchronizeSettings';
 import ActionsPlugin from './plugins/ActionsPlugin';
 import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
@@ -24,7 +25,6 @@ import ContextMenuPlugin from './plugins/ContextMenuPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import EmojiPickerPlugin from './plugins/EmojiPickerPlugin';
 import { ExcalidrawPlugin } from './plugins/ExcalidrawExtension';
-import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
 import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
 import { MentionsPlugin } from './plugins/MentionsExtension';
 import { ShortcutsExtension } from './plugins/ShortcutsExtension';
@@ -40,6 +40,7 @@ import TreeViewPlugin from './plugins/TreeViewPlugin';
 import ContentEditable from './ui/ContentEditable';
 
 export default function Editor(): JSX.Element {
+  const {LinkEditorPlugin} = useEditorIntegration();
   const {
     settings: {
       isCharLimit,
@@ -140,7 +141,7 @@ export default function Editor(): JSX.Element {
             <ExcalidrawPlugin />
             {isEditable && floatingAnchorElem && (
               <>
-                <FloatingLinkEditorPlugin
+                <LinkEditorPlugin
                   anchorElem={floatingAnchorElem}
                   isLinkEditMode={isLinkEditMode}
                   setIsLinkEditMode={setIsLinkEditMode}

@@ -57,13 +57,13 @@ import {
   type Collaborator,
   useCollaborationConfig,
 } from './context/CollaborationContext';
+import {
+  type EditorIntegration,
+  EditorIntegrationProvider,
+} from './context/EditorIntegrationContext';
 import type {DocumentSnapshotRegistry} from './documentSnapshots';
 import {useSettings} from './context/SettingsContext';
 import {ToolbarContext} from './context/ToolbarContext';
-import {
-  type WikiPageReference,
-  type WikiPageRepository,
-} from './context/WikiPagesContext';
 import Editor from './Editor';
 import {CollaborativeEditorEnvironment} from './EditorEnvironment';
 import EditorSurface from './EditorSurface';
@@ -100,7 +100,6 @@ import {TerseExportExtension} from './plugins/TerseExportExtension';
 import {TwitterExtension} from './plugins/TwitterExtension';
 import TypingPerfPlugin from './plugins/TypingPerfPlugin';
 import {VisibleNonPrintingExtension} from './plugins/VisibleNonPrintingExtension';
-import {WikiClickableLinkExtension} from './plugins/WikiClickableLinkExtension';
 import {YouTubeExtension} from './plugins/YouTubeExtension';
 import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
@@ -252,7 +251,6 @@ const AppExtension = defineExtension({
     MentionsExtension,
     configExtension(LinkExtension, {validateUrl}),
     PlaygroundAutoLinkExtension,
-    WikiClickableLinkExtension,
     SelectionAlwaysOnDisplayExtension,
     configExtension(SelectBlockExtension, {
       cascadeSelection: true,
@@ -306,12 +304,16 @@ interface DynamicSettings {
   isRichText: boolean;
 }
 
-function buildExtensionFromSettings(settings: DynamicSettings) {
+function buildExtensionFromSettings(
+  settings: DynamicSettings,
+  integration: EditorIntegration,
+) {
   const {editable, isRichText} = settings;
   return defineExtension({
     $initialEditorState: null,
     dependencies: [
       AppExtension,
+      integration.extension,
       isRichText ? PlaygroundRichTextExtension : PlainTextExtension,
     ],
     editable,
@@ -344,7 +346,13 @@ function EditorShell({isShadowDOM}: {isShadowDOM: boolean}): JSX.Element {
   return isShadowDOM ? <ShadowDomWrapper>{editor}</ShadowDomWrapper> : editor;
 }
 
-function App({editable}: {editable: boolean}): JSX.Element {
+function App({
+  editable,
+  integration,
+}: {
+  editable: boolean;
+  integration: EditorIntegration;
+}): JSX.Element {
   const initialEditable = useRef(editable).current;
   const {
     settings: {emptyEditor, isRichText, isShadowDOM, measureTypingPerf},
@@ -356,60 +364,61 @@ function App({editable}: {editable: boolean}): JSX.Element {
   // appear here or they would rebuild the whole editor on every change.
   const app = useMemo(
     () =>
-      buildExtensionFromSettings({
-        editable: initialEditable,
-        emptyEditor,
-        isRichText,
-      }),
-    [emptyEditor, initialEditable, isRichText],
+      buildExtensionFromSettings(
+        {
+          editable: initialEditable,
+          emptyEditor,
+          isRichText,
+        },
+        integration,
+      ),
+    [emptyEditor, initialEditable, integration, isRichText],
   );
   const {cursorColor, displayName, providerFactory} = useCollaborationConfig();
 
   return (
-    <LexicalExtensionComposer extension={app} contentEditable={null}>
-      <CollaborationPlugin
-        cursorColor={cursorColor}
-        id="main"
-        initialEditorState={emptyEditor ? undefined : $prepopulatedRichText}
-        providerFactory={providerFactory}
-        shouldBootstrap={true}
-        username={displayName}
-      />
-      <DocumentSnapshotPlugin documentKey="main" />
-      <EditableController editable={editable} />
-      <ToolbarContext>
-        <EditorShell isShadowDOM={isShadowDOM} />
-        <Settings />
-        {measureTypingPerf ? <TypingPerfPlugin /> : null}
-      </ToolbarContext>
-    </LexicalExtensionComposer>
+    <EditorIntegrationProvider value={integration}>
+      <LexicalExtensionComposer extension={app} contentEditable={null}>
+        <CollaborationPlugin
+          cursorColor={cursorColor}
+          id="main"
+          initialEditorState={emptyEditor ? undefined : $prepopulatedRichText}
+          providerFactory={providerFactory}
+          shouldBootstrap={true}
+          username={displayName}
+        />
+        <DocumentSnapshotPlugin documentKey="main" />
+        <EditableController editable={editable} />
+        <ToolbarContext>
+          <EditorShell isShadowDOM={isShadowDOM} />
+          <Settings />
+          {measureTypingPerf ? <TypingPerfPlugin /> : null}
+        </ToolbarContext>
+      </LexicalExtensionComposer>
+    </EditorIntegrationProvider>
   );
 }
 
 export default function PlaygroundApp({
   collaborator,
   editable,
-  initialPages,
+  integration,
   providerFactory,
   snapshotRegistry,
-  wikiPageRepository,
 }: {
   collaborator: Collaborator;
   editable: boolean;
-  initialPages: WikiPageReference[];
+  integration: EditorIntegration;
   providerFactory: ProviderFactory;
   snapshotRegistry: DocumentSnapshotRegistry;
-  wikiPageRepository: WikiPageRepository;
 }): JSX.Element {
   return (
     <CollaborativeEditorEnvironment
       collaborator={collaborator}
-      pages={initialPages}
       providerFactory={providerFactory}
       snapshotRegistry={snapshotRegistry}
-      wikiPageRepository={wikiPageRepository}
     >
-      <App editable={editable} />
+      <App editable={editable} integration={integration} />
     </CollaborativeEditorEnvironment>
   );
 }

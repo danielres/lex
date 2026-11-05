@@ -8,7 +8,7 @@ import {type JSX, useCallback, useEffect, useState} from 'react';
 import differ from '../../vendor/htmldiffer';
 
 import type {Collaborator} from './context/CollaborationContext';
-import type {WikiPageReference} from './context/WikiPagesContext';
+import type {EditorIntegration} from './context/EditorIntegrationContext';
 import {ReadOnlyEditorEnvironment} from './EditorEnvironment';
 import EditorSurface from './EditorSurface';
 import PlaygroundNodes from './nodes/PlaygroundNodes';
@@ -107,10 +107,12 @@ function CaptureHtmlPlugin({onHtml}: {onHtml: (html: string) => void}) {
 }
 
 function PreviewEditor({
+  integration,
   lexicalState,
   namespace,
   onHtml,
 }: {
+  integration: EditorIntegration;
   lexicalState: SerializedEditorState | null;
   namespace: string;
   onHtml: (html: string) => void;
@@ -122,7 +124,7 @@ function PreviewEditor({
         editorState:
           lexicalState === null ? undefined : JSON.stringify(lexicalState),
         namespace,
-        nodes: PlaygroundNodes,
+        nodes: [...PlaygroundNodes, ...integration.nodes],
         onError: error => {
           throw error;
         },
@@ -142,13 +144,13 @@ function PreviewEditor({
 
 export default function RevisionPreview({
   collaborator,
+  integration,
   lexicalState,
-  pages,
   previousLexicalState,
 }: {
   collaborator: Collaborator;
+  integration: EditorIntegration;
   lexicalState: SerializedEditorState;
-  pages: WikiPageReference[];
   previousLexicalState: SerializedEditorState | null;
 }): JSX.Element {
   const [currentHtml, setCurrentHtml] = useState<string | null>(null);
@@ -165,14 +167,16 @@ export default function RevisionPreview({
       : renderDiff(previousHtml, currentHtml);
 
   return (
-    <ReadOnlyEditorEnvironment collaborator={collaborator} pages={pages}>
+    <ReadOnlyEditorEnvironment collaborator={collaborator}>
       <div aria-hidden="true" className="hidden">
         <PreviewEditor
+          integration={integration}
           lexicalState={previousLexicalState}
           namespace="PreviousRevisionPreview"
           onHtml={capturePreviousHtml}
         />
         <PreviewEditor
+          integration={integration}
           lexicalState={lexicalState}
           namespace="CurrentRevisionPreview"
           onHtml={captureCurrentHtml}

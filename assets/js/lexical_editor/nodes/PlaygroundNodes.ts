@@ -41,7 +41,6 @@ import {SpecialTextNode} from './SpecialTextNode';
 import {StickyNode} from './StickyNode';
 import {TweetNode} from './TweetNode';
 import {YouTubeNode} from './YouTubeNode';
-import {WikiLinkNode} from './WikiLinkNode';
 
 const PlaygroundNodes: Klass<LexicalNode>[] = [
   HeadingNode,
@@ -82,7 +81,6 @@ const PlaygroundNodes: Klass<LexicalNode>[] = [
   SlotContainerNode,
   ReviewNode,
   PullQuoteNode,
-  WikiLinkNode,
 ];
 
 export default PlaygroundNodes;

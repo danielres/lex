@@ -13,7 +13,7 @@ import {
 } from 'lexical';
 import {type JSX, useEffect} from 'react';
 
-import {useWikiPages} from '../context/WikiPagesContext';
+import {useWikiPages} from './WikiPagesContext';
 
 const pageIdState = createState('pageId', {
   parse: value => (typeof value === 'string' ? value : ''),

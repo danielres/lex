@@ -5,28 +5,26 @@
 import './fonts.css';
 
 import {createRoot} from 'react-dom/client';
+import type {ReactNode} from 'react';
 
 import PlaygroundApp from './App';
 import type {EditorCollaboration} from './collaboration';
 import type {Collaborator} from './context/CollaborationContext';
-import type {
-  WikiPageReference,
-  WikiPageRepository,
-} from './context/WikiPagesContext';
+import type {EditorIntegration} from './context/EditorIntegrationContext';
 import {
   type DocumentSnapshot,
   DocumentSnapshotRegistry,
 } from './documentSnapshots';
 import './setupEnv';
 
-export interface MountedLexicalEditor {
+export interface MountedEditor {
   getConfirmedDocumentSnapshots(): Promise<DocumentSnapshot[]>;
   getDocumentSnapshots(): DocumentSnapshot[];
   restoreRevision(
     lexicalState: DocumentSnapshot['lexicalState'],
   ): Promise<DocumentSnapshot[]>;
   setEditable(editable: boolean): void;
-  setPages(pages: WikiPageReference[]): void;
+  refresh(): void;
   unmount(): void;
 }
 
@@ -36,32 +34,32 @@ export function mountEditor(
     collaborator,
     collaboration,
     initialEditable,
-    initialPages,
-    wikiPageRepository,
+    integration,
+    renderEnvironment,
   }: {
     collaborator: Collaborator;
     collaboration: EditorCollaboration;
     initialEditable: boolean;
-    initialPages: WikiPageReference[];
-    wikiPageRepository: WikiPageRepository;
+    integration: EditorIntegration;
+    renderEnvironment: (children: ReactNode) => ReactNode;
   },
-): MountedLexicalEditor {
+): MountedEditor {
   const snapshotRegistry = new DocumentSnapshotRegistry(initialEditable);
   const root = createRoot(element);
   let editable = initialEditable;
-  let pages = initialPages;
 
   const render = () => {
-    root.render(
+    const editor = (
       <PlaygroundApp
         collaborator={collaborator}
         editable={editable}
-        initialPages={pages}
+        integration={integration}
         providerFactory={collaboration.providerFactory}
         snapshotRegistry={snapshotRegistry}
-        wikiPageRepository={wikiPageRepository}
-      />,
+      />
     );
+
+    root.render(renderEnvironment(editor));
   };
 
   render();
@@ -87,8 +85,7 @@ export function mountEditor(
         render();
       }
     },
-    setPages(nextPages) {
-      pages = nextPages;
+    refresh() {
       render();
     },
     unmount() {

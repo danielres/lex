@@ -66,10 +66,10 @@ import {createPortal} from 'react-dom';
 import {
   type WikiPageReference,
   useWikiPages,
-} from '../../context/WikiPagesContext';
-import {$createWikiLinkNode, $isWikiLinkNode} from '../../nodes/WikiLinkNode';
-import {getSelectedNode} from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
+} from './WikiPagesContext';
+import {$createWikiLinkNode, $isWikiLinkNode} from './WikiLinkNode';
+import {getSelectedNode} from '../../lexical_editor/utils/getSelectedNode';
+import {sanitizeUrl} from '../../lexical_editor/utils/url';
 
 function $getSelectedLinkNode(selection: RangeSelection): LinkNode | null {
   const node = getSelectedNode(selection);

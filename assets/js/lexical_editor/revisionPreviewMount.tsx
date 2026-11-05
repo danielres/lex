@@ -1,8 +1,9 @@
 import type {SerializedEditorState} from 'lexical';
 import {createRoot} from 'react-dom/client';
+import type {ReactNode} from 'react';
 
 import type {Collaborator} from './context/CollaborationContext';
-import type {WikiPageReference} from './context/WikiPagesContext';
+import type {EditorIntegration} from './context/EditorIntegrationContext';
 import RevisionPreview from './RevisionPreview';
 
 export function mountRevisionPreview(
@@ -10,17 +11,19 @@ export function mountRevisionPreview(
   collaborator: Collaborator,
   lexicalState: SerializedEditorState,
   previousLexicalState: SerializedEditorState | null,
-  pages: WikiPageReference[],
+  integration: EditorIntegration,
+  renderEnvironment: (children: ReactNode) => ReactNode,
 ): () => void {
   const root = createRoot(element);
-  root.render(
+  const preview = (
     <RevisionPreview
       collaborator={collaborator}
+      integration={integration}
       lexicalState={lexicalState}
-      pages={pages}
       previousLexicalState={previousLexicalState}
-    />,
+    />
   );
+  root.render(renderEnvironment(preview));
 
   return () => root.unmount();
 }

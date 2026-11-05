@@ -1,5 +1,5 @@
-import { mountRevisionPreview } from "../lexical_editor/revisionPreviewMount"
 import { mountLexicalEditor } from "./mount"
+import { mountRevisionPreview } from "./revisionPreviewMount"
 
 const snapshotsToParams = snapshots =>
   snapshots.map(snapshot => ({

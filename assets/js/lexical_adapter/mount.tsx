@@ -2,12 +2,19 @@ import type {Collaborator} from '../lexical_editor/context/CollaborationContext'
 import type {
   WikiPageReference,
   WikiPageRepository,
-} from '../lexical_editor/context/WikiPagesContext';
+} from './wiki/WikiPagesContext';
 import {
   mountEditor,
-  type MountedLexicalEditor,
+  type MountedEditor,
 } from '../lexical_editor/mount';
 import {createPhoenixCollaboration} from './phoenixCollaboration';
+import {wikiEditorIntegration} from './wiki/integration';
+import {WikiPagesProvider} from './wiki/WikiPagesContext';
+
+export interface MountedLexicalEditor
+  extends Omit<MountedEditor, 'refresh'> {
+  setPages(pages: WikiPageReference[]): void;
+}
 
 export function mountLexicalEditor(
   element: HTMLElement,
@@ -35,11 +42,25 @@ export function mountLexicalEditor(
     csrfToken,
   );
 
-  return mountEditor(element, {
+  let pages = initialPages;
+  const editor = mountEditor(element, {
     collaboration,
     collaborator,
     initialEditable,
-    initialPages,
-    wikiPageRepository,
+    integration: wikiEditorIntegration,
+    renderEnvironment: children => (
+      <WikiPagesProvider initialPages={pages} repository={wikiPageRepository}>
+        {children}
+      </WikiPagesProvider>
+    ),
   });
+  const {refresh, ...mountedEditor} = editor;
+
+  return {
+    ...mountedEditor,
+    setPages(nextPages) {
+      pages = nextPages;
+      refresh();
+    },
+  };
 }
