@@ -36,7 +36,7 @@
   --lexical-control-divider-color: var(--color-base-300);
   --lexical-control-hover-surface: var(--color-base-200);
   --lexical-control-shadow: 0 4px 7px color-mix(in oklab, black 20%, transparent);
-  --lexical-control-surface: var(--color-base-100);
+  --lexical-control-surface: var(--color-base-300);
 
   /* Validation, pickers, and dates */
   --lexical-content-limit-exceeded-color: var(--color-error);
