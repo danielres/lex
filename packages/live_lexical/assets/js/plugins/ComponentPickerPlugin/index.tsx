@@ -395,6 +395,7 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
     <>
       {modal}
       <LexicalTypeaheadMenuPlugin<ComponentPickerOption>
+        anchorClassName="lexical-portal"
         onQueryChange={setQueryString}
         onSelectOption={onSelectOption}
         triggerFn={checkForTriggerMatch}

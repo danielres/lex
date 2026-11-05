@@ -660,6 +660,7 @@ export function MentionsPlugin(): JSX.Element | null {
 
   return (
     <LexicalTypeaheadMenuPlugin<MentionTypeaheadOption>
+      anchorClassName="lexical-portal"
       onQueryChange={setQueryString}
       onSelectOption={onSelectOption}
       triggerFn={checkForMentionMatch}

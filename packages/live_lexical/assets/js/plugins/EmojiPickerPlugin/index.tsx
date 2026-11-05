@@ -123,6 +123,7 @@ export default function EmojiPickerPlugin() {
 
   return (
     <LexicalTypeaheadMenuPlugin
+      anchorClassName="lexical-portal"
       onQueryChange={setQueryString}
       onSelectOption={onSelectOption}
       triggerFn={checkForTriggerMatch}

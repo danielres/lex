@@ -1,6 +1,5 @@
-/* DaisyUI mappings for the portable Lexical variables. */
-.lexical-editor,
-.lexical-portal {
+/* DaisyUI mappings inherited by editors and body-level portals. */
+:root {
   /* Actions and buttons */
   --lexical-block-cursor-color: var(--color-base-content);
   --lexical-action-active-background: color-mix(in oklab, var(--color-primary) 15%, transparent);
