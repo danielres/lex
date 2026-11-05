@@ -296,7 +296,14 @@
 
 .ExcalidrawModal__overlay {
   .excalidraw {
+    .App-toolbar__extra-tools-trigger,
+    .default-sidebar-trigger,
     .main-menu-trigger {
+      display: none;
+    }
+
+    li[data-testid='addToLibrary'],
+    li[data-testid='addToLibrary'] + .context-menu-item-separator {
       display: none;
     }
   }

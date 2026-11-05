@@ -11,6 +11,7 @@ import type {
   BinaryFiles,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
+  UIOptions,
 } from '@excalidraw/excalidraw/types';
 
 import {Excalidraw} from '@excalidraw/excalidraw';
@@ -31,6 +32,21 @@ import Button from './Button';
 import Modal from './Modal';
 
 export type ExcalidrawInitialElements = ExcalidrawInitialDataState['elements'];
+
+const EXCALIDRAW_UI_OPTIONS: UIOptions = {
+  canvasActions: {
+    changeViewBackgroundColor: false,
+    clearCanvas: false,
+    export: false,
+    loadScene: false,
+    saveAsImage: false,
+    saveToActiveFile: false,
+    toggleTheme: false,
+  },
+  tools: {
+    image: false,
+  },
+};
 
 type Props = {
   closeOnClickOutside?: boolean;
@@ -205,6 +221,8 @@ export default function ExcalidrawModal({
         <div className="ExcalidrawModal__row">
           {discardModalOpen && renderDiscardDialog()}
           <Excalidraw
+            UIOptions={EXCALIDRAW_UI_OPTIONS}
+            aiEnabled={false}
             excalidrawAPI={setExcalidrawAPI}
             initialData={{
               appState: initialAppState || {isLoading: false},
@@ -213,6 +231,7 @@ export default function ExcalidrawModal({
             }}
             onChange={onChange}
             theme={appTheme}
+            validateEmbeddable={false}
           />
           <div className="ExcalidrawModal__actions">
             <button className="lexical-action-button" onClick={discard}>
