@@ -293,7 +293,7 @@ function TextFormatFloatingToolbar({
             className={'popup-item spaced ' + (isLink ? 'active' : '')}
             title="Insert link"
             aria-label="Insert link">
-            <i className="format link" />
+            <i className="format link-icon" />
           </button>
         </>
       )}

@@ -43,7 +43,7 @@ export default function ContextMenuPlugin({
         },
         $showOn: (node: LexicalNode) => $isLinkNode(node.getParent()),
         disabled: false,
-        icon: <i className="PlaygroundEditorTheme__contextMenuItemIcon link" />,
+        icon: <i className="PlaygroundEditorTheme__contextMenuItemIcon link-icon" />,
       }),
       new NodeContextMenuSeparator({
         $showOn: (node: LexicalNode) => $isLinkNode(node.getParent()),

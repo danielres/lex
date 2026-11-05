@@ -290,7 +290,7 @@ function BlockFormatDropDown({
 }
 
 function Divider(): JSX.Element {
-  return <div className="divider" />;
+  return <div className="lexical-divider" />;
 }
 
 function IndentControls({
@@ -828,7 +828,7 @@ export default function ToolbarPlugin({
             aria-label="Insert link"
             title={`Insert link (${shortcut('INSERT_LINK')})`}
             type="button">
-            <i className="format link" />
+            <i className="format link-icon" />
           </button>
           <DropDown
             disabled={!isEditable}
@@ -966,7 +966,7 @@ export default function ToolbarPlugin({
                     ));
                   }}
                   className="item">
-                  <i className="icon table" />
+                  <i className="icon table-icon" />
                   <span className="text">Table</span>
                 </DropDownItem>
                 <DropDownItem
