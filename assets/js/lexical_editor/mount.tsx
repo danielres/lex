@@ -7,7 +7,7 @@ import './fonts.css';
 import {createRoot} from 'react-dom/client';
 
 import PlaygroundApp from './App';
-import {createPhoenixCollaboration} from './collaboration';
+import type {EditorCollaboration} from './collaboration';
 import type {Collaborator} from './context/CollaborationContext';
 import type {
   WikiPageReference,
@@ -30,31 +30,22 @@ export interface MountedLexicalEditor {
   unmount(): void;
 }
 
-export function mountLexicalEditor(
+export function mountEditor(
   element: HTMLElement,
   {
     collaborator,
-    csrfToken,
-    documentId,
+    collaboration,
     initialEditable,
     initialPages,
-    spaceId,
     wikiPageRepository,
   }: {
     collaborator: Collaborator;
-    csrfToken: string;
-    documentId: string;
+    collaboration: EditorCollaboration;
     initialEditable: boolean;
     initialPages: WikiPageReference[];
-    spaceId: string;
     wikiPageRepository: WikiPageRepository;
   },
 ): MountedLexicalEditor {
-  const collaboration = createPhoenixCollaboration(
-    documentId,
-    spaceId,
-    csrfToken,
-  );
   const snapshotRegistry = new DocumentSnapshotRegistry(initialEditable);
   const root = createRoot(element);
   let editable = initialEditable;
