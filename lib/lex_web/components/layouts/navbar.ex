@@ -3,6 +3,7 @@ defmodule LexWeb.Layouts.Navbar do
 
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Dropdown
+  alias LexWeb.Layouts.ThemeToggle
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
@@ -48,6 +49,13 @@ defmodule LexWeb.Layouts.Navbar do
             </div>
 
             <.button_sign_out />
+
+            <hr class={[
+              "border-base-content/20",
+              "my-2"
+            ]} />
+
+            <ThemeToggle.render />
           </div>
         </:content>
       </Dropdown.render>

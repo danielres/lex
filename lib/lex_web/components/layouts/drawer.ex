@@ -2,7 +2,6 @@ defmodule LexWeb.Layouts.Drawer do
   use LexWeb, :html
 
   alias LexWeb.Components
-  alias LexWeb.Layouts.ThemeToggle
   alias LexWeb.PresencesLive
   alias LexWeb.UI
 
@@ -33,18 +32,6 @@ defmodule LexWeb.Layouts.Drawer do
         <.separator />
 
         <.presences scope={@scope} socket={@socket} />
-
-        <.separator visible?={@open?} />
-
-        <div class={[
-          @open? && "opacity-100",
-          !@open? && "opacity-0",
-          "transition",
-          "mx-auto w-fit",
-          "p-2"
-        ]}>
-          <ThemeToggle.render />
-        </div>
       </:aside>
     </Components.Drawer.render>
     """
