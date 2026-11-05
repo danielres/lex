@@ -9,7 +9,7 @@
 .code-action-menu-container {
   height: 35.8px;
   font-size: 10px;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--lexical-code-action-text-color, rgb(0 0 0 / 50%));
   position: absolute;
   display: flex;
   align-items: center;
@@ -30,7 +30,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--lexical-code-action-text-color, rgb(0 0 0 / 50%));
   text-transform: uppercase;
 }
 
@@ -39,16 +39,16 @@
   width: 16px;
   opacity: 0.6;
   display: flex;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--lexical-code-action-text-color, rgb(0 0 0 / 50%));
   background-size: contain;
 }
 
 .code-action-menu-container button.menu-item:hover {
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-color: var(--lexical-control-border-color, rgb(0 0 0 / 30%));
   opacity: 0.9;
 }
 
 .code-action-menu-container button.menu-item:active {
-  background-color: rgba(223, 232, 250);
-  border: 1px solid rgba(0, 0, 0, 0.45);
+  background-color: var(--lexical-control-active-surface, rgb(223 232 250));
+  border-color: var(--lexical-control-border-color, rgb(0 0 0 / 45%));
 }

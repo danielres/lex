@@ -20,7 +20,7 @@
 }
 
 .VersionsPlugin_VersionList {
-  border: 1px solid #ddd;
+  border: 1px solid var(--lexical-control-border-color, #ddd);
   border-radius: 4px;
   max-height: 300px;
   overflow-y: auto;
@@ -28,9 +28,9 @@
 
 .VersionsPlugin_VersionItem {
   align-items: center;
-  background-color: white;
+  background-color: var(--lexical-control-surface, white);
   border: none;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--lexical-control-divider-color, #eee);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -38,18 +38,18 @@
   width: 100%;
 
   &:disabled {
-    color: #777;
+    color: var(--lexical-muted-text-color, #777);
     font-style: italic;
     cursor: default;
   }
 }
 
 .VersionsPlugin_VersionItem:hover:not(:disabled) {
-  background-color: #f5f5f5;
+  background-color: var(--lexical-control-hover-surface, #f5f5f5);
 }
 
 .VersionsPlugin_VersionItem--selected {
-  background-color: #e3f2fd;
+  background-color: var(--lexical-version-selected-background, #e3f2fd);
 }
 
 .VersionsPlugin_CompareButton {

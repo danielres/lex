@@ -12,7 +12,7 @@
   margin: 0;
   border: 0;
   outline: 0;
-  color: #8421a2;
+  color: var(--lexical-selection-color, #8421a2);
   background-color: inherit;
   resize: none;
 }
@@ -22,17 +22,17 @@
   margin: 0;
   border: 0;
   outline: 0;
-  color: #8421a2;
+  color: var(--lexical-selection-color, #8421a2);
   background-color: inherit;
   resize: none;
   width: 100%;
 }
 
 .EquationEditor_inputBackground {
-  background-color: #eee;
+  background-color: var(--lexical-control-hover-surface, #eee);
 }
 
 .EquationEditor_dollarSign {
   text-align: left;
-  color: #b0b0b0;
+  color: var(--lexical-muted-text-color, #b0b0b0);
 }

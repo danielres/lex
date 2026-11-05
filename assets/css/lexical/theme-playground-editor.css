@@ -492,7 +492,10 @@
 }
 .PlaygroundEditorTheme__characterLimit {
   display: inline;
-  background-color: #ffbbbb !important;
+  background-color: var(
+    --lexical-content-limit-exceeded-background,
+    #ffbbbb
+  ) !important;
 }
 .PlaygroundEditorTheme__ol1 {
   color: var(--lexical-document-text-color, inherit);
@@ -581,23 +584,23 @@
 }
 .PlaygroundEditorTheme__listItemUnchecked:focus:before,
 .PlaygroundEditorTheme__listItemChecked:focus:before {
-  box-shadow: 0 0 0 2px #a6cdfe;
+  box-shadow: 0 0 0 2px var(--lexical-selection-color, #a6cdfe);
   border-radius: 2px;
 }
 .PlaygroundEditorTheme__listItemUnchecked:before {
-  border: 1px solid #999;
+  border: 1px solid var(--lexical-muted-text-color, #999);
   border-radius: 2px;
 }
 .PlaygroundEditorTheme__listItemChecked:before {
-  border: 1px solid rgb(61, 135, 245);
+  border: 1px solid var(--lexical-selection-color, rgb(61 135 245));
   border-radius: 2px;
-  background-color: #3d87f5;
+  background-color: var(--lexical-selection-color, #3d87f5);
   background-repeat: no-repeat;
 }
 .PlaygroundEditorTheme__listItemChecked:after {
   content: '';
   cursor: pointer;
-  border-color: #fff;
+  border-color: var(--lexical-selection-content-color, #fff);
   border-style: solid;
   position: absolute;
   display: block;
@@ -620,40 +623,49 @@
   display: none;
 }
 .PlaygroundEditorTheme__tokenComment {
-  color: slategray;
+  color: var(--lexical-token-comment-color, slategray);
 }
 .PlaygroundEditorTheme__tokenDeleted {
-  border-image: linear-gradient(to right, #ffcecb 50%, #ffebe9 50%) fill 0/0/0
-    100vw;
+  border-image: var(
+      --lexical-diff-deleted-background,
+      linear-gradient(to right, #ffcecb 50%, #ffebe9 50%)
+    )
+    fill 0 / 0 / 0 100vw;
 }
 .PlaygroundEditorTheme__tokenInserted {
-  border-image: linear-gradient(to right, #aceebb 50%, #dafbe1 50%) fill 0/0/0
-    100vw;
+  border-image: var(
+      --lexical-diff-inserted-background,
+      linear-gradient(to right, #aceebb 50%, #dafbe1 50%)
+    )
+    fill 0 / 0 / 0 100vw;
 }
 .PlaygroundEditorTheme__tokenUnchanged {
-  border-image: linear-gradient(to right, #ddd 50%, #f0f2f5 50%) fill 0/0/0
-    100vw;
+  border-image: var(
+      --lexical-diff-unchanged-background,
+      linear-gradient(to right, #ddd 50%, #f0f2f5 50%)
+    )
+    fill 0 / 0 / 0 100vw;
 }
 .PlaygroundEditorTheme__tokenPunctuation {
-  color: #999;
+  color: var(--lexical-token-punctuation-color, #999);
 }
 .PlaygroundEditorTheme__tokenProperty {
-  color: #905;
+  color: var(--lexical-token-property-color, #905);
 }
 .PlaygroundEditorTheme__tokenSelector {
-  color: #690;
+  color: var(--lexical-token-selector-color, #690);
 }
 .PlaygroundEditorTheme__tokenOperator {
-  color: #9a6e3a;
+  color: var(--lexical-token-operator-color, #9a6e3a);
 }
 .PlaygroundEditorTheme__tokenAttr {
-  color: #07a;
+  color: var(--lexical-token-attribute-color, #07a);
 }
 .PlaygroundEditorTheme__tokenVariable {
-  color: #e90;
+  color: var(--lexical-token-variable-color, #e90);
 }
 .PlaygroundEditorTheme__tokenFunction {
-  color: #dd4a68;
+  color: var(--lexical-token-function-color, #dd4a68);
 }
 .PlaygroundEditorTheme__mark {
   background: color-mix(
@@ -713,7 +725,7 @@
   user-select: none;
 }
 .PlaygroundEditorTheme__embedBlockFocus {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60 132 244));
 }
 .PlaygroundEditorTheme__layoutContainer {
   display: grid;
@@ -721,13 +733,13 @@
   margin: 10px 0;
 }
 .PlaygroundEditorTheme__layoutItem {
-  border: 1px dashed #ddd;
+  border: 1px dashed var(--lexical-control-border-color, #ddd);
   padding: 8px 16px;
   min-width: 0;
   max-width: 100%;
 }
 .PlaygroundEditorTheme__autocomplete {
-  color: #ccc;
+  color: var(--lexical-placeholder-color, #ccc);
 }
 .PlaygroundEditorTheme__hr {
   padding: 2px 2px;
@@ -739,24 +751,24 @@
   content: '';
   display: block;
   height: 2px;
-  background-color: #ccc;
+  background-color: var(--lexical-visible-divider-color, #ccc);
   line-height: 2px;
 }
 .PlaygroundEditorTheme__hr.PlaygroundEditorTheme__hrSelected {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60 132 244));
   user-select: none;
 }
 
 .PlaygroundEditorTheme__specialText {
-  background-color: yellow;
+  background-color: var(--lexical-special-text-background, yellow);
   font-weight: bold;
 }
 
 .PlaygroundEditorTheme__contextMenu {
   outline: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  background: var(--lexical-control-surface, #fff);
+  border: 1px solid var(--lexical-control-border-color, #ddd);
+  box-shadow: var(--lexical-control-shadow, 0 5px 10px rgb(0 0 0 / 30%));
   border-radius: 8px;
 }
 .PlaygroundEditorTheme__contextMenu button:first-child {
@@ -773,8 +785,8 @@
   display: flex;
   justify-content: left;
   width: 100%;
-  background-color: #fff;
-  color: #050505;
+  background-color: var(--lexical-control-surface, #fff);
+  color: var(--lexical-editor-text-color, #050505);
   border: 0;
   border-radius: 0px;
   font-size: var(--playground-font-size);
@@ -786,15 +798,15 @@
   cursor: pointer;
 }
 .PlaygroundEditorTheme__contextMenuItem.open {
-  background: #ddd;
+  background: var(--lexical-control-active-surface, #ddd);
 }
 .PlaygroundEditorTheme__contextMenuItem:focus,
 .PlaygroundEditorTheme__contextMenuItem:not([disabled]):active {
-  background: #eee;
+  background: var(--lexical-control-hover-surface, #eee);
 }
 .PlaygroundEditorTheme__contextMenuItem:disabled {
-  background: #fff;
-  color: #aaa;
+  background: var(--lexical-control-surface, #fff);
+  color: var(--lexical-find-disabled-text-color, #aaa);
   cursor: not-allowed;
 }
 .PlaygroundEditorTheme__contextMenuItemIcon {
@@ -829,7 +841,7 @@
     margin-bottom: 24px; /* Space between pages */
     margin-left: auto;
     margin-right: auto;
-    box-shadow: 0 0 0 1px #ddd;
+    box-shadow: 0 0 0 1px var(--lexical-page-border-color, #ddd);
     outline: none; /* Remove blue focus border */
   }
 }
@@ -862,7 +874,7 @@
 }
 [data-lexical-visible-non-printing-linebreak]::before {
   content: '↵';
-  color: #999;
+  color: var(--lexical-non-printing-color, #999);
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
@@ -873,7 +885,7 @@
 }
 [data-lexical-visible-non-printing-block]::after {
   content: '¶';
-  color: #999;
+  color: var(--lexical-non-printing-color, #999);
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
@@ -910,10 +922,15 @@
      plus a 1px stem that stretches across the rest of the tab whitespace.
      Decouples the arrowhead shape from tab width so heading fonts (large tab
      widths) and body fonts (small tab widths) both render a sane arrow. */
-  background:
+  background-color: var(--lexical-non-printing-color, #999);
+  -webkit-mask:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 8'%3E%3Cpath d='M0 0 L6 4 L0 8' fill='none' stroke='%23999' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
       no-repeat right center / 6px 8px,
-    linear-gradient(#999, #999) no-repeat left center / calc(100% - 6px) 1px;
+    linear-gradient(#000, #000) no-repeat left center / calc(100% - 6px) 1px;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 8'%3E%3Cpath d='M0 0 L6 4 L0 8' fill='none' stroke='%23000' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right center / 6px 8px,
+    linear-gradient(#000, #000) no-repeat left center / calc(100% - 6px) 1px;
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
@@ -931,41 +948,42 @@
   font-display: block;
 }
 .lexical-card-node {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--lexical-card-background, #fff);
+  border: 1px solid var(--lexical-card-border-color, #e5e7eb);
   border-radius: 12px;
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04);
+  box-shadow: var(
+    --lexical-card-shadow,
+    0 2px 8px rgb(0 0 0 / 8%), 0 4px 16px rgb(0 0 0 / 4%)
+  );
   margin: 12px 0;
   padding: 16px 20px;
 }
 .lexical-card-node[data-selected='true'] {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  border-color: var(--lexical-selection-color, #2563eb);
+  box-shadow: var(--lexical-card-selected-shadow, 0 0 0 2px rgb(37 99 235 / 25%));
 }
 .lexical-pullquote-node {
-  border-left: 4px solid #2563eb;
-  background: #f8fafc;
+  border-left: 4px solid var(--lexical-pullquote-border-color, #2563eb);
+  background: var(--lexical-pullquote-background, #f8fafc);
   border-radius: 4px;
   margin: 12px 0;
   padding: 16px 20px;
 }
 .lexical-pullquote-node[data-selected='true'] {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  border-color: var(--lexical-selection-color, #1d4ed8);
+  box-shadow: var(--lexical-card-selected-shadow, 0 0 0 2px rgb(37 99 235 / 25%));
 }
 .lexical-pullquote-body {
   outline: none;
   font-style: italic;
   font-size: 18px;
-  color: #1f2937;
+  color: var(--lexical-editor-text-color, #1f2937);
   line-height: 1.5;
 }
 .lexical-pullquote-attribution {
   outline: none;
   margin-top: 8px;
-  color: #4b5563;
+  color: var(--lexical-muted-text-color, #4b5563);
   font-size: 14px;
   text-align: right;
 }
@@ -1075,7 +1093,7 @@
    not a separately-bordered box. The container renders hidden until
    CardExtension mounts it in place. */
 .lexical-card-node [data-lexical-slot='title'] {
-  border-bottom: 1px solid #d1d5db;
+  border-bottom: 1px solid var(--lexical-control-divider-color, #d1d5db);
   outline: none;
   padding-bottom: 4px;
 }
@@ -1112,7 +1130,7 @@
   [data-lexical-slot='title']
   > p:has(> br):not(:has(> * + *))::before,
 .lexical-card-node > p:only-of-type:has(> br):not(:has(> * + *))::before {
-  color: #9ca3af;
+  color: var(--lexical-card-placeholder-color, #9ca3af);
   left: 0;
   pointer-events: none;
   position: absolute;
@@ -1129,12 +1147,11 @@
    trigger a layout reflow on the same frame as a forward-delete
    keystroke. */
 .lexical-card-node[data-current-slot='title'] [data-lexical-slot='title'] {
-  border-bottom-color: #fb923c;
+  border-bottom-color: var(--lexical-card-accent-color, #fb923c);
 }
 .lexical-card-node[data-current-slot='body'] {
-  border-color: #fb923c;
+  border-color: var(--lexical-card-accent-color, #fb923c);
   box-shadow:
-    0 0 0 1px rgba(251, 146, 60, 0.25),
-    0 2px 8px rgba(0, 0, 0, 0.08),
-    0 4px 16px rgba(0, 0, 0, 0.04);
+    0 0 0 1px color-mix(in srgb, var(--lexical-card-accent-color, #fb923c) 25%, transparent),
+    var(--lexical-card-shadow, 0 2px 8px rgb(0 0 0 / 8%), 0 4px 16px rgb(0 0 0 / 4%));
 }

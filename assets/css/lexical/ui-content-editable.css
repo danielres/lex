@@ -24,7 +24,7 @@
 
 .ContentEditable__placeholder {
   font-size: 16px;
-  color: #999;
+  color: var(--lexical-placeholder-color, #999);
   overflow: hidden;
   position: absolute;
   text-overflow: ellipsis;

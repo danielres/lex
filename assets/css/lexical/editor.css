@@ -103,8 +103,8 @@
 
 .lexical-editor pre {
   line-height: 1.1;
-  background: #222;
-  color: #fff;
+  background: var(--lexical-debug-background, #222);
+  color: var(--lexical-debug-text-color, #fff);
   margin: 0;
   padding: 10px;
   font-size: 12px;
@@ -114,8 +114,8 @@
 
 .tree-view-output {
   display: block;
-  background: #222;
-  color: #fff;
+  background: var(--lexical-debug-background, #222);
+  color: var(--lexical-debug-text-color, #fff);
   padding: 0;
   font-size: 12px;
   margin: 1px auto 10px auto;
@@ -131,7 +131,7 @@
 }
 
 .lexical-editor pre::-webkit-scrollbar-thumb {
-  background: #999;
+  background: var(--lexical-debug-scrollbar-color, #999);
 }
 
 .editor-dev-button {
@@ -144,8 +144,8 @@
   border: none;
   cursor: pointer;
   outline: none;
-  box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.3);
-  background-color: #444;
+  box-shadow: var(--lexical-debug-shadow, 0 1px 10px rgb(0 0 0 / 30%));
+  background-color: var(--lexical-debug-background, #444);
 }
 
 .editor-dev-button::after {
@@ -161,11 +161,11 @@
 }
 
 .editor-dev-button:hover {
-  background-color: #555;
+  background-color: var(--lexical-debug-hover-background, #555);
 }
 
 .editor-dev-button.active {
-  background-color: rgb(233, 35, 35);
+  background-color: var(--lexical-debug-danger-background, rgb(233 35 35));
 }
 
 .test-recorder-toolbar {
@@ -183,13 +183,13 @@
   border: none;
   cursor: pointer;
   outline: none;
-  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
-  background-color: #222;
+  box-shadow: var(--lexical-debug-shadow, 1px 2px 2px rgb(0 0 0 / 40%));
+  background-color: var(--lexical-debug-background, #222);
   transition: box-shadow 50ms ease-out;
 }
 
 .test-recorder-button:active {
-  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--lexical-debug-shadow, 1px 2px 4px rgb(0 0 0 / 40%));
 }
 
 .test-recorder-button + .test-recorder-button {
@@ -479,7 +479,7 @@ i.horizontal-rule {
 }
 
 .icon.table {
-  background-color: #6c757d;
+  background-color: var(--lexical-muted-text-color, #6c757d);
   mask-image: url(/assets/lexical/images/icons/table.svg);
   -webkit-mask-image: url(/assets/lexical/images/icons/table.svg);
   mask-repeat: no-repeat;
@@ -827,12 +827,12 @@ i.page-setup,
 }
 
 .mention:focus {
-  box-shadow: rgb(180 213 255) 0px 0px 0px 2px;
+  box-shadow: 0 0 0 2px var(--lexical-selection-color, rgb(180 213 255));
   outline: none;
 }
 
 .characters-limit {
-  color: #888;
+  color: var(--lexical-muted-text-color, #888);
   font-size: 12px;
   text-align: right;
   display: block;
@@ -842,7 +842,7 @@ i.page-setup,
 }
 
 .characters-limit.characters-limit-exceeded {
-  color: red;
+  color: var(--lexical-content-limit-exceeded-color, red);
 }
 
 .lexical-dropdown {
@@ -1073,7 +1073,11 @@ i.paragraph,
   display: block;
   height: 60px;
   margin-top: -60px;
-  background: linear-gradient(to bottom, transparent, #eee);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--lexical-control-hover-surface, #eee)
+  );
   pointer-events: none;
 }
 
@@ -1091,9 +1095,13 @@ i.paragraph,
 
 .switch {
   display: block;
-  color: #444;
+  color: var(--lexical-editor-text-color, #444);
   margin: 5px 0;
-  background-color: rgba(238, 238, 238, 0.7);
+  background-color: color-mix(
+    in srgb,
+    var(--lexical-control-hover-surface, #eee) 70%,
+    transparent
+  );
   padding: 5px 10px;
   border-radius: 10px;
 }
@@ -1116,7 +1124,7 @@ i.paragraph,
 }
 
 .switch button {
-  background-color: rgb(206, 208, 212);
+  background-color: var(--lexical-control-border-color, rgb(206 208 212));
   height: 24px;
   box-sizing: border-box;
   border-radius: 12px;
@@ -1131,7 +1139,7 @@ i.paragraph,
 }
 
 .switch button:focus-visible {
-  border-color: blue;
+  border-color: var(--lexical-selection-color, blue);
 }
 
 .switch button span {
@@ -1142,12 +1150,12 @@ i.paragraph,
   width: 20px;
   height: 20px;
   border-radius: 12px;
-  background-color: white;
+  background-color: var(--lexical-selection-content-color, white);
   transition: transform 0.2s;
 }
 
 .switch button[aria-checked='true'] {
-  background-color: rgb(24, 119, 242);
+  background-color: var(--lexical-selection-color, rgb(24 119 242));
 }
 
 .switch button[aria-checked='true'] span {
@@ -1318,7 +1326,7 @@ i.paragraph,
 
 .emoji {
   color: transparent;
-  caret-color: rgb(5, 5, 5);
+  caret-color: var(--lexical-emoji-caret-color, rgb(5 5 5));
   background-size: 16px 16px;
   background-position: center;
   background-repeat: no-repeat;
@@ -1332,12 +1340,12 @@ i.paragraph,
 
 .emoji-inner::selection {
   color: transparent;
-  background-color: rgba(150, 150, 150, 0.4);
+  background-color: var(--lexical-emoji-selection-background, rgb(150 150 150 / 40%));
 }
 
 .emoji-inner::moz-selection {
   color: transparent;
-  background-color: rgba(150, 150, 150, 0.4);
+  background-color: var(--lexical-emoji-selection-background, rgb(150 150 150 / 40%));
 }
 
 .emoji.happysmile {
@@ -1357,7 +1365,7 @@ i.paragraph,
 }
 
 .keyword {
-  color: rgb(241, 118, 94);
+  color: var(--lexical-token-function-color, rgb(241 118 94));
   font-weight: bold;
 }
 
@@ -1506,28 +1514,29 @@ i.chevron-down {
 }
 
 .action-button {
-  background-color: #eee;
+  background-color: var(--lexical-button-background, #eee);
   border: 0;
   padding: 8px 12px;
   position: relative;
   margin-left: 5px;
   border-radius: 15px;
-  color: #222;
+  color: var(--lexical-button-text-color, #222);
   display: inline-block;
   cursor: pointer;
 }
 
 .action-button[data-active='true'] {
-  filter: invert(90%);
+  background-color: var(--lexical-action-active-background, #e3e8f5);
+  color: var(--lexical-action-active-text-color, #216fdb);
 }
 
 .action-button[data-active='true']:hover {
-  filter: invert(100%);
+  background-color: var(--lexical-action-active-hover-background, #d6def0);
 }
 
 .action-button:hover {
-  background-color: #ddd;
-  color: #000;
+  background-color: var(--lexical-button-hover-background, #ddd);
+  color: var(--lexical-button-text-color, #000);
 }
 
 .action-button-mic.active {
@@ -1535,22 +1544,22 @@ i.chevron-down {
 }
 
 button.action-button:disabled {
-  opacity: 0.6;
-  background: #eee;
+  background: var(--lexical-button-background, #eee);
+  color: var(--lexical-action-disabled-text-color, #777);
   cursor: not-allowed;
 }
 
 @keyframes mic-pulsate-color {
   0% {
-    background-color: #ffdcdc;
+    background-color: var(--lexical-microphone-idle-background, #ffdcdc);
   }
 
   50% {
-    background-color: #ff8585;
+    background-color: var(--lexical-microphone-active-background, #ff8585);
   }
 
   100% {
-    background-color: #ffdcdc;
+    background-color: var(--lexical-microphone-idle-background, #ffdcdc);
   }
 }
 
@@ -1571,7 +1580,7 @@ button.action-button:disabled {
   border: 0;
   background: none;
   flex: 1;
-  color: #fff;
+  color: var(--lexical-debug-text-color, #fff);
   font-size: 12px;
 }
 
@@ -1587,7 +1596,7 @@ button.action-button:disabled {
   right: 15px;
   position: absolute;
   background: none;
-  color: #fff;
+  color: var(--lexical-debug-text-color, #fff);
 }
 
 .debug-timetravel-button:hover {
@@ -1602,7 +1611,7 @@ button.action-button:disabled {
   right: 85px;
   position: absolute;
   background: none;
-  color: #fff;
+  color: var(--lexical-debug-text-color, #fff);
 }
 
 .debug-treetype-button:hover {
@@ -1870,7 +1879,7 @@ button.toolbar-item.active i {
 }
 
 .excalidraw-button.selected {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60 132 244));
   user-select: none;
 }
 
@@ -1919,7 +1928,7 @@ span.editor-equation {
 }
 
 .editor-equation.focused {
-  outline: 2px solid rgb(60, 132, 244);
+  outline: 2px solid var(--lexical-selection-color, rgb(60 132 244));
 }
 
 button.item i {
@@ -1938,7 +1947,7 @@ button.item.dropdown-item-active i {
 }
 
 .dialog-dropdown {
-  background-color: #eee !important;
+  background-color: var(--lexical-control-hover-surface, #eee) !important;
   margin-bottom: 10px;
   width: 100%;
 }

@@ -20,7 +20,7 @@
   gap: 4px;
   margin-bottom: 18px;
   padding: 4px;
-  background-color: #f1f2f4;
+  background-color: var(--lexical-shortcuts-platform-background, #f1f2f4);
   border-radius: 10px;
 }
 .ShortcutsHelpDialog__platform {
@@ -32,7 +32,7 @@
   border-radius: 7px;
   padding: 8px 12px;
   background-color: transparent;
-  color: #555;
+  color: var(--lexical-muted-text-color, #555);
   font-size: 13px;
   font-weight: 600;
   line-height: 16px;
@@ -43,15 +43,13 @@
     color 0.15s;
 }
 .ShortcutsHelpDialog__platform:hover {
-  color: #222;
-  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--lexical-editor-text-color, #222);
+  background-color: var(--lexical-control-hover-surface, rgb(0 0 0 / 4%));
 }
 .ShortcutsHelpDialog__platform[aria-checked='true'] {
-  background-color: #fff;
-  color: rgb(24, 119, 242);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  background-color: var(--lexical-shortcuts-selected-background, #fff);
+  color: var(--lexical-selection-color, rgb(24 119 242));
+  box-shadow: var(--lexical-shortcuts-selected-shadow, 0 1px 2px rgb(0 0 0 / 12%));
 }
 .ShortcutsHelpDialog__platformIcon {
   display: inline-block;
@@ -81,9 +79,9 @@
   top: 0;
   z-index: 1;
   padding-bottom: 8px;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  color: #888;
+  background-color: var(--lexical-control-surface, #fff);
+  border-bottom: 1px solid var(--lexical-control-divider-color, #e0e0e0);
+  color: var(--lexical-muted-text-color, #888);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -99,14 +97,14 @@
 .ShortcutsHelpDialog__shortcut {
   padding-top: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lexical-control-divider-color, #f0f0f0);
 }
 .ShortcutsHelpDialog tbody tr:last-child td {
   border-bottom: 0;
 }
 .ShortcutsHelpDialog__action {
   padding-right: 2em;
-  color: #333;
+  color: var(--lexical-editor-text-color, #333);
   font-size: 14px;
 }
 .ShortcutsHelpDialog__shortcut {
@@ -125,13 +123,13 @@
 }
 .ShortcutsHelpDialog__shortcut[data-platform='apple'] kbd {
   font-size: 1em;
-  color: #333;
+  color: var(--lexical-editor-text-color, #333);
 }
 .ShortcutsHelpDialog__shortcut[data-platform='other'] kbd {
   font-weight: 600;
-  background-color: #f7f7f7;
-  color: #333333;
-  border: 1px solid #ccc;
+  background-color: var(--lexical-shortcuts-key-background, #f7f7f7);
+  color: var(--lexical-editor-text-color, #333);
+  border: 1px solid var(--lexical-control-border-color, #ccc);
   border-bottom-width: 3px;
   border-radius: 3px;
   padding: 0.1em 0.4em;
@@ -140,6 +138,6 @@
   .ShortcutsHelpDialog__separator::before {
   content: ' + ';
   font-weight: normal;
-  color: #666; /* Gives the plus sign a slightly muted color */
+  color: var(--lexical-muted-text-color, #666);
   margin: 0 0.2em;
 }

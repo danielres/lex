@@ -8,8 +8,8 @@
  */
 
 .Collapsible__container {
-  background: #fcfcfc;
-  border: 1px solid #eee;
+  background: var(--lexical-collapsible-background, #fcfcfc);
+  border: 1px solid var(--lexical-collapsible-border-color, #eee);
   border-radius: 10px;
   margin-bottom: 8px;
 }
@@ -32,7 +32,7 @@
   border-style: solid;
   border-color: transparent;
   border-width: 4px 6px 4px 6px;
-  border-left-color: #000;
+  border-left-color: var(--lexical-editor-text-color, #000);
   display: block;
   content: '';
   position: absolute;

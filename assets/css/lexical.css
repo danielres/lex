@@ -38,6 +38,22 @@
 .lexical-editor,
 .lexical-portal {
   --lexical-block-cursor-color: var(--color-base-content);
+  --lexical-action-active-background: color-mix(
+    in oklab,
+    var(--color-primary) 15%,
+    transparent
+  );
+  --lexical-action-active-hover-background: color-mix(
+    in oklab,
+    var(--color-primary) 25%,
+    transparent
+  );
+  --lexical-action-active-text-color: var(--color-primary);
+  --lexical-action-disabled-text-color: color-mix(
+    in oklab,
+    var(--color-base-content) 50%,
+    transparent
+  );
   --lexical-button-background: var(--color-base-200);
   --lexical-button-hover-background: var(--color-base-300);
   --lexical-button-text-color: var(--color-base-content);
@@ -49,6 +65,11 @@
     var(--color-base-content) 60%,
     transparent
   );
+  --lexical-code-action-error-background: var(--color-neutral);
+  --lexical-code-action-error-text-color: var(--color-neutral-content);
+  --lexical-code-action-text-color: var(--lexical-muted-text-color);
+  --lexical-collapsible-background: var(--color-base-100);
+  --lexical-collapsible-border-color: var(--color-base-300);
   --lexical-comment-accent-hover: color-mix(
     in oklab,
     var(--color-info) 85%,
@@ -74,6 +95,12 @@
   --lexical-control-hover-surface: var(--color-base-200);
   --lexical-control-shadow: 0 4px 7px color-mix(in oklab, black 20%, transparent);
   --lexical-control-surface: var(--color-base-100);
+  --lexical-content-limit-exceeded-color: var(--color-error);
+  --lexical-content-limit-exceeded-background: color-mix(
+    in oklab,
+    var(--color-error) 25%,
+    transparent
+  );
   --lexical-color-picker-active-shadow: 0 0 0 2px var(--color-info);
   --lexical-color-picker-cursor-color: white;
   --lexical-color-picker-cursor-shadow: 0 0 15px rgb(0 0 0 / 15%);
@@ -82,18 +109,54 @@
     color-mix(in oklab, var(--color-base-content) 30%, transparent);
   --lexical-date-time-pill-background: var(--color-base-300);
   --lexical-date-time-pill-border-color: var(--color-base-300);
+  --lexical-debug-background: var(--color-neutral);
+  --lexical-debug-danger-background: var(--color-error);
+  --lexical-debug-hover-background: color-mix(
+    in oklab,
+    var(--color-neutral) 85%,
+    white
+  );
+  --lexical-debug-scrollbar-color: color-mix(
+    in oklab,
+    var(--color-neutral-content) 60%,
+    transparent
+  );
+  --lexical-debug-shadow: 0 1px 10px rgb(0 0 0 / 30%);
+  --lexical-debug-text-color: var(--color-neutral-content);
   --lexical-document-text-color: color-mix(
     in oklab,
     var(--color-base-content) 75%,
     transparent
+  );
+  --lexical-diff-deleted-background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--color-error) 35%, white) 50%,
+    color-mix(in oklab, var(--color-error) 15%, white) 50%
+  );
+  --lexical-diff-inserted-background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--color-success) 35%, white) 50%,
+    color-mix(in oklab, var(--color-success) 15%, white) 50%
+  );
+  --lexical-diff-unchanged-background: linear-gradient(
+    to right,
+    var(--color-base-300) 50%,
+    var(--color-base-200) 50%
   );
   --lexical-dropdown-border: 1px solid
     color-mix(in oklab, var(--color-base-content) 20%, transparent);
   --lexical-dropdown-shadow:
     0 10px 15px -3px rgb(0 0 0 / 10%),
     0 4px 6px -4px rgb(0 0 0 / 10%);
+  --lexical-drag-target-color: var(--color-info);
   --lexical-editor-surface: transparent;
   --lexical-editor-text-color: var(--color-base-content);
+  --lexical-emoji-caret-color: var(--color-base-content);
+  --lexical-emoji-selection-background: color-mix(
+    in oklab,
+    var(--color-base-content) 40%,
+    transparent
+  );
   --lexical-floating-toolbar-background: var(--color-base-200);
   --lexical-floating-toolbar-border: 1px solid
     color-mix(in oklab, var(--color-base-content) 30%, transparent);
@@ -103,6 +166,19 @@
     transparent
   );
   --lexical-flash-text-color: var(--color-neutral-content);
+  --lexical-find-active-background: var(--lexical-control-active-surface);
+  --lexical-find-active-border-color: color-mix(
+    in oklab,
+    var(--color-info) 40%,
+    transparent
+  );
+  --lexical-find-disabled-text-color: color-mix(
+    in oklab,
+    var(--color-base-content) 25%,
+    transparent
+  );
+  --lexical-find-input-background: var(--color-base-200);
+  --lexical-find-panel-shadow: var(--lexical-control-shadow);
   --lexical-hashtag-background: color-mix(
     in oklab,
     var(--color-info) 15%,
@@ -163,6 +239,12 @@
     transparent
   );
   --lexical-mark-color: var(--color-warning);
+  --lexical-microphone-active-background: var(--color-error);
+  --lexical-microphone-idle-background: color-mix(
+    in oklab,
+    var(--color-error) 25%,
+    transparent
+  );
   --lexical-modal-overlay-background: color-mix(
     in oklab,
     var(--color-neutral) 60%,
@@ -176,7 +258,10 @@
     var(--color-base-content) 60%,
     transparent
   );
+  --lexical-non-printing-color: var(--lexical-muted-text-color);
+  --lexical-placeholder-color: var(--lexical-muted-text-color);
   --lexical-page-break-color: var(--color-base-300);
+  --lexical-page-border-color: var(--color-base-300);
   --lexical-poll-background: var(--color-base-100);
   --lexical-poll-votes-background: color-mix(
     in oklab,
@@ -203,8 +288,23 @@
     var(--color-base-content) 25%,
     transparent
   );
+  --lexical-card-accent-color: var(--color-warning);
+  --lexical-card-background: var(--color-base-100);
+  --lexical-card-border-color: var(--color-base-300);
+  --lexical-card-placeholder-color: var(--lexical-muted-text-color);
+  --lexical-card-shadow: 0 2px 8px rgb(0 0 0 / 8%),
+    0 4px 16px rgb(0 0 0 / 4%);
+  --lexical-card-selected-shadow: 0 0 0 2px
+    color-mix(in oklab, var(--color-info) 25%, transparent);
+  --lexical-pullquote-background: var(--color-base-200);
+  --lexical-pullquote-border-color: var(--color-info);
   --lexical-selection-color: var(--color-info);
   --lexical-selection-content-color: var(--color-info-content);
+  --lexical-shortcuts-key-background: var(--color-base-200);
+  --lexical-shortcuts-platform-background: var(--color-base-200);
+  --lexical-shortcuts-selected-background: var(--color-base-100);
+  --lexical-shortcuts-selected-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  --lexical-special-text-background: var(--color-warning);
   --lexical-select-background-end: var(--color-base-200);
   --lexical-select-background-start: var(--color-base-100);
   --lexical-select-border-color: var(--color-base-300);
@@ -284,6 +384,17 @@
     var(--color-base-200) 50%,
     transparent
   );
+  --lexical-token-attribute-color: var(--color-info);
+  --lexical-token-comment-color: var(--lexical-muted-text-color);
+  --lexical-token-function-color: var(--color-error);
+  --lexical-token-operator-color: var(--color-warning);
+  --lexical-token-property-color: var(--color-secondary);
+  --lexical-token-punctuation-color: var(--lexical-muted-text-color);
+  --lexical-token-selector-color: var(--color-success);
+  --lexical-token-variable-color: var(--color-warning);
+  --lexical-toc-rail-color: var(--color-base-300);
+  --lexical-version-selected-background: var(--lexical-control-active-surface);
+  --lexical-visible-divider-color: var(--color-base-300);
   --lexical-toolbar-background: var(--color-base-300);
   --lexical-toolbar-border-bottom: 1px solid var(--color-base-300);
   --lexical-toolbar-border-radius: var(--radius-box);

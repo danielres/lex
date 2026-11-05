@@ -59,16 +59,9 @@
   }
 }
 
-.editor-shell .ContentEditable__placeholder,
-.editor-shell .characters-limit {
-  @apply text-base-content/60;
-}
-
-
 .editor-shell {
   .action-button {
     @apply hidden;
-    @apply bg-base-200 text-base-content;
   }
 
   .PlaygroundEditorTheme__h1,
@@ -115,37 +108,5 @@
     .image-caption-container { @apply backdrop-blur; }
   }
 
-}
-
-.editor-shell .action-button:hover {
-  @apply bg-base-300 text-base-content;
-}
-
-.editor-shell .action-button[data-active="true"] {
-  @apply bg-primary/15 text-primary filter-none;
-}
-
-.editor-shell .action-button[data-active="true"]:hover {
-  @apply bg-primary/25 text-primary filter-none;
-}
-
-.editor-shell button.action-button:disabled {
-  @apply bg-base-200 text-base-content/50;
-}
-
-.editor-shell .actions i {
-  @apply bg-current;
-}
-
-.editor-shell[data-app-theme="dark"]
-  .draggable-block-menu
-  .icon {
-  @apply brightness-0 invert opacity-60;
-}
-
-.editor-shell[data-app-theme="dark"]
-  .draggable-block-menu
-  .icon:hover {
-  @apply opacity-100;
 }
 

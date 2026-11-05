@@ -26,12 +26,13 @@
   width: 16px;
   height: 16px;
   opacity: 0.3;
-  background-image: url(/assets/lexical/images/icons/draggable-block-menu.svg);
+  background-color: currentColor;
+  -webkit-mask: url(/assets/lexical/images/icons/draggable-block-menu.svg) center / contain no-repeat;
+  mask: url(/assets/lexical/images/icons/draggable-block-menu.svg) center / contain no-repeat;
 }
 
 .draggable-block-menu .icon:hover {
   opacity: 1;
-  /* background-color: #efefef; */
 }
 
 .draggable-block-menu .icon-plus {
@@ -39,7 +40,9 @@
   border: none;
   cursor: pointer;
   background-color: transparent;
-  background-image: url(/assets/lexical/images/icons/plus.svg);
+  background-color: currentColor;
+  -webkit-mask: url(/assets/lexical/images/icons/plus.svg) center / contain no-repeat;
+  mask: url(/assets/lexical/images/icons/plus.svg) center / contain no-repeat;
 }
 
 .draggable-block-menu:active {
@@ -48,7 +51,7 @@
 
 .draggable-block-target-line {
   pointer-events: none;
-  background: deepskyblue;
+  background: var(--lexical-drag-target-color, deepskyblue);
   height: 4px;
   position: absolute;
   left: 0;
