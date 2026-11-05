@@ -1,0 +1,33 @@
+.lexical-revision-preview {
+  @apply min-w-0 max-w-full overflow-x-auto;
+}
+
+.lexical-revision-diff {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+
+  .excalidraw-button,
+  .excalidraw-button > div,
+  img,
+  svg {
+    max-width: 100%;
+  }
+
+  .excalidraw-button > div,
+  svg {
+    height: auto !important;
+  }
+
+  del:not(:has(.excalidraw-button)),
+  del .excalidraw-button {
+    @apply bg-error/25 text-base-content no-underline;
+    @apply border border-red-500;
+  }
+
+  ins:not(:has(.excalidraw-button)),
+  ins .excalidraw-button {
+    @apply bg-success/25 text-base-content no-underline;
+    @apply border border-green-500;
+  }
+}

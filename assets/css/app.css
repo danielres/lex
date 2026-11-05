@@ -7,6 +7,9 @@
 @source "../../deps/ash_authentication_phoenix";
 
 @import "./lexical.css";
+@import "./lexical-adapter/theme.css";
+@import "./lexical-adapter/revision.css";
+@import "./lexical-adapter/wiki.css";
 
 @source "../css";
 @source "../js";
