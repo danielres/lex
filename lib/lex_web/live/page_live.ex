@@ -210,7 +210,12 @@ defmodule LexWeb.PageLive do
         </div>
 
         <div phx-hook="AutoAnimate" id="wiki-page-info" class="relative left-0">
-          <div :if={@live_action == :info} class="border-info p-4 bg-base-300 rounded-box mb-4">
+          <div
+            :if={@live_action == :info}
+            id="page-info"
+            phx-hook="ScrollToTop"
+            class="border-info p-4 bg-base-300 rounded-box mb-4"
+          >
             <Info.render page={@page} />
           </div>
         </div>
