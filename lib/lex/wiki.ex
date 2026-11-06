@@ -9,5 +9,6 @@ defmodule Lex.Wiki do
     resource Lex.Wiki.Page
     resource Lex.Wiki.PageDocument
     resource Lex.Wiki.PageRevision
+    resource Lex.Wiki.PageRevisionContributor
   end
 end

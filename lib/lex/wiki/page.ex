@@ -144,6 +144,7 @@ defmodule Lex.Wiki.Page do
   def list_revisions!(scope, page) do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id)
+    |> Ash.Query.load([:checkpointed_by, :contributors])
     |> Ash.Query.sort(inserted_at: :desc, id: :desc)
     |> Ash.read!(scope: scope)
   end
@@ -193,10 +194,11 @@ defmodule Lex.Wiki.Page do
   def set_checkpoint(
         scope,
         page,
-        %{lexical_state: lexical_state, search_text: search_text},
+        %{lexical_state: lexical_state, search_text: search_text} = snapshot,
         restored_from_revision_id
       ) do
     content_hash = content_hash(lexical_state)
+    contributor_ids = Map.get(snapshot, :contributor_ids, [])
 
     with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, latest_revision} <- scope |> latest_revision(page) do
@@ -209,7 +211,8 @@ defmodule Lex.Wiki.Page do
           lexical_state,
           search_text,
           content_hash,
-          restored_from_revision_id
+          restored_from_revision_id,
+          contributor_ids
         )
         |> case do
           {:ok, _revision} -> {:ok, :saved}
@@ -376,17 +379,23 @@ defmodule Lex.Wiki.Page do
          lexical_state,
          search_text,
          content_hash,
-         restored_from_revision_id
+         restored_from_revision_id,
+         contributor_ids
        ) do
     PageRevision
-    |> Ash.Changeset.for_create(:create, %{
-      content_hash: content_hash,
-      lexical_state: lexical_state,
-      page_id: page.id,
-      restored_from_revision_id: restored_from_revision_id,
-      search_text: search_text
-    })
-    |> Ash.create(scope: scope)
+    |> Ash.Changeset.for_create(
+      :create,
+      %{
+        contributor_ids: contributor_ids,
+        content_hash: content_hash,
+        lexical_state: lexical_state,
+        page_id: page.id,
+        restored_from_revision_id: restored_from_revision_id,
+        search_text: search_text
+      },
+      scope: scope
+    )
+    |> Ash.create()
   end
 
   defp content_hash(lexical_state) do

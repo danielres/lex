@@ -6,6 +6,7 @@ defmodule LexWeb.CollaborationChannelTest do
   require Ash.Query
 
   alias Lex.Collaboration
+  alias Lex.Collaboration.Contributors
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
@@ -225,6 +226,62 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
 
     assert scope |> persisted_text(room) == ""
+  end
+
+  test "a revision attributes document updates without counting awareness", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    main_room = "#{page.id}/main"
+    caption_room = "#{page.id}/caption-1"
+    main_editor = create_user("Main Editor")
+    caption_editor = create_user("Caption Editor")
+    main_editor_scope = %{scope | current_user: main_editor}
+    caption_editor_scope = %{scope | current_user: caption_editor}
+    saver_socket = scope |> join_channel(main_room)
+    main_socket = main_editor_scope |> join_channel(main_room)
+    caption_socket = caption_editor_scope |> join_channel(caption_room)
+
+    awareness_doc = Yex.Doc.new()
+    {:ok, awareness} = Yex.Awareness.new(awareness_doc)
+    :ok = Yex.Awareness.set_local_state(awareness, %{"name" => "Saver"})
+    {:ok, awareness_update} = Yex.Awareness.encode_update(awareness)
+    awareness_message = Sync.message_encode!({:awareness, awareness_update})
+
+    push(saver_socket, "yjs", {:binary, awareness_message})
+    push(main_socket, "yjs", {:binary, document_update_message("main")})
+    push(caption_socket, "yjs", {:binary, document_update_message("caption")})
+
+    saver_reference = push(saver_socket, "confirm_updates_applied", %{})
+    main_reference = push(main_socket, "confirm_updates_applied", %{})
+    caption_reference = push(caption_socket, "confirm_updates_applied", %{})
+
+    assert_reply saver_reference, :ok, %{}
+    assert_reply main_reference, :ok, %{}
+    assert_reply caption_reference, :ok, %{}
+
+    documents = [
+      document_snapshot("main", "Main"),
+      document_snapshot("caption-1", "Caption")
+    ]
+
+    assert {:ok, %{revision: :saved}} = scope |> Collaboration.checkpoint(page, documents)
+
+    [revision] = scope |> Page.list_revisions!(page)
+    contributor_ids = Enum.map(revision.contributors, & &1.id)
+
+    assert revision.checkpointed_by.id == scope.current_user.id
+    assert Enum.sort(contributor_ids) == Enum.sort([main_editor.id, caption_editor.id])
+    assert Contributors.capture([main_room, caption_room]).contributor_ids == []
+
+    :ok = Contributors.record(main_room, main_editor.id)
+
+    assert {:ok, %{revision: :unchanged}} =
+             scope |> Collaboration.checkpoint(page, documents)
+
+    assert Contributors.capture([main_room]).contributor_ids == []
+
+    close_channel(saver_socket)
+    close_channel(main_socket)
+    close_channel(caption_socket)
   end
 
   test "invalid and nonexistent page rooms cannot join", %{scope: scope} do

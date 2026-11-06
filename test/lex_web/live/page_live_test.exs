@@ -431,6 +431,26 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
+  test "shows who saved and contributed to a revision", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Home")
+    contributor = create_user("Revision Contributor")
+    _revision = scope |> create_revision(page, "First version", [contributor.id])
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
+
+    assert has_element?(
+             view,
+             "[data-testid='revision-checkpointed-by']",
+             "Saved by #{scope.current_user.display_name}"
+           )
+
+    assert has_element?(
+             view,
+             "[data-testid='revision-contributors']",
+             "Revision Contributor"
+           )
+  end
+
   test "does not open another page's revision", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     other_page = scope |> Page.ensure!("Other Page")
@@ -531,12 +551,13 @@ defmodule LexWeb.PageLiveTest do
     }
   end
 
-  defp create_revision(scope, page, text) do
+  defp create_revision(scope, page, text, contributor_ids \\ []) do
     assert {:ok, :saved} =
              scope
              |> Page.set_checkpoint(
                page,
                %{
+                 contributor_ids: contributor_ids,
                  lexical_state: document_snapshot("main", text)["lexical_state"],
                  search_text: text
                },

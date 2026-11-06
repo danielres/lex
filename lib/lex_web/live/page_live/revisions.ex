@@ -4,6 +4,8 @@ defmodule LexWeb.PageLive.Revisions do
 
   alias Lex.Collaboration
   alias Lex.Wiki.Page
+  alias LexWeb.Components.Avatar
+  alias LexWeb.Components.Tooltip
 
   def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
@@ -151,11 +153,32 @@ defmodule LexWeb.PageLive.Revisions do
         "bg-info/25 px-4 py-2 rounded-box border-2 border-info/20 shadow"
       ]}
     >
-      <div>
+      <div class="grid gap-1">
         <p class="font-semibold">
           V. {position(@revisions)} of {length(@revisions.entries)}
         </p>
-        <p class="text-sm opacity-60">{Utils.Time.relative(@revisions.selected.inserted_at)}</p>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm opacity-60">
+          <span>{Utils.Time.relative(@revisions.selected.inserted_at)}</span>
+          <span data-testid="revision-checkpointed-by">
+            Saved by {@revisions.selected.checkpointed_by.display_name}
+          </span>
+          <div
+            :if={@revisions.selected.contributors != []}
+            class="flex items-center gap-1"
+            data-testid="revision-contributors"
+          >
+            <span>Contributors</span>
+            <div class="flex -space-x-1">
+              <Tooltip.render
+                :for={contributor <- @revisions.selected.contributors}
+                alignment="start"
+              >
+                <Avatar.render class="ring-2 ring-base-200 rounded-full" user={contributor} />
+                <:tooltip>{contributor.display_name}</:tooltip>
+              </Tooltip.render>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="flex gap-2">
