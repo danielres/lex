@@ -1,6 +1,7 @@
 defmodule Lex.Wiki.Page do
   require Ash.Query
 
+  alias Lex.Accounts.User
   alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
@@ -27,12 +28,13 @@ defmodule Lex.Wiki.Page do
     defaults [:read]
 
     read :list do
-      prepare build(load: :last_updated_at, sort: :title)
+      prepare build(load: [:author, :last_updated_at], sort: :title)
     end
 
     create :create do
       accept [:title]
 
+      change relate_actor(:author)
       change SetTitleAndSlug
     end
 
@@ -76,6 +78,10 @@ defmodule Lex.Wiki.Page do
   end
 
   relationships do
+    belongs_to :author, User do
+      allow_nil? false
+    end
+
     belongs_to :space, Lex.Accounts.Space do
       destination_attribute :id
       allow_nil? false
@@ -277,6 +283,7 @@ defmodule Lex.Wiki.Page do
   defp get_by_slug(scope, slug) do
     __MODULE__
     |> Ash.Query.filter(slug == ^slug)
+    |> Ash.Query.load(:author)
     |> Ash.read_one(scope: scope)
   end
 
