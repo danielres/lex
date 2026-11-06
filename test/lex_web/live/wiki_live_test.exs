@@ -12,8 +12,8 @@ defmodule LexWeb.WikiLiveTest do
   end
 
   test "lists links to pages other than home", %{conn: conn, scope: scope} do
-    scope |> Page.ensure!("Home")
-    scope |> Page.ensure!("Summer Activities")
+    home = scope |> Page.ensure!("Home")
+    summer_activities = scope |> Page.ensure!("Summer Activities")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
@@ -21,8 +21,20 @@ defmodule LexWeb.WikiLiveTest do
 
     assert has_element?(
              view,
+             ~s|[data-testid="page-list-author-#{home.id}"]|,
+             scope.current_user.display_name
+           )
+
+    assert has_element?(
+             view,
              ~s|a[href="/test-space/wiki/summer-activities"]|,
              "Summer Activities"
+           )
+
+    assert has_element?(
+             view,
+             ~s|[data-testid="page-list-author-#{summer_activities.id}"]|,
+             scope.current_user.display_name
            )
   end
 
@@ -39,6 +51,20 @@ defmodule LexWeb.WikiLiveTest do
            )
 
     refute has_element?(view, ~s|a[href="/test-space/wiki/summer-activities"]|)
+  end
+
+  test "shows the author of a page created by another user", %{conn: conn, scope: scope} do
+    other_user = create_user("Other User")
+    other_scope = %{scope | current_user: other_user}
+    page = other_scope |> Page.ensure!("Shared Knowledge")
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
+
+    assert has_element?(
+             view,
+             ~s|[data-testid="page-list-author-#{page.id}"]|,
+             other_user.display_name
+           )
   end
 
   test "adds a page link after the page is created", %{conn: conn, scope: scope} do

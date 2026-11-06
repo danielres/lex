@@ -24,13 +24,31 @@ defmodule LexWeb.HomePageLiveTest do
 
     refute has_element?(first_view, "[data-testid='missing-page']")
     refute has_element?(second_view, "[data-testid='missing-page']")
+    assert has_element?(first_view, "[data-testid='page-author']", current_user.display_name)
+    assert has_element?(second_view, "[data-testid='page-author']", current_user.display_name)
 
-    assert [%{space_id: first_space_id, title: "Home", slug: "home"}] =
+    assert [
+             %{
+               author_id: first_author_id,
+               space_id: first_space_id,
+               title: "Home",
+               slug: "home"
+             }
+           ] =
              Page.list!(scope: first_scope)
 
-    assert [%{space_id: second_space_id, title: "Home", slug: "home"}] =
+    assert [
+             %{
+               author_id: second_author_id,
+               space_id: second_space_id,
+               title: "Home",
+               slug: "home"
+             }
+           ] =
              Page.list!(scope: second_scope)
 
+    assert first_author_id == current_user.id
+    assert second_author_id == current_user.id
     assert first_space_id == first_space.id
     assert second_space_id == second_space.id
   end
