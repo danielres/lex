@@ -8,6 +8,7 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
+  alias LexWeb.Components.Avatar
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.PageRepository
@@ -194,6 +195,13 @@ defmodule LexWeb.PageLive do
       <div :if={@page} class="min-w-0">
         <div class="mb-4 pb-2 border-b-2 border-base-content/10">
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
+          <div
+            class="mt-2 flex items-center gap-2 text-sm text-base-content/60"
+            data-testid="page-author"
+          >
+            <Avatar.render user={@page.author} />
+            <span>By {@page.author.display_name}</span>
+          </div>
         </div>
 
         <div
