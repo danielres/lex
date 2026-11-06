@@ -41,6 +41,9 @@
 
     .image-caption-container {
       @apply backdrop-blur;
+      .image-caption-text {
+        @apply text-base-content text-sm;
+      }
     }
   }
 }
