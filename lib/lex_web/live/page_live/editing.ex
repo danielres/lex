@@ -6,6 +6,8 @@ defmodule LexWeb.PageLive.Editing do
 
   alias Lex.Collaboration
 
+  def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
+
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{checkpointing?: false, title_form: nil})
   end

@@ -5,6 +5,8 @@ defmodule LexWeb.PageLive.Revisions do
   alias Lex.Collaboration
   alias Lex.Wiki.Page
 
+  def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
+
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{
       entries: [],

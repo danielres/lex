@@ -178,13 +178,16 @@ defmodule LexWeb.PageLive do
         <div :if={@page} class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
           <Info.button_toggle active?={@live_action == :info} />
 
-          <Revisions.ButtonToggle.render
+          <Revisions.button_toggle
             active?={@live_action == :revisions}
             page={@page}
             space={@space}
           />
 
-          <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
+          <Editing.button_toggle
+            editing={@editing}
+            active?={@live_action == :editing}
+          />
         </div>
       </div>
 
