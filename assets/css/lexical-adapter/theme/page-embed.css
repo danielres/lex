@@ -1,13 +1,14 @@
 .lexical-editor {
   .wiki-page-embed {
     @apply relative my-4 min-w-0;
-    @apply bg-base-300/10;
+    @apply bg-base-300/20;
     @apply p-3;
     @apply rounded-box;
-    @apply border-[1.5px] border-dashed border-base-content/20;
+    @apply border-[1.75px] border-dashed border-base-content/40;
 
     .lexical-embedded-page{
-      @apply  max-h-64 overflow-auto;
+      @apply max-h-64 overflow-auto;
+      @apply opacity-70;
     }
 
     &.selected {
