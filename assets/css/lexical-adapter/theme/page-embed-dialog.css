@@ -6,8 +6,16 @@
       @apply flex flex-col gap-1;
     }
 
-    .wiki-page-embed-show-title {
-      @apply flex-row items-center;
+    .wiki-page-embed-options {
+      @apply flex flex-wrap items-center gap-4;
+
+      label {
+        @apply flex cursor-pointer flex-row items-center gap-2;
+      }
+
+      input {
+        @apply checkbox checkbox-sm;
+      }
     }
 
     .wiki-page-embed-results {

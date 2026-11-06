@@ -9,6 +9,7 @@ import {
   $getDocument,
   $getNodeByKey,
   booleanValue,
+  enumValue,
   type DOMConversionMap,
   type EditorConfig,
   type ElementFormatType,
@@ -41,8 +42,18 @@ import {
 
 const MAX_PAGE_EMBED_DEPTH = 4;
 
+export type PageEmbedRenderMode = 'full' | 'headings';
+
+type PageEmbedOptions = {
+  renderMode?: PageEmbedRenderMode;
+  showTitle?: boolean;
+};
+
 const pageEmbedNodeSchema = nodeSchema<PageEmbedNode>()({
   pageId: withAccessors(stringValue(), { getter: { field: '__pageId' } }),
+  renderMode: withAccessors(enumValue(['full', 'headings'], 'full'), {
+    getter: { field: '__renderMode' },
+  }),
   showTitle: withAccessors(booleanValue(), {
     getter: { field: '__showTitle' },
   }),
@@ -57,10 +68,13 @@ const pageEmbedImportDOM: DOMConversionMap = {
 
     return {
       conversion: () => ({
-        node: $createPageEmbedNode(
-          pageId,
-          element.getAttribute('data-show-title') === 'true',
-        ),
+        node: $createPageEmbedNode(pageId, {
+          renderMode:
+            element.getAttribute('data-render-mode') === 'headings'
+              ? 'headings'
+              : 'full',
+          showTitle: element.getAttribute('data-show-title') === 'true',
+        }),
       }),
       priority: 2,
     };
@@ -70,10 +84,12 @@ const pageEmbedImportDOM: DOMConversionMap = {
 function PageEmbedComponent({
   nodeKey,
   pageId,
+  renderMode,
   showTitle,
 }: {
   nodeKey: NodeKey;
   pageId: string;
+  renderMode: PageEmbedRenderMode;
   showTitle: boolean;
 }): JSX.Element {
   const [editor] = useLexicalComposerContext();
@@ -163,11 +179,20 @@ function PageEmbedComponent({
     setSelected(true);
   };
 
-  const toggleTitle = () => {
+  const setHeadingsOnly = (headingsOnly: boolean) => {
     editor.update(() => {
       const node = $getNodeByKey(nodeKey);
       if ($isPageEmbedNode(node)) {
-        node.setShowTitle(!showTitle);
+        node.setRenderMode(headingsOnly ? 'headings' : 'full');
+      }
+    });
+  };
+
+  const setShowTitle = (showTitle: boolean) => {
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isPageEmbedNode(node)) {
+        node.setShowTitle(showTitle);
       }
     });
   };
@@ -212,9 +237,24 @@ function PageEmbedComponent({
       onClick={(event) => event.stopPropagation()}
     >
       {isEditable ? (
-        <button type="button" onClick={toggleTitle}>
-          {showTitle ? 'Hide title' : 'Show title'}
-        </button>
+        <div className="wiki-page-embed-options">
+          <label>
+            <input
+              checked={renderMode === 'headings'}
+              type="checkbox"
+              onChange={(event) => setHeadingsOnly(event.target.checked)}
+            />
+            Headings only
+          </label>
+          <label>
+            <input
+              checked={showTitle}
+              type="checkbox"
+              onChange={(event) => setShowTitle(event.target.checked)}
+            />
+            Show title
+          </label>
+        </div>
       ) : null}
       <a href={page?.path}>Open page</a>
       {inline ? (
@@ -230,7 +270,9 @@ function PageEmbedComponent({
           Edit
         </button>
       )}
-      {saveError ? <span>Could not save page</span> : null}
+      {saveError ? (
+        <span className="wiki-page-embed-save-error">Could not save page</span>
+      ) : null}
     </div>
   );
 
@@ -275,9 +317,17 @@ function PageEmbedComponent({
     );
   }
 
+  const className = [
+    'wiki-page-embed',
+    renderMode === 'headings' && 'headings-only',
+    isSelected && 'selected',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <section
-      className={`wiki-page-embed${isSelected ? ' selected' : ''}`}
+      className={className}
       data-page-id={pageId}
       onClick={select}
     >
@@ -295,6 +345,7 @@ function PageEmbedComponent({
 export type SerializedPageEmbedNode = Spread<
   {
     pageId: string;
+    renderMode: PageEmbedRenderMode;
     showTitle: boolean;
   },
   SerializedDecoratorBlockNode
@@ -302,6 +353,7 @@ export type SerializedPageEmbedNode = Spread<
 
 export class PageEmbedNode extends DecoratorBlockNode {
   __pageId: string;
+  __renderMode: PageEmbedRenderMode;
   __showTitle: boolean;
 
   $config() {
@@ -315,7 +367,10 @@ export class PageEmbedNode extends DecoratorBlockNode {
   static clone(node: PageEmbedNode): PageEmbedNode {
     return new PageEmbedNode(
       node.__pageId,
-      node.__showTitle,
+      {
+        renderMode: node.__renderMode,
+        showTitle: node.__showTitle,
+      },
       node.__format,
       node.__key,
     );
@@ -323,12 +378,13 @@ export class PageEmbedNode extends DecoratorBlockNode {
 
   constructor(
     pageId: string = '',
-    showTitle: boolean = false,
+    { renderMode = 'full', showTitle = false }: PageEmbedOptions = {},
     format?: ElementFormatType,
     key?: NodeKey,
   ) {
     super(format, key);
     this.__pageId = pageId;
+    this.__renderMode = renderMode;
     this.__showTitle = showTitle;
   }
 
@@ -339,6 +395,16 @@ export class PageEmbedNode extends DecoratorBlockNode {
   setPageId(pageId: string): this {
     const self = this.getWritable();
     self.__pageId = pageId;
+    return self;
+  }
+
+  getRenderMode(): PageEmbedRenderMode {
+    return this.getLatest().__renderMode;
+  }
+
+  setRenderMode(renderMode: PageEmbedRenderMode): this {
+    const self = this.getWritable();
+    self.__renderMode = renderMode;
     return self;
   }
 
@@ -359,6 +425,7 @@ export class PageEmbedNode extends DecoratorBlockNode {
   exportDOM() {
     const element = $getDocument().createElement('div');
     element.setAttribute('data-wiki-page-embed', this.getPageId());
+    element.setAttribute('data-render-mode', this.getRenderMode());
     element.setAttribute('data-show-title', String(this.getShowTitle()));
     return { element };
   }
@@ -372,6 +439,7 @@ export class PageEmbedNode extends DecoratorBlockNode {
       <PageEmbedComponent
         nodeKey={this.getKey()}
         pageId={this.getPageId()}
+        renderMode={this.getRenderMode()}
         showTitle={this.getShowTitle()}
       />
     );
@@ -380,9 +448,9 @@ export class PageEmbedNode extends DecoratorBlockNode {
 
 export function $createPageEmbedNode(
   pageId: string,
-  showTitle: boolean,
+  options: PageEmbedOptions = {},
 ): PageEmbedNode {
-  return new PageEmbedNode(pageId, showTitle);
+  return new PageEmbedNode(pageId, options);
 }
 
 export function $isPageEmbedNode(

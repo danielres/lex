@@ -16,6 +16,7 @@ function InsertPageEmbedDialog({
 }): JSX.Element {
   const {currentPageId, pages} = useWikiPages();
   const [query, setQuery] = useState('');
+  const [headingsOnly, setHeadingsOnly] = useState(false);
   const [showTitle, setShowTitle] = useState(false);
   const availablePages = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -30,7 +31,12 @@ function InsertPageEmbedDialog({
 
   const insert = (pageId: string) => {
     editor.update(() => {
-      $insertNodeToNearestRoot($createPageEmbedNode(pageId, showTitle));
+      $insertNodeToNearestRoot(
+        $createPageEmbedNode(pageId, {
+          renderMode: headingsOnly ? 'headings' : 'full',
+          showTitle,
+        }),
+      );
     });
     onClose();
   };
@@ -47,14 +53,24 @@ function InsertPageEmbedDialog({
           onChange={(event) => setQuery(event.target.value)}
         />
       </label>
-      <label className="wiki-page-embed-show-title">
-        <input
-          checked={showTitle}
-          type="checkbox"
-          onChange={(event) => setShowTitle(event.target.checked)}
-        />
-        Show title
-      </label>
+      <div className="wiki-page-embed-options">
+        <label>
+          <input
+            checked={headingsOnly}
+            type="checkbox"
+            onChange={(event) => setHeadingsOnly(event.target.checked)}
+          />
+          Headings only
+        </label>
+        <label>
+          <input
+            checked={showTitle}
+            type="checkbox"
+            onChange={(event) => setShowTitle(event.target.checked)}
+          />
+          Show title
+        </label>
+      </div>
       <div className="wiki-page-embed-results">
         {availablePages.map((page) => (
           <button key={page.id} type="button" onClick={() => insert(page.id)}>
