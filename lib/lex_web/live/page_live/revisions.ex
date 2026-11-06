@@ -149,39 +149,45 @@ defmodule LexWeb.PageLive.Revisions do
     <div
       :if={@revisions.selected}
       class={[
-        "flex items-center justify-between gap-3 mb-8",
-        "bg-info/25 px-4 py-2 rounded-box border-2 border-info/20 shadow"
+        "flex items-end justify-between gap-3 mb-6",
+        "bg-info/25 pl-4 pr-2 py-2 rounded-box border-2 border-info/20 shadow"
       ]}
     >
-      <div class="grid gap-1">
-        <p class="font-semibold">
-          V. {position(@revisions)} of {length(@revisions.entries)}
-        </p>
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm opacity-60">
-          <span>{Utils.Time.relative(@revisions.selected.inserted_at)}</span>
-          <span data-testid="revision-checkpointed-by">
-            Saved by {@revisions.selected.checkpointed_by.display_name}
+      <div class="grid grow gap-0">
+        <div class={[
+          "flex gap-2 items-baseline"
+        ]}>
+          <h2 class="font-semibold">
+            V. {position(@revisions)} of {length(@revisions.entries)}
+          </h2>
+          <span class="text-sm text-base-content/75">
+            {Utils.Time.relative(@revisions.selected.inserted_at)}
           </span>
-          <div
-            :if={@revisions.selected.contributors != []}
-            class="flex items-center gap-1"
-            data-testid="revision-contributors"
-          >
-            <span>Contributors</span>
-            <div class="flex -space-x-1">
-              <Tooltip.render
-                :for={contributor <- @revisions.selected.contributors}
-                alignment="start"
-              >
-                <Avatar.render class="ring-2 ring-base-200 rounded-full" user={contributor} />
-                <:tooltip>{contributor.display_name}</:tooltip>
-              </Tooltip.render>
-            </div>
+        </div>
+
+        <div
+          :if={@revisions.selected.contributors != []}
+          class="flex items-center gap-3"
+          data-testid="revision-contributors"
+        >
+          <%!-- <span data-testid="revision-checkpointed-by"> --%>
+          <%!--   Saved by {@revisions.selected.checkpointed_by.display_name} --%>
+          <%!-- </span> --%>
+          <%!-- <span class="text-sm">Contributors:</span> --%>
+          <h3 class="small-caps">Contributors:</h3>
+          <div class="flex flex-wrap gap-2">
+            <Tooltip.render
+              :for={contributor <- @revisions.selected.contributors}
+              alignment="start"
+            >
+              <Avatar.render user={contributor} />
+              <:tooltip>{contributor.display_name}</:tooltip>
+            </Tooltip.render>
           </div>
         </div>
       </div>
 
-      <div class="flex gap-2">
+      <div class="flex gap-1">
         <.link
           :if={previous(@revisions)}
           aria-label="Previous revision"
