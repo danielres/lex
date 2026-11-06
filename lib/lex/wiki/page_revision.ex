@@ -53,6 +53,7 @@ defmodule Lex.Wiki.PageRevision do
 
     attribute :search_text, :string do
       allow_nil? false
+      constraints allow_empty?: true
       public? true
     end
 

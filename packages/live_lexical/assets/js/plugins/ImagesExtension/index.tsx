@@ -7,12 +7,7 @@
  */
 
 import {caretFromPoint} from '@lexical/clipboard';
-import {
-  $generateNodesFromDOM,
-  defineImportRule,
-  DOMImportExtension,
-  sel,
-} from '@lexical/html';
+import {defineImportRule, DOMImportExtension, sel} from '@lexical/html';
 import {
   $isAutoLinkNode,
   $isLinkNode,
@@ -28,7 +23,6 @@ import {
   $insertNodes,
   $isNodeSelection,
   $isRootOrShadowRoot,
-  $selectAll,
   $setSelection,
   COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_HIGH,
@@ -45,7 +39,6 @@ import {
   type LexicalEditor,
   mergeRegister,
   registerEventListener,
-  SKIP_DOM_SELECTION_TAG,
 } from 'lexical';
 import {type JSX, useEffect, useRef, useState} from 'react';
 
@@ -97,8 +90,7 @@ const ImgRule = defineImportRule({
 });
 
 /**
- * `<figcaption>` is consumed by the surrounding `<figure>` rule (its
- * content is imported into the ImageNode's nested caption editor), so a
+ * `<figcaption>` is consumed by the surrounding `<figure>` rule, so a
  * top-level handler drops it entirely.
  */
 const FigcaptionRule = defineImportRule({
@@ -112,22 +104,13 @@ const FigureRule = defineImportRule({
     const imported = ctx.$importChildren(el);
     const figcaption = el.querySelector('figcaption');
     if (figcaption) {
+      const caption = figcaption.textContent?.replace(/\s+/g, ' ').trim() ?? '';
       for (const imgNode of imported) {
-        if (!$isImageNode(imgNode)) {
+        if (!$isImageNode(imgNode) || caption === '') {
           continue;
         }
+        imgNode.setCaption(caption);
         imgNode.setShowCaption(true);
-        // The caption editor is a nested editor with its own (legacy)
-        // import pipeline; route the <figcaption> children through it.
-        imgNode.__caption.update(
-          () => {
-            $selectAll().insertNodes(
-              $generateNodesFromDOM(imgNode.__caption, figcaption),
-            );
-            $setSelection(null);
-          },
-          {tag: SKIP_DOM_SELECTION_TAG},
-        );
       }
     }
     return imported;
@@ -357,7 +340,7 @@ function $onDragStart(event: DragEvent): boolean {
     JSON.stringify({
       data: {
         altText: node.__altText,
-        caption: node.__caption,
+        caption: node.getCaption(),
         height: node.__height,
         key: node.getKey(),
         maxWidth: node.__maxWidth,

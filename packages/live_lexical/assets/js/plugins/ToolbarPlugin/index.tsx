@@ -26,7 +26,7 @@ import {useLexicalRovingTabIndexRef} from '@lexical/react/useLexicalRovingTabInd
 import {$isHeadingNode} from '@lexical/rich-text';
 import {$isParentElementRTL} from '@lexical/selection';
 import {$isTableNode, $isTableSelection} from '@lexical/table';
-import {$getNearestNodeOfType, $isEditorIsNestedEditor} from '@lexical/utils';
+import {$getNearestNodeOfType} from '@lexical/utils';
 import {
   $addUpdateTag,
   $findMatchingParent,
@@ -432,18 +432,6 @@ export default function ToolbarPlugin({
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
-      if (activeEditor !== editor && $isEditorIsNestedEditor(activeEditor)) {
-        const rootElement = activeEditor.getRootElement();
-        updateToolbarState(
-          'isImageCaption',
-          !!rootElement?.parentElement?.classList.contains(
-            'image-caption-container',
-          ),
-        );
-      } else {
-        updateToolbarState('isImageCaption', false);
-      }
-
       const anchorNode = selection.anchor.getNode();
       const element = $findTopLevelElement(anchorNode);
       const elementKey = element.getKey();
@@ -622,9 +610,6 @@ export default function ToolbarPlugin({
   const insertGifOnClick = (payload: InsertImagePayload) => {
     activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
   };
-
-  const canViewerSeeInsertDropdown = !toolbarState.isImageCaption;
-  const canViewerSeeInsertCodeButton = !toolbarState.isImageCaption;
 
   return (
     <div
@@ -808,22 +793,20 @@ export default function ToolbarPlugin({
             aria-label={`Format text to underlined. Shortcut: ${shortcut('UNDERLINE')}`}>
             <i className="format underline" />
           </button>
-          {canViewerSeeInsertCodeButton && (
-            <button
-              disabled={!isEditable}
-              onClick={e =>
-                dispatchFormatTextCommand('code', isKeyboardInput(e))
-              }
-              className={
-                'lexical-toolbar-item spaced ' +
-                (toolbarState.isCode ? 'active' : '')
-              }
-              title={`Code (${shortcut('INSERT_CODE_BLOCK')})`}
-              type="button"
-              aria-label="Code">
-              <i className="format code" />
-            </button>
-          )}
+          <button
+            disabled={!isEditable}
+            onClick={e =>
+              dispatchFormatTextCommand('code', isKeyboardInput(e))
+            }
+            className={
+              'lexical-toolbar-item spaced ' +
+              (toolbarState.isCode ? 'active' : '')
+            }
+            title={`Code (${shortcut('INSERT_CODE_BLOCK')})`}
+            type="button"
+            aria-label="Code">
+            <i className="format code" />
+          </button>
           <button
             disabled={!isEditable}
             onClick={insertLink}
@@ -913,10 +896,8 @@ export default function ToolbarPlugin({
               <span className="shortcut">{shortcut('CLEAR_FORMATTING')}</span>
             </DropDownItem>
           </DropDown>
-          {canViewerSeeInsertDropdown && (
-            <>
-              <Divider />
-              <DropDown
+          <Divider />
+          <DropDown
                 disabled={!isEditable}
                 buttonClassName="lexical-toolbar-item spaced"
                 buttonLabel="Insert"
@@ -1062,9 +1043,7 @@ export default function ToolbarPlugin({
                     <span className="text">{embedConfig.contentName}</span>
                   </DropDownItem>
                 ))}
-              </DropDown>
-            </>
-          )}
+          </DropDown>
         </>
       )}
       <Divider />

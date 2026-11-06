@@ -9,39 +9,17 @@
 import type {JSX} from 'react';
 
 import {
-  buildEditorFromExtensions,
-  NestedEditorExtension,
-} from '@lexical/extension';
-import {HashtagExtension} from '@lexical/hashtag';
-import {$generateHtmlFromNodes} from '@lexical/html';
-import {LinkExtension} from '@lexical/link';
-import {ReactExtension} from '@lexical/react/ReactExtension';
-import {ReactProviderExtension} from '@lexical/react/ReactProviderExtension';
-import {RichTextExtension} from '@lexical/rich-text';
-import {
   $applyNodeReplacement,
-  $createRangeSelection,
-  $extendCaretToRange,
-  $getChildCaret,
   $getDocument,
-  $getRoot,
-  $isElementNode,
-  $isParagraphNode,
   booleanValue,
-  configExtension,
   DecoratorNode,
-  defineExtension,
   type DOMExportOutput,
   type EditorConfig,
-  type LexicalEditorWithDispose,
   type LexicalNode,
   type NodeKey,
   nodeSchema,
   numberValue,
   optional,
-  type RangeSelection,
-  rawValue,
-  type SerializedEditor,
   type SerializedLexicalNode,
   type Spread,
   stringValue,
@@ -50,49 +28,11 @@ import {
 } from 'lexical';
 import * as React from 'react';
 
-import {EmojisExtension} from '../plugins/EmojisExtension';
-import {MentionsPlugin} from '../plugins/MentionsExtension';
-import ContentEditable from '../ui/ContentEditable';
-import {EmojiNode} from './EmojiNode';
-import {KeywordsExtension} from './KeywordNode';
-
 const ImageComponent = React.lazy(() => import('./ImageComponent'));
-
-const CaptionEditorExtension = defineExtension({
-  // Skip the default empty-paragraph initializer. In collab mode
-  // CollaborationPlugin's bootstrap only runs `initializeEditor` when
-  // the Lexical root is empty, so a pre-seeded paragraph would prevent
-  // the caption editor from ever exporting its state to Yjs. In
-  // non-collab mode RichText's normalization adds a paragraph as soon
-  // as the editor mounts.
-  $initialEditorState: null,
-  dependencies: [
-    NestedEditorExtension,
-    ReactProviderExtension,
-    RichTextExtension,
-    HashtagExtension,
-    LinkExtension,
-    KeywordsExtension,
-    EmojisExtension,
-    configExtension(ReactExtension, {
-      contentEditable: (
-        <ContentEditable
-          placeholder="Enter a caption..."
-          placeholderClassName="ImageNode__placeholder"
-          className="ImageNode__contentEditable"
-        />
-      ),
-      decorators: [<MentionsPlugin key="mentions" />],
-    }),
-  ],
-  name: '@lexical/playground/ImageNodeCaption',
-  namespace: 'Playground/ImageNodeCaption',
-  nodes: [EmojiNode],
-});
 
 export interface ImagePayload {
   altText: string;
-  caption?: LexicalEditorWithDispose;
+  caption?: string;
   height?: number;
   key?: NodeKey;
   maxWidth?: number;
@@ -102,23 +42,10 @@ export interface ImagePayload {
   captionsEnabled?: boolean;
 }
 
-export function $isCaptionEditorEmpty(): boolean {
-  // Search the document for any non-element node
-  // to determine if it's empty or not
-  for (const {origin} of $extendCaretToRange(
-    $getChildCaret($getRoot(), 'next'),
-  )) {
-    if (!$isElementNode(origin)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 export type SerializedImageNode = Spread<
   {
     altText: string;
-    caption: SerializedEditor;
+    caption: string;
     height?: number;
     maxWidth: number;
     showCaption: boolean;
@@ -130,9 +57,7 @@ export type SerializedImageNode = Spread<
 
 const imageNodeSchema = nodeSchema<ImageNode>()({
   altText: stringValue(),
-  caption: withAccessors(rawValue<SerializedEditor>(), {
-    getter: 'getSerializedCaption',
-  }),
+  caption: withField(stringValue(), {field: '__caption'}),
   // An unsized dimension is the 'inherit' sentinel, which has always
   // serialized as 0 (and parses back through `|| 'inherit'`).
   height: withAccessors(optional(numberValue()), {
@@ -158,7 +83,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __height: 'inherit' | number;
   __maxWidth: number;
   __showCaption: boolean;
-  __caption: LexicalEditorWithDispose;
+  __caption: string;
   // Captions cannot yet be used within editor cells
   __captionsEnabled: boolean;
 
@@ -183,9 +108,13 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     );
   }
 
-  /** @internal The nested caption editor's own serialized state. */
-  getSerializedCaption(): SerializedEditor {
-    return this.getLatest().__caption.toJSON();
+  getCaption(): string {
+    return this.getLatest().__caption;
+  }
+
+  getTextContent(): string {
+    const latest = this.getLatest();
+    return latest.__showCaption ? latest.__caption : '';
   }
 
   /** @internal 'inherit' has always serialized as 0. */
@@ -200,22 +129,9 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return height === 'inherit' ? 0 : height;
   }
 
-  /**
-   * Apply a serialized nested caption editor. The nested editor's own
-   * `parseEditorState` owns validation of the payload, which is why the `json`
-   * schema declares the property with {@link rawValue} rather than describing
-   * its shape. An empty parsed state is ignored so it does not clobber the
-   * caption the node was created with.
-   */
-  setCaption(caption: SerializedEditor | undefined): this {
+  setCaption(caption: string): this {
     const self = this.getWritable();
-    if (caption) {
-      const nestedEditor = self.__caption;
-      const editorState = nestedEditor.parseEditorState(caption.editorState);
-      if (!editorState.isEmpty()) {
-        nestedEditor.setEditorState(editorState);
-      }
-    }
+    self.__caption = caption;
     return self;
   }
 
@@ -226,39 +142,15 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     imgElement.setAttribute('width', this.__width.toString());
     imgElement.setAttribute('height', this.__height.toString());
 
-    if (this.__showCaption && this.__caption) {
-      const captionEditor = this.__caption;
-      const captionHtml = captionEditor.read(() => {
-        if ($isCaptionEditorEmpty()) {
-          return null;
-        }
-        // Don't serialize the wrapping paragraph if there is only one
-        let selection: null | RangeSelection = null;
-        const firstChild = $getRoot().getFirstChild();
-        if (
-          $isParagraphNode(firstChild) &&
-          firstChild.getNextSibling() === null
-        ) {
-          selection = $createRangeSelection();
-          selection.anchor.set(firstChild.getKey(), 0, 'element');
-          selection.focus.set(
-            firstChild.getKey(),
-            firstChild.getChildrenSize(),
-            'element',
-          );
-        }
-        return $generateHtmlFromNodes(captionEditor, selection);
-      });
-      if (captionHtml) {
-        const figureElement = $getDocument().createElement('figure');
-        const figcaptionElement = $getDocument().createElement('figcaption');
-        figcaptionElement.innerHTML = captionHtml;
+    if (this.__showCaption && this.__caption.trim() !== '') {
+      const figureElement = $getDocument().createElement('figure');
+      const figcaptionElement = $getDocument().createElement('figcaption');
+      figcaptionElement.textContent = this.__caption;
 
-        figureElement.appendChild(imgElement);
-        figureElement.appendChild(figcaptionElement);
+      figureElement.appendChild(imgElement);
+      figureElement.appendChild(figcaptionElement);
 
-        return {element: figureElement};
-      }
+      return {element: figureElement};
     }
 
     return {element: imgElement};
@@ -306,7 +198,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     width?: 'inherit' | number,
     height?: 'inherit' | number,
     showCaption?: boolean,
-    caption?: LexicalEditorWithDispose,
+    caption: string = '',
     captionsEnabled?: boolean,
     key?: NodeKey,
   ) {
@@ -317,8 +209,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__width = width || 'inherit';
     this.__height = height || 'inherit';
     this.__showCaption = showCaption || false;
-    this.__caption =
-      caption || buildEditorFromExtensions(CaptionEditorExtension);
+    this.__caption = caption;
     this.__captionsEnabled = captionsEnabled !== false;
   }
 
