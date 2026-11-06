@@ -174,20 +174,22 @@ defmodule LexWeb.PageLive do
       space={@space}
       ui={@ui}
     >
-      <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
-        <div :if={@page} class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
-          <Info.button_toggle active?={@live_action == :info} />
+      <div class="fixed top-0 sm:sticky right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
+        <div :if={@page} class="relative top-5 flex gap-2 p-2 rounded-full">
+          <div class="bg-base-200/50 backdrop-blur h-fit rounded-full p-1">
+            <Info.button_toggle active?={@live_action == :info} />
 
-          <Revisions.button_toggle
-            active?={@live_action == :revisions}
-            page={@page}
-            space={@space}
-          />
+            <Revisions.button_toggle
+              active?={@live_action == :revisions}
+              page={@page}
+              space={@space}
+            />
 
-          <Editing.button_toggle
-            editing={@editing}
-            active?={@live_action == :editing}
-          />
+            <Editing.button_toggle
+              editing={@editing}
+              active?={@live_action == :editing}
+            />
+          </div>
         </div>
       </div>
 
