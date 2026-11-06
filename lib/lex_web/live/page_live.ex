@@ -11,6 +11,7 @@ defmodule LexWeb.PageLive do
   alias LexWeb.Components.Avatar
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.Editing
+  alias LexWeb.PageLive.Info
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
   alias LexWeb.Space
@@ -18,8 +19,9 @@ defmodule LexWeb.PageLive do
 
   delegate(:creation, Creation, info: false)
   delegate(:editing, Editing, info: false)
-  delegate(:revisions, Revisions, info: false)
+  delegate(:info, Info, info: false, mount: false)
   delegate(:page_repository, PageRepository, info: false)
+  delegate(:revisions, Revisions, info: false)
   delegate(:space, Space)
   delegate(:ui, UI)
 
@@ -174,11 +176,14 @@ defmodule LexWeb.PageLive do
     >
       <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
         <div :if={@page} class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
+          <Info.button_toggle active?={@live_action == :info} />
+
           <Revisions.ButtonToggle.render
             active?={@live_action == :revisions}
             page={@page}
             space={@space}
           />
+
           <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
         </div>
       </div>
@@ -193,14 +198,17 @@ defmodule LexWeb.PageLive do
       <Creation.render :if={@page == nil} creation={@creation} />
 
       <div :if={@page} class="min-w-0">
-        <div class="mb-4 pb-2 border-b-2 border-base-content/10">
+        <div class={[
+          "mb-4 pb-2",
+          "border-b-2 border-base-content/10",
+          "space-y-2"
+        ]}>
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
-          <div
-            class="mt-2 flex items-center gap-2 text-sm text-base-content/60"
-            data-testid="page-author"
-          >
-            <Avatar.render user={@page.author} />
-            <span>By {@page.author.display_name}</span>
+        </div>
+
+        <div phx-hook="AutoAnimate" id="wiki-page-info" class="relative left-0">
+          <div :if={@live_action == :info} class="border-info p-4 bg-base-300 rounded-box mb-4">
+            <Info.render page={@page} />
           </div>
         </div>
 
