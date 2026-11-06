@@ -30,7 +30,10 @@ defmodule LexWeb.Layouts.Navbar do
       </div>
 
       <Dropdown.render id="navbar-user-dropdown">
-        <Avatar.render user={current_user} />
+        <Avatar.render
+          class="reactive"
+          user={current_user}
+        />
 
         <:content>
           <div class={[
