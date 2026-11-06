@@ -1,0 +1,46 @@
+.lexical-editor-surface {
+  .PlaygroundEditorTheme__h1,
+  .PlaygroundEditorTheme__h2,
+  .PlaygroundEditorTheme__h3 {
+    @apply leading-none normal-case text-balance font-normal;
+    font-variant-caps: small-caps;
+  }
+
+  .PlaygroundEditorTheme__h1 {
+    @apply text-2xl border-b pb-1;
+  }
+
+  .PlaygroundEditorTheme__h2 {
+    @apply text-xl;
+  }
+
+  .PlaygroundEditorTheme__h3 {
+    @apply text-lg;
+  }
+
+  .PlaygroundEditorTheme__ul {
+    @apply list-disc;
+  }
+
+  .PlaygroundEditorTheme__ol1,
+  .PlaygroundEditorTheme__ol2 {
+    @apply list-decimal;
+  }
+
+  .PlaygroundEditorTheme__link {
+    @apply after:opacity-50 hover:after:opacity-100 after:transition;
+    @apply after:content-['↗'] after:pl-0.5 after:pr-1 after:font-bold;
+    @apply opacity-90 hover:opacity-100 transition;
+    @apply pl-0.5;
+  }
+
+  .editor-image {
+    img {
+      @apply rounded-box;
+    }
+
+    .image-caption-container {
+      @apply backdrop-blur;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+.lexical-portal {
+  .wiki-page-embed-dialog {
+    @apply flex min-w-72 flex-col gap-4;
+
+    label {
+      @apply flex flex-col gap-1;
+    }
+
+    .wiki-page-embed-show-title {
+      @apply flex-row items-center;
+    }
+
+    .wiki-page-embed-results {
+      @apply flex max-h-80 flex-col gap-1 overflow-y-auto;
+
+      button {
+        @apply btn btn-ghost justify-start;
+      }
+
+      p {
+        @apply py-4 text-center text-sm opacity-60;
+      }
+    }
+  }
+}
