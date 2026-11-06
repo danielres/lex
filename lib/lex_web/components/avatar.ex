@@ -2,6 +2,7 @@ defmodule LexWeb.Components.Avatar do
   use LexWeb, :html
 
   attr :user, :map, required: true
+  attr :class, :string, default: ""
 
   def render(assigns) do
     initials = assigns.user.display_name |> String.slice(0..1)
@@ -15,7 +16,10 @@ defmodule LexWeb.Components.Avatar do
       |> assign(color: color)
 
     ~H"""
-    <div class="avatar">
+    <div class={[
+      "avatar",
+      @class
+    ]}>
       <div
         class={[
           "size-6 rounded-full",
