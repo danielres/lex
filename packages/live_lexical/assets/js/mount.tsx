@@ -16,6 +16,8 @@ import {
 import type {EditorIntegration} from './integration';
 import './setupEnv';
 
+export type {DocumentSnapshot} from './documentSnapshots';
+
 export interface MountedEditor {
   getConfirmedDocumentSnapshots(): Promise<DocumentSnapshot[]>;
   getDocumentSnapshots(): DocumentSnapshot[];

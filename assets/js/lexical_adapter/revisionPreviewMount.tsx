@@ -6,36 +6,50 @@ import {wikiEditorIntegration} from './wiki/integration';
 import {
   type WikiPageReference,
   type WikiPageRepository,
+  type WikiPageSnapshot,
   WikiPagesProvider,
 } from './wiki/WikiPagesContext';
 
-const readOnlyWikiPageRepository: WikiPageRepository = {
-  ensure: async () => {
-    throw new Error('Read-only editors cannot create pages');
-  },
-  resolve: async () => null,
-};
+export interface MountedWikiRevisionPreview {
+  setPageSnapshot(pageId: string, snapshot: WikiPageSnapshot): void;
+  unmount(): void;
+}
 
 export function mountRevisionPreview(
   element: HTMLElement,
   collaborator: Collaborator,
+  currentPageId: string,
   lexicalState: SerializedEditorState,
   previousLexicalState: SerializedEditorState | null,
   pages: WikiPageReference[],
-): () => void {
-  return mountEditorRevisionPreview(
+  repository: WikiPageRepository,
+): MountedWikiRevisionPreview {
+  let snapshotUpdates = new Map<string, WikiPageSnapshot>();
+  const preview = mountEditorRevisionPreview(
     element,
     collaborator,
     lexicalState,
     previousLexicalState,
     wikiEditorIntegration,
-    children => (
+    (children) => (
       <WikiPagesProvider
+        collaborator={collaborator}
+        currentPageId={currentPageId}
         initialPages={pages}
-        repository={readOnlyWikiPageRepository}
+        integration={wikiEditorIntegration}
+        repository={repository}
+        snapshotUpdates={snapshotUpdates}
       >
         {children}
       </WikiPagesProvider>
     ),
   );
+
+  return {
+    setPageSnapshot(pageId, snapshot) {
+      snapshotUpdates = new Map(snapshotUpdates).set(pageId, snapshot);
+      preview.refresh();
+    },
+    unmount: preview.unmount,
+  };
 }

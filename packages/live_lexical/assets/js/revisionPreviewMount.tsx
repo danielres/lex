@@ -6,6 +6,11 @@ import type {Collaborator} from './collaboration';
 import type {EditorIntegration} from './integration';
 import RevisionPreview from './RevisionPreview';
 
+export interface MountedRevisionPreview {
+  refresh(): void;
+  unmount(): void;
+}
+
 export function mountRevisionPreview(
   element: HTMLElement,
   collaborator: Collaborator,
@@ -13,17 +18,23 @@ export function mountRevisionPreview(
   previousLexicalState: SerializedEditorState | null,
   integration: EditorIntegration,
   renderEnvironment: (children: ReactNode) => ReactNode,
-): () => void {
+): MountedRevisionPreview {
   const root = createRoot(element);
-  const preview = (
-    <RevisionPreview
-      collaborator={collaborator}
-      integration={integration}
-      lexicalState={lexicalState}
-      previousLexicalState={previousLexicalState}
-    />
-  );
-  root.render(renderEnvironment(preview));
+  const render = () => {
+    const preview = (
+      <RevisionPreview
+        collaborator={collaborator}
+        integration={integration}
+        lexicalState={lexicalState}
+        previousLexicalState={previousLexicalState}
+      />
+    );
+    root.render(renderEnvironment(preview));
+  };
+  render();
 
-  return () => root.unmount();
+  return {
+    refresh: render,
+    unmount: () => root.unmount(),
+  };
 }

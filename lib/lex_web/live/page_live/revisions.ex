@@ -212,9 +212,14 @@ defmodule LexWeb.PageLive.Revisions do
       class="lexical-editor"
       data-collaborator-display-name={current_user.display_name}
       data-collaborator-hue={current_user.hue}
+      data-checkpoint-page-event={assigns[:"data-checkpoint-page-event"]}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
+      data-load-page-snapshot-event={assigns[:"data-load-page-snapshot-event"]}
+      data-page-id={assigns[:"data-page-id"]}
       data-pages={assigns[:"data-pages"]}
       data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}
+      data-resolve-page-event={assigns[:"data-resolve-page-event"]}
+      data-space-id={assigns[:"data-space-id"]}
       id={"revision-preview-#{@revisions.selected.id}"}
       phx-hook="LexicalRevisionPreview"
       phx-update="ignore"

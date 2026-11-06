@@ -58,7 +58,7 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
     assert render(view) =~ "/test-space/wiki/summer-activities"
 
-    render_hook(view, "wiki_link_map:ensure", %{"title" => "Winter Plans"})
+    render_hook(view, "page_repository:ensure", %{"title" => "Winter Plans"})
 
     assert Page.list!(scope: scope) |> Enum.any?(&(&1.title == "Winter Plans"))
   end
@@ -108,6 +108,84 @@ defmodule LexWeb.PageLiveTest do
     assert :ok = scope |> Page.set_checkpoint(page, "main", document("updated"))
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
+  end
+
+  test "pushes updated snapshots for embedded pages in the same space", %{
+    conn: conn,
+    scope: scope
+  } do
+    scope |> Page.ensure!("Home")
+    embedded_page = scope |> Page.ensure!("Reusable Page")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+    snapshot = document_snapshot("main", "Reusable content")
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.set_checkpoint(
+               embedded_page,
+               "main",
+               document("Reusable content"),
+               %{
+                 lexical_state: snapshot["lexical_state"],
+                 search_text: snapshot["search_text"]
+               }
+             )
+
+    page_id = embedded_page.id
+    lexical_state = snapshot["lexical_state"]
+
+    assert_push_event(view, "page_snapshot_updated", %{
+      content_hash: content_hash,
+      lexical_state: ^lexical_state,
+      page_id: ^page_id
+    })
+
+    assert is_binary(content_hash)
+  end
+
+  test "does not expose snapshot updates from another space", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    other_scope = create_scope("Other Space", scope.current_user)
+    other_page = other_scope |> Page.ensure!("Private Page")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+    snapshot = document_snapshot("main", "Private content")
+
+    assert {:ok, :saved} =
+             other_scope
+             |> Page.set_checkpoint(
+               other_page,
+               "main",
+               document("Private content"),
+               %{
+                 lexical_state: snapshot["lexical_state"],
+                 search_text: snapshot["search_text"]
+               }
+             )
+
+    refute_push_event(view, "page_snapshot_updated", %{})
+  end
+
+  test "checkpoints inline embeds as revisions of the referenced page", %{
+    conn: conn,
+    scope: scope
+  } do
+    containing_page = scope |> Page.ensure!("Home")
+    embedded_page = scope |> Page.ensure!("Reusable Page")
+    {:ok, shared_doc} = scope |> Collaboration.open_document("#{embedded_page.id}/main")
+    :ok = SharedDoc.observe(shared_doc)
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+
+    render_hook(view, "page_repository:checkpoint", %{
+      "documents" => [document_snapshot("main", "Embedded content")],
+      "page_id" => embedded_page.id
+    })
+
+    assert [%{search_text: "Embedded content"}] = scope |> Page.list_revisions!(embedded_page)
+    assert [] = scope |> Page.list_revisions!(containing_page)
+
+    monitor = Process.monitor(shared_doc)
+    :ok = Collaboration.close_document(shared_doc)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
   test "the lock button toggles whether the editor is editable", %{conn: conn, scope: scope} do

@@ -5,6 +5,7 @@
     "./collaboration": "./assets/js/collaboration.ts",
     "./integration": "./assets/js/integration.ts",
     "./mount": "./assets/js/mount.tsx",
+    "./read-only-content": "./assets/js/ReadOnlyContent.tsx",
     "./revision-preview": "./assets/js/revisionPreviewMount.tsx",
     "./selection": "./assets/js/selection.ts",
     "./styles.css": "./assets/css/lexical.css",

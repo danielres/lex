@@ -234,7 +234,7 @@
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
     @apply focus-within:outline-2 outline-info/50 rounded-box;
-    @apply bg-base-100/75;
+    @apply bg-base-100/25;
   }
 
   .ContentEditable__root {
@@ -291,6 +291,75 @@
 
     .image-caption-container {
       @apply backdrop-blur;
+    }
+  }
+}
+
+.lexical-editor {
+  .wiki-page-embed {
+    @apply relative my-4 min-w-0 rounded-box border-[1.5px] border-dashed border-base-content/20 bg-base-300/10 p-3;
+    .lexical-embedded-page{
+      @apply  max-h-64 overflow-auto;
+    }
+
+    &.selected {
+      @apply outline-2 outline-info/60;
+    }
+
+    .wiki-page-embed-controls {
+      @apply mb-2 flex flex-wrap items-center justify-end gap-2 text-sm;
+
+      button,
+      a {
+        @apply btn btn-xs btn-ghost;
+      }
+
+      span {
+        @apply text-error;
+      }
+    }
+
+    .wiki-page-embed-title {
+      @apply mb-3 border-b border-base-content/10 pb-2 font-semibold;
+
+      a {
+        @apply hover:underline;
+      }
+    }
+
+    .wiki-page-embed-message {
+      @apply rounded-box bg-base-200 p-4 text-sm text-base-content/60;
+    }
+
+    .wiki-page-embed-editor,
+    .lexical-embedded-page {
+      @apply min-w-0;
+    }
+  }
+}
+
+.lexical-portal {
+  .wiki-page-embed-dialog {
+    @apply flex min-w-72 flex-col gap-4;
+
+    label {
+      @apply flex flex-col gap-1;
+    }
+
+    .wiki-page-embed-show-title {
+      @apply flex-row items-center;
+    }
+
+    .wiki-page-embed-results {
+      @apply flex max-h-80 flex-col gap-1 overflow-y-auto;
+
+      button {
+        @apply btn btn-ghost justify-start;
+      }
+
+      p {
+        @apply py-4 text-center text-sm opacity-60;
+      }
     }
   }
 }

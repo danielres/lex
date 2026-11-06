@@ -148,6 +148,22 @@ defmodule Lex.Wiki.Page do
     |> Ash.read_one(scope: scope)
   end
 
+  def get_document_snapshot(scope, page, document_key) do
+    with {:ok, page_document} <- scope |> get_page_document(page, document_key) do
+      case page_document do
+        nil ->
+          {:ok, nil}
+
+        page_document ->
+          {:ok,
+           %{
+             content_hash: page_document.content_hash,
+             lexical_state: page_document.lexical_state
+           }}
+      end
+    end
+  end
+
   def restore(scope, page, document_key, doc) do
     with {:ok, page_document} <- scope |> get_page_document(page, document_key) do
       restore_page_document(page_document, doc)

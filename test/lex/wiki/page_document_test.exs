@@ -40,6 +40,16 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert page_document.lexical_state == lexical_state
     assert page_document.search_text == "First version"
     assert String.length(page_document.content_hash) == 64
+
+    assert {:ok, snapshot} = scope |> Page.get_document_snapshot(page, "main")
+    assert snapshot.lexical_state == lexical_state
+    assert snapshot.content_hash == page_document.content_hash
+  end
+
+  test "returns no semantic snapshot before a document is checkpointed", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
+
+    assert {:ok, nil} = scope |> Page.get_document_snapshot(page, "main")
   end
 
   test "does not update an unchanged semantic snapshot", %{scope: scope} do

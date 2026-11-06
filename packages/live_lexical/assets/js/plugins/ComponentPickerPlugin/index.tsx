@@ -33,6 +33,8 @@ import {
 import {type JSX, useCallback, useMemo, useState} from 'react';
 
 import useModal from '../../hooks/useModal';
+import {useEditorIntegration} from '../../context/EditorIntegrationContext';
+import type {ComponentPickerOptionConfig, ShowModal} from '../../integration';
 import catTypingGif from '../../images/cat-typing.gif';
 import {EmbedConfigs} from '../AutoEmbedPlugin';
 import {INSERT_CARD_COMMAND} from '../CardExtension';
@@ -104,7 +106,8 @@ export function ComponentPickerMenuItem({
       aria-selected={isSelected}
       id={'typeahead-item-' + index}
       onMouseEnter={onMouseEnter}
-      onClick={onClick}>
+      onClick={onClick}
+    >
       {option.icon}
       <span className="text">{option.title}</span>
     </li>
@@ -128,7 +131,7 @@ export function getDynamicOptions(editor: LexicalEditor, queryString: string) {
 
     options.push(
       ...colOptions.map(
-        columns =>
+        (columns) =>
           new ComponentPickerOption(`${rows}x${columns} Table`, {
             icon: <i className="icon table-icon" />,
             keywords: ['table'],
@@ -141,8 +144,6 @@ export function getDynamicOptions(editor: LexicalEditor, queryString: string) {
 
   return options;
 }
-
-export type ShowModal = ReturnType<typeof useModal>[1];
 
 export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
   return [
@@ -158,7 +159,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
         }),
     }),
     ...([1, 2, 3] as const).map(
-      n =>
+      (n) =>
         new ComponentPickerOption(`Heading ${n}`, {
           icon: <i className={`icon h${n}`} />,
           keywords: ['heading', 'header', `h${n}`],
@@ -175,7 +176,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       icon: <i className="icon table-icon" />,
       keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
       onSelect: () =>
-        showModal('Insert Table', onClose => (
+        showModal('Insert Table', (onClose) => (
           <InsertTableDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
@@ -239,12 +240,12 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       icon: <i className="icon poll" />,
       keywords: ['poll', 'vote'],
       onSelect: () =>
-        showModal('Insert Poll', onClose => (
+        showModal('Insert Poll', (onClose) => (
           <InsertPollDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
     ...EmbedConfigs.map(
-      embedConfig =>
+      (embedConfig) =>
         new ComponentPickerOption(`Embed ${embedConfig.contentName}`, {
           icon: embedConfig.icon,
           keywords: [...embedConfig.keywords, 'embed'],
@@ -294,7 +295,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       icon: <i className="icon equation" />,
       keywords: ['equation', 'latex', 'math'],
       onSelect: () =>
-        showModal('Insert Equation', onClose => (
+        showModal('Insert Equation', (onClose) => (
           <InsertEquationDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
@@ -311,7 +312,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       icon: <i className="icon image" />,
       keywords: ['image', 'photo', 'picture', 'file'],
       onSelect: () =>
-        showModal('Insert Image', onClose => (
+        showModal('Insert Image', (onClose) => (
           <InsertImageDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
@@ -339,7 +340,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       icon: <i className="icon columns" />,
       keywords: ['columns', 'layout', 'grid'],
       onSelect: () =>
-        showModal('Insert Columns Layout', onClose => (
+        showModal('Insert Columns Layout', (onClose) => (
           <InsertLayoutDialog activeEditor={editor} onClose={onClose} />
         )),
     }),
@@ -348,6 +349,7 @@ export function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
 
 export default function ComponentPickerMenuPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
+  const {componentPickerOptions} = useEditorIntegration();
   const [modal, showModal] = useModal();
   const [queryString, setQueryString] = useState<string | null>(null);
 
@@ -357,7 +359,16 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
   });
 
   const options = useMemo(() => {
-    const baseOptions = getBaseOptions(editor, showModal);
+    const integrationOptions = (
+      componentPickerOptions?.(editor, showModal) ?? []
+    ).map(
+      (option: ComponentPickerOptionConfig) =>
+        new ComponentPickerOption(option.title, option),
+    );
+    const baseOptions = [
+      ...getBaseOptions(editor, showModal),
+      ...integrationOptions,
+    ];
 
     if (!queryString) {
       return baseOptions;
@@ -368,12 +379,12 @@ export default function ComponentPickerMenuPlugin(): JSX.Element {
     return [
       ...getDynamicOptions(editor, queryString),
       ...baseOptions.filter(
-        option =>
+        (option) =>
           regex.test(option.title) ||
-          option.keywords.some(keyword => regex.test(keyword)),
+          option.keywords.some((keyword) => regex.test(keyword)),
       ),
     ];
-  }, [editor, queryString, showModal]);
+  }, [componentPickerOptions, editor, queryString, showModal]);
 
   const onSelectOption = useCallback(
     (
