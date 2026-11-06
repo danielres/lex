@@ -46,6 +46,71 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert snapshot.content_hash == page_document.content_hash
   end
 
+  test "persists an empty nested document snapshot", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
+    lexical_state = lexical_state("", format: 0)
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.set_checkpoint(
+               page,
+               "caption-1",
+               document(""),
+               %{lexical_state: lexical_state, search_text: ""}
+             )
+
+    [page_document] = Ash.read!(PageDocument, scope: scope)
+
+    assert page_document.lexical_state == lexical_state
+    assert page_document.search_text == ""
+  end
+
+  test "persists a non-text document with empty searchable text", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
+
+    lexical_state = %{
+      "root" => %{
+        "children" => [%{"type" => "horizontalrule", "version" => 1}],
+        "type" => "root",
+        "version" => 1
+      }
+    }
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.set_checkpoint(
+               page,
+               "main",
+               document(""),
+               %{lexical_state: lexical_state, search_text: ""}
+             )
+
+    [page_document] = Ash.read!(PageDocument, scope: scope)
+    assert page_document.search_text == ""
+  end
+
+  test "rejects a semantic snapshot without searchable text", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
+
+    result =
+      PageDocument
+      |> Ash.Changeset.for_create(:save_snapshot, %{
+        content_hash: String.duplicate("0", 64),
+        document_key: "main",
+        lexical_state: lexical_state("Text", format: 0),
+        page_id: page.id,
+        yjs_state: <<0>>
+      })
+      |> Ash.create(scope: scope)
+
+    assert {:error, %Ash.Error.Invalid{errors: errors}} = result
+
+    assert Enum.any?(
+             errors,
+             &match?(%Ash.Error.Changes.Required{field: :search_text}, &1)
+           )
+  end
+
   test "returns no semantic snapshot before a document is checkpointed", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
