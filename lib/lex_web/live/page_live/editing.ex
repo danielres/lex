@@ -2,7 +2,11 @@ defmodule LexWeb.PageLive.Editing do
   use LexWeb, :live_view
   use LiveDelegate, path: [:editing]
 
+  require Logger
+
   alias Lex.Collaboration
+
+  def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{checkpointing?: false, title_form: nil})
@@ -59,12 +63,27 @@ defmodule LexWeb.PageLive.Editing do
 
         {:reply, %{ok: true, result: counts}, socket}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Could not checkpoint page #{page.id}: #{inspect(reason)}")
         checkpoint_failed(socket)
     end
   end
 
-  def handle_event("checkpoint", _params, socket), do: checkpoint_failed(socket)
+  def handle_event("checkpoint", %{"error" => reason}, socket) do
+    Logger.error(
+      "Could not collect document snapshots for page #{socket.assigns.page.id}: #{inspect(reason)}"
+    )
+
+    checkpoint_failed(socket)
+  end
+
+  def handle_event("checkpoint", params, socket) do
+    Logger.error(
+      "Received invalid document checkpoint payload for page #{socket.assigns.page.id}: #{inspect(params)}"
+    )
+
+    checkpoint_failed(socket)
+  end
 
   def handle_event("title_change", %{"page_title" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.editing.title_form, params)

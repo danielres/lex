@@ -6,10 +6,13 @@ defmodule Lex.Collaboration do
   document checkpoints its state and exits after its last observer disconnects.
   """
 
+  alias Lex.Collaboration.Contributors
   alias Lex.Collaboration.Persistence
   alias Lex.Wiki.Page
+  alias Yex.Sync
   alias Yex.Sync.SharedDoc
 
+  @empty_update <<0, 0>>
   @registry __MODULE__.Registry
   @supervisor __MODULE__.DocumentSupervisor
 
@@ -29,6 +32,16 @@ defmodule Lex.Collaboration do
     end
   end
 
+  def record_update(room, user_id, message) do
+    with {:ok, {:sync, {type, update}}} when type in [:sync_step2, :sync_update] <-
+           Sync.message_decode(message),
+         true <- update != @empty_update do
+      Contributors.record(room, user_id)
+    else
+      _not_document_update -> :ok
+    end
+  end
+
   def checkpoint(scope, page, documents, restored_from_revision_id \\ nil)
 
   def checkpoint(_scope, _page, [], _restored_from_revision_id),
@@ -37,19 +50,34 @@ defmodule Lex.Collaboration do
   def checkpoint(scope, page, documents, restored_from_revision_id) when is_list(documents) do
     with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, snapshots} <- snapshots(documents),
-         {:ok, main_snapshot} <- main_snapshot(snapshots),
-         {:ok, counts} <- checkpoint_documents(scope, page, snapshots),
-         {:ok, revision} <-
-           scope
-           |> Page.set_checkpoint(
-             page,
-             %{
-               lexical_state: main_snapshot.lexical_state,
-               search_text: search_text(snapshots)
-             },
-             restored_from_revision_id
-           ) do
-      {:ok, Map.put(counts, :revision, revision)}
+         {:ok, main_snapshot} <- main_snapshot(snapshots) do
+      rooms = Enum.map(snapshots, &"#{page.id}/#{&1.document_key}")
+      contributions = Contributors.capture(rooms)
+
+      result =
+        with {:ok, counts} <- checkpoint_documents(scope, page, snapshots),
+             {:ok, revision} <-
+               scope
+               |> Page.set_checkpoint(
+                 page,
+                 %{
+                   contributor_ids: contributions.contributor_ids,
+                   lexical_state: main_snapshot.lexical_state,
+                   search_text: search_text(snapshots)
+                 },
+                 restored_from_revision_id
+               ) do
+          {:ok, Map.put(counts, :revision, revision)}
+        end
+
+      case result do
+        {:ok, _counts} = success ->
+          :ok = Contributors.acknowledge(contributions)
+          success
+
+        {:error, _reason} = error ->
+          error
+      end
     end
   end
 
@@ -72,7 +100,9 @@ defmodule Lex.Collaboration do
         counts = Map.update!(counts, status, &(&1 + 1))
         {:cont, {:ok, counts}}
       else
-        {:error, reason} -> {:halt, {:error, reason}}
+        {:error, reason} ->
+          error = {:document_checkpoint_failed, snapshot.document_key, reason}
+          {:halt, {:error, error}}
       end
     end)
   end

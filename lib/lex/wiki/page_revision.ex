@@ -15,6 +15,11 @@ defmodule Lex.Wiki.PageRevision do
     defaults [:read]
 
     create :create do
+      argument :contributor_ids, {:array, :uuid} do
+        allow_nil? false
+        default []
+      end
+
       accept [
         :content_hash,
         :lexical_state,
@@ -22,6 +27,9 @@ defmodule Lex.Wiki.PageRevision do
         :restored_from_revision_id,
         :search_text
       ]
+
+      change relate_actor(:checkpointed_by)
+      change manage_relationship(:contributor_ids, :contributors, type: :append)
     end
   end
 
@@ -53,6 +61,7 @@ defmodule Lex.Wiki.PageRevision do
 
     attribute :search_text, :string do
       allow_nil? false
+      constraints allow_empty?: true
       public? true
     end
 
@@ -60,9 +69,20 @@ defmodule Lex.Wiki.PageRevision do
   end
 
   relationships do
+    belongs_to :checkpointed_by, Lex.Accounts.User do
+      allow_nil? false
+    end
+
     belongs_to :page, Lex.Wiki.Page do
       allow_nil? false
       attribute_public? true
+    end
+
+    many_to_many :contributors, Lex.Accounts.User do
+      through Lex.Wiki.PageRevisionContributor
+      source_attribute_on_join_resource :page_revision_id
+      destination_attribute_on_join_resource :user_id
+      sort display_name: :asc
     end
   end
 end

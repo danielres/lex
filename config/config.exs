@@ -112,12 +112,45 @@ config :phoenix_live_view,
 # at the `config/runtime.exs`.
 config :lex, Lex.Mailer, adapter: Swoosh.Adapters.Local
 
+base_esbuild_args = ~w(
+    js/index.tsx
+    js/app.js
+    --bundle
+    --target=es2022
+    --outdir=../priv/static/assets
+    --external:/fonts/*
+    --external:/images/*
+    --alias:@=.
+    --splitting
+    --format=esm
+  )
+
+environment_esbuild_args =
+  if config_env() == :prod,
+    do: ~w(--conditions=production),
+    else: ~w(--conditions=development)
+
+live_lexical_esbuild_args = ~w(
+    --jsx=automatic
+    --preserve-symlinks
+    --loader:.gif=file
+    --loader:.jpg=file
+    --loader:.png=file
+    --loader:.svg=file
+    --loader:.ttf=file
+    --loader:.woff=file
+    --loader:.woff2=file
+    --define:process.env.EXCALIDRAW_ASSET_PATH="/assets/"
+  )
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
   lex: [
     args:
-      ~w(js/index.tsx js/app.js --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=. --splitting --format=esm --conditions=production --loader:.gif=file --loader:.jpg=file --loader:.png=file --loader:.svg=file --loader:.ttf=file --loader:.woff=file --loader:.woff2=file --define:process.env.EXCALIDRAW_ASSET_PATH="/assets/"),
+      base_esbuild_args ++
+        environment_esbuild_args ++
+        live_lexical_esbuild_args,
     cd: Path.expand("../assets", __DIR__),
     env: %{
       "NODE_PATH" =>

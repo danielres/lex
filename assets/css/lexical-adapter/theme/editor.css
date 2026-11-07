@@ -1,0 +1,24 @@
+.lexical-editor {
+  @apply rounded-box;
+  @apply border border-transparent;
+}
+
+.lexical-editor-surface {
+  &[data-editable='true'] .ContentEditable__root {
+    @apply px-4 py-4 pt-8 sm:pl-12;
+    @apply focus-within:outline-2 outline-info/50 rounded-box;
+    @apply bg-base-100/25;
+  }
+
+  .ContentEditable__root {
+    @apply min-w-0 max-w-full bg-transparent p-0;
+
+    > * {
+      @apply my-[1em] first:mt-0;
+    }
+  }
+
+  .lexical-action-button {
+    @apply hidden;
+  }
+}

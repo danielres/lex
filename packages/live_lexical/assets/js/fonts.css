@@ -1,0 +1,8 @@
+/* Reenie Beanie is served locally for the sticky-note node. */
+@font-face {
+  font-family: 'Reenie Beanie';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ReenieBeanie-Regular.woff2) format('woff2');
+}

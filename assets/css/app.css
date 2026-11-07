@@ -2,13 +2,19 @@
    https://tailwindcss.com/docs/configuration */
 
 @import "tailwindcss" source(none);
-@source "../../deps/ash_authentication_phoenix";
 @import "phoenix-colocated/lex/colocated.css";
-@import "../js/lexical_editor/themes/WikiEditor.css";
+@import "../../deps/toast/assets/css/toast.css";
+@source "../../deps/ash_authentication_phoenix";
+
+@import "live_lexical/styles.css";
+@import "./lexical-adapter/theme.css";
+@import "./lexical-adapter/revision.css";
+@import "./lexical-adapter/wiki.css";
+
 @source "../css";
 @source "../js";
 @source "../../lib/lex_web";
-@import "../../deps/toast/assets/css/toast.css";
+@source "../../packages/live_lexical/assets/js";
 
 :root {
   --collaboration-color-lightness: 58%;
@@ -141,4 +147,16 @@ html, body {
   > * {
     grid-area: 1 / 1;
   }
+}
+
+.reactive {
+ @apply opacity-80 hover:opacity-100 transition;
+}
+
+.autogrid {
+  @apply grid;
+  grid-template-rows: repeat(auto-fill, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(var(--autogrid-min, 12rem), 1fr));
+  /* justify-content: start; */
+  /* align-content: center; */
 }

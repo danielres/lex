@@ -1,0 +1,6 @@
+@import "./theme/vars.css";
+@import "./theme/editor.css";
+@import "./theme/excalidraw.css";
+@import "./theme/prose.css";
+@import "./theme/page-embed.css";
+@import "./theme/page-embed-dialog.css";

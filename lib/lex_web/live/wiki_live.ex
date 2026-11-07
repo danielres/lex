@@ -5,6 +5,7 @@ defmodule LexWeb.WikiLive do
   alias Ash.Notifier.Notification
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
+  alias LexWeb.Components.Avatar
   alias LexWeb.Space
   alias LexWeb.UI
 
@@ -153,6 +154,13 @@ defmodule LexWeb.WikiLive do
                     {page.title}
                     <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />
                   </.link>
+                  <div
+                    class="mt-1 flex items-center gap-2 text-xs text-base-content/60"
+                    data-testid={"page-list-author-#{page.id}"}
+                  >
+                    <Avatar.render user={page.author} />
+                    <span>{page.author.display_name}</span>
+                  </div>
                 </td>
                 <td>
                   {Utils.Time.relative(page.inserted_at)}

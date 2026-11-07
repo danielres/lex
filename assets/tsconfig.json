@@ -28,9 +28,13 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
+    "preserveSymlinks": true,
     "skipLibCheck": true,
     "target": "ES2022",
     "types": ["vite/client"]
   },
-  "include": ["js/app.js", "js/index.tsx", "js/lexical_editor/mount.tsx"]
+  "include": [
+    "js/app.js",
+    "js/index.tsx"
+  ]
 }

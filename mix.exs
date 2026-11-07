@@ -112,16 +112,16 @@ defmodule Lex.MixProject do
         "tailwind.install --if-missing",
         "esbuild.install --if-missing",
         "ash_typescript.npm_install",
-        "cmd --cd assets npm run copy:excalidraw-assets"
+        "cmd --cd assets npm run copy:static-assets"
       ],
       "assets.build": [
         "compile",
-        "cmd --cd assets npm run copy:excalidraw-assets",
+        "cmd --cd assets npm run copy:static-assets",
         "tailwind lex",
         "esbuild lex"
       ],
       "assets.deploy": [
-        "cmd --cd assets npm run copy:excalidraw-assets",
+        "cmd --cd assets npm run copy:static-assets",
         "tailwind lex --minify",
         "esbuild lex --minify",
         "phx.digest"

@@ -11,9 +11,36 @@ defmodule Lex.Wiki.PageTest do
     test "creates a page with a slug derived from its title", %{scope: scope} do
       assert {:ok, page} = scope |> Page.ensure("Summer Activities")
 
+      assert page.author.id == scope.current_user.id
+      assert page.author_id == scope.current_user.id
       assert page.title == "Summer Activities"
       assert page.slug == "summer-activities"
       assert {:ok, page.id} == Ecto.UUID.cast(page.id)
+    end
+
+    test "requires an actor when creating a page", %{scope: scope} do
+      result =
+        Page
+        |> Ash.Changeset.for_create(:create, %{title: "Summer Activities"},
+          tenant: scope.space_id
+        )
+        |> Ash.create()
+
+      assert {:error, error} = result
+      assert Exception.message(error) =~ "could not relate to actor"
+    end
+
+    test "does not accept an author from page input", %{scope: scope} do
+      changeset =
+        Page
+        |> Ash.Changeset.for_create(
+          :create,
+          %{author_id: create_user("Other User").id, title: "Summer Activities"},
+          scope: scope
+        )
+
+      refute changeset.valid?
+      assert [%Ash.Error.Invalid.NoSuchInput{input: :author_id}] = changeset.errors
     end
 
     test "publishes a notification after creating a page", %{scope: scope} do
@@ -105,6 +132,8 @@ defmodule Lex.Wiki.PageTest do
       renamed_page = Page.rename!(page, "  Winter   Activities ", scope: scope)
 
       assert renamed_page.id == page.id
+      assert renamed_page.author.id == scope.current_user.id
+      assert renamed_page.author_id == page.author_id
       assert renamed_page.title == "Winter Activities"
       assert renamed_page.slug == "winter-activities"
     end
@@ -144,6 +173,13 @@ defmodule Lex.Wiki.PageTest do
                "Home",
                "Summer Activities"
              ]
+    end
+
+    test "loads each page author", %{scope: scope} do
+      scope |> Page.ensure!("Home")
+
+      assert [%{author: author}] = Page.list!(scope: scope)
+      assert author.id == scope.current_user.id
     end
   end
 end

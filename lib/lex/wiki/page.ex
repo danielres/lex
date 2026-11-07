@@ -1,6 +1,7 @@
 defmodule Lex.Wiki.Page do
   require Ash.Query
 
+  alias Lex.Accounts.User
   alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
@@ -27,12 +28,13 @@ defmodule Lex.Wiki.Page do
     defaults [:read]
 
     read :list do
-      prepare build(load: :last_updated_at, sort: :title)
+      prepare build(load: [:author, :last_updated_at], sort: :title)
     end
 
     create :create do
       accept [:title]
 
+      change relate_actor(:author)
       change SetTitleAndSlug
     end
 
@@ -76,6 +78,10 @@ defmodule Lex.Wiki.Page do
   end
 
   relationships do
+    belongs_to :author, User do
+      allow_nil? false
+    end
+
     belongs_to :space, Lex.Accounts.Space do
       destination_attribute :id
       allow_nil? false
@@ -138,6 +144,7 @@ defmodule Lex.Wiki.Page do
   def list_revisions!(scope, page) do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id)
+    |> Ash.Query.load([:checkpointed_by, :contributors])
     |> Ash.Query.sort(inserted_at: :desc, id: :desc)
     |> Ash.read!(scope: scope)
   end
@@ -146,6 +153,22 @@ defmodule Lex.Wiki.Page do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id and id == ^revision_id)
     |> Ash.read_one(scope: scope)
+  end
+
+  def get_document_snapshot(scope, page, document_key) do
+    with {:ok, page_document} <- scope |> get_page_document(page, document_key) do
+      case page_document do
+        nil ->
+          {:ok, nil}
+
+        page_document ->
+          {:ok,
+           %{
+             content_hash: page_document.content_hash,
+             lexical_state: page_document.lexical_state
+           }}
+      end
+    end
   end
 
   def restore(scope, page, document_key, doc) do
@@ -171,10 +194,11 @@ defmodule Lex.Wiki.Page do
   def set_checkpoint(
         scope,
         page,
-        %{lexical_state: lexical_state, search_text: search_text},
+        %{lexical_state: lexical_state, search_text: search_text} = snapshot,
         restored_from_revision_id
       ) do
     content_hash = content_hash(lexical_state)
+    contributor_ids = Map.get(snapshot, :contributor_ids, [])
 
     with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, latest_revision} <- scope |> latest_revision(page) do
@@ -187,7 +211,8 @@ defmodule Lex.Wiki.Page do
           lexical_state,
           search_text,
           content_hash,
-          restored_from_revision_id
+          restored_from_revision_id,
+          contributor_ids
         )
         |> case do
           {:ok, _revision} -> {:ok, :saved}
@@ -261,6 +286,7 @@ defmodule Lex.Wiki.Page do
   defp get_by_slug(scope, slug) do
     __MODULE__
     |> Ash.Query.filter(slug == ^slug)
+    |> Ash.Query.load(:author)
     |> Ash.read_one(scope: scope)
   end
 
@@ -353,17 +379,23 @@ defmodule Lex.Wiki.Page do
          lexical_state,
          search_text,
          content_hash,
-         restored_from_revision_id
+         restored_from_revision_id,
+         contributor_ids
        ) do
     PageRevision
-    |> Ash.Changeset.for_create(:create, %{
-      content_hash: content_hash,
-      lexical_state: lexical_state,
-      page_id: page.id,
-      restored_from_revision_id: restored_from_revision_id,
-      search_text: search_text
-    })
-    |> Ash.create(scope: scope)
+    |> Ash.Changeset.for_create(
+      :create,
+      %{
+        contributor_ids: contributor_ids,
+        content_hash: content_hash,
+        lexical_state: lexical_state,
+        page_id: page.id,
+        restored_from_revision_id: restored_from_revision_id,
+        search_text: search_text
+      },
+      scope: scope
+    )
+    |> Ash.create()
   end
 
   defp content_hash(lexical_state) do

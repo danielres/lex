@@ -8,17 +8,20 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
+  alias LexWeb.Components.Avatar
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.Editing
+  alias LexWeb.PageLive.Info
+  alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
-  alias LexWeb.PageLive.WikiLinkMap
   alias LexWeb.Space
   alias LexWeb.UI
 
   delegate(:creation, Creation, info: false)
   delegate(:editing, Editing, info: false)
+  delegate(:info, Info, info: false, mount: false)
+  delegate(:page_repository, PageRepository, info: false)
   delegate(:revisions, Revisions, info: false)
-  delegate(:wiki_link_map, WikiLinkMap, info: false)
   delegate(:space, Space)
   delegate(:ui, UI)
 
@@ -65,12 +68,28 @@ defmodule LexWeb.PageLive do
 
   @impl true
   def handle_info(
-        %Notification{resource: PageDocument, action: %{name: action}},
+        %Notification{
+          resource: PageDocument,
+          action: %{name: :save_snapshot},
+          data: %{document_key: "main"} = page_document
+        },
         socket
-      )
-      when action in [:save, :save_snapshot] do
+      ) do
+    socket =
+      if PageRepository.includes?(socket.assigns.page_repository, page_document.page_id) do
+        push_event(socket, PageRepository.snapshot_updated_event(), %{
+          content_hash: page_document.content_hash,
+          lexical_state: page_document.lexical_state,
+          page_id: page_document.page_id
+        })
+      else
+        socket
+      end
+
     {:noreply, socket}
   end
+
+  def handle_info(%Notification{resource: PageDocument}, socket), do: {:noreply, socket}
 
   def handle_info(
         %Notification{resource: PageRevision, action: %{name: :create}, data: revision},
@@ -106,7 +125,7 @@ defmodule LexWeb.PageLive do
       if page == nil and created_page.space_id == space.id and created_page.slug == creation.slug do
         socket |> load_page(created_page, nil)
       else
-        socket |> WikiLinkMap.reload()
+        socket |> PageRepository.reload()
       end
 
     {:noreply, socket}
@@ -119,7 +138,7 @@ defmodule LexWeb.PageLive do
     current_page = socket.assigns.page
 
     live_action = socket.assigns.live_action
-    socket = socket |> WikiLinkMap.reload()
+    socket = socket |> PageRepository.reload()
 
     if current_page != nil and current_page.id == renamed_page.id do
       socket =
@@ -155,14 +174,22 @@ defmodule LexWeb.PageLive do
       space={@space}
       ui={@ui}
     >
-      <div class="fixed sm:sticky top-14 sm:top-2 right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
-        <div :if={@page} class="flex gap-2 bg-base-200/50 backdrop-blur p-2 rounded-full">
-          <Revisions.ButtonToggle.render
-            active?={@live_action == :revisions}
-            page={@page}
-            space={@space}
-          />
-          <Editing.ButtonToggle.render editing={@editing} live_action={@live_action} />
+      <div class="fixed top-4 sm:top-0 sm:sticky right-0 sm:right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
+        <div :if={@page} class="relative top-5 flex gap-2 p-2 rounded-full">
+          <div class="bg-base-200/50 backdrop-blur h-fit rounded-full p-1">
+            <Info.button_toggle active?={@live_action == :info} />
+
+            <Revisions.button_toggle
+              active?={@live_action == :revisions}
+              page={@page}
+              space={@space}
+            />
+
+            <Editing.button_toggle
+              editing={@editing}
+              active?={@live_action == :editing}
+            />
+          </div>
         </div>
       </div>
 
@@ -176,8 +203,23 @@ defmodule LexWeb.PageLive do
       <Creation.render :if={@page == nil} creation={@creation} />
 
       <div :if={@page} class="min-w-0">
-        <div class="mb-4 pb-2 border-b-2 border-base-content/10">
+        <div class={[
+          "mb-4 pb-2",
+          "border-b-2 border-base-content/10",
+          "space-y-2"
+        ]}>
           <Editing.Title.render editing={@editing} live_action={@live_action} page={@page} />
+        </div>
+
+        <div phx-hook="AutoAnimate" id="wiki-page-info" class="relative left-0">
+          <div
+            :if={@live_action == :info}
+            id="page-info"
+            phx-hook="ScrollToTop"
+            class="border-info p-4 bg-base-300 rounded-box mb-4"
+          >
+            <Info.render page={@page} />
+          </div>
         </div>
 
         <div
@@ -189,15 +231,17 @@ defmodule LexWeb.PageLive do
           id="current-page-editor"
         >
           <div
-            class="lexical-playground"
+            class="lexical-editor"
             data-checkpoint-event={Editing.checkpoint_event()}
             data-collaborator-display-name={@scope.current_user.display_name}
             data-collaborator-hue={@scope.current_user.hue}
             data-document-id={@page.id}
             data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
-            data-ensure-page-event={WikiLinkMap.ensure_event()}
-            data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
-            data-resolve-page-event={WikiLinkMap.resolve_event()}
+            data-checkpoint-page-event={PageRepository.checkpoint_event()}
+            data-ensure-page-event={PageRepository.ensure_event()}
+            data-load-page-snapshot-event={PageRepository.load_snapshot_event()}
+            data-pages={PageRepository.encode(@page_repository, @space)}
+            data-resolve-page-event={PageRepository.resolve_event()}
             data-restore-checkpoint-event={Revisions.checkpoint_event()}
             data-restore-preserve-event={Revisions.preserve_event()}
             data-restore-request-event={Revisions.restore_request_event()}
@@ -216,12 +260,17 @@ defmodule LexWeb.PageLive do
           id="page-revisions"
         >
           <Revisions.render
-            data-pages={WikiLinkMap.encode(@wiki_link_map, @space)}
+            data-checkpoint-page-event={PageRepository.checkpoint_event()}
+            data-load-page-snapshot-event={PageRepository.load_snapshot_event()}
+            data-page-id={@page.id}
+            data-pages={PageRepository.encode(@page_repository, @space)}
+            data-resolve-page-event={PageRepository.resolve_event()}
+            data-space-id={@space.id}
             page={@page}
             revisions={@revisions}
             scope={@scope}
             space={@space}
-            wiki_link_map={@wiki_link_map}
+            page_repository={@page_repository}
           />
         </section>
       </div>
@@ -240,7 +289,7 @@ defmodule LexWeb.PageLive do
     |> assign(page: page)
     |> Editing.reload(page)
     |> Revisions.reload(page, revision_id)
-    |> WikiLinkMap.reload()
+    |> PageRepository.reload()
   end
 
   defp page_path(

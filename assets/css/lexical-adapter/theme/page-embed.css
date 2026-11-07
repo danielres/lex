@@ -1,0 +1,68 @@
+.lexical-editor {
+  .wiki-page-embed {
+    @apply relative my-4 min-w-0;
+    @apply bg-base-300/20;
+    @apply p-3;
+    @apply rounded-box;
+    @apply border-[1.75px] border-dashed border-base-content/40;
+
+    .lexical-embedded-page {
+      @apply max-h-64 overflow-auto;
+      @apply opacity-70;
+    }
+
+    &.headings-only {
+      .lexical-embedded-page .ContentEditable__root {
+        > :not(h1, h2, h3, h4, h5, h6) {
+          display: none;
+        }
+      }
+    }
+
+    &.selected {
+      @apply outline-2 outline-info/60;
+    }
+
+    .wiki-page-embed-controls {
+      @apply mb-2 flex flex-wrap items-center justify-end gap-2 text-sm;
+
+      button,
+      a {
+        @apply btn btn-xs btn-ghost;
+      }
+
+      .wiki-page-embed-options {
+        @apply flex flex-wrap items-center gap-3;
+
+        label {
+          @apply flex cursor-pointer items-center gap-1.5;
+        }
+
+        input {
+          @apply checkbox checkbox-xs;
+        }
+      }
+
+      .wiki-page-embed-save-error {
+        @apply text-error;
+      }
+    }
+
+    .wiki-page-embed-title {
+      @apply mb-3 border-b border-base-content/10 pb-2 font-semibold;
+
+      a {
+        @apply hover:underline;
+      }
+    }
+
+    .wiki-page-embed-message {
+      @apply rounded-box bg-base-200 p-4 text-sm text-base-content/60;
+    }
+
+    .wiki-page-embed-editor,
+    .lexical-embedded-page {
+      @apply min-w-0;
+    }
+  }
+}

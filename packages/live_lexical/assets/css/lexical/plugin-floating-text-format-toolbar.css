@@ -1,0 +1,149 @@
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+.floating-text-format-popup {
+  display: flex;
+  background: var(--lexical-floating-toolbar-background, #fff);
+  border: var(--lexical-floating-toolbar-border, none);
+  padding: 4px;
+  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  box-shadow: var(
+    --lexical-control-shadow,
+    0px 5px 10px rgba(0, 0, 0, 0.3)
+  );
+  border-radius: 8px;
+  transition: opacity 0.5s;
+  height: 35px;
+  will-change: transform;
+
+  button.popup-item {
+    border: 0;
+    display: flex;
+    background: none;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+
+    &:disabled {
+      cursor: not-allowed;
+
+      i.format {
+        opacity: 0.2;
+      }
+    }
+
+    &.spaced {
+      margin-right: 2px;
+    }
+
+    &.active {
+      background-color: var(
+        --lexical-control-active-surface,
+        rgba(223, 232, 250, 0.3)
+      );
+
+      i {
+        opacity: 1;
+      }
+    }
+
+    i.format {
+      background-color: CanvasText;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      height: 18px;
+      width: 18px;
+      margin-top: 2px;
+      vertical-align: -0.25em;
+      display: flex;
+      opacity: 0.6;
+    }
+  }
+
+  .popup-item {
+    &:hover:not([disabled]) {
+      background-color: var(--lexical-control-hover-surface, #eee);
+    }
+
+    .text {
+      display: flex;
+      line-height: 20px;
+      vertical-align: middle;
+      font-size: 14px;
+      color: var(--lexical-muted-text-color, #777);
+      text-overflow: ellipsis;
+      width: 70px;
+      overflow: hidden;
+      height: 20px;
+      text-align: left;
+    }
+
+    .icon {
+      display: flex;
+      width: 20px;
+      height: 20px;
+      user-select: none;
+      margin-right: 8px;
+      line-height: 16px;
+      background-size: contain;
+    }
+  }
+
+  select.popup-item {
+    border: 0;
+    display: flex;
+    background: none;
+    border-radius: 10px;
+    padding: 8px;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 70px;
+    font-size: 14px;
+    color: var(--lexical-muted-text-color, #777);
+    text-overflow: ellipsis;
+
+    &.code-language {
+      text-transform: capitalize;
+      width: 130px;
+    }
+  }
+
+  i.chevron-down {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    user-select: none;
+
+    &.inside {
+      margin-left: -25px;
+      margin-top: 11px;
+      margin-right: 10px;
+      pointer-events: none;
+    }
+  }
+
+  .lexical-divider {
+    width: 1px;
+    background-color: var(--lexical-control-divider-color, #eee);
+    margin: 0 4px;
+  }
+
+  @media (max-width: 1024px) {
+    button.insert-comment {
+      display: none;
+    }
+  }
+}

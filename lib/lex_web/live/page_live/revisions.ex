@@ -4,6 +4,10 @@ defmodule LexWeb.PageLive.Revisions do
 
   alias Lex.Collaboration
   alias Lex.Wiki.Page
+  alias LexWeb.Components.Avatar
+  alias LexWeb.Components.Tooltip
+
+  def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{
@@ -145,18 +149,45 @@ defmodule LexWeb.PageLive.Revisions do
     <div
       :if={@revisions.selected}
       class={[
-        "flex items-center justify-between gap-3 mb-8",
-        "bg-info/25 px-4 py-2 rounded-box border-2 border-info/20 shadow"
+        "flex items-end justify-between gap-3 mb-6",
+        "bg-info/25 pl-4 pr-2 py-2 rounded-box border-2 border-info/20 shadow"
       ]}
     >
-      <div>
-        <p class="font-semibold">
-          V. {position(@revisions)} of {length(@revisions.entries)}
-        </p>
-        <p class="text-sm opacity-60">{Utils.Time.relative(@revisions.selected.inserted_at)}</p>
+      <div class="grid grow gap-0">
+        <div class={[
+          "flex gap-2 items-baseline"
+        ]}>
+          <h2 class="font-semibold">
+            V. {position(@revisions)} of {length(@revisions.entries)}
+          </h2>
+          <span class="text-sm text-base-content/75">
+            {Utils.Time.relative(@revisions.selected.inserted_at)}
+          </span>
+        </div>
+
+        <div
+          :if={@revisions.selected.contributors != []}
+          class="flex items-center gap-3"
+          data-testid="revision-contributors"
+        >
+          <%!-- <span data-testid="revision-checkpointed-by"> --%>
+          <%!--   Saved by {@revisions.selected.checkpointed_by.display_name} --%>
+          <%!-- </span> --%>
+          <%!-- <span class="text-sm">Contributors:</span> --%>
+          <h3 class="small-caps">Contributors:</h3>
+          <div class="flex flex-wrap gap-2">
+            <Tooltip.render
+              :for={contributor <- @revisions.selected.contributors}
+              alignment="start"
+            >
+              <Avatar.render user={contributor} />
+              <:tooltip>{contributor.display_name}</:tooltip>
+            </Tooltip.render>
+          </div>
+        </div>
       </div>
 
-      <div class="flex gap-2">
+      <div class="flex gap-1">
         <.link
           :if={previous(@revisions)}
           aria-label="Previous revision"
@@ -209,12 +240,17 @@ defmodule LexWeb.PageLive.Revisions do
 
     <div
       :if={@revisions.selected}
-      class="lexical-playground"
+      class="lexical-editor"
       data-collaborator-display-name={current_user.display_name}
       data-collaborator-hue={current_user.hue}
+      data-checkpoint-page-event={assigns[:"data-checkpoint-page-event"]}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
+      data-load-page-snapshot-event={assigns[:"data-load-page-snapshot-event"]}
+      data-page-id={assigns[:"data-page-id"]}
       data-pages={assigns[:"data-pages"]}
       data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}
+      data-resolve-page-event={assigns[:"data-resolve-page-event"]}
+      data-space-id={assigns[:"data-space-id"]}
       id={"revision-preview-#{@revisions.selected.id}"}
       phx-hook="LexicalRevisionPreview"
       phx-update="ignore"

@@ -66,6 +66,7 @@ defmodule Lex.Wiki.PageDocument do
     end
 
     attribute :search_text, :string do
+      constraints allow_empty?: true
       public? true
     end
 

@@ -8,7 +8,9 @@ defmodule LexWeb.CollaborationChannel do
   def join("y_doc:" <> room, _payload, socket) when room != "" do
     with {:ok, shared_doc} <- Collaboration.open_document(socket.assigns.scope, room),
          :ok <- SharedDoc.observe(shared_doc) do
-      {:ok, assign(socket, :shared_doc, shared_doc)}
+      socket = socket |> assign(room: room, shared_doc: shared_doc)
+
+      {:ok, socket}
     else
       {:error, reason} -> {:error, %{reason: inspect(reason)}}
     end
@@ -29,7 +31,11 @@ defmodule LexWeb.CollaborationChannel do
   end
 
   def handle_in("yjs", message, socket) when is_binary(message) do
+    current_user = socket.assigns.scope.current_user
+
     :ok = SharedDoc.send_yjs_message(socket.assigns.shared_doc, message)
+    :ok = Collaboration.record_update(socket.assigns.room, current_user.id, message)
+
     {:noreply, socket}
   end
 

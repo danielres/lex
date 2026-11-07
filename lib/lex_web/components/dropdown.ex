@@ -1,7 +1,7 @@
 defmodule LexWeb.Components.Dropdown do
   use LexWeb, :html
 
-  attr :class, :string, default: "btn"
+  attr :class, :string, default: ""
   attr :id, :string, required: true
   slot :inner_block, required: true
   slot :content, required: true
@@ -10,7 +10,10 @@ defmodule LexWeb.Components.Dropdown do
     ~H"""
     <button
       type="button"
-      class={@class}
+      class={[
+        "cursor-pointer",
+        @class
+      ]}
       popovertarget={@id}
       style={"anchor-name:--anchor-#{@id}"}
     >

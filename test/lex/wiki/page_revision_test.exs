@@ -44,6 +44,28 @@ defmodule Lex.Wiki.PageRevisionTest do
     assert first_revision.search_text == "First version"
   end
 
+  test "records the checkpointing user and distinct contributors", %{scope: scope} do
+    page = scope |> Page.ensure!("Home")
+    contributor = create_user("Contributor")
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.set_checkpoint(
+               page,
+               %{
+                 contributor_ids: [contributor.id],
+                 lexical_state: lexical_state("Collaborative version"),
+                 search_text: "Collaborative version"
+               },
+               nil
+             )
+
+    [revision] = scope |> Page.list_revisions!(page)
+
+    assert revision.checkpointed_by.id == scope.current_user.id
+    assert Enum.map(revision.contributors, & &1.id) == [contributor.id]
+  end
+
   test "records restore provenance and requires the source revision to belong to the page", %{
     scope: scope
   } do
