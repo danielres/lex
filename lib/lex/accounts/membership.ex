@@ -1,11 +1,15 @@
 defmodule Lex.Accounts.Membership do
+  alias Lex.Accounts.Membership.Checks.CanSetPrivileges
+  alias Lex.Accounts.Membership.Checks.HasPrivilege
   alias Lex.Accounts.Membership.Changes.SetIdentity
   alias Lex.Accounts.Membership.Validations.OwnerMustRemainMember
+  alias Lex.Accounts.Privilege
 
   use Ash.Resource,
     otp_app: :lex,
     domain: Lex.Accounts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "memberships"
@@ -63,6 +67,40 @@ defmodule Lex.Accounts.Membership do
       validate OwnerMustRemainMember
       change set_attribute(:status, :inactive)
     end
+
+    update :set_privileges do
+      accept [:privileges]
+      require_atomic? false
+
+      change fn changeset, _context ->
+        Ash.Changeset.update_change(changeset, :privileges, fn privileges ->
+          privileges |> Enum.uniq() |> Enum.sort()
+        end)
+      end
+    end
+  end
+
+  policies do
+    policy action(:for_user) do
+      authorize_if actor_present()
+    end
+
+    policy action(:read) do
+      authorize_if expr(user_id == ^actor(:id))
+      authorize_if {HasPrivilege, privilege: :manage_members}
+    end
+
+    policy action([:accept, :decline]) do
+      authorize_if expr(user_id == ^actor(:id))
+    end
+
+    policy action([:invite, :reinvite, :deactivate]) do
+      authorize_if {HasPrivilege, privilege: :manage_members}
+    end
+
+    policy action(:set_privileges) do
+      authorize_if CanSetPrivileges
+    end
   end
 
   multitenancy do
@@ -88,6 +126,12 @@ defmodule Lex.Accounts.Membership do
 
     attribute :slug, :string do
       constraints min_length: 1, max_length: 80
+      public? true
+    end
+
+    attribute :privileges, {:array, Privilege} do
+      allow_nil? false
+      default [:edit_pages]
       public? true
     end
   end
