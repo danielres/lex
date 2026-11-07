@@ -174,7 +174,7 @@ defmodule LexWeb.PageLive do
       space={@space}
       ui={@ui}
     >
-      <div class="fixed top-0 sm:sticky right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
+      <div class="fixed top-4 sm:top-0 sm:sticky right-0 sm:right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
         <div :if={@page} class="relative top-5 flex gap-2 p-2 rounded-full">
           <div class="bg-base-200/50 backdrop-blur h-fit rounded-full p-1">
             <Info.button_toggle active?={@live_action == :info} />

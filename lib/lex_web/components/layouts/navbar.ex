@@ -15,7 +15,7 @@ defmodule LexWeb.Layouts.Navbar do
     <% current_user = @scope.current_user %>
     <div class={[
       "bg-base-300",
-      "p-2 pr-4 max-sm:pl-0",
+      "px-2 py-1 sm:py-2 pr-4 max-sm:pl-0",
       "flex items-center gap-3",
       "border-b border-base-content/20"
     ]}>
