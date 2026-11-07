@@ -75,21 +75,21 @@ defmodule LexWeb.CollaborationChannelTest do
     {:ok, shared_doc} = scope |> Collaboration.open_document(room)
     monitor = Process.monitor(shared_doc)
 
-    push(first_socket, "yjs", {:binary, document_update_message("checkpoint text")})
+    push(first_socket, "yjs", {:binary, document_update_message("persisted text")})
     close_channel(first_socket)
     assert Process.alive?(shared_doc)
     assert {:ok, ^shared_doc} = scope |> Collaboration.open_document(room)
-    assert checkpoint_count(room) == 0
+    assert persisted_document_count(room) == 0
 
     close_channel(second_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
     assert_eventually(fn -> Registry.lookup(Lex.Collaboration.Registry, room) == [] end)
-    assert checkpoint_count(room) == 1
-    assert scope |> persisted_text(room) == "checkpoint text"
+    assert persisted_document_count(room) == 1
+    assert scope |> persisted_text(room) == "persisted text"
     assert Ash.read!(PageRevision) == []
   end
 
-  test "a checkpoint hydrates the document when its room reopens", %{scope: scope} do
+  test "persisted state hydrates the document when its room reopens", %{scope: scope} do
     room = unique_room(scope)
     socket = scope |> join_channel(room)
     {:ok, shared_doc} = scope |> Collaboration.open_document(room)
@@ -114,7 +114,7 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^reopened_monitor, :process, ^reopened_shared_doc, :normal}
   end
 
-  test "nested documents checkpoint independently", %{scope: scope} do
+  test "nested documents persist independently", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"
     caption_room = "#{page.id}/caption-1"
@@ -136,7 +136,7 @@ defmodule LexWeb.CollaborationChannelTest do
     assert scope |> persisted_text(caption_room) == "caption text"
   end
 
-  test "semantic checkpoints save changed active documents and skip unchanged ones", %{
+  test "saving records changed active documents and skips unchanged ones", %{
     scope: scope
   } do
     page = scope |> Page.ensure!(unique_slug())
@@ -163,10 +163,10 @@ defmodule LexWeb.CollaborationChannelTest do
     ]
 
     assert {:ok, %{revision: :saved, saved: 2, unchanged: 0}} =
-             scope |> Collaboration.checkpoint(page, documents)
+             scope |> Collaboration.save(page, documents)
 
     assert {:ok, %{revision: :unchanged, saved: 0, unchanged: 2}} =
-             scope |> Collaboration.checkpoint(page, documents)
+             scope |> Collaboration.save(page, documents)
 
     page_documents = PageDocument |> Ash.Query.sort(:document_key) |> Ash.read!()
 
@@ -202,12 +202,12 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
-  test "semantic checkpointing requires active document rooms", %{scope: scope} do
+  test "saving requires active document rooms", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
 
-    assert {:error, {:document_checkpoint_failed, "main", :document_not_open}} =
+    assert {:error, {:document_save_failed, "main", :document_not_open}} =
              scope
-             |> Collaboration.checkpoint(page, [document_snapshot("main", "Missing")])
+             |> Collaboration.save(page, [document_snapshot("main", "Missing")])
   end
 
   test "awareness is not included in the persisted document", %{scope: scope} do
@@ -263,19 +263,19 @@ defmodule LexWeb.CollaborationChannelTest do
       document_snapshot("caption-1", "Caption")
     ]
 
-    assert {:ok, %{revision: :saved}} = scope |> Collaboration.checkpoint(page, documents)
+    assert {:ok, %{revision: :saved}} = scope |> Collaboration.save(page, documents)
 
     [revision] = scope |> Page.list_revisions!(page)
     contributor_ids = Enum.map(revision.contributors, & &1.id)
 
-    assert revision.checkpointed_by.id == scope.current_user.id
+    assert revision.saved_by.id == scope.current_user.id
     assert Enum.sort(contributor_ids) == Enum.sort([main_editor.id, caption_editor.id])
     assert Contributors.capture([main_room, caption_room]).contributor_ids == []
 
     :ok = Contributors.record(main_room, main_editor.id)
 
     assert {:ok, %{revision: :unchanged}} =
-             scope |> Collaboration.checkpoint(page, documents)
+             scope |> Collaboration.save(page, documents)
 
     assert Contributors.capture([main_room]).contributor_ids == []
 
@@ -301,11 +301,11 @@ defmodule LexWeb.CollaborationChannelTest do
              scope |> join_error("#{missing_page_id}/main")
   end
 
-  test "a corrupt checkpoint prevents the room from opening", %{scope: scope} do
+  test "corrupt persisted state prevents the room from opening", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
 
     PageDocument
-    |> Ash.Changeset.for_create(:save, %{
+    |> Ash.Changeset.for_create(:persist, %{
       page_id: page.id,
       document_key: "main",
       yjs_state: <<255>>
@@ -370,7 +370,7 @@ defmodule LexWeb.CollaborationChannelTest do
     "test-#{System.unique_integer([:positive])}"
   end
 
-  defp checkpoint_count(room) do
+  defp persisted_document_count(room) do
     [page_id, document_key] = String.split(room, "/", parts: 2)
 
     PageDocument

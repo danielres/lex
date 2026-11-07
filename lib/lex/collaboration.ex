@@ -3,7 +3,7 @@ defmodule Lex.Collaboration do
   Opens Yjs documents used by collaboration channels.
 
   A room has one shared document while at least one channel observes it. The
-  document checkpoints its state and exits after its last observer disconnects.
+  document persists its state and exits after its last observer disconnects.
   """
 
   alias Lex.Collaboration.Contributors
@@ -42,12 +42,12 @@ defmodule Lex.Collaboration do
     end
   end
 
-  def checkpoint(scope, page, documents, restored_from_revision_id \\ nil)
+  def save(scope, page, documents, restored_from_revision_id \\ nil)
 
-  def checkpoint(_scope, _page, [], _restored_from_revision_id),
+  def save(_scope, _page, [], _restored_from_revision_id),
     do: {:error, :missing_document_snapshots}
 
-  def checkpoint(scope, page, documents, restored_from_revision_id) when is_list(documents) do
+  def save(scope, page, documents, restored_from_revision_id) when is_list(documents) do
     with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, snapshots} <- snapshots(documents),
          {:ok, main_snapshot} <- main_snapshot(snapshots) do
@@ -55,10 +55,10 @@ defmodule Lex.Collaboration do
       contributions = Contributors.capture(rooms)
 
       result =
-        with {:ok, counts} <- checkpoint_documents(scope, page, snapshots),
+        with {:ok, counts} <- save_documents(scope, page, snapshots),
              {:ok, revision} <-
                scope
-               |> Page.set_checkpoint(
+               |> Page.record_revision(
                  page,
                  %{
                    contributor_ids: contributions.contributor_ids,
@@ -93,25 +93,25 @@ defmodule Lex.Collaboration do
     end
   end
 
-  defp checkpoint_documents(scope, page, snapshots) do
+  defp save_documents(scope, page, snapshots) do
     Enum.reduce_while(snapshots, {:ok, %{saved: 0, unchanged: 0}}, fn snapshot, result ->
-      with {:ok, status} <- scope |> checkpoint_document(page, snapshot) do
+      with {:ok, status} <- scope |> save_document(page, snapshot) do
         {:ok, counts} = result
         counts = Map.update!(counts, status, &(&1 + 1))
         {:cont, {:ok, counts}}
       else
         {:error, reason} ->
-          error = {:document_checkpoint_failed, snapshot.document_key, reason}
+          error = {:document_save_failed, snapshot.document_key, reason}
           {:halt, {:error, error}}
       end
     end)
   end
 
-  defp checkpoint_document(scope, page, snapshot) do
+  defp save_document(scope, page, snapshot) do
     with {:ok, shared_doc} <- active_document(page, snapshot.document_key) do
       doc = SharedDoc.get_doc(shared_doc)
 
-      scope |> Page.set_checkpoint(page, snapshot.document_key, doc, snapshot)
+      scope |> Page.save_document(page, snapshot.document_key, doc, snapshot)
     end
   end
 

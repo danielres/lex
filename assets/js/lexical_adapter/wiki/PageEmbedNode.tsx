@@ -99,20 +99,20 @@ function PageEmbedComponent({
   const path = usePageEmbedPath();
   const {
     activeInlineEmbed,
-    applySnapshot,
+    applyContent,
     beginInlineEdit,
-    checkpointPage,
+    savePage,
     collaborator,
     endInlineEdit,
     integration,
-    loadPageSnapshot,
+    loadPageContent,
     pageById,
     pages,
     repository,
-    snapshotByPageId,
+    contentByPageId,
   } = useWikiPages();
   const page = pageById.get(pageId);
-  const snapshot = snapshotByPageId.get(pageId);
+  const pageContent = contentByPageId.get(pageId);
   const [missing, setMissing] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -126,14 +126,14 @@ function PageEmbedComponent({
   const embeddedPath = useMemo(() => [...path, pageId], [pageId, path]);
 
   useEffect(() => {
-    if (circular || depthExceeded || snapshot !== undefined) {
+    if (circular || depthExceeded || pageContent !== undefined) {
       return;
     }
 
-    void loadPageSnapshot(pageId).then((loadedSnapshot) => {
-      setMissing(loadedSnapshot === null);
+    void loadPageContent(pageId).then((loadedContent) => {
+      setMissing(loadedContent === null);
     });
-  }, [circular, depthExceeded, loadPageSnapshot, pageId, snapshot]);
+  }, [circular, depthExceeded, loadPageContent, pageContent, pageId]);
 
   useEffect(() => {
     const element = inlineEditorElement.current;
@@ -208,15 +208,15 @@ function PageEmbedComponent({
     mountedEditor.setEditable(false);
 
     try {
-      const snapshots = await mountedEditor.getConfirmedDocumentSnapshots();
-      const saved = await checkpointPage(pageId, snapshots);
+      const snapshots = await mountedEditor.captureDocumentSnapshots();
+      const saved = await savePage(pageId, snapshots);
 
       if (saved) {
         const mainSnapshot = snapshots.find(
           (document) => document.documentKey === 'main',
         );
         if (mainSnapshot !== undefined) {
-          applySnapshot(pageId, {
+          applyContent(pageId, {
             contentHash: null,
             lexicalState: mainSnapshot.lexicalState,
           });
@@ -298,19 +298,19 @@ function PageEmbedComponent({
     content = (
       <div className="wiki-page-embed-editor" ref={inlineEditorElement} />
     );
-  } else if (snapshot === undefined) {
+  } else if (pageContent === undefined) {
     content = <div className="wiki-page-embed-message">Loading page…</div>;
   } else {
     content = (
       <PageEmbedPathProvider path={embeddedPath}>
         <ReadOnlyContent
           key={
-            snapshot.contentHash ??
-            JSON.stringify(snapshot.lexicalState ?? 'empty')
+            pageContent.contentHash ??
+            JSON.stringify(pageContent.lexicalState ?? 'empty')
           }
           collaborator={collaborator}
           integration={integration}
-          lexicalState={snapshot.lexicalState}
+          lexicalState={pageContent.lexicalState}
           namespace={`WikiPageEmbed/${nodeKey}/${pageId}`}
         />
       </PageEmbedPathProvider>

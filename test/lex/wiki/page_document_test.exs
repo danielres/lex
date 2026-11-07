@@ -8,27 +8,27 @@ defmodule Lex.Wiki.PageDocumentTest do
     {:ok, scope: create_scope()}
   end
 
-  test "sets and restores a checkpoint", %{scope: scope} do
+  test "persists and restores a document", %{scope: scope} do
     page = scope |> Page.ensure!("home")
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("first version"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("first version"))
     assert scope |> restored_text(page, "main") == "first version"
-    [first_checkpoint] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument)
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("second version"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("second version"))
     assert scope |> restored_text(page, "main") == "second version"
-    [second_checkpoint] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument)
 
-    assert DateTime.after?(second_checkpoint.updated_at, first_checkpoint.updated_at)
+    assert DateTime.after?(second_document.updated_at, first_document.updated_at)
   end
 
-  test "persists a semantic snapshot with its searchable text and content hash", %{scope: scope} do
+  test "saves page content with its searchable text and content hash", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
     lexical_state = lexical_state("First version", format: 0)
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "main",
                document("first version"),
@@ -41,18 +41,18 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert page_document.search_text == "First version"
     assert String.length(page_document.content_hash) == 64
 
-    assert {:ok, snapshot} = scope |> Page.get_document_snapshot(page, "main")
-    assert snapshot.lexical_state == lexical_state
-    assert snapshot.content_hash == page_document.content_hash
+    assert {:ok, content} = scope |> Page.get_document_content(page, "main")
+    assert content.lexical_state == lexical_state
+    assert content.content_hash == page_document.content_hash
   end
 
-  test "persists an empty nested document snapshot", %{scope: scope} do
+  test "persists empty nested document content", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
     lexical_state = lexical_state("", format: 0)
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "caption-1",
                document(""),
@@ -78,7 +78,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "main",
                document(""),
@@ -89,12 +89,12 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert page_document.search_text == ""
   end
 
-  test "rejects a semantic snapshot without searchable text", %{scope: scope} do
+  test "rejects page content without searchable text", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
     result =
       PageDocument
-      |> Ash.Changeset.for_create(:save_snapshot, %{
+      |> Ash.Changeset.for_create(:save, %{
         content_hash: String.duplicate("0", 64),
         document_key: "main",
         lexical_state: lexical_state("Text", format: 0),
@@ -111,30 +111,30 @@ defmodule Lex.Wiki.PageDocumentTest do
            )
   end
 
-  test "returns no semantic snapshot before a document is checkpointed", %{scope: scope} do
+  test "returns no page content before a document is saved", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
-    assert {:ok, nil} = scope |> Page.get_document_snapshot(page, "main")
+    assert {:ok, nil} = scope |> Page.get_document_content(page, "main")
   end
 
-  test "does not update an unchanged semantic snapshot", %{scope: scope} do
+  test "does not update unchanged page content", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
     lexical_state = lexical_state("Same content", format: 0)
-    snapshot = %{lexical_state: lexical_state, search_text: "Same content"}
+    content = %{lexical_state: lexical_state, search_text: "Same content"}
 
     assert {:ok, :saved} =
-             scope |> Page.set_checkpoint(page, "main", document("first state"), snapshot)
+             scope |> Page.save_document(page, "main", document("first state"), content)
 
-    [first_checkpoint] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument)
 
     assert {:ok, :unchanged} =
              scope
-             |> Page.set_checkpoint(page, "main", document("different yjs state"), snapshot)
+             |> Page.save_document(page, "main", document("different yjs state"), content)
 
-    [second_checkpoint] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument)
 
-    assert second_checkpoint.updated_at == first_checkpoint.updated_at
-    assert second_checkpoint.yjs_state == first_checkpoint.yjs_state
+    assert second_document.updated_at == first_document.updated_at
+    assert second_document.yjs_state == first_document.yjs_state
   end
 
   test "persists formatting changes when searchable text is unchanged", %{scope: scope} do
@@ -142,43 +142,43 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "main",
                document("text"),
                %{lexical_state: lexical_state("Text", format: 0), search_text: "Text"}
              )
 
-    [first_checkpoint] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument)
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "main",
                document("text"),
                %{lexical_state: lexical_state("Text", format: 1), search_text: "Text"}
              )
 
-    [second_checkpoint] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument)
 
-    refute second_checkpoint.content_hash == first_checkpoint.content_hash
+    refute second_document.content_hash == first_document.content_hash
   end
 
-  test "a Yjs-only checkpoint preserves an existing semantic snapshot", %{scope: scope} do
+  test "persisting only Yjs state preserves existing page content", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
     lexical_state = lexical_state("Searchable", format: 0)
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                page,
                "main",
                document("first"),
                %{lexical_state: lexical_state, search_text: "Searchable"}
              )
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("second"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("second"))
 
     [page_document] = Ash.read!(PageDocument)
 
@@ -186,25 +186,25 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert page_document.search_text == "Searchable"
   end
 
-  test "advances the page's last update when a document is checkpointed", %{scope: scope} do
+  test "advances the page's last update when a document is persisted", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
-    assert [page_before_checkpoint] = Page.list!(scope: scope)
-    assert page_before_checkpoint.last_updated_at == page.updated_at
+    assert [page_before_persist] = Page.list!(scope: scope)
+    assert page_before_persist.last_updated_at == page.updated_at
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("first version"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("first version"))
 
-    assert [page_after_checkpoint] = Page.list!(scope: scope)
-    assert DateTime.after?(page_after_checkpoint.last_updated_at, page.updated_at)
+    assert [page_after_persist] = Page.list!(scope: scope)
+    assert DateTime.after?(page_after_persist.last_updated_at, page.updated_at)
   end
 
-  test "uses the newest checkpoint across nested documents", %{scope: scope} do
+  test "uses the newest persisted nested document", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("main"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("main"))
     [main_document] = Ash.read!(PageDocument)
 
-    assert :ok = scope |> Page.set_checkpoint(page, "caption-1", document("caption"))
+    assert :ok = scope |> Page.persist_document(page, "caption-1", document("caption"))
 
     page = Page.list!(scope: scope) |> List.first()
     latest_document = PageDocument |> Ash.Query.sort(updated_at: :desc) |> Ash.read_first!()
@@ -217,20 +217,20 @@ defmodule Lex.Wiki.PageDocumentTest do
     first_page = scope |> Page.ensure!("first-page")
     second_page = scope |> Page.ensure!("second-page")
 
-    assert :ok = scope |> Page.set_checkpoint(first_page, "main", document("first main"))
+    assert :ok = scope |> Page.persist_document(first_page, "main", document("first main"))
 
     assert :ok =
              scope
-             |> Page.set_checkpoint(first_page, "caption-1", document("first caption"))
+             |> Page.persist_document(first_page, "caption-1", document("first caption"))
 
-    assert :ok = scope |> Page.set_checkpoint(second_page, "main", document("second main"))
+    assert :ok = scope |> Page.persist_document(second_page, "main", document("second main"))
 
     assert scope |> restored_text(first_page, "main") == "first main"
     assert scope |> restored_text(first_page, "caption-1") == "first caption"
     assert scope |> restored_text(second_page, "main") == "second main"
   end
 
-  test "restoring a document without a checkpoint leaves it empty", %{scope: scope} do
+  test "restoring a document without persisted state leaves it empty", %{scope: scope} do
     page = scope |> Page.ensure!("home")
 
     assert scope |> restored_text(page, "main") == ""
@@ -239,11 +239,11 @@ defmodule Lex.Wiki.PageDocumentTest do
   test "rejects invalid document keys", %{scope: scope} do
     page = scope |> Page.ensure!("home")
 
-    assert {:error, _error} = scope |> Page.set_checkpoint(page, "", document("text"))
+    assert {:error, _error} = scope |> Page.persist_document(page, "", document("text"))
 
     assert {:error, _error} =
              scope
-             |> Page.set_checkpoint(page, String.duplicate("x", 256), document("text"))
+             |> Page.persist_document(page, String.duplicate("x", 256), document("text"))
   end
 
   defp document(text) do

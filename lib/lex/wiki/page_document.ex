@@ -14,14 +14,14 @@ defmodule Lex.Wiki.PageDocument do
   actions do
     defaults [:read]
 
-    create :save do
+    create :persist do
       accept [:document_key, :page_id, :yjs_state]
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:yjs_state]
     end
 
-    create :save_snapshot do
+    create :save do
       accept [
         :content_hash,
         :document_key,
@@ -43,8 +43,8 @@ defmodule Lex.Wiki.PageDocument do
     name Lex.PubSub
     prefix "wiki"
 
+    publish :persist, "pages"
     publish :save, "pages"
-    publish :save_snapshot, "pages"
   end
 
   attributes do

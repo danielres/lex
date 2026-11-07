@@ -7,15 +7,15 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
   def render(assigns) do
     ~H"""
     <button
-      aria-label={button_label(@active?, @editing.checkpointing?)}
+      aria-label={button_label(@active?, @editing.saving?)}
       aria-pressed={@active?}
       class={[
         "btn btn-sm btn-circle btn-neutral hover:btn-info",
         @active? && "btn-info"
       ]}
-      disabled={@editing.checkpointing?}
+      disabled={@editing.saving?}
       phx-click={delegate_event("toggle")}
-      title={button_label(@active?, @editing.checkpointing?)}
+      title={button_label(@active?, @editing.saving?)}
       type="button"
     >
       <.icon :if={@active?} name="hero-check-micro" />

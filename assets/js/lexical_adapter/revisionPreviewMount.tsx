@@ -6,12 +6,12 @@ import {wikiEditorIntegration} from './wiki/integration';
 import {
   type WikiPageReference,
   type WikiPageRepository,
-  type WikiPageSnapshot,
+  type WikiPageContent,
   WikiPagesProvider,
 } from './wiki/WikiPagesContext';
 
 export interface MountedWikiRevisionPreview {
-  setPageSnapshot(pageId: string, snapshot: WikiPageSnapshot): void;
+  setPageContent(pageId: string, content: WikiPageContent): void;
   unmount(): void;
 }
 
@@ -24,7 +24,7 @@ export function mountRevisionPreview(
   pages: WikiPageReference[],
   repository: WikiPageRepository,
 ): MountedWikiRevisionPreview {
-  let snapshotUpdates = new Map<string, WikiPageSnapshot>();
+  let contentUpdates = new Map<string, WikiPageContent>();
   const preview = mountEditorRevisionPreview(
     element,
     collaborator,
@@ -38,7 +38,7 @@ export function mountRevisionPreview(
         initialPages={pages}
         integration={wikiEditorIntegration}
         repository={repository}
-        snapshotUpdates={snapshotUpdates}
+        contentUpdates={contentUpdates}
       >
         {children}
       </WikiPagesProvider>
@@ -46,8 +46,8 @@ export function mountRevisionPreview(
   );
 
   return {
-    setPageSnapshot(pageId, snapshot) {
-      snapshotUpdates = new Map(snapshotUpdates).set(pageId, snapshot);
+    setPageContent(pageId, content) {
+      contentUpdates = new Map(contentUpdates).set(pageId, content);
       preview.refresh();
     },
     unmount: preview.unmount,

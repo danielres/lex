@@ -1,6 +1,9 @@
 import {mountLexicalEditor} from './mount'
 import {mountRevisionPreview} from './revisionPreviewMount'
-import {createWikiPageRepository, snapshotsToParams} from './wiki/repository'
+import {
+  createWikiPageRepository,
+  documentSnapshotsToParams,
+} from './wiki/repository'
 
 const collaboratorFromElement = (element) => {
   const displayName = element.dataset.collaboratorDisplayName
@@ -20,19 +23,19 @@ export const createLexicalHooks = (csrfToken) => ({
         new Promise((resolve) => this.pushEvent(event, payload, resolve))
       const ensurePageEvent = this.el.dataset.ensurePageEvent
       const resolvePageEvent = this.el.dataset.resolvePageEvent
-      const loadPageSnapshotEvent = this.el.dataset.loadPageSnapshotEvent
-      const checkpointPageEvent = this.el.dataset.checkpointPageEvent
-      const checkpointEvent = this.el.dataset.checkpointEvent
-      const restoreCheckpointEvent = this.el.dataset.restoreCheckpointEvent
+      const loadPageContentEvent = this.el.dataset.loadPageContentEvent
+      const savePageEvent = this.el.dataset.savePageEvent
+      const saveEvent = this.el.dataset.saveEvent
+      const restoreCommitEvent = this.el.dataset.restoreCommitEvent
       const restorePreserveEvent = this.el.dataset.restorePreserveEvent
       const restoreRequestEvent = this.el.dataset.restoreRequestEvent
-      const snapshotRequestEvent = this.el.dataset.snapshotRequestEvent
+      const saveRequestEvent = this.el.dataset.saveRequestEvent
 
       const wikiPageRepository = createWikiPageRepository({
-        checkpointEvent: checkpointPageEvent,
+        saveEvent: savePageEvent,
         csrfToken,
         ensureEvent: ensurePageEvent,
-        loadSnapshotEvent: loadPageSnapshotEvent,
+        loadContentEvent: loadPageContentEvent,
         request: requestPage,
         resolveEvent: resolvePageEvent,
         spaceId: this.el.dataset.spaceId,
@@ -48,8 +51,8 @@ export const createLexicalHooks = (csrfToken) => ({
         wikiPageRepository,
       })
 
-      this.snapshotRequestRef = this.handleEvent(
-        snapshotRequestEvent,
+      this.saveRequestRef = this.handleEvent(
+        saveRequestEvent,
         async () => {
           try {
             if (!this.lexicalEditor) {
@@ -58,22 +61,22 @@ export const createLexicalHooks = (csrfToken) => ({
 
             this.lexicalEditor.setEditable(false)
             const snapshots =
-              await this.lexicalEditor.getConfirmedDocumentSnapshots()
-            const documents = snapshotsToParams(snapshots)
+              await this.lexicalEditor.captureDocumentSnapshots()
+            const documents = documentSnapshotsToParams(snapshots)
 
-            this.pushEvent(checkpointEvent, {documents})
+            this.pushEvent(saveEvent, {documents})
           } catch (error) {
             const reason =
               error instanceof Error ? error.message : String(error)
-            this.pushEvent(checkpointEvent, {error: reason})
+            this.pushEvent(saveEvent, {error: reason})
           }
         },
       )
 
-      this.pageSnapshotUpdatedRef = this.handleEvent(
-        'page_snapshot_updated',
+      this.pageContentUpdatedRef = this.handleEvent(
+        'page_content_updated',
         ({content_hash, lexical_state, page_id}) => {
-          this.lexicalEditor?.setPageSnapshot(page_id, {
+          this.lexicalEditor?.setPageContent(page_id, {
             contentHash: content_hash,
             lexicalState: lexical_state,
           })
@@ -88,9 +91,9 @@ export const createLexicalHooks = (csrfToken) => ({
               throw new Error('Lexical editor is not mounted')
 
             const currentSnapshots =
-              await this.lexicalEditor.getConfirmedDocumentSnapshots()
+              await this.lexicalEditor.captureDocumentSnapshots()
             const preserveReply = await requestPage(restorePreserveEvent, {
-              documents: snapshotsToParams(currentSnapshots),
+              documents: documentSnapshotsToParams(currentSnapshots),
             })
 
             if (!preserveReply.ok) return
@@ -98,12 +101,12 @@ export const createLexicalHooks = (csrfToken) => ({
             const snapshots =
               await this.lexicalEditor.restoreRevision(lexical_state)
 
-            this.pushEvent(restoreCheckpointEvent, {
-              documents: snapshotsToParams(snapshots),
+            this.pushEvent(restoreCommitEvent, {
+              documents: documentSnapshotsToParams(snapshots),
               revision_id,
             })
           } catch (_error) {
-            this.pushEvent(restoreCheckpointEvent, {
+            this.pushEvent(restoreCommitEvent, {
               error: 'restore_failed',
               revision_id,
             })
@@ -118,8 +121,8 @@ export const createLexicalHooks = (csrfToken) => ({
     },
 
     destroyed() {
-      this.removeHandleEvent(this.snapshotRequestRef)
-      this.removeHandleEvent(this.pageSnapshotUpdatedRef)
+      this.removeHandleEvent(this.saveRequestRef)
+      this.removeHandleEvent(this.pageContentUpdatedRef)
       this.removeHandleEvent(this.restoreRequestRef)
       this.lexicalEditor?.unmount()
     },
@@ -130,10 +133,10 @@ export const createLexicalHooks = (csrfToken) => ({
       const requestPage = (event, payload) =>
         new Promise((resolve) => this.pushEvent(event, payload, resolve))
       const wikiPageRepository = createWikiPageRepository({
-        checkpointEvent: this.el.dataset.checkpointPageEvent,
+        saveEvent: this.el.dataset.savePageEvent,
         csrfToken,
         ensureEvent: this.el.dataset.ensurePageEvent,
-        loadSnapshotEvent: this.el.dataset.loadPageSnapshotEvent,
+        loadContentEvent: this.el.dataset.loadPageContentEvent,
         request: requestPage,
         resolveEvent: this.el.dataset.resolvePageEvent,
         spaceId: this.el.dataset.spaceId,
@@ -149,10 +152,10 @@ export const createLexicalHooks = (csrfToken) => ({
         wikiPageRepository,
       )
 
-      this.pageSnapshotUpdatedRef = this.handleEvent(
-        'page_snapshot_updated',
+      this.pageContentUpdatedRef = this.handleEvent(
+        'page_content_updated',
         ({content_hash, lexical_state, page_id}) => {
-          this.revisionPreview?.setPageSnapshot(page_id, {
+          this.revisionPreview?.setPageContent(page_id, {
             contentHash: content_hash,
             lexicalState: lexical_state,
           })
@@ -161,7 +164,7 @@ export const createLexicalHooks = (csrfToken) => ({
     },
 
     destroyed() {
-      this.removeHandleEvent(this.pageSnapshotUpdatedRef)
+      this.removeHandleEvent(this.pageContentUpdatedRef)
       this.revisionPreview?.unmount()
     },
   },

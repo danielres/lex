@@ -14,7 +14,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
@@ -22,7 +22,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :unchanged} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
@@ -30,7 +30,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{lexical_state: second_state, search_text: "Second version"},
                nil
@@ -44,13 +44,13 @@ defmodule Lex.Wiki.PageRevisionTest do
     assert first_revision.search_text == "First version"
   end
 
-  test "records the checkpointing user and distinct contributors", %{scope: scope} do
+  test "records the saving user and distinct contributors", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
     contributor = create_user("Contributor")
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{
                  contributor_ids: [contributor.id],
@@ -62,7 +62,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     [revision] = scope |> Page.list_revisions!(page)
 
-    assert revision.checkpointed_by.id == scope.current_user.id
+    assert revision.saved_by.id == scope.current_user.id
     assert Enum.map(revision.contributors, & &1.id) == [contributor.id]
   end
 
@@ -75,7 +75,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
@@ -85,7 +85,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{
                  lexical_state: lexical_state("Restored version"),
@@ -99,7 +99,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:error, _error} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                other_page,
                %{lexical_state: lexical_state("Invalid"), search_text: "Invalid"},
                source_revision.id

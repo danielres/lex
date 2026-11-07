@@ -1,6 +1,6 @@
 import {createPhoenixCollaboration} from '../phoenixCollaboration'
 
-const snapshotsToParams = (snapshots) =>
+const documentSnapshotsToParams = (snapshots) =>
   snapshots.map((snapshot) => ({
     document_key: snapshot.documentKey,
     lexical_state: snapshot.lexicalState,
@@ -8,17 +8,17 @@ const snapshotsToParams = (snapshots) =>
   }))
 
 export const createWikiPageRepository = ({
-  checkpointEvent,
   csrfToken,
   ensureEvent,
-  loadSnapshotEvent,
+  loadContentEvent,
   request,
   resolveEvent,
+  saveEvent,
   spaceId,
 }) => ({
-  async checkpoint(id, snapshots) {
-    const reply = await request(checkpointEvent, {
-      documents: snapshotsToParams(snapshots),
+  async save(id, snapshots) {
+    const reply = await request(saveEvent, {
+      documents: documentSnapshotsToParams(snapshots),
       page_id: id,
     })
     return reply.ok === true
@@ -34,14 +34,14 @@ export const createWikiPageRepository = ({
     return reply.page
   },
 
-  async loadSnapshot(id) {
-    const reply = await request(loadSnapshotEvent, {id})
+  async loadContent(id) {
+    const reply = await request(loadContentEvent, {id})
     if (!reply.ok) return null
 
-    return reply.snapshot
+    return reply.content
       ? {
-          contentHash: reply.snapshot.content_hash,
-          lexicalState: reply.snapshot.lexical_state,
+          contentHash: reply.content.content_hash,
+          lexicalState: reply.content.lexical_state,
         }
       : {contentHash: null, lexicalState: null}
   },
@@ -52,4 +52,4 @@ export const createWikiPageRepository = ({
   },
 })
 
-export {snapshotsToParams}
+export {documentSnapshotsToParams}
