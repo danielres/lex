@@ -19,8 +19,7 @@ import './setupEnv';
 export type {DocumentSnapshot} from './documentSnapshots';
 
 export interface MountedEditor {
-  getConfirmedDocumentSnapshots(): Promise<DocumentSnapshot[]>;
-  getDocumentSnapshots(): DocumentSnapshot[];
+  captureDocumentSnapshots(): Promise<DocumentSnapshot[]>;
   restoreRevision(
     lexicalState: DocumentSnapshot['lexicalState'],
   ): Promise<DocumentSnapshot[]>;
@@ -66,18 +65,15 @@ export function mountEditor(
   render();
 
   return {
-    async getConfirmedDocumentSnapshots() {
-      const snapshots = snapshotRegistry.snapshots();
+    async captureDocumentSnapshots() {
+      const snapshots = snapshotRegistry.capture();
       await collaboration.confirmUpdatesApplied();
       return snapshots;
-    },
-    getDocumentSnapshots() {
-      return snapshotRegistry.snapshots();
     },
     async restoreRevision(lexicalState) {
       await snapshotRegistry.restoreMain(lexicalState);
       await collaboration.confirmUpdatesApplied();
-      return snapshotRegistry.snapshots();
+      return snapshotRegistry.capture();
     },
     setEditable(nextEditable) {
       if (editable !== nextEditable) {

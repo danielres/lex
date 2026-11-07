@@ -28,7 +28,7 @@ defmodule Lex.Wiki.PageRevision do
         :search_text
       ]
 
-      change relate_actor(:checkpointed_by)
+      change relate_actor(:saved_by)
       change manage_relationship(:contributor_ids, :contributors, type: :append)
     end
   end
@@ -69,7 +69,7 @@ defmodule Lex.Wiki.PageRevision do
   end
 
   relationships do
-    belongs_to :checkpointed_by, Lex.Accounts.User do
+    belongs_to :saved_by, Lex.Accounts.User do
       allow_nil? false
     end
 

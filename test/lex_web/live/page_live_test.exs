@@ -101,16 +101,16 @@ defmodule LexWeb.PageLiveTest do
     refute home.id == summer.id
   end
 
-  test "remains alive when a document checkpoint is saved", %{conn: conn, scope: scope} do
+  test "remains alive when a document is persisted", %{conn: conn, scope: scope} do
     page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert :ok = scope |> Page.set_checkpoint(page, "main", document("updated"))
+    assert :ok = scope |> Page.persist_document(page, "main", document("updated"))
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
   end
 
-  test "pushes updated snapshots for embedded pages in the same space", %{
+  test "pushes updated content for embedded pages in the same space", %{
     conn: conn,
     scope: scope
   } do
@@ -121,7 +121,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                embedded_page,
                "main",
                document("Reusable content"),
@@ -134,7 +134,7 @@ defmodule LexWeb.PageLiveTest do
     page_id = embedded_page.id
     lexical_state = snapshot["lexical_state"]
 
-    assert_push_event(view, "page_snapshot_updated", %{
+    assert_push_event(view, "page_content_updated", %{
       content_hash: content_hash,
       lexical_state: ^lexical_state,
       page_id: ^page_id
@@ -143,7 +143,7 @@ defmodule LexWeb.PageLiveTest do
     assert is_binary(content_hash)
   end
 
-  test "does not expose snapshot updates from another space", %{conn: conn, scope: scope} do
+  test "does not expose content updates from another space", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     other_scope = create_scope("Other Space", scope.current_user)
     other_page = other_scope |> Page.ensure!("Private Page")
@@ -152,7 +152,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              other_scope
-             |> Page.set_checkpoint(
+             |> Page.save_document(
                other_page,
                "main",
                document("Private content"),
@@ -162,10 +162,10 @@ defmodule LexWeb.PageLiveTest do
                }
              )
 
-    refute_push_event(view, "page_snapshot_updated", %{})
+    refute_push_event(view, "page_content_updated", %{})
   end
 
-  test "checkpoints inline embeds as revisions of the referenced page", %{
+  test "saves inline embeds as revisions of the referenced page", %{
     conn: conn,
     scope: scope
   } do
@@ -175,7 +175,7 @@ defmodule LexWeb.PageLiveTest do
     :ok = SharedDoc.observe(shared_doc)
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    render_hook(view, "page_repository:checkpoint", %{
+    render_hook(view, "page_repository:save", %{
       "documents" => [document_snapshot("main", "Embedded content")],
       "page_id" => embedded_page.id
     })
@@ -208,11 +208,11 @@ defmodule LexWeb.PageLiveTest do
     |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
-    assert_push_event(view, "document_snapshot_requested", %{})
+    assert_push_event(view, "page_save_requested", %{})
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
     assert has_element?(view, "button[aria-label='Saving document'][disabled]")
 
-    render_hook(view, "editing:checkpoint", %{
+    render_hook(view, "editing:save", %{
       "documents" => [document_snapshot("main", "Home content")]
     })
 
@@ -229,7 +229,7 @@ defmodule LexWeb.PageLiveTest do
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
-  test "restores edit mode when checkpointing fails", %{conn: conn, scope: scope} do
+  test "restores edit mode when saving fails", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
@@ -239,9 +239,9 @@ defmodule LexWeb.PageLiveTest do
     |> element("button[phx-click='editing:toggle']")
     |> render_click()
 
-    assert_push_event(view, "document_snapshot_requested", %{})
+    assert_push_event(view, "page_save_requested", %{})
 
-    render_hook(view, "editing:checkpoint", %{"error" => "snapshot_failed"})
+    render_hook(view, "editing:save", %{"error" => "snapshot_failed"})
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
     assert has_element?(view, "button[aria-label='Make editor read-only']")
@@ -411,7 +411,7 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")
   end
 
-  test "shows an empty history before the first checkpoint", %{conn: conn, scope: scope} do
+  test "shows an empty history before the first revision", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
@@ -431,18 +431,12 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
-  test "shows who saved and contributed to a revision", %{conn: conn, scope: scope} do
+  test "shows who contributed to a revision", %{conn: conn, scope: scope} do
     page = scope |> Page.ensure!("Home")
     contributor = create_user("Revision Contributor")
     _revision = scope |> create_revision(page, "First version", [contributor.id])
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
-
-    assert has_element?(
-             view,
-             "[data-testid='revision-checkpointed-by']",
-             "Saved by #{scope.current_user.display_name}"
-           )
 
     assert has_element?(
              view,
@@ -493,7 +487,7 @@ defmodule LexWeb.PageLiveTest do
     assert preserved_revision.restored_from_revision_id == nil
     assert preserved_revision.search_text == "Unsaved collaborative edits"
 
-    render_hook(view, "revisions:checkpoint", %{
+    render_hook(view, "revisions:commit_restore", %{
       "documents" => [document_snapshot("main", "First version restored")],
       "revision_id" => source_revision.id
     })
@@ -554,7 +548,7 @@ defmodule LexWeb.PageLiveTest do
   defp create_revision(scope, page, text, contributor_ids \\ []) do
     assert {:ok, :saved} =
              scope
-             |> Page.set_checkpoint(
+             |> Page.record_revision(
                page,
                %{
                  contributor_ids: contributor_ids,

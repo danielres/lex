@@ -9,7 +9,7 @@ defmodule LexWeb.PageLive.Editing do
   def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{checkpointing?: false, title_form: nil})
+    delegate_assign(socket, %{saving?: false, title_form: nil})
   end
 
   def reload(socket, page) do
@@ -19,8 +19,8 @@ defmodule LexWeb.PageLive.Editing do
     socket |> delegate_assign(:title_form, form)
   end
 
-  def checkpoint_event, do: delegate_event("checkpoint")
-  def snapshot_request_event, do: "document_snapshot_requested"
+  def save_event, do: delegate_event("save")
+  def save_request_event, do: "page_save_requested"
 
   @impl true
   def handle_event("toggle", _params, socket) do
@@ -28,13 +28,13 @@ defmodule LexWeb.PageLive.Editing do
 
     socket =
       cond do
-        editing.checkpointing? ->
+        editing.saving? ->
           socket
 
         socket.assigns.live_action == :editing ->
           socket
-          |> delegate_assign(:checkpointing?, true)
-          |> push_event(snapshot_request_event(), %{})
+          |> delegate_assign(:saving?, true)
+          |> push_event(save_request_event(), %{})
 
         true ->
           assign(socket, :live_action, :editing)
@@ -43,18 +43,18 @@ defmodule LexWeb.PageLive.Editing do
     {:noreply, socket}
   end
 
-  def handle_event("checkpoint", %{"documents" => documents}, socket)
+  def handle_event("save", %{"documents" => documents}, socket)
       when is_list(documents) do
     scope = socket.assigns.scope
     page = socket.assigns.page
 
     scope
-    |> Collaboration.checkpoint(page, documents)
+    |> Collaboration.save(page, documents)
     |> case do
       {:ok, counts} ->
         socket =
           socket
-          |> delegate_assign(:checkpointing?, false)
+          |> delegate_assign(:saving?, false)
           |> assign(:live_action, :show)
           |> push_patch(
             replace: true,
@@ -64,25 +64,25 @@ defmodule LexWeb.PageLive.Editing do
         {:reply, %{ok: true, result: counts}, socket}
 
       {:error, reason} ->
-        Logger.error("Could not checkpoint page #{page.id}: #{inspect(reason)}")
-        checkpoint_failed(socket)
+        Logger.error("Could not save page #{page.id}: #{inspect(reason)}")
+        save_failed(socket)
     end
   end
 
-  def handle_event("checkpoint", %{"error" => reason}, socket) do
+  def handle_event("save", %{"error" => reason}, socket) do
     Logger.error(
       "Could not collect document snapshots for page #{socket.assigns.page.id}: #{inspect(reason)}"
     )
 
-    checkpoint_failed(socket)
+    save_failed(socket)
   end
 
-  def handle_event("checkpoint", params, socket) do
+  def handle_event("save", params, socket) do
     Logger.error(
-      "Received invalid document checkpoint payload for page #{socket.assigns.page.id}: #{inspect(params)}"
+      "Received invalid page save payload for page #{socket.assigns.page.id}: #{inspect(params)}"
     )
 
-    checkpoint_failed(socket)
+    save_failed(socket)
   end
 
   def handle_event("title_change", %{"page_title" => params}, socket) do
@@ -119,10 +119,10 @@ defmodule LexWeb.PageLive.Editing do
     |> to_form()
   end
 
-  defp checkpoint_failed(socket) do
+  defp save_failed(socket) do
     socket =
       socket
-      |> delegate_assign(:checkpointing?, false)
+      |> delegate_assign(:saving?, false)
       |> put_flash(:error, "Could not save the document")
 
     {:reply, %{ok: false}, socket}

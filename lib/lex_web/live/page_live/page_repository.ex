@@ -28,9 +28,9 @@ defmodule LexWeb.PageLive.PageRepository do
 
   def ensure_event, do: delegate_event("ensure")
   def resolve_event, do: delegate_event("resolve")
-  def load_snapshot_event, do: delegate_event("load_snapshot")
-  def checkpoint_event, do: delegate_event("checkpoint")
-  def snapshot_updated_event, do: "page_snapshot_updated"
+  def load_content_event, do: delegate_event("load_content")
+  def save_event, do: delegate_event("save")
+  def content_updated_event, do: "page_content_updated"
 
   @impl true
   def handle_event("ensure", %{"title" => title}, socket) do
@@ -67,19 +67,19 @@ defmodule LexWeb.PageLive.PageRepository do
     end
   end
 
-  def handle_event("load_snapshot", %{"id" => id}, socket) do
+  def handle_event("load_content", %{"id" => id}, socket) do
     scope = socket.assigns.scope
 
     with {:ok, page} <- Page.get(id, scope: scope),
-         {:ok, snapshot} <- scope |> Page.get_document_snapshot(page, "main") do
-      {:reply, %{ok: true, snapshot: snapshot}, socket}
+         {:ok, content} <- scope |> Page.get_document_content(page, "main") do
+      {:reply, %{ok: true, content: content}, socket}
     else
       {:error, _error} -> {:reply, %{ok: false}, socket}
     end
   end
 
   def handle_event(
-        "checkpoint",
+        "save",
         %{"documents" => documents, "page_id" => page_id},
         socket
       )
@@ -87,15 +87,15 @@ defmodule LexWeb.PageLive.PageRepository do
     scope = socket.assigns.scope
 
     with {:ok, page} <- Page.get(page_id, scope: scope),
-         {:ok, result} <- scope |> Collaboration.checkpoint(page, documents) do
+         {:ok, result} <- scope |> Collaboration.save(page, documents) do
       {:reply, %{ok: true, result: result}, socket}
     else
       {:error, reason} -> {:reply, %{ok: false, error: inspect(reason)}, socket}
     end
   end
 
-  def handle_event("checkpoint", _params, socket) do
-    {:reply, %{ok: false, error: "invalid checkpoint"}, socket}
+  def handle_event("save", _params, socket) do
+    {:reply, %{ok: false, error: "invalid save"}, socket}
   end
 
   defp page_reference(space, page) do

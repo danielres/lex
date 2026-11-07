@@ -29,15 +29,13 @@ defmodule Lex.Collaboration.Persistence do
     document_key = document_ref.document_key
 
     scope
-    |> Page.set_checkpoint(page, document_key, doc)
+    |> Page.persist_document(page, document_key, doc)
     |> case do
       :ok ->
         :ok
 
       {:error, error} ->
-        Logger.error(
-          "Could not checkpoint collaboration room #{inspect(room)}: #{inspect(error)}"
-        )
+        Logger.error("Could not persist collaboration room #{inspect(room)}: #{inspect(error)}")
 
         :ok
     end

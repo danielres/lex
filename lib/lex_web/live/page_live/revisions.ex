@@ -32,7 +32,7 @@ defmodule LexWeb.PageLive.Revisions do
     |> delegate_assign(:selected_index, selected_index)
   end
 
-  def checkpoint_event, do: delegate_event("checkpoint")
+  def commit_restore_event, do: delegate_event("commit_restore")
   def preserve_event, do: delegate_event("preserve")
   def restore_request_event, do: "revision_restore_requested"
 
@@ -74,7 +74,7 @@ defmodule LexWeb.PageLive.Revisions do
   end
 
   def handle_event(
-        "checkpoint",
+        "commit_restore",
         %{"documents" => documents, "revision_id" => revision_id},
         socket
       )
@@ -84,7 +84,7 @@ defmodule LexWeb.PageLive.Revisions do
     space = socket.assigns.space
 
     scope
-    |> Collaboration.checkpoint(page, documents, revision_id)
+    |> Collaboration.save(page, documents, revision_id)
     |> case do
       {:ok, _result} ->
         socket =
@@ -100,7 +100,7 @@ defmodule LexWeb.PageLive.Revisions do
     end
   end
 
-  def handle_event("checkpoint", _params, socket), do: restore_failed(socket)
+  def handle_event("commit_restore", _params, socket), do: restore_failed(socket)
 
   def handle_event("preserve", %{"documents" => documents}, socket)
       when is_list(documents) do
@@ -108,7 +108,7 @@ defmodule LexWeb.PageLive.Revisions do
     page = socket.assigns.page
 
     scope
-    |> Collaboration.checkpoint(page, documents)
+    |> Collaboration.save(page, documents)
     |> case do
       {:ok, _result} ->
         {:reply, %{ok: true}, socket}
@@ -170,8 +170,8 @@ defmodule LexWeb.PageLive.Revisions do
           class="flex items-center gap-3"
           data-testid="revision-contributors"
         >
-          <%!-- <span data-testid="revision-checkpointed-by"> --%>
-          <%!--   Saved by {@revisions.selected.checkpointed_by.display_name} --%>
+          <%!-- <span data-testid="revision-saved-by"> --%>
+          <%!--   Saved by {@revisions.selected.saved_by.display_name} --%>
           <%!-- </span> --%>
           <%!-- <span class="text-sm">Contributors:</span> --%>
           <h3 class="small-caps">Contributors:</h3>
@@ -243,9 +243,9 @@ defmodule LexWeb.PageLive.Revisions do
       class="lexical-editor"
       data-collaborator-display-name={current_user.display_name}
       data-collaborator-hue={current_user.hue}
-      data-checkpoint-page-event={assigns[:"data-checkpoint-page-event"]}
+      data-save-page-event={assigns[:"data-save-page-event"]}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
-      data-load-page-snapshot-event={assigns[:"data-load-page-snapshot-event"]}
+      data-load-page-content-event={assigns[:"data-load-page-content-event"]}
       data-page-id={assigns[:"data-page-id"]}
       data-pages={assigns[:"data-pages"]}
       data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}
@@ -262,7 +262,7 @@ defmodule LexWeb.PageLive.Revisions do
         <div>
           <h2 class="text-xl font-semibold">No revisions yet</h2>
           <p class="py-2 opacity-70">
-            A revision will be created at the next document checkpoint.
+            A revision will be created the next time the page is saved.
           </p>
         </div>
       </div>

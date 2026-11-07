@@ -120,7 +120,7 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(view, "tbody tr:first-child", "Autumn Activities")
   end
 
-  test "sorts and refreshes pages by their latest document checkpoint", %{
+  test "sorts and refreshes pages by their latest persisted document", %{
     conn: conn,
     scope: scope
   } do
@@ -128,7 +128,7 @@ defmodule LexWeb.WikiLiveTest do
     scope |> Page.ensure!("Second Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    assert :ok = scope |> Page.set_checkpoint(first_page, "main", document("updated"))
+    assert :ok = scope |> Page.persist_document(first_page, "main", document("updated"))
 
     assert has_element?(view, "tbody tr:first-child", "First Page")
   end

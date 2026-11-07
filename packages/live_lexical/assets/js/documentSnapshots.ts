@@ -55,7 +55,7 @@ export class DocumentSnapshotRegistry {
     });
   }
 
-  snapshots(): DocumentSnapshot[] {
+  capture(): DocumentSnapshot[] {
     return Array.from(this.editors.entries())
       .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey))
       .map(([documentKey, editor]) => {

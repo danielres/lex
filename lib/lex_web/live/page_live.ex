@@ -70,14 +70,14 @@ defmodule LexWeb.PageLive do
   def handle_info(
         %Notification{
           resource: PageDocument,
-          action: %{name: :save_snapshot},
+          action: %{name: :save},
           data: %{document_key: "main"} = page_document
         },
         socket
       ) do
     socket =
       if PageRepository.includes?(socket.assigns.page_repository, page_document.page_id) do
-        push_event(socket, PageRepository.snapshot_updated_event(), %{
+        push_event(socket, PageRepository.content_updated_event(), %{
           content_hash: page_document.content_hash,
           lexical_state: page_document.lexical_state,
           page_id: page_document.page_id
@@ -232,20 +232,20 @@ defmodule LexWeb.PageLive do
         >
           <div
             class="lexical-editor"
-            data-checkpoint-event={Editing.checkpoint_event()}
+            data-save-event={Editing.save_event()}
             data-collaborator-display-name={@scope.current_user.display_name}
             data-collaborator-hue={@scope.current_user.hue}
             data-document-id={@page.id}
-            data-editable={to_string(@live_action == :editing && !@editing.checkpointing?)}
-            data-checkpoint-page-event={PageRepository.checkpoint_event()}
+            data-editable={to_string(@live_action == :editing && !@editing.saving?)}
+            data-save-page-event={PageRepository.save_event()}
             data-ensure-page-event={PageRepository.ensure_event()}
-            data-load-page-snapshot-event={PageRepository.load_snapshot_event()}
+            data-load-page-content-event={PageRepository.load_content_event()}
             data-pages={PageRepository.encode(@page_repository, @space)}
             data-resolve-page-event={PageRepository.resolve_event()}
-            data-restore-checkpoint-event={Revisions.checkpoint_event()}
+            data-restore-commit-event={Revisions.commit_restore_event()}
             data-restore-preserve-event={Revisions.preserve_event()}
             data-restore-request-event={Revisions.restore_request_event()}
-            data-snapshot-request-event={Editing.snapshot_request_event()}
+            data-save-request-event={Editing.save_request_event()}
             data-space-id={@space.id}
             id={"lexical-editor-#{@page.id}"}
             phx-hook="LexicalEditor"
@@ -260,8 +260,8 @@ defmodule LexWeb.PageLive do
           id="page-revisions"
         >
           <Revisions.render
-            data-checkpoint-page-event={PageRepository.checkpoint_event()}
-            data-load-page-snapshot-event={PageRepository.load_snapshot_event()}
+            data-save-page-event={PageRepository.save_event()}
+            data-load-page-content-event={PageRepository.load_content_event()}
             data-page-id={@page.id}
             data-pages={PageRepository.encode(@page_repository, @space)}
             data-resolve-page-event={PageRepository.resolve_event()}

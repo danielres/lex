@@ -25,35 +25,35 @@ export interface WikiPageReference {
   title: string;
 }
 
-export interface WikiPageSnapshot {
+export interface WikiPageContent {
   contentHash: string | null;
   lexicalState: SerializedEditorState | null;
 }
 
 export interface WikiPageRepository {
-  checkpoint(id: string, snapshots: DocumentSnapshot[]): Promise<boolean>;
+  save(id: string, snapshots: DocumentSnapshot[]): Promise<boolean>;
   createCollaboration(id: string): EditorCollaboration;
   ensure(title: string): Promise<WikiPageReference>;
-  loadSnapshot(id: string): Promise<WikiPageSnapshot | null>;
+  loadContent(id: string): Promise<WikiPageContent | null>;
   resolve(id: string): Promise<WikiPageReference | null>;
 }
 
 interface WikiPagesContextValue {
   activeInlineEmbed: string | null;
-  applySnapshot(id: string, snapshot: WikiPageSnapshot): void;
+  applyContent(id: string, content: WikiPageContent): void;
   beginInlineEdit(nodeKey: string): void;
-  checkpointPage(id: string, snapshots: DocumentSnapshot[]): Promise<boolean>;
   collaborator: Collaborator;
+  contentByPageId: ReadonlyMap<string, WikiPageContent>;
   currentPageId: string;
   endInlineEdit(nodeKey: string): void;
   ensurePage(title: string): Promise<WikiPageReference>;
   integration: EditorIntegration;
-  loadPageSnapshot(id: string): Promise<WikiPageSnapshot | null>;
+  loadPageContent(id: string): Promise<WikiPageContent | null>;
   pageById: ReadonlyMap<string, WikiPageReference>;
   pages: WikiPageReference[];
   resolvePage(id: string): Promise<WikiPageReference | null>;
   repository: WikiPageRepository;
-  snapshotByPageId: ReadonlyMap<string, WikiPageSnapshot>;
+  savePage(id: string, snapshots: DocumentSnapshot[]): Promise<boolean>;
 }
 
 const WikiPagesContext = createContext<WikiPagesContextValue | null>(null);
@@ -81,7 +81,7 @@ export function WikiPagesProvider({
   integration,
   pagePath,
   repository,
-  snapshotUpdates = new Map(),
+  contentUpdates = new Map(),
 }: {
   children: ReactNode;
   collaborator: Collaborator;
@@ -90,7 +90,7 @@ export function WikiPagesProvider({
   integration: EditorIntegration;
   pagePath?: string[];
   repository: WikiPageRepository;
-  snapshotUpdates?: ReadonlyMap<string, WikiPageSnapshot>;
+  contentUpdates?: ReadonlyMap<string, WikiPageContent>;
 }): JSX.Element {
   const [activeInlineEmbed, setActiveInlineEmbed] = useState<string | null>(
     null,
@@ -98,11 +98,11 @@ export function WikiPagesProvider({
   const [pageById, setPageById] = useState(
     () => new Map(initialPages.map((page) => [page.id, page])),
   );
-  const [snapshotByPageId, setSnapshotByPageId] = useState(
-    () => new Map<string, WikiPageSnapshot>(),
+  const [contentByPageId, setContentByPageId] = useState(
+    () => new Map<string, WikiPageContent>(),
   );
-  const snapshotRequests = useRef(
-    new Map<string, Promise<WikiPageSnapshot | null>>(),
+  const contentRequests = useRef(
+    new Map<string, Promise<WikiPageContent | null>>(),
   );
 
   useEffect(() => {
@@ -110,20 +110,20 @@ export function WikiPagesProvider({
   }, [initialPages]);
 
   useEffect(() => {
-    if (snapshotUpdates.size === 0) {
+    if (contentUpdates.size === 0) {
       return;
     }
 
-    setSnapshotByPageId((currentSnapshots) => {
-      const nextSnapshots = new Map(currentSnapshots);
-      snapshotUpdates.forEach((snapshot, id) => {
-        if (nextSnapshots.has(id)) {
-          nextSnapshots.set(id, snapshot);
+    setContentByPageId((currentContent) => {
+      const nextContent = new Map(currentContent);
+      contentUpdates.forEach((content, id) => {
+        if (nextContent.has(id)) {
+          nextContent.set(id, content);
         }
       });
-      return nextSnapshots;
+      return nextContent;
     });
-  }, [snapshotUpdates]);
+  }, [contentUpdates]);
 
   const rememberPage = useCallback((page: WikiPageReference) => {
     setPageById((currentPages) => {
@@ -143,20 +143,20 @@ export function WikiPagesProvider({
     return page;
   }, []);
 
-  const applySnapshot = useCallback(
-    (id: string, snapshot: WikiPageSnapshot) => {
-      setSnapshotByPageId((currentSnapshots) => {
-        const currentSnapshot = currentSnapshots.get(id);
+  const applyContent = useCallback(
+    (id: string, content: WikiPageContent) => {
+      setContentByPageId((currentContent) => {
+        const existingContent = currentContent.get(id);
         if (
-          snapshot.contentHash !== null &&
-          currentSnapshot?.contentHash === snapshot.contentHash
+          content.contentHash !== null &&
+          existingContent?.contentHash === content.contentHash
         ) {
-          return currentSnapshots;
+          return currentContent;
         }
 
-        const nextSnapshots = new Map(currentSnapshots);
-        nextSnapshots.set(id, snapshot);
-        return nextSnapshots;
+        const nextContent = new Map(currentContent);
+        nextContent.set(id, content);
+        return nextContent;
       });
     },
     [],
@@ -180,29 +180,29 @@ export function WikiPagesProvider({
     [pageById, rememberPage, repository],
   );
 
-  const loadPageSnapshot = useCallback(
+  const loadPageContent = useCallback(
     async (id: string) => {
-      const cachedSnapshot = snapshotByPageId.get(id);
-      if (cachedSnapshot !== undefined) {
-        return cachedSnapshot;
+      const cachedContent = contentByPageId.get(id);
+      if (cachedContent !== undefined) {
+        return cachedContent;
       }
 
-      const activeRequest = snapshotRequests.current.get(id);
+      const activeRequest = contentRequests.current.get(id);
       if (activeRequest !== undefined) {
         return activeRequest;
       }
 
-      const request = repository.loadSnapshot(id).then((snapshot) => {
-        snapshotRequests.current.delete(id);
-        if (snapshot !== null) {
-          applySnapshot(id, snapshot);
+      const request = repository.loadContent(id).then((content) => {
+        contentRequests.current.delete(id);
+        if (content !== null) {
+          applyContent(id, content);
         }
-        return snapshot;
+        return content;
       });
-      snapshotRequests.current.set(id, request);
+      contentRequests.current.set(id, request);
       return request;
     },
-    [applySnapshot, repository, snapshotByPageId],
+    [applyContent, contentByPageId, repository],
   );
 
   const beginInlineEdit = useCallback((nodeKey: string) => {
@@ -215,9 +215,8 @@ export function WikiPagesProvider({
     );
   }, []);
 
-  const checkpointPage = useCallback(
-    (id: string, snapshots: DocumentSnapshot[]) =>
-      repository.checkpoint(id, snapshots),
+  const savePage = useCallback(
+    (id: string, snapshots: DocumentSnapshot[]) => repository.save(id, snapshots),
     [repository],
   );
 
@@ -236,37 +235,37 @@ export function WikiPagesProvider({
   const value = useMemo(
     () => ({
       activeInlineEmbed,
-      applySnapshot,
+      applyContent,
       beginInlineEdit,
-      checkpointPage,
       collaborator,
+      contentByPageId,
       currentPageId,
       endInlineEdit,
       ensurePage,
       integration,
-      loadPageSnapshot,
+      loadPageContent,
       pageById,
       pages,
       resolvePage,
       repository,
-      snapshotByPageId,
+      savePage,
     }),
     [
       activeInlineEmbed,
-      applySnapshot,
+      applyContent,
       beginInlineEdit,
-      checkpointPage,
       collaborator,
+      contentByPageId,
       currentPageId,
       endInlineEdit,
       ensurePage,
       integration,
-      loadPageSnapshot,
+      loadPageContent,
       pageById,
       pages,
       resolvePage,
       repository,
-      snapshotByPageId,
+      savePage,
     ],
   );
 

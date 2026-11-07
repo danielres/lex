@@ -144,7 +144,7 @@ defmodule Lex.Wiki.Page do
   def list_revisions!(scope, page) do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id)
-    |> Ash.Query.load([:checkpointed_by, :contributors])
+    |> Ash.Query.load([:saved_by, :contributors])
     |> Ash.Query.sort(inserted_at: :desc, id: :desc)
     |> Ash.read!(scope: scope)
   end
@@ -155,7 +155,7 @@ defmodule Lex.Wiki.Page do
     |> Ash.read_one(scope: scope)
   end
 
-  def get_document_snapshot(scope, page, document_key) do
+  def get_document_content(scope, page, document_key) do
     with {:ok, page_document} <- scope |> get_page_document(page, document_key) do
       case page_document do
         nil ->
@@ -177,28 +177,28 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  def set_checkpoint(scope, page, document_key, doc) when is_binary(document_key) do
+  def persist_document(scope, page, document_key, doc) do
     with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
          {:ok, page_document} <- scope |> get_page_document(page, document_key) do
       if page_document != nil and page_document.yjs_state == yjs_state do
         :ok
       else
         with {:ok, _page_document} <-
-               scope |> save_page_document(page, document_key, yjs_state) do
+               scope |> persist_page_document(page, document_key, yjs_state) do
           :ok
         end
       end
     end
   end
 
-  def set_checkpoint(
+  def record_revision(
         scope,
         page,
-        %{lexical_state: lexical_state, search_text: search_text} = snapshot,
+        %{lexical_state: lexical_state, search_text: search_text} = content,
         restored_from_revision_id
       ) do
     content_hash = content_hash(lexical_state)
-    contributor_ids = Map.get(snapshot, :contributor_ids, [])
+    contributor_ids = Map.get(content, :contributor_ids, [])
 
     with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
          {:ok, latest_revision} <- scope |> latest_revision(page) do
@@ -222,7 +222,7 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  def set_checkpoint(
+  def save_document(
         scope,
         page,
         document_key,
@@ -238,7 +238,7 @@ defmodule Lex.Wiki.Page do
         with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
              {:ok, _page_document} <-
                scope
-               |> save_page_document_snapshot(
+               |> save_page_document(
                  page,
                  document_key,
                  yjs_state,
@@ -342,9 +342,9 @@ defmodule Lex.Wiki.Page do
     Yex.apply_update(doc, page_document.yjs_state)
   end
 
-  defp save_page_document(scope, page, document_key, yjs_state) do
+  defp persist_page_document(scope, page, document_key, yjs_state) do
     PageDocument
-    |> Ash.Changeset.for_create(:save, %{
+    |> Ash.Changeset.for_create(:persist, %{
       page_id: page.id,
       document_key: document_key,
       yjs_state: yjs_state
@@ -352,7 +352,7 @@ defmodule Lex.Wiki.Page do
     |> Ash.create(scope: scope)
   end
 
-  defp save_page_document_snapshot(
+  defp save_page_document(
          scope,
          page,
          document_key,
@@ -362,7 +362,7 @@ defmodule Lex.Wiki.Page do
          content_hash
        ) do
     PageDocument
-    |> Ash.Changeset.for_create(:save_snapshot, %{
+    |> Ash.Changeset.for_create(:save, %{
       content_hash: content_hash,
       document_key: document_key,
       lexical_state: lexical_state,
