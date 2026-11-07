@@ -1,5 +1,8 @@
 defmodule Lex.Accounts.Space do
+  alias Lex.Accounts.Membership
+  alias Lex.Accounts.Space.Changes.CreateOwnerMembership
   alias Lex.Accounts.Space.Changes.SetSlug
+  alias Lex.Accounts.User
   alias Lex.Wiki.Page
 
   use Ash.Resource,
@@ -27,7 +30,10 @@ defmodule Lex.Accounts.Space do
 
     create :create do
       accept [:name, :description]
+
+      change relate_actor(:owner)
       change SetSlug
+      change CreateOwnerMembership
     end
 
     read :list do
@@ -56,6 +62,15 @@ defmodule Lex.Accounts.Space do
   end
 
   relationships do
+    belongs_to :owner, User do
+      allow_nil? false
+    end
+
+    has_many :memberships, Membership do
+      destination_attribute :space_id
+      default_sort inserted_at: :asc
+    end
+
     has_many :pages, Page do
       destination_attribute :space_id
       default_sort inserted_at: :asc
