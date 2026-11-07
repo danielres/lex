@@ -49,6 +49,12 @@ defmodule Lex.Accounts do
     |> Ash.update()
   end
 
+  def set_membership_privileges(scope, %Membership{} = membership, privileges) do
+    membership
+    |> Ash.Changeset.for_update(:set_privileges, %{privileges: privileges}, scope: scope)
+    |> Ash.update()
+  end
+
   def get_membership(scope, %User{} = user) do
     Membership
     |> Ash.Query.filter(user_id == ^user.id)
