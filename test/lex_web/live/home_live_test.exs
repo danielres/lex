@@ -3,6 +3,7 @@ defmodule LexWeb.HomeLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Accounts
   alias Lex.Accounts.Space
 
   setup :authenticate
@@ -22,6 +23,12 @@ defmodule LexWeb.HomeLiveTest do
              view,
              "[data-testid='space'][href='/#{existing_space.slug}']",
              "Existing Space"
+           )
+
+    assert has_element?(
+             view,
+             "[data-testid='space'][href='/#{existing_space.slug}']",
+             "Invitation"
            )
 
     view
@@ -58,8 +65,11 @@ defmodule LexWeb.HomeLiveTest do
     )
     |> render_submit()
 
-    assert has_element?(view, "[data-testid='space'][href='/new-space']", "New Space")
-    refute has_element?(view, "[data-testid='space-creation-form']")
-    assert [%{name: "Existing Space"}, %{name: "New Space"}] = Space.list!(scope: scope)
+    assert_redirect(view, ~p"/new-space/join")
+
+    assert [
+             %{space: %{name: "Existing Space"}, status: :invited},
+             %{space: %{name: "New Space"}, status: :invited}
+           ] = scope |> Accounts.list_memberships!()
   end
 end

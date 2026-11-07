@@ -28,10 +28,10 @@ defmodule Lex.Accounts.MembershipTest do
   end
 
   test "accepting an invitation establishes an immutable normalized identity", %{
-    current_user: current_user,
     scope: scope
   } do
-    {:ok, membership} = scope |> Accounts.get_membership(current_user)
+    member = create_user("Member")
+    {:ok, membership} = scope |> Accounts.invite_membership(member)
 
     assert {:ok, membership} =
              scope |> Accounts.accept_membership(membership, "  Téam   Member  ")
@@ -50,13 +50,24 @@ defmodule Lex.Accounts.MembershipTest do
   end
 
   test "declining an invitation preserves an inactive membership", %{
+    scope: scope
+  } do
+    member = create_user("Member")
+    {:ok, membership} = scope |> Accounts.invite_membership(member)
+
+    assert {:ok, membership} = scope |> Accounts.decline_membership(membership)
+    assert membership.status == :inactive
+  end
+
+  test "the owner cannot decline or deactivate their membership", %{
     current_user: current_user,
     scope: scope
   } do
     {:ok, membership} = scope |> Accounts.get_membership(current_user)
 
-    assert {:ok, membership} = scope |> Accounts.decline_membership(membership)
-    assert membership.status == :inactive
+    assert {:error, _error} = scope |> Accounts.decline_membership(membership)
+    assert {:ok, membership} = scope |> Accounts.accept_membership(membership, "Owner")
+    assert {:error, _error} = scope |> Accounts.deactivate_membership(membership)
   end
 
   test "member slugs are unique within a space", %{scope: scope} do

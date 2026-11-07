@@ -2,6 +2,7 @@ defmodule LexWeb.HomeLive do
   use LexWeb, :live_view
   use LiveDelegate
 
+  alias Lex.Accounts
   alias Lex.Accounts.Space
   alias LexWeb.UI
 
@@ -13,13 +14,13 @@ defmodule LexWeb.HomeLive do
     scope = socket.assigns.scope
 
     space_form = scope |> space_form()
-    spaces = Space.list!(scope: scope)
+    memberships = scope |> Accounts.list_memberships!()
 
     socket =
       socket
       |> assign(:creating_space?, false)
+      |> assign(:memberships, memberships)
       |> assign(:space_form, space_form)
-      |> assign(:spaces, spaces)
 
     {:ok, socket}
   end
@@ -54,16 +55,9 @@ defmodule LexWeb.HomeLive do
   def handle_event("create_space", %{"space" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.space_form, params: params) do
       {:ok, space} ->
-        scope = socket.assigns.scope
-        space_form = scope |> space_form()
-
         socket =
           socket
-          |> assign(:creating_space?, false)
-          |> assign(:space_form, space_form)
-          |> update(:spaces, fn spaces ->
-            Enum.sort_by([space | spaces], & &1.name)
-          end)
+          |> push_navigate(to: ~p"/#{space.slug}/join")
 
         {:noreply, socket}
 
@@ -84,7 +78,7 @@ defmodule LexWeb.HomeLive do
       <div class="w-full max-w-md">
         <.list_spaces
           :if={!@creating_space?}
-          spaces={@spaces}
+          memberships={@memberships}
         />
 
         <.creation_form
@@ -151,8 +145,8 @@ defmodule LexWeb.HomeLive do
 
       <div class="autogrid gap-4 [--autogrid-min:8rem]">
         <.link
-          :for={space <- @spaces}
-          navigate={~p"/#{space.slug}"}
+          :for={membership <- @memberships}
+          navigate={~p"/#{membership.space.slug}"}
           data-testid="space"
           class={[
             grid_item_class,
@@ -160,7 +154,13 @@ defmodule LexWeb.HomeLive do
             "leading-tight"
           ]}
         >
-          {space.name}
+          <span>{membership.space.name}</span>
+          <span
+            :if={membership.status == :invited}
+            class="mt-2 block text-xs font-normal text-base-content/60"
+          >
+            Invitation
+          </span>
         </.link>
 
         <button

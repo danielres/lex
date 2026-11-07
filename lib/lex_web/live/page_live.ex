@@ -17,18 +17,20 @@ defmodule LexWeb.PageLive do
   alias LexWeb.Space
   alias LexWeb.UI
 
+  delegate(:space, Space)
   delegate(:creation, Creation, info: false)
   delegate(:editing, Editing, info: false)
   delegate(:info, Info, info: false, mount: false)
   delegate(:page_repository, PageRepository, info: false)
   delegate(:revisions, Revisions, info: false)
-  delegate(:space, Space)
   delegate(:ui, UI)
 
   @impl true
   def mount(params, session, socket) do
-    if connected?(socket), do: Page.subscribe()
     socket = socket |> delegate_mount(params, session)
+
+    if connected?(socket) and !socket.redirected, do: Page.subscribe()
+
     {:ok, socket}
   end
 

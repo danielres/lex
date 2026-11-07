@@ -3,6 +3,7 @@ defmodule LexWeb.CollaborationSocketTest do
 
   require Phoenix.ChannelTest
 
+  alias Lex.Accounts
   alias Lex.Accounts.Space
 
   @endpoint LexWeb.Endpoint
@@ -11,6 +12,9 @@ defmodule LexWeb.CollaborationSocketTest do
     current_user = create_user()
     actor_scope = %Lex.Scope{current_user: current_user}
     space = Space.create!(%{name: "Test Space"}, scope: actor_scope)
+    scope = %{actor_scope | space_id: space.id}
+    {:ok, membership} = scope |> Accounts.get_membership(current_user)
+    {:ok, membership} = scope |> Accounts.accept_membership(membership, "Test Member")
     conn = log_in_user(conn, current_user)
 
     assert {:ok, socket} =
@@ -21,7 +25,22 @@ defmodule LexWeb.CollaborationSocketTest do
              )
 
     assert socket.assigns.scope.current_user.id == current_user.id
+    assert socket.assigns.scope.current_membership.id == membership.id
     assert socket.assigns.scope.space_id == space.id
+  end
+
+  test "rejects an invited member", %{conn: conn} do
+    current_user = create_user()
+    actor_scope = %Lex.Scope{current_user: current_user}
+    space = Space.create!(%{name: "Test Space"}, scope: actor_scope)
+    conn = log_in_user(conn, current_user)
+
+    assert :error =
+             Phoenix.ChannelTest.connect(
+               LexWeb.CollaborationSocket,
+               %{"space_id" => space.id},
+               connect_info: %{session: get_session(conn)}
+             )
   end
 
   test "rejects an unauthenticated session" do

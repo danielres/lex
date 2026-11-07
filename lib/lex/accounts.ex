@@ -54,4 +54,10 @@ defmodule Lex.Accounts do
     |> Ash.Query.filter(user_id == ^user.id)
     |> Ash.read_one(scope: scope)
   end
+
+  def list_memberships!(scope) do
+    Membership
+    |> Ash.Query.for_read(:for_user, %{}, scope: scope)
+    |> Ash.read!(scope: scope)
+  end
 end

@@ -1,5 +1,6 @@
 defmodule Lex.Accounts.Membership do
   alias Lex.Accounts.Membership.Changes.SetIdentity
+  alias Lex.Accounts.Membership.Validations.OwnerMustRemainMember
 
   use Ash.Resource,
     otp_app: :lex,
@@ -19,6 +20,13 @@ defmodule Lex.Accounts.Membership do
   actions do
     defaults [:read]
 
+    read :for_user do
+      multitenancy :bypass
+
+      filter expr(user_id == ^actor(:id) and status in [:active, :invited])
+      prepare build(load: :space, sort: :inserted_at)
+    end
+
     create :invite do
       accept [:user_id]
     end
@@ -37,6 +45,7 @@ defmodule Lex.Accounts.Membership do
       require_atomic? false
 
       validate attribute_equals(:status, :invited)
+      validate OwnerMustRemainMember
       change set_attribute(:status, :inactive)
     end
 
@@ -51,6 +60,7 @@ defmodule Lex.Accounts.Membership do
       require_atomic? false
 
       validate attribute_equals(:status, :active)
+      validate OwnerMustRemainMember
       change set_attribute(:status, :inactive)
     end
   end

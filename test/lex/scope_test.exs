@@ -25,10 +25,18 @@ defmodule Lex.ScopeTest do
     }
 
     space_id = Ecto.UUID.generate()
-    scope = %Lex.Scope{current_user: current_user, space_id: space_id}
+    current_membership = %{id: Ecto.UUID.generate()}
+
+    scope = %Lex.Scope{
+      current_membership: current_membership,
+      current_user: current_user,
+      space_id: space_id
+    }
+
     opts = Ash.Scope.to_opts(scope)
 
     assert opts[:actor] == current_user
     assert opts[:tenant] == space_id
+    assert scope.current_membership == current_membership
   end
 end

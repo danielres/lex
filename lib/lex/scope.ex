@@ -1,6 +1,6 @@
 defmodule Lex.Scope do
   @enforce_keys [:current_user]
-  defstruct [:current_user, :space_id]
+  defstruct [:current_membership, :current_user, :space_id]
 
   defimpl Ash.Scope.ToOpts do
     def get_actor(%{current_user: current_user}), do: {:ok, current_user}

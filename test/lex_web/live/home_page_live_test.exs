@@ -12,11 +12,10 @@ defmodule LexWeb.HomePageLiveTest do
     conn: conn,
     current_user: current_user
   } do
-    scope = %Lex.Scope{current_user: current_user}
-    first_space = Space.create!(%{name: "First Space"}, scope: scope)
-    second_space = Space.create!(%{name: "Second Space"}, scope: scope)
-    first_scope = %{scope | space_id: first_space.id}
-    second_scope = %{scope | space_id: second_space.id}
+    first_scope = create_scope("First Space", current_user)
+    second_scope = create_scope("Second Space", current_user)
+    first_space = Ash.get!(Space, first_scope.space_id, scope: first_scope)
+    second_space = Ash.get!(Space, second_scope.space_id, scope: second_scope)
 
     {:ok, first_view, _html} = live(conn, ~p"/#{first_space.slug}/wiki/home")
     second_conn = conn |> recycle() |> log_in_user(current_user)
@@ -57,9 +56,8 @@ defmodule LexWeb.HomePageLiveTest do
     conn: conn,
     current_user: current_user
   } do
-    scope = %Lex.Scope{current_user: current_user}
-    space = Space.create!(%{name: "Test Space"}, scope: scope)
-    scope = %{scope | space_id: space.id}
+    scope = create_scope("Test Space", current_user)
+    space = Ash.get!(Space, scope.space_id, scope: scope)
 
     {:ok, view, _html} = live(conn, ~p"/#{space.slug}/wiki/new-page")
 

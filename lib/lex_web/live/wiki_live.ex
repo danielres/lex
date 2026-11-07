@@ -19,27 +19,32 @@ defmodule LexWeb.WikiLive do
   }
 
   def mount(params, session, socket) do
-    if connected?(socket), do: Page.subscribe()
-
     socket = socket |> delegate_mount(params, session)
-    scope = socket.assigns.scope
 
-    tz =
-      case get_connect_params(socket) do
-        %{"tz" => timezone} -> timezone
-        _ -> "Etc/UTC"
-      end
+    if socket.redirected do
+      {:ok, socket}
+    else
+      if connected?(socket), do: Page.subscribe()
 
-    pages = scope |> list_pages(:last_updated_at, :desc)
+      scope = socket.assigns.scope
 
-    socket =
-      socket
-      |> assign(pages: pages)
-      |> assign(sort_by: :last_updated_at)
-      |> assign(sort_direction: :desc)
-      |> assign(tz: tz)
+      tz =
+        case get_connect_params(socket) do
+          %{"tz" => timezone} -> timezone
+          _ -> "Etc/UTC"
+        end
 
-    {:ok, socket}
+      pages = scope |> list_pages(:last_updated_at, :desc)
+
+      socket =
+        socket
+        |> assign(pages: pages)
+        |> assign(sort_by: :last_updated_at)
+        |> assign(sort_direction: :desc)
+        |> assign(tz: tz)
+
+      {:ok, socket}
+    end
   end
 
   def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)
