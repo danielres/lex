@@ -10,12 +10,19 @@ defmodule LexWeb.PageLive.Creation do
   end
 
   def reload(socket, scope, slug) do
-    form = scope |> creation_form(slug)
+    form =
+      if socket.assigns.can_edit_pages? do
+        scope |> creation_form(slug)
+      end
 
     socket |> delegate_assign(%{form: form, slug: slug})
   end
 
   @impl true
+  def handle_event(_event, _params, %{assigns: %{can_edit_pages?: false}} = socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("validate", %{"page" => params}, socket) do
     form = socket.assigns.creation.form
     form = form |> AshPhoenix.Form.validate(params)
@@ -44,23 +51,32 @@ defmodule LexWeb.PageLive.Creation do
     end
   end
 
+  attr :can_edit_pages?, :boolean, required: true
   attr :creation, :map, required: true
 
   @impl true
   def render(assigns) do
-    path_preview = path_preview(assigns.creation.form[:title].value)
+    path_preview =
+      if assigns.creation.form do
+        path_preview(assigns.creation.form[:title].value)
+      end
+
     assigns = assigns |> assign(path_preview: path_preview)
 
     ~H"""
     <section class="mx-auto mt-16 max-w-2xs space-y-2 text-center" data-testid="missing-page">
       <div>
         <h1 class="text-xl font-semibold">This page doesn’t exist</h1>
-        <p class="text-base-content/60">
+        <p :if={@can_edit_pages?} class="text-base-content/60">
           Choose a title to create a new page.
+        </p>
+        <p :if={!@can_edit_pages?} class="text-base-content/60">
+          You don’t have permission to create it.
         </p>
       </div>
 
       <.form
+        :if={@can_edit_pages?}
         for={@creation.form}
         id="page-creation-form"
         class="space-y-4"

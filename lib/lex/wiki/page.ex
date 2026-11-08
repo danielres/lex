@@ -1,6 +1,8 @@
 defmodule Lex.Wiki.Page do
   require Ash.Query
 
+  alias Lex.Accounts.Membership.Checks.ActiveMember
+  alias Lex.Accounts.Membership.Checks.HasPrivilege
   alias Lex.Accounts.User
   alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
@@ -11,6 +13,7 @@ defmodule Lex.Wiki.Page do
   use Ash.Resource,
     domain: Lex.Wiki,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
   postgres do
@@ -43,6 +46,16 @@ defmodule Lex.Wiki.Page do
       require_atomic? false
 
       change SetTitleAndSlug
+    end
+  end
+
+  policies do
+    policy action_type(:read) do
+      authorize_if ActiveMember
+    end
+
+    policy action([:create, :rename]) do
+      authorize_if {HasPrivilege, privilege: :edit_pages}
     end
   end
 
@@ -349,7 +362,7 @@ defmodule Lex.Wiki.Page do
       document_key: document_key,
       yjs_state: yjs_state
     })
-    |> Ash.create(scope: scope)
+    |> Ash.create(scope: scope, authorize?: false)
   end
 
   defp save_page_document(

@@ -2,6 +2,8 @@ defmodule Lex.Accounts do
   require Ash.Query
 
   alias Lex.Accounts.Membership
+  alias Lex.Accounts.Membership.Access
+  alias Lex.Accounts.Space
   alias Lex.Accounts.User
 
   use Ash.Domain,
@@ -53,6 +55,10 @@ defmodule Lex.Accounts do
     membership
     |> Ash.Changeset.for_update(:set_privileges, %{privileges: privileges}, scope: scope)
     |> Ash.update()
+  end
+
+  def has_privilege?(scope, %Space{} = space, privilege) do
+    Access.has_privilege?(scope, space, privilege)
   end
 
   def get_membership(scope, %User{} = user) do

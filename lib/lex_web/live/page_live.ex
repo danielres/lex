@@ -5,10 +5,10 @@ defmodule LexWeb.PageLive do
   alias Ash.Error
   alias Ash.Error.Query.NotFound
   alias Ash.Notifier.Notification
+  alias Lex.Accounts
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
-  alias LexWeb.Components.Avatar
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Info
@@ -28,6 +28,11 @@ defmodule LexWeb.PageLive do
   @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
+
+    can_edit_pages? =
+      Accounts.has_privilege?(socket.assigns.scope, socket.assigns.space, :edit_pages)
+
+    socket = socket |> assign(:can_edit_pages?, can_edit_pages?)
 
     if connected?(socket) and !socket.redirected, do: Page.subscribe()
 
@@ -188,6 +193,7 @@ defmodule LexWeb.PageLive do
             />
 
             <Editing.button_toggle
+              :if={@can_edit_pages?}
               editing={@editing}
               active?={@live_action == :editing}
             />
@@ -202,7 +208,11 @@ defmodule LexWeb.PageLive do
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
       </div>
 
-      <Creation.render :if={@page == nil} creation={@creation} />
+      <Creation.render
+        :if={@page == nil}
+        can_edit_pages?={@can_edit_pages?}
+        creation={@creation}
+      />
 
       <div :if={@page} class="min-w-0">
         <div class={[
@@ -238,7 +248,9 @@ defmodule LexWeb.PageLive do
             data-collaborator-display-name={@scope.current_user.display_name}
             data-collaborator-hue={@scope.current_user.hue}
             data-document-id={@page.id}
-            data-editable={to_string(@live_action == :editing && !@editing.saving?)}
+            data-editable={
+              to_string(@can_edit_pages? && @live_action == :editing && !@editing.saving?)
+            }
             data-save-page-event={PageRepository.save_event()}
             data-ensure-page-event={PageRepository.ensure_event()}
             data-load-page-content-event={PageRepository.load_content_event()}
@@ -269,6 +281,7 @@ defmodule LexWeb.PageLive do
             data-resolve-page-event={PageRepository.resolve_event()}
             data-space-id={@space.id}
             page={@page}
+            can_edit_pages?={@can_edit_pages?}
             revisions={@revisions}
             scope={@scope}
             space={@space}

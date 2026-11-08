@@ -13,8 +13,10 @@ defmodule LexWeb.PageLive.Editing do
   end
 
   def reload(socket, page) do
-    scope = socket.assigns.scope
-    form = scope |> title_form(page)
+    form =
+      if socket.assigns.can_edit_pages? do
+        socket.assigns.scope |> title_form(page)
+      end
 
     socket |> delegate_assign(:title_form, form)
   end
@@ -23,6 +25,15 @@ defmodule LexWeb.PageLive.Editing do
   def save_request_event, do: "page_save_requested"
 
   @impl true
+  def handle_event("save", _params, %{assigns: %{can_edit_pages?: false}} = socket) do
+    {:reply, %{ok: false}, socket}
+  end
+
+  def handle_event(event, _params, %{assigns: %{can_edit_pages?: false}} = socket)
+      when event in ["toggle", "title_change", "title_reset", "title_save"] do
+    {:noreply, socket}
+  end
+
   def handle_event("toggle", _params, socket) do
     editing = socket.assigns.editing
 

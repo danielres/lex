@@ -1,9 +1,13 @@
 defmodule Lex.Wiki.PageDocument do
   @moduledoc false
 
+  alias Lex.Accounts.Membership.Checks.ActiveMember
+  alias Lex.Accounts.Membership.Checks.HasPrivilege
+
   use Ash.Resource,
     domain: Lex.Wiki,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
   postgres do
@@ -35,6 +39,16 @@ defmodule Lex.Wiki.PageDocument do
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:content_hash, :lexical_state, :search_text, :yjs_state]
+    end
+  end
+
+  policies do
+    policy action_type(:read) do
+      authorize_if ActiveMember
+    end
+
+    policy action([:persist, :save]) do
+      authorize_if {HasPrivilege, privilege: :edit_pages}
     end
   end
 

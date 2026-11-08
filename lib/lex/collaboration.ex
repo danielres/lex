@@ -42,6 +42,17 @@ defmodule Lex.Collaboration do
     end
   end
 
+  def document_update?(message) do
+    case Sync.message_decode(message) do
+      {:ok, {:sync, {type, update}}}
+      when type in [:sync_step2, :sync_update] and update != @empty_update ->
+        true
+
+      _message ->
+        false
+    end
+  end
+
   def save(scope, page, documents, restored_from_revision_id \\ nil)
 
   def save(_scope, _page, [], _restored_from_revision_id),
