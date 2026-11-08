@@ -73,6 +73,6 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     invited_scope = %Lex.Scope{current_user: invited_user, space_id: owner_scope.space_id}
     assert {:ok, membership} = invited_scope |> Accounts.get_membership(invited_user)
     assert membership.id == invitation.id
-    assert membership.status == :inactive
+    assert membership.status == :declined
   end
 end

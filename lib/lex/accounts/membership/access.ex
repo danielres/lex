@@ -2,9 +2,10 @@ defmodule Lex.Accounts.Membership.Access do
   require Ash.Query
 
   alias Lex.Accounts.Membership
+  alias Lex.Accounts.Privilege
   alias Lex.Accounts.Space
 
-  def has_privilege?(
+  def effective_privileges(
         %Lex.Scope{
           current_user: %{id: user_id},
           current_membership: %Membership{
@@ -14,13 +15,16 @@ defmodule Lex.Accounts.Membership.Access do
             user_id: user_id
           }
         },
-        %Space{id: space_id, owner_id: owner_id},
-        privilege
+        %Space{id: space_id, owner_id: owner_id}
       ) do
-    user_id == owner_id or privilege in privileges
+    if user_id == owner_id, do: Privilege.values(), else: privileges
   end
 
-  def has_privilege?(_scope, _space, _privilege), do: false
+  def effective_privileges(_scope, _space), do: []
+
+  def has_privilege?(scope, space, privilege) do
+    privilege in effective_privileges(scope, space)
+  end
 
   def check_active_member(actor_id, space_id) do
     actor_id
