@@ -11,8 +11,8 @@ defmodule Lex.Wiki.PageTest do
     test "creates a page with a slug derived from its title", %{scope: scope} do
       assert {:ok, page} = scope |> Page.ensure("Summer Activities")
 
-      assert page.author.id == scope.current_user.id
-      assert page.author_id == scope.current_user.id
+      assert page.author.id == scope.user.id
+      assert page.author_id == scope.user.id
       assert page.title == "Summer Activities"
       assert page.slug == "summer-activities"
       assert {:ok, page.id} == Ecto.UUID.cast(page.id)
@@ -22,7 +22,7 @@ defmodule Lex.Wiki.PageTest do
       result =
         Page
         |> Ash.Changeset.for_create(:create, %{title: "Summer Activities"},
-          tenant: scope.space_id
+          tenant: scope.space.id
         )
         |> Ash.create()
 
@@ -132,7 +132,7 @@ defmodule Lex.Wiki.PageTest do
       renamed_page = Page.rename!(page, "  Winter   Activities ", scope: scope)
 
       assert renamed_page.id == page.id
-      assert renamed_page.author.id == scope.current_user.id
+      assert renamed_page.author.id == scope.user.id
       assert renamed_page.author_id == page.author_id
       assert renamed_page.title == "Winter Activities"
       assert renamed_page.slug == "winter-activities"
@@ -179,7 +179,7 @@ defmodule Lex.Wiki.PageTest do
       scope |> Page.ensure!("Home")
 
       assert [%{author: author}] = Page.list!(scope: scope)
-      assert author.id == scope.current_user.id
+      assert author.id == scope.user.id
     end
   end
 end

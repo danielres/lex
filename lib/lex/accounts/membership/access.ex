@@ -5,25 +5,23 @@ defmodule Lex.Accounts.Membership.Access do
   alias Lex.Accounts.Privilege
   alias Lex.Accounts.Space
 
-  def effective_privileges(
-        %Lex.Scope{
-          current_user: %{id: user_id},
-          current_membership: %Membership{
-            status: :active,
-            privileges: privileges,
-            space_id: space_id,
-            user_id: user_id
-          }
+  def effective_privileges(%Lex.Scope{
+        user: %{id: user_id},
+        membership: %Membership{
+          status: :active,
+          privileges: privileges,
+          space_id: space_id,
+          user_id: user_id
         },
-        %Space{id: space_id, owner_id: owner_id}
-      ) do
+        space: %Space{id: space_id, owner_id: owner_id}
+      }) do
     if user_id == owner_id, do: Privilege.values(), else: privileges
   end
 
-  def effective_privileges(_scope, _space), do: []
+  def effective_privileges(_scope), do: []
 
-  def has_privilege?(scope, space, privilege) do
-    privilege in effective_privileges(scope, space)
+  def has_privilege?(scope, privilege) do
+    privilege in effective_privileges(scope)
   end
 
   def check_active_member(actor_id, space_id) do

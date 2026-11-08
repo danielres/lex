@@ -34,7 +34,6 @@ defmodule LexWeb.Layouts do
   attr :editing?, :boolean, default: false
   attr :scope, :map, required: true
   attr :socket, :any, required: true
-  attr :space, :map, required: true
   attr :ui, :map, required: true
 
   slot :inner_block, required: true
@@ -54,7 +53,6 @@ defmodule LexWeb.Layouts do
         <Navbar.render
           drawer_open?={@ui.drawer_open?}
           scope={@scope}
-          space={@space}
         />
       </div>
 
@@ -63,7 +61,6 @@ defmodule LexWeb.Layouts do
         open?={@ui.drawer_open?}
         scope={@scope}
         socket={@socket}
-        space={@space}
       >
         <main class="min-w-0 max-w-full p-2 sm:p-8">
           {render_slot(@inner_block)}

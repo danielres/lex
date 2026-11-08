@@ -22,7 +22,7 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(
              view,
              ~s|[data-testid="page-list-author-#{home.id}"]|,
-             scope.current_user.display_name
+             scope.user.display_name
            )
 
     assert has_element?(
@@ -34,7 +34,7 @@ defmodule LexWeb.WikiLiveTest do
     assert has_element?(
              view,
              ~s|[data-testid="page-list-author-#{summer_activities.id}"]|,
-             scope.current_user.display_name
+             scope.user.display_name
            )
   end
 
@@ -55,7 +55,7 @@ defmodule LexWeb.WikiLiveTest do
 
   test "shows the author of a page created by another user", %{conn: conn, scope: scope} do
     other_user = create_user("Other User")
-    other_scope = %{scope | current_user: other_user}
+    other_scope = %{scope | user: other_user}
     page = other_scope |> Page.ensure!("Shared Knowledge")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")

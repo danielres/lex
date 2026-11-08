@@ -12,9 +12,9 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     conn: conn,
     current_user: current_user
   } do
-    scope = %Lex.Scope{current_user: current_user}
+    scope = %Lex.Scope{user: current_user}
     space = Space.create!(%{name: "Test Space"}, scope: scope)
-    scope = %{scope | space_id: space.id}
+    scope = %{scope | space: space}
 
     assert {:error, {:redirect, %{to: "/test-space/join"}}} =
              live(conn, ~p"/test-space")
@@ -38,7 +38,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     |> render_submit()
 
     assert_redirect(view, ~p"/test-space")
-    assert {:ok, membership} = scope |> Accounts.get_membership(current_user)
+    assert {:ok, membership} = scope |> Accounts.get_membership()
     assert membership.status == :active
     assert membership.display_name == "Space Identity"
   end
@@ -52,7 +52,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     assert {:error, {:redirect, %{to: "/test-space"}}} =
              live(conn, ~p"/test-space/join")
 
-    assert scope.current_membership.status == :active
+    assert scope.membership.status == :active
   end
 
   test "lets an invited member decline", %{conn: conn} do
@@ -70,8 +70,8 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
 
     assert_redirect(view, ~p"/")
 
-    invited_scope = %Lex.Scope{current_user: invited_user, space_id: owner_scope.space_id}
-    assert {:ok, membership} = invited_scope |> Accounts.get_membership(invited_user)
+    invited_scope = %Lex.Scope{space: owner_scope.space, user: invited_user}
+    assert {:ok, membership} = invited_scope |> Accounts.get_membership()
     assert membership.id == invitation.id
     assert membership.status == :declined
   end

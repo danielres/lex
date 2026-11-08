@@ -85,7 +85,6 @@ defmodule LexWeb.PageLive.Revisions do
       when is_list(documents) do
     page = socket.assigns.page
     scope = socket.assigns.scope
-    space = socket.assigns.space
 
     scope
     |> Collaboration.save(page, documents, revision_id)
@@ -95,7 +94,7 @@ defmodule LexWeb.PageLive.Revisions do
           socket
           |> delegate_assign(:restoring?, false)
           |> put_flash(:info, "Revision restored")
-          |> push_patch(to: ~p"/#{space.slug}/wiki/#{page.slug}")
+          |> push_patch(to: ~p"/#{scope.space.slug}/wiki/#{page.slug}")
 
         {:reply, %{ok: true}, socket}
 
@@ -149,7 +148,7 @@ defmodule LexWeb.PageLive.Revisions do
   @impl true
   def render(assigns) do
     ~H"""
-    <% current_user = @scope.current_user %>
+    <% user = @scope.user %>
     <div
       :if={@revisions.selected}
       class={[
@@ -197,7 +196,7 @@ defmodule LexWeb.PageLive.Revisions do
           aria-label="Previous revision"
           class="btn btn-square hover:btn-info"
           id="previous-revision"
-          patch={~p"/#{@space.slug}/wiki/#{@page.slug}/revisions/#{previous(@revisions).id}"}
+          patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}/revisions/#{previous(@revisions).id}"}
         >
           <.icon name="hero-chevron-left-micro" class="size-4" />
         </.link>
@@ -216,7 +215,7 @@ defmodule LexWeb.PageLive.Revisions do
           aria-label="Next revision"
           class="btn btn-square hover:btn-info"
           id="next-revision"
-          patch={~p"/#{@space.slug}/wiki/#{@page.slug}/revisions/#{next(@revisions).id}"}
+          patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}/revisions/#{next(@revisions).id}"}
         >
           <.icon name="hero-chevron-right-micro" class="size-4" />
         </.link>
@@ -246,8 +245,8 @@ defmodule LexWeb.PageLive.Revisions do
     <div
       :if={@revisions.selected}
       class="lexical-editor"
-      data-collaborator-display-name={current_user.display_name}
-      data-collaborator-hue={current_user.hue}
+      data-collaborator-display-name={user.display_name}
+      data-collaborator-hue={user.hue}
       data-save-page-event={assigns[:"data-save-page-event"]}
       data-lexical-state={Jason.encode!(@revisions.selected.lexical_state)}
       data-load-page-content-event={assigns[:"data-load-page-content-event"]}

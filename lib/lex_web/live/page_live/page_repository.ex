@@ -16,9 +16,9 @@ defmodule LexWeb.PageLive.PageRepository do
     socket |> delegate_assign(:pages, pages)
   end
 
-  def encode(page_repository, space) do
+  def encode(page_repository, scope) do
     page_repository.pages
-    |> Enum.map(fn page -> space |> page_reference(page) end)
+    |> Enum.map(fn page -> scope.space |> page_reference(page) end)
     |> Jason.encode!()
   end
 
@@ -35,13 +35,12 @@ defmodule LexWeb.PageLive.PageRepository do
   @impl true
   def handle_event("ensure", %{"title" => title}, socket) do
     scope = socket.assigns.scope
-    space = socket.assigns.space
 
     scope
     |> Page.ensure(title)
     |> case do
       {:ok, page} ->
-        reference = space |> page_reference(page)
+        reference = scope.space |> page_reference(page)
 
         {:reply, %{ok: true, page: reference}, socket}
 
@@ -54,11 +53,10 @@ defmodule LexWeb.PageLive.PageRepository do
 
   def handle_event("resolve", %{"id" => id}, socket) do
     scope = socket.assigns.scope
-    space = socket.assigns.space
 
     case Page.get(id, scope: scope) do
       {:ok, page} ->
-        reference = space |> page_reference(page)
+        reference = scope.space |> page_reference(page)
 
         {:reply, %{ok: true, page: reference}, socket}
 
