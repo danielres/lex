@@ -5,6 +5,8 @@ defmodule Lex.Accounts.Membership.Access do
   alias Lex.Accounts.Privilege
   alias Lex.Accounts.Space
 
+  def available_privileges, do: Privilege.values()
+
   def effective_privileges(%Lex.Scope{
         user: %{id: user_id},
         membership: %Membership{
@@ -20,7 +22,7 @@ defmodule Lex.Accounts.Membership.Access do
 
   def effective_privileges(_scope), do: []
 
-  def has_privilege?(scope, privilege) do
+  def can?(scope, privilege) do
     privilege in effective_privileges(scope)
   end
 

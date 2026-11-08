@@ -59,10 +59,6 @@ defmodule LexWeb.PageLive.Revisions do
   def position(revisions), do: length(revisions.entries) - revisions.selected_index
 
   @impl true
-  def handle_event("restore", _params, %{assigns: %{can_edit_pages?: false}} = socket) do
-    {:noreply, socket}
-  end
-
   def handle_event("restore", _params, socket) do
     revision = socket.assigns.revisions.selected
 
@@ -230,7 +226,7 @@ defmodule LexWeb.PageLive.Revisions do
           <.icon name="hero-chevron-right-micro" class="size-4" />
         </button>
         <button
-          :if={@can_edit_pages?}
+          :if={can?(@scope, :edit_pages)}
           aria-label="Restore revision"
           class="btn btn-info rounded"
           disabled={@revisions.restoring?}

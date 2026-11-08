@@ -3,7 +3,7 @@ defmodule LexWeb.PageLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Collaboration
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
@@ -57,10 +57,10 @@ defmodule LexWeb.PageLiveTest do
   } do
     page = scope |> Page.ensure!("Existing Page")
     member = create_user("Reader")
-    {:ok, membership} = scope |> Accounts.invite_membership(member)
+    {:ok, membership} = scope |> Membership.invite(member.id)
     member_scope = %{scope | membership: membership, user: member}
-    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
-    {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
+    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
     member_scope = %{member_scope | membership: membership}
     conn = conn |> recycle() |> log_in_user(member)
 

@@ -3,7 +3,7 @@ defmodule LexWeb.MembersLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
 
   setup :authenticate
 
@@ -15,7 +15,7 @@ defmodule LexWeb.MembersLiveTest do
     member = create_user("Directory Member")
     member_scope = scope |> add_member(member, "Member Profile")
     invited_user = create_user("Invited Person")
-    {:ok, _membership} = scope |> Accounts.invite_membership(invited_user)
+    {:ok, _membership} = scope |> Membership.invite(invited_user.id)
     conn = conn |> recycle() |> log_in_user(member)
 
     {:ok, view, _html} = live(conn, ~p"/test-space/members")
@@ -42,7 +42,7 @@ defmodule LexWeb.MembersLiveTest do
     refute has_element?(view, "[data-testid='invite-member'][phx-value-user_id='#{user.id}']")
 
     invited_scope = %{scope | membership: nil, user: user}
-    assert {:ok, membership} = invited_scope |> Accounts.get_membership()
+    assert {:ok, membership} = invited_scope |> Membership.get()
     assert membership.status == :invited
   end
 
@@ -59,28 +59,28 @@ defmodule LexWeb.MembersLiveTest do
     )
     |> render_click()
 
-    assert {:ok, membership} = scope |> Accounts.get_membership(membership.id)
+    assert {:ok, membership} = scope |> Membership.get(membership.id)
     assert membership.privileges == []
 
     view
     |> element("[data-testid='disable-member'][phx-value-membership_id='#{membership.id}']")
     |> render_click()
 
-    assert {:ok, membership} = scope |> Accounts.get_membership(membership.id)
+    assert {:ok, membership} = scope |> Membership.get(membership.id)
     assert membership.status == :disabled
 
     view
     |> element("[data-testid='reinvite-member'][phx-value-membership_id='#{membership.id}']")
     |> render_click()
 
-    assert {:ok, membership} = scope |> Accounts.get_membership(membership.id)
+    assert {:ok, membership} = scope |> Membership.get(membership.id)
     assert membership.status == :invited
   end
 
   defp add_member(scope, user, display_name) do
-    {:ok, membership} = scope |> Accounts.invite_membership(user)
+    {:ok, membership} = scope |> Membership.invite(user.id)
     member_scope = %{scope | membership: membership, user: user}
-    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, display_name)
+    {:ok, membership} = member_scope |> Membership.accept(membership, display_name)
 
     %{member_scope | membership: membership}
   end

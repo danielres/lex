@@ -3,7 +3,7 @@ defmodule LexWeb.CollaborationSocketTest do
 
   require Phoenix.ChannelTest
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
 
   @endpoint LexWeb.Endpoint
@@ -13,8 +13,8 @@ defmodule LexWeb.CollaborationSocketTest do
     actor_scope = %Lex.Scope{user: current_user}
     space = Space.create!(%{name: "Test Space"}, scope: actor_scope)
     scope = %{actor_scope | space: space}
-    {:ok, membership} = scope |> Accounts.get_membership()
-    {:ok, membership} = scope |> Accounts.accept_membership(membership, "Test Member")
+    {:ok, membership} = scope |> Membership.get()
+    {:ok, membership} = scope |> Membership.accept(membership, "Test Member")
     conn = log_in_user(conn, current_user)
 
     assert {:ok, socket} =
@@ -33,10 +33,10 @@ defmodule LexWeb.CollaborationSocketTest do
   test "connects active members without editing privileges as read-only", %{conn: conn} do
     owner_scope = create_scope()
     member = create_user("Reader")
-    {:ok, membership} = owner_scope |> Accounts.invite_membership(member)
+    {:ok, membership} = owner_scope |> Membership.invite(member.id)
     member_scope = %{owner_scope | membership: membership, user: member}
-    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
-    {:ok, membership} = owner_scope |> Accounts.set_membership_privileges(membership, [])
+    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
+    {:ok, membership} = owner_scope |> Membership.set_privileges(membership, [])
     conn = conn |> log_in_user(member)
 
     assert {:ok, socket} =

@@ -3,7 +3,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
 
   setup :authenticate
@@ -38,7 +38,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     |> render_submit()
 
     assert_redirect(view, ~p"/test-space")
-    assert {:ok, membership} = scope |> Accounts.get_membership()
+    assert {:ok, membership} = scope |> Membership.get()
     assert membership.status == :active
     assert membership.display_name == "Space Identity"
   end
@@ -59,7 +59,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     owner = create_user("Owner")
     owner_scope = create_scope("Test Space", owner)
     invited_user = create_user("Invited User")
-    {:ok, invitation} = owner_scope |> Accounts.invite_membership(invited_user)
+    {:ok, invitation} = owner_scope |> Membership.invite(invited_user.id)
     conn = conn |> log_in_user(invited_user)
 
     {:ok, view, _html} = live(conn, ~p"/test-space/join")
@@ -71,7 +71,7 @@ defmodule LexWeb.MembershipOnboardingLiveTest do
     assert_redirect(view, ~p"/")
 
     invited_scope = %Lex.Scope{space: owner_scope.space, user: invited_user}
-    assert {:ok, membership} = invited_scope |> Accounts.get_membership()
+    assert {:ok, membership} = invited_scope |> Membership.get()
     assert membership.id == invitation.id
     assert membership.status == :declined
   end
