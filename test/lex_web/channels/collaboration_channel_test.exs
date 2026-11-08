@@ -276,8 +276,8 @@ defmodule LexWeb.CollaborationChannelTest do
     caption_room = "#{page.id}/caption-1"
     main_editor = create_user("Main Editor")
     caption_editor = create_user("Caption Editor")
-    main_editor_scope = %{scope | current_user: main_editor}
-    caption_editor_scope = %{scope | current_user: caption_editor}
+    main_editor_scope = %{scope | user: main_editor}
+    caption_editor_scope = %{scope | user: caption_editor}
     saver_socket = scope |> join_channel(main_room)
     main_socket = main_editor_scope |> join_channel(main_room)
     caption_socket = caption_editor_scope |> join_channel(caption_room)
@@ -310,7 +310,7 @@ defmodule LexWeb.CollaborationChannelTest do
     [revision] = scope |> Page.list_revisions!(page)
     contributor_ids = Enum.map(revision.contributors, & &1.id)
 
-    assert revision.saved_by.id == scope.current_user.id
+    assert revision.saved_by.id == scope.user.id
     assert Enum.sort(contributor_ids) == Enum.sort([main_editor.id, caption_editor.id])
     assert Contributors.capture([main_room, caption_room]).contributor_ids == []
 
@@ -400,11 +400,11 @@ defmodule LexWeb.CollaborationChannelTest do
   defp read_only_member_scope(scope) do
     member = create_user("Reader")
     {:ok, membership} = scope |> Accounts.invite_membership(member)
-    member_scope = %{scope | current_membership: membership, current_user: member}
+    member_scope = %{scope | membership: membership, user: member}
     {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
     {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
 
-    %{member_scope | current_membership: membership}
+    %{member_scope | membership: membership}
   end
 
   defp sync_step1_message do

@@ -17,10 +17,10 @@ defmodule LexWeb.MembershipOnboardingLive do
       scope = socket.assigns.scope
 
       form =
-        scope.current_membership
+        scope.membership
         |> AshPhoenix.Form.for_update(:accept,
           as: "membership",
-          params: %{"display_name" => scope.current_user.display_name},
+          params: %{"display_name" => scope.user.display_name},
           scope: scope
         )
         |> to_form()
@@ -44,7 +44,7 @@ defmodule LexWeb.MembershipOnboardingLive do
     |> AshPhoenix.Form.submit(params: params)
     |> case do
       {:ok, _membership} ->
-        socket = socket |> push_navigate(to: ~p"/#{socket.assigns.space.slug}")
+        socket = socket |> push_navigate(to: ~p"/#{socket.assigns.scope.space.slug}")
 
         {:noreply, socket}
 
@@ -59,7 +59,7 @@ defmodule LexWeb.MembershipOnboardingLive do
     scope = socket.assigns.scope
 
     scope
-    |> Accounts.decline_membership(scope.current_membership)
+    |> Accounts.decline_membership(scope.membership)
     |> case do
       {:ok, _membership} ->
         socket = socket |> push_navigate(to: ~p"/")
@@ -78,7 +78,7 @@ defmodule LexWeb.MembershipOnboardingLive do
       <div class="w-full max-w-md space-y-6 rounded-box bg-base-200 p-6 shadow-sm">
         <div class="space-y-1">
           <p class="text-sm text-base-content/60">Join space</p>
-          <h1 class="text-2xl font-semibold">{@space.name}</h1>
+          <h1 class="text-2xl font-semibold">{@scope.space.name}</h1>
           <p class="text-sm text-base-content/70">
             Choose the name other members will see in this space. It cannot be changed later.
           </p>
@@ -99,7 +99,7 @@ defmodule LexWeb.MembershipOnboardingLive do
 
           <div class="flex justify-between gap-3">
             <button
-              :if={@space.owner_id != @scope.current_user.id}
+              :if={@scope.space.owner_id != @scope.user.id}
               class="btn btn-ghost"
               data-testid="decline-membership"
               phx-click="decline"

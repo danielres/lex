@@ -9,7 +9,6 @@ defmodule LexWeb.Layouts.Drawer do
   attr :open?, :boolean, required: true
   attr :scope, :map, required: true
   attr :socket, :any, required: true
-  attr :space, :map, required: true
   slot :inner_block, required: true
 
   def render(assigns) do
@@ -25,7 +24,7 @@ defmodule LexWeb.Layouts.Drawer do
           <.main_links
             active={@active}
             open?={@open?}
-            space={@space}
+            scope={@scope}
           />
         </div>
 
@@ -63,7 +62,7 @@ defmodule LexWeb.Layouts.Drawer do
 
   attr :active, :string, required: true
   attr :open?, :boolean, required: true
-  attr :space, :map, required: true
+  attr :scope, :map, required: true
 
   defp main_links(assigns) do
     ~H"""
@@ -82,7 +81,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@space.slug}"}
+          navigate={~p"/#{@scope.space.slug}"}
           class={[
             link_class,
             @active == "space" && active_class
@@ -95,7 +94,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@space.slug}/members"}
+          navigate={~p"/#{@scope.space.slug}/members"}
           class={[
             link_class,
             @active == "members" && active_class
@@ -108,7 +107,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@space.slug}/wiki/home"}
+          navigate={~p"/#{@scope.space.slug}/wiki/home"}
           class={[
             link_class,
             @active == "page" && active_class,

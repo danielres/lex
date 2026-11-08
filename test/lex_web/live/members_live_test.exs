@@ -21,17 +21,35 @@ defmodule LexWeb.MembersLiveTest do
     {:ok, view, _html} = live(conn, ~p"/test-space/members")
 
     assert has_element?(view, "[data-testid='membership']", "Member Profile")
-    assert has_element?(view, "[data-testid='membership']", scope.current_membership.display_name)
+    assert has_element?(view, "[data-testid='membership']", scope.membership.display_name)
     refute has_element?(view, "[data-testid='membership']", "Invited Person")
     refute has_element?(view, "[data-testid='membership-privilege']")
     refute has_element?(view, "[data-testid='disable-member']")
-    assert member_scope.current_membership.status == :active
+    refute has_element?(view, "[data-testid='invite-members']")
+    assert member_scope.membership.status == :active
+  end
+
+  test "the owner can invite an existing user", %{conn: conn, scope: scope} do
+    user = create_user("New Member")
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/members")
+
+    view
+    |> element("[data-testid='invite-member'][phx-value-user_id='#{user.id}']")
+    |> render_click()
+
+    assert has_element?(view, "[data-testid='membership']", "New Member")
+    refute has_element?(view, "[data-testid='invite-member'][phx-value-user_id='#{user.id}']")
+
+    invited_scope = %{scope | membership: nil, user: user}
+    assert {:ok, membership} = invited_scope |> Accounts.get_membership()
+    assert membership.status == :invited
   end
 
   test "the owner can change privileges and membership lifecycle", %{conn: conn, scope: scope} do
     member = create_user("Managed Member")
     member_scope = scope |> add_member(member, "Managed Profile")
-    membership = member_scope.current_membership
+    membership = member_scope.membership
 
     {:ok, view, _html} = live(conn, ~p"/test-space/members")
 
@@ -61,9 +79,9 @@ defmodule LexWeb.MembersLiveTest do
 
   defp add_member(scope, user, display_name) do
     {:ok, membership} = scope |> Accounts.invite_membership(user)
-    member_scope = %{scope | current_membership: membership, current_user: user}
+    member_scope = %{scope | membership: membership, user: user}
     {:ok, membership} = member_scope |> Accounts.accept_membership(membership, display_name)
 
-    %{member_scope | current_membership: membership}
+    %{member_scope | membership: membership}
   end
 end

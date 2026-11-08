@@ -58,10 +58,10 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Existing Page")
     member = create_user("Reader")
     {:ok, membership} = scope |> Accounts.invite_membership(member)
-    member_scope = %{scope | current_membership: membership, current_user: member}
+    member_scope = %{scope | membership: membership, user: member}
     {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
     {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
-    member_scope = %{member_scope | current_membership: membership}
+    member_scope = %{member_scope | membership: membership}
     conn = conn |> recycle() |> log_in_user(member)
 
     assert {:ok, fetched_page} = member_scope |> Page.fetch_by_slug(page.slug)
@@ -111,7 +111,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, _view, first_html} = live(conn, ~p"/test-space/wiki/summer-activities")
     [page] = Ash.read!(Page, scope: scope)
 
-    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    second_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, _view, second_html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     assert first_html =~ ~s(data-document-id="#{page.id}")
@@ -123,7 +123,7 @@ defmodule LexWeb.PageLiveTest do
     scope |> Page.ensure!("Home")
     scope |> Page.ensure!("Summer Activities")
     {:ok, _view, home_html} = live(conn, ~p"/test-space/wiki/home")
-    summer_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    summer_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, _view, summer_html} = live(summer_conn, ~p"/test-space/wiki/summer-activities")
 
     [home, summer] = Page |> Ash.Query.sort(:slug) |> Ash.read!(scope: scope)
@@ -177,7 +177,7 @@ defmodule LexWeb.PageLiveTest do
 
   test "does not expose content updates from another space", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
-    other_scope = create_scope("Other Space", scope.current_user)
+    other_scope = create_scope("Other Space", scope.user)
     other_page = other_scope |> Page.ensure!("Private Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
     snapshot = document_snapshot("main", "Private content")
@@ -302,7 +302,7 @@ defmodule LexWeb.PageLiveTest do
   test "propagates a rename to other viewers of the same page", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Summer Activities")
     {:ok, first_view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
-    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    second_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, second_view, _html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(first_view)

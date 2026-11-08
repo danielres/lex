@@ -93,13 +93,12 @@ defmodule LexWeb.WikiLive do
       flash={@flash}
       scope={@scope}
       socket={@socket}
-      space={@space}
       ui={@ui}
     >
       <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">
           <.link
-            navigate={~p"/#{@space.slug}/wiki/home"}
+            navigate={~p"/#{@scope.space.slug}/wiki/home"}
             class="btn btn-info px-2 rounded-box"
           >
             <.icon name="hero-home-micro" />
@@ -154,7 +153,7 @@ defmodule LexWeb.WikiLive do
                       "hover:text-info",
                       "transition"
                     ]}
-                    navigate={~p"/#{@space.slug}/wiki/#{page.slug}"}
+                    navigate={~p"/#{@scope.space.slug}/wiki/#{page.slug}"}
                   >
                     {page.title}
                     <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />

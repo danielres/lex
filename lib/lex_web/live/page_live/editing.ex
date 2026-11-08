@@ -69,7 +69,7 @@ defmodule LexWeb.PageLive.Editing do
           |> assign(:live_action, :show)
           |> push_patch(
             replace: true,
-            to: ~p"/#{socket.assigns.space.slug}/wiki/#{socket.assigns.page.slug}"
+            to: ~p"/#{socket.assigns.scope.space.slug}/wiki/#{socket.assigns.page.slug}"
           )
 
         {:reply, %{ok: true, result: counts}, socket}

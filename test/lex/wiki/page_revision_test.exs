@@ -62,7 +62,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     [revision] = scope |> Page.list_revisions!(page)
 
-    assert revision.saved_by.id == scope.current_user.id
+    assert revision.saved_by.id == scope.user.id
     assert Enum.map(revision.contributors, & &1.id) == [contributor.id]
   end
 

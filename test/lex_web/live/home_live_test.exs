@@ -12,7 +12,7 @@ defmodule LexWeb.HomeLiveTest do
     conn: conn,
     current_user: current_user
   } do
-    scope = %Lex.Scope{current_user: current_user}
+    scope = %Lex.Scope{user: current_user}
     existing_space = Space.create!(%{name: "Existing Space"}, scope: scope)
 
     {:ok, view, _html} = live(conn, ~p"/")

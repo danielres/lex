@@ -8,12 +8,12 @@ defmodule LexWeb.PresencesLive do
 
   @impl true
   def mount(_params, %{"scope" => scope}, socket) do
-    current_user = scope.current_user
+    user = scope.user
 
     presence = %{
-      id: current_user.id,
-      display_name: current_user.display_name,
-      hue: current_user.hue
+      id: user.id,
+      display_name: user.display_name,
+      hue: user.hue
     }
 
     socket =

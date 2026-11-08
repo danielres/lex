@@ -21,7 +21,6 @@ defmodule LexWeb.SpaceLive do
       flash={@flash}
       scope={@scope}
       socket={@socket}
-      space={@space}
       ui={@ui}
     >
       <div class="space-y-2">
@@ -36,7 +35,7 @@ defmodule LexWeb.SpaceLive do
           "text-2xl",
           "border-b-2 border-base-content/20"
         ]}>
-          {@space.name}
+          {@scope.space.name}
         </h1>
       </div>
     </Layouts.app>

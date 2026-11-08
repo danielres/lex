@@ -13,12 +13,12 @@ defmodule LexWeb.CollaborationSocket do
     with {:ok, space_id} <- Ecto.UUID.cast(space_id),
          {:ok, current_user} <-
            Helpers.authenticate_resource_from_session(User, session, :lex, []),
-         scope = %Lex.Scope{current_user: current_user, space_id: space_id},
+         {:ok, space} <- Ash.get(Space, space_id, authorize?: false),
+         scope = %Lex.Scope{space: space, user: current_user},
          {:ok, %{status: :active} = membership} <-
-           Accounts.get_membership(scope, current_user),
-         {:ok, space} <- Ash.get(Space, space_id, authorize?: false) do
-      scope = %{scope | current_membership: membership}
-      can_edit_pages? = Accounts.has_privilege?(scope, space, :edit_pages)
+           Accounts.get_membership(scope) do
+      scope = %{scope | membership: membership}
+      can_edit_pages? = Accounts.has_privilege?(scope, :edit_pages)
 
       socket =
         socket

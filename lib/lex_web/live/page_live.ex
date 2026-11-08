@@ -29,8 +29,7 @@ defmodule LexWeb.PageLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
 
-    can_edit_pages? =
-      Accounts.has_privilege?(socket.assigns.scope, socket.assigns.space, :edit_pages)
+    can_edit_pages? = Accounts.has_privilege?(socket.assigns.scope, :edit_pages)
 
     socket = socket |> assign(:can_edit_pages?, can_edit_pages?)
 
@@ -125,7 +124,7 @@ defmodule LexWeb.PageLive do
         socket
       ) do
     page = socket.assigns.page
-    space = socket.assigns.space
+    space = socket.assigns.scope.space
     creation = socket.assigns.creation
 
     socket =
@@ -178,7 +177,6 @@ defmodule LexWeb.PageLive do
       flash={@flash}
       scope={@scope}
       socket={@socket}
-      space={@space}
       ui={@ui}
     >
       <div class="fixed top-4 sm:top-0 sm:sticky right-0 sm:right-2 z-30 sm:w-full sm:flex sm:justify-end sm:h-0">
@@ -189,7 +187,7 @@ defmodule LexWeb.PageLive do
             <Revisions.button_toggle
               active?={@live_action == :revisions}
               page={@page}
-              space={@space}
+              scope={@scope}
             />
 
             <Editing.button_toggle
@@ -202,7 +200,10 @@ defmodule LexWeb.PageLive do
       </div>
 
       <div :if={@page != nil} class="text-base-content/50">
-        <.link class="hover:text-base-content transition" navigate={~p"/#{@space.slug}/wiki"}>
+        <.link
+          class="hover:text-base-content transition"
+          navigate={~p"/#{@scope.space.slug}/wiki"}
+        >
           Wiki
         </.link>
         <.icon name="hero-chevron-right-micro" class="opacity-50" />
@@ -245,8 +246,8 @@ defmodule LexWeb.PageLive do
           <div
             class="lexical-editor"
             data-save-event={Editing.save_event()}
-            data-collaborator-display-name={@scope.current_user.display_name}
-            data-collaborator-hue={@scope.current_user.hue}
+            data-collaborator-display-name={@scope.user.display_name}
+            data-collaborator-hue={@scope.user.hue}
             data-document-id={@page.id}
             data-editable={
               to_string(@can_edit_pages? && @live_action == :editing && !@editing.saving?)
@@ -254,13 +255,13 @@ defmodule LexWeb.PageLive do
             data-save-page-event={PageRepository.save_event()}
             data-ensure-page-event={PageRepository.ensure_event()}
             data-load-page-content-event={PageRepository.load_content_event()}
-            data-pages={PageRepository.encode(@page_repository, @space)}
+            data-pages={PageRepository.encode(@page_repository, @scope)}
             data-resolve-page-event={PageRepository.resolve_event()}
             data-restore-commit-event={Revisions.commit_restore_event()}
             data-restore-preserve-event={Revisions.preserve_event()}
             data-restore-request-event={Revisions.restore_request_event()}
             data-save-request-event={Editing.save_request_event()}
-            data-space-id={@space.id}
+            data-space-id={@scope.space.id}
             id={"lexical-editor-#{@page.id}"}
             phx-hook="LexicalEditor"
             phx-update="ignore"
@@ -277,14 +278,13 @@ defmodule LexWeb.PageLive do
             data-save-page-event={PageRepository.save_event()}
             data-load-page-content-event={PageRepository.load_content_event()}
             data-page-id={@page.id}
-            data-pages={PageRepository.encode(@page_repository, @space)}
+            data-pages={PageRepository.encode(@page_repository, @scope)}
             data-resolve-page-event={PageRepository.resolve_event()}
-            data-space-id={@space.id}
+            data-space-id={@scope.space.id}
             page={@page}
             can_edit_pages?={@can_edit_pages?}
             revisions={@revisions}
             scope={@scope}
-            space={@space}
             page_repository={@page_repository}
           />
         </section>
@@ -312,7 +312,7 @@ defmodule LexWeb.PageLive do
            assigns: %{
              live_action: :revisions,
              revisions: %{requested_id: revision_id},
-             space: %{slug: space_slug}
+             scope: %{space: %{slug: space_slug}}
            }
          },
          page
@@ -321,11 +321,11 @@ defmodule LexWeb.PageLive do
        do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions/#{revision_id}"
 
   defp page_path(
-         %{assigns: %{live_action: :revisions, space: %{slug: space_slug}}},
+         %{assigns: %{live_action: :revisions, scope: %{space: %{slug: space_slug}}}},
          page
        ),
        do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions"
 
-  defp page_path(%{assigns: %{space: %{slug: space_slug}}}, page),
+  defp page_path(%{assigns: %{scope: %{space: %{slug: space_slug}}}}, page),
     do: ~p"/#{space_slug}/wiki/#{page.slug}"
 end

@@ -39,10 +39,10 @@ defmodule LexWeb.CollaborationChannel do
 
   def handle_in("yjs", message, socket) when is_binary(message) do
     if socket.assigns.can_edit_pages? or !Collaboration.document_update?(message) do
-      current_user = socket.assigns.scope.current_user
+      user = socket.assigns.scope.user
 
       :ok = SharedDoc.send_yjs_message(socket.assigns.shared_doc, message)
-      :ok = Collaboration.record_update(socket.assigns.room, current_user.id, message)
+      :ok = Collaboration.record_update(socket.assigns.room, user.id, message)
 
       {:noreply, socket}
     else

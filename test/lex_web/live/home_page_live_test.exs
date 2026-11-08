@@ -3,7 +3,6 @@ defmodule LexWeb.HomePageLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Lex.Accounts.Space
   alias Lex.Wiki.Page
 
   setup :authenticate
@@ -14,8 +13,8 @@ defmodule LexWeb.HomePageLiveTest do
   } do
     first_scope = create_scope("First Space", current_user)
     second_scope = create_scope("Second Space", current_user)
-    first_space = Ash.get!(Space, first_scope.space_id, scope: first_scope)
-    second_space = Ash.get!(Space, second_scope.space_id, scope: second_scope)
+    first_space = first_scope.space
+    second_space = second_scope.space
 
     {:ok, first_view, _html} = live(conn, ~p"/#{first_space.slug}/wiki/home")
     second_conn = conn |> recycle() |> log_in_user(current_user)
@@ -57,7 +56,7 @@ defmodule LexWeb.HomePageLiveTest do
     current_user: current_user
   } do
     scope = create_scope("Test Space", current_user)
-    space = Ash.get!(Space, scope.space_id, scope: scope)
+    space = scope.space
 
     {:ok, view, _html} = live(conn, ~p"/#{space.slug}/wiki/new-page")
 

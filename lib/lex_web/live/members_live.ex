@@ -16,10 +16,8 @@ defmodule LexWeb.MembersLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
     scope = socket.assigns.scope
-    space = socket.assigns.space
-
-    available_privileges = Privilege.values()
-    effective_privileges = scope |> Accounts.effective_privileges(space)
+    available_privileges = Accounts.available_privileges()
+    effective_privileges = scope |> Accounts.effective_privileges()
 
     socket =
       socket
@@ -49,6 +47,22 @@ defmodule LexWeb.MembersLive do
     else
       error ->
         socket = socket |> operation_failed("Could not change privileges", error)
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("invite", %{"user_id" => user_id}, socket) do
+    scope = socket.assigns.scope
+
+    with {:ok, user} <- scope |> Accounts.get_user(user_id),
+         {:ok, _membership} <- scope |> Accounts.invite_membership(user) do
+      socket = socket |> reload_memberships()
+
+      {:noreply, socket}
+    else
+      error ->
+        socket = socket |> operation_failed("Could not invite member", error)
 
         {:noreply, socket}
     end
@@ -94,16 +108,49 @@ defmodule LexWeb.MembersLive do
       flash={@flash}
       scope={@scope}
       socket={@socket}
-      space={@space}
       ui={@ui}
     >
       <div class="mx-auto max-w-3xl space-y-6">
         <div>
           <h1 class="text-2xl font-semibold">Members</h1>
           <p class="text-base-content/60">
-            Memberships for {@space.name}.
+            Memberships for {@scope.space.name}.
           </p>
         </div>
+
+        <section
+          :if={:manage_members in @effective_privileges}
+          class="rounded-box border border-base-content/15 bg-base-200 p-4"
+          data-testid="invite-members"
+        >
+          <h2 class="font-semibold">Invite a member</h2>
+          <p class="mt-1 text-sm text-base-content/60">
+            Invite an existing user to {@scope.space.name}.
+          </p>
+
+          <p :if={@invitable_users == []} class="mt-4 text-sm text-base-content/60">
+            There are no users available to invite.
+          </p>
+
+          <div :if={@invitable_users != []} class="mt-4 grid gap-2">
+            <div
+              :for={user <- @invitable_users}
+              class="flex items-center justify-between gap-3 rounded-box bg-base-100 p-3"
+              data-testid="invitable-user"
+            >
+              <span class="font-medium">{user.display_name}</span>
+              <button
+                class="btn btn-sm btn-info"
+                data-testid="invite-member"
+                phx-click="invite"
+                phx-value-user_id={user.id}
+                type="button"
+              >
+                Invite
+              </button>
+            </div>
+          </div>
+        </section>
 
         <div class="grid gap-3" data-testid="memberships">
           <%= for memberships <- [
@@ -121,11 +168,29 @@ defmodule LexWeb.MembersLive do
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
                     <h2 class="font-semibold">{membership_name(membership)}</h2>
-                    <span class={status_class(membership.status)}>
-                      {status_label(membership.status)}
+                    <span
+                      :if={membership.status == :active}
+                      class="badge badge-sm badge-success"
+                    >
+                      Active
+                    </span>
+                    <span :if={membership.status == :declined} class="badge badge-sm">
+                      Declined
                     </span>
                     <span
-                      :if={membership.user_id == @space.owner_id}
+                      :if={membership.status == :disabled}
+                      class="badge badge-sm badge-error"
+                    >
+                      Disabled
+                    </span>
+                    <span
+                      :if={membership.status == :invited}
+                      class="badge badge-sm badge-warning"
+                    >
+                      Pending
+                    </span>
+                    <span
+                      :if={membership.user_id == @scope.space.owner_id}
                       class="badge badge-sm badge-info"
                     >
                       Owner
@@ -144,8 +209,8 @@ defmodule LexWeb.MembersLive do
 
                 <div :if={
                   :manage_members in @effective_privileges &&
-                    membership.user_id != @space.owner_id &&
-                    membership.user_id != @scope.current_user.id
+                    membership.user_id != @scope.space.owner_id &&
+                    membership.user_id != @scope.user.id
                 }>
                   <button
                     :if={membership.status == :active}
@@ -173,8 +238,8 @@ defmodule LexWeb.MembersLive do
               <div
                 :if={
                   :manage_privileges in @effective_privileges &&
-                    membership.user_id != @space.owner_id &&
-                    membership.user_id != @scope.current_user.id
+                    membership.user_id != @scope.space.owner_id &&
+                    membership.user_id != @scope.user.id
                 }
                 class="mt-4 flex flex-wrap gap-2 border-t border-base-content/10 pt-3"
               >
@@ -206,23 +271,30 @@ defmodule LexWeb.MembersLive do
 
   defp reload_memberships(socket) do
     scope = socket.assigns.scope
-    space = socket.assigns.space
 
-    active_memberships = space |> Accounts.list_memberships!(scope, :active)
-    pending_memberships = space |> list_memberships_or_empty(scope, :pending)
-    declined_memberships = space |> list_memberships_or_empty(scope, :declined)
-    disabled_memberships = space |> list_memberships_or_empty(scope, :disabled)
+    active_memberships = scope |> Accounts.list_memberships!(:active)
+    pending_memberships = scope |> list_memberships_or_empty(:pending)
+    declined_memberships = scope |> list_memberships_or_empty(:declined)
+    disabled_memberships = scope |> list_memberships_or_empty(:disabled)
+
+    invitable_users =
+      if :manage_members in socket.assigns.effective_privileges do
+        scope |> Accounts.list_invitable_users!()
+      else
+        []
+      end
 
     socket
     |> assign(:active_memberships, active_memberships)
     |> assign(:pending_memberships, pending_memberships)
     |> assign(:declined_memberships, declined_memberships)
     |> assign(:disabled_memberships, disabled_memberships)
+    |> assign(:invitable_users, invitable_users)
   end
 
-  defp list_memberships_or_empty(space, scope, selection) do
-    space
-    |> Accounts.list_memberships(scope, selection)
+  defp list_memberships_or_empty(scope, selection) do
+    scope
+    |> Accounts.list_memberships(selection)
     |> case do
       {:ok, memberships} -> memberships
       {:error, %Ash.Error.Forbidden{}} -> []
@@ -240,16 +312,6 @@ defmodule LexWeb.MembersLive do
 
   defp membership_name(%{display_name: nil, user: user}), do: user.display_name
   defp membership_name(membership), do: membership.display_name
-
-  defp status_class(:active), do: "badge badge-sm badge-success"
-  defp status_class(:declined), do: "badge badge-sm"
-  defp status_class(:disabled), do: "badge badge-sm badge-error"
-  defp status_class(:invited), do: "badge badge-sm badge-warning"
-
-  defp status_label(:active), do: "Active"
-  defp status_label(:declined), do: "Declined"
-  defp status_label(:disabled), do: "Disabled"
-  defp status_label(:invited), do: "Pending"
 
   defp operation_failed(socket, message, error) do
     Logger.warning("#{message}: #{inspect(error)}")

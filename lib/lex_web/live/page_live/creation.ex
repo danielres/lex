@@ -33,7 +33,7 @@ defmodule LexWeb.PageLive.Creation do
 
   def handle_event("create", %{"page" => params}, socket) do
     form = socket.assigns.creation.form
-    space = socket.assigns.space
+    space = socket.assigns.scope.space
 
     form
     |> AshPhoenix.Form.submit(params: params)
