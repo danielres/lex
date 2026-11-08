@@ -1,7 +1,8 @@
 defmodule Lex.Accounts.Membership do
+  alias Lex.Accounts.Membership.Changes.SetIdentity
+  alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.CanSetPrivileges
   alias Lex.Accounts.Membership.Checks.HasPrivilege
-  alias Lex.Accounts.Membership.Changes.SetIdentity
   alias Lex.Accounts.Membership.Validations.OwnerMustRemainMember
   alias Lex.Accounts.Privilege
 
@@ -24,11 +25,35 @@ defmodule Lex.Accounts.Membership do
   actions do
     defaults [:read]
 
-    read :for_user do
+    read :current_user do
       multitenancy :bypass
 
       filter expr(user_id == ^actor(:id) and status in [:active, :invited])
       prepare build(load: :space, sort: :inserted_at)
+    end
+
+    read :active do
+      filter expr(status == :active)
+      prepare build(load: :user, sort: [:display_name, :inserted_at])
+    end
+
+    read :pending do
+      filter expr(status == :invited)
+      prepare build(load: :user, sort: :inserted_at)
+    end
+
+    read :declined do
+      filter expr(status == :declined)
+      prepare build(load: :user, sort: :inserted_at)
+    end
+
+    read :disabled do
+      filter expr(status == :disabled)
+      prepare build(load: :user, sort: :inserted_at)
+    end
+
+    read :all do
+      prepare build(load: :user, sort: [:status, :display_name, :inserted_at])
     end
 
     create :invite do
@@ -50,22 +75,22 @@ defmodule Lex.Accounts.Membership do
 
       validate attribute_equals(:status, :invited)
       validate OwnerMustRemainMember
-      change set_attribute(:status, :inactive)
+      change set_attribute(:status, :declined)
     end
 
     update :reinvite do
       require_atomic? false
 
-      validate attribute_equals(:status, :inactive)
+      validate attribute_in(:status, [:declined, :disabled])
       change set_attribute(:status, :invited)
     end
 
-    update :deactivate do
+    update :disable do
       require_atomic? false
 
       validate attribute_equals(:status, :active)
       validate OwnerMustRemainMember
-      change set_attribute(:status, :inactive)
+      change set_attribute(:status, :disabled)
     end
 
     update :set_privileges do
@@ -81,12 +106,37 @@ defmodule Lex.Accounts.Membership do
   end
 
   policies do
-    policy action(:for_user) do
+    policy action(:current_user) do
       authorize_if actor_present()
     end
 
-    policy action(:read) do
+    bypass action(:read) do
       authorize_if expr(user_id == ^actor(:id))
+      authorize_if {HasPrivilege, privilege: :manage_members}
+    end
+
+    policy action(:read) do
+      authorize_if {HasPrivilege, privilege: :manage_privileges}
+      forbid_if expr(status == :declined)
+    end
+
+    policy action(:active) do
+      authorize_if ActiveMember
+    end
+
+    policy action(:pending) do
+      authorize_if {HasPrivilege, privilege: :manage_members}
+      authorize_if {HasPrivilege, privilege: :manage_privileges}
+      authorize_if {HasPrivilege, privilege: :view_pending_memberships}
+    end
+
+    policy action(:disabled) do
+      authorize_if {HasPrivilege, privilege: :manage_members}
+      authorize_if {HasPrivilege, privilege: :manage_privileges}
+      authorize_if {HasPrivilege, privilege: :view_disabled_memberships}
+    end
+
+    policy action([:all, :declined]) do
       authorize_if {HasPrivilege, privilege: :manage_members}
     end
 
@@ -94,7 +144,7 @@ defmodule Lex.Accounts.Membership do
       authorize_if expr(user_id == ^actor(:id))
     end
 
-    policy action([:invite, :reinvite, :deactivate]) do
+    policy action([:disable, :invite, :reinvite]) do
       authorize_if {HasPrivilege, privilege: :manage_members}
     end
 
@@ -114,7 +164,7 @@ defmodule Lex.Accounts.Membership do
 
     attribute :status, :atom do
       allow_nil? false
-      constraints one_of: [:invited, :active, :inactive]
+      constraints one_of: [:invited, :active, :declined, :disabled]
       default :invited
       public? true
     end

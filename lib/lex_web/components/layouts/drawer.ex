@@ -95,6 +95,19 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
+          navigate={~p"/#{@space.slug}/members"}
+          class={[
+            link_class,
+            @active == "members" && active_class
+          ]}
+        >
+          <.icon name="hero-user-group-mini" />
+          <span :if={@open?}>Members</span>
+        </.link>
+      </li>
+
+      <li>
+        <.link
           navigate={~p"/#{@space.slug}/wiki/home"}
           class={[
             link_class,

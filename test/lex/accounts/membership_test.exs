@@ -44,7 +44,8 @@ defmodule Lex.Accounts.MembershipTest do
     assert membership.display_name == "Téam Member"
     assert membership.slug == "team-member"
 
-    assert {:ok, membership} = scope |> Accounts.deactivate_membership(membership)
+    assert {:ok, membership} = scope |> Accounts.disable_membership(membership)
+    assert membership.status == :disabled
     assert {:ok, membership} = scope |> Accounts.reinvite_membership(membership)
     assert {:ok, membership} = member_scope |> Accounts.accept_membership(membership, nil)
 
@@ -53,7 +54,7 @@ defmodule Lex.Accounts.MembershipTest do
     assert membership.slug == "team-member"
   end
 
-  test "declining an invitation preserves an inactive membership", %{
+  test "declining an invitation preserves a declined membership", %{
     current_user: current_user,
     scope: scope
   } do
@@ -63,10 +64,12 @@ defmodule Lex.Accounts.MembershipTest do
     member_scope = scope |> membership_scope(member, membership)
 
     assert {:ok, membership} = member_scope |> Accounts.decline_membership(membership)
-    assert membership.status == :inactive
+    assert membership.status == :declined
+    assert {:ok, membership} = scope |> Accounts.reinvite_membership(membership)
+    assert membership.status == :invited
   end
 
-  test "the owner cannot decline or deactivate their membership", %{
+  test "the owner cannot decline or disable their membership", %{
     current_user: current_user,
     scope: scope
   } do
@@ -74,7 +77,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert {:error, _error} = scope |> Accounts.decline_membership(membership)
     assert {:ok, membership} = scope |> Accounts.accept_membership(membership, "Owner")
-    assert {:error, _error} = scope |> Accounts.deactivate_membership(membership)
+    assert {:error, _error} = scope |> Accounts.disable_membership(membership)
   end
 
   test "member slugs are unique within a space", %{
@@ -170,6 +173,29 @@ defmodule Lex.Accounts.MembershipTest do
              |> Accounts.set_membership_privileges(second_membership, [:manage_privileges])
   end
 
+  test "privilege managers cannot change their own privileges", %{
+    current_user: current_user,
+    scope: scope
+  } do
+    scope = scope |> activate_owner(current_user)
+    manager = create_user("Privilege Manager")
+    {:ok, membership} = scope |> Accounts.invite_membership(manager)
+    manager_scope = scope |> membership_scope(manager, membership)
+    {:ok, membership} = manager_scope |> Accounts.accept_membership(membership, "Manager")
+
+    {:ok, membership} =
+      scope |> Accounts.set_membership_privileges(membership, [:manage_privileges])
+
+    manager_scope = %{manager_scope | current_membership: membership}
+
+    assert {:error, _error} =
+             manager_scope
+             |> Accounts.set_membership_privileges(membership, [
+               :edit_pages,
+               :manage_privileges
+             ])
+  end
+
   test "memberships are isolated by space", %{current_user: current_user, scope: scope} do
     other_scope = %Scope{current_user: current_user}
     other_space = Space.create!(%{name: "Other Space"}, scope: other_scope)
@@ -183,13 +209,61 @@ defmodule Lex.Accounts.MembershipTest do
     assert second_membership.space_id == other_scope.space_id
   end
 
+  test "membership visibility privileges expose pending and disabled memberships separately", %{
+    current_user: current_user,
+    scope: scope,
+    space: space
+  } do
+    scope = scope |> activate_owner(current_user)
+    viewer = create_user("Viewer")
+    pending_user = create_user("Pending")
+    disabled_user = create_user("Disabled")
+    {:ok, viewer_membership} = scope |> Accounts.invite_membership(viewer)
+    {:ok, _pending_membership} = scope |> Accounts.invite_membership(pending_user)
+    {:ok, disabled_membership} = scope |> Accounts.invite_membership(disabled_user)
+    viewer_scope = scope |> membership_scope(viewer, viewer_membership)
+    disabled_scope = scope |> membership_scope(disabled_user, disabled_membership)
+
+    {:ok, viewer_membership} =
+      viewer_scope |> Accounts.accept_membership(viewer_membership, "Viewer")
+
+    {:ok, disabled_membership} =
+      disabled_scope |> Accounts.accept_membership(disabled_membership, "Disabled")
+
+    {:ok, disabled_membership} = scope |> Accounts.disable_membership(disabled_membership)
+
+    {:ok, viewer_membership} =
+      scope
+      |> Accounts.set_membership_privileges(viewer_membership, [:view_pending_memberships])
+
+    viewer_scope = %{viewer_scope | current_membership: viewer_membership}
+
+    assert [_pending_membership] = space |> Accounts.list_memberships!(viewer_scope, :pending)
+
+    assert_raise Ash.Error.Forbidden, fn ->
+      space |> Accounts.list_memberships!(viewer_scope, :disabled)
+    end
+
+    {:ok, viewer_membership} =
+      scope
+      |> Accounts.set_membership_privileges(viewer_membership, [
+        :view_disabled_memberships,
+        :view_pending_memberships
+      ])
+
+    viewer_scope = %{viewer_scope | current_membership: viewer_membership}
+
+    assert [listed_membership] = space |> Accounts.list_memberships!(viewer_scope, :disabled)
+    assert listed_membership.id == disabled_membership.id
+  end
+
   test "invalid lifecycle transitions are rejected", %{
     current_user: current_user,
     scope: scope
   } do
     {:ok, membership} = scope |> Accounts.get_membership(current_user)
 
-    assert {:error, _error} = scope |> Accounts.deactivate_membership(membership)
+    assert {:error, _error} = scope |> Accounts.disable_membership(membership)
     assert {:ok, membership} = scope |> Accounts.accept_membership(membership, "Member")
     assert {:error, _error} = scope |> Accounts.decline_membership(membership)
   end
