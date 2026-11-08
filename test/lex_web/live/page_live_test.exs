@@ -3,6 +3,7 @@ defmodule LexWeb.PageLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Accounts
   alias Lex.Collaboration
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
@@ -48,6 +49,37 @@ defmodule LexWeb.PageLiveTest do
 
     assert_redirect(view, ~p"/test-space/wiki/a-better-title")
     assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
+  end
+
+  test "members without page editing privileges can read but cannot edit or create pages", %{
+    conn: conn,
+    scope: scope
+  } do
+    page = scope |> Page.ensure!("Existing Page")
+    member = create_user("Reader")
+    {:ok, membership} = scope |> Accounts.invite_membership(member)
+    member_scope = %{scope | current_membership: membership, current_user: member}
+    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
+    {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
+    member_scope = %{member_scope | current_membership: membership}
+    conn = conn |> recycle() |> log_in_user(member)
+
+    assert {:ok, fetched_page} = member_scope |> Page.fetch_by_slug(page.slug)
+    assert fetched_page.id == page.id
+    assert {:error, _error} = member_scope |> Page.ensure("Forbidden Page")
+    assert {:error, _error} = Page.rename(page, "Forbidden Rename", scope: member_scope)
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/#{page.slug}")
+
+    refute has_element?(view, "button[phx-click='editing:toggle']")
+    assert has_element?(view, "[phx-hook='LexicalEditor'][data-editable='false']")
+
+    missing_conn = conn |> recycle() |> log_in_user(member)
+    {:ok, missing_view, _html} = live(missing_conn, ~p"/test-space/wiki/missing-page")
+
+    assert has_element?(missing_view, "[data-testid='missing-page']", "doesn’t exist")
+    assert has_element?(missing_view, "[data-testid='missing-page']", "don’t have permission")
+    refute has_element?(missing_view, "[data-testid='page-creation-form']")
   end
 
   test "preloads page references and creates missing link targets", %{conn: conn, scope: scope} do

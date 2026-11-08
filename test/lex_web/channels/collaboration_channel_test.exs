@@ -5,6 +5,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
   require Ash.Query
 
+  alias Lex.Accounts
   alias Lex.Collaboration
   alias Lex.Collaboration.Contributors
   alias Lex.Wiki.Page
@@ -228,6 +229,47 @@ defmodule LexWeb.CollaborationChannelTest do
     assert scope |> persisted_text(room) == ""
   end
 
+  test "read-only members can synchronize awareness but cannot update documents", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    room = "#{page.id}/main"
+    read_only_scope = scope |> read_only_member_scope()
+    socket = read_only_scope |> join_channel(room, false)
+    {:ok, shared_doc} = read_only_scope |> Collaboration.open_document(room)
+
+    push(socket, "yjs_sync", {:binary, sync_step1_message()})
+    assert_push "yjs", {:binary, sync_reply}
+    assert {:ok, {:sync, {:sync_step2, _update}}} = Sync.message_decode(sync_reply)
+    assert_push "yjs", {:binary, server_sync_step1}
+    assert {:ok, {:sync, {:sync_step1, _state_vector}}} = Sync.message_decode(server_sync_step1)
+    assert_push "yjs", {:binary, awareness_reply}
+    assert {:ok, {:awareness, _awareness}} = Sync.message_decode(awareness_reply)
+
+    doc = Yex.Doc.new()
+    {:ok, awareness} = Yex.Awareness.new(doc)
+    :ok = Yex.Awareness.set_local_state(awareness, %{"name" => "Reader"})
+    {:ok, awareness_update} = Yex.Awareness.encode_update(awareness)
+    awareness_message = Sync.message_encode!({:awareness, awareness_update})
+
+    push(socket, "yjs", {:binary, awareness_message})
+    assert_push "yjs", {:binary, received_awareness}
+    assert Sync.message_decode(received_awareness) == Sync.message_decode(awareness_message)
+
+    reference = push(socket, "yjs", {:binary, document_update_message("forbidden")})
+    assert_reply reference, :error, %{reason: "editing not permitted"}
+
+    text =
+      shared_doc
+      |> SharedDoc.get_doc()
+      |> Yex.Doc.get_text("content")
+      |> Yex.Text.to_string()
+
+    assert text == ""
+
+    monitor = Process.monitor(shared_doc)
+    close_channel(socket)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+  end
+
   test "a revision attributes document updates without counting awareness", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"
@@ -343,16 +385,26 @@ defmodule LexWeb.CollaborationChannelTest do
     }
   end
 
-  defp join_channel(scope, room) do
+  defp join_channel(scope, room, can_edit_pages? \\ true) do
     LexWeb.CollaborationSocket
-    |> socket(nil, %{scope: scope})
+    |> socket(nil, %{can_edit_pages?: can_edit_pages?, scope: scope})
     |> subscribe_and_join!(LexWeb.CollaborationChannel, "y_doc:#{room}")
   end
 
   defp join_error(scope, room) do
     LexWeb.CollaborationSocket
-    |> socket(nil, %{scope: scope})
+    |> socket(nil, %{can_edit_pages?: true, scope: scope})
     |> subscribe_and_join(LexWeb.CollaborationChannel, "y_doc:#{room}")
+  end
+
+  defp read_only_member_scope(scope) do
+    member = create_user("Reader")
+    {:ok, membership} = scope |> Accounts.invite_membership(member)
+    member_scope = %{scope | current_membership: membership, current_user: member}
+    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
+    {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
+
+    %{member_scope | current_membership: membership}
   end
 
   defp sync_step1_message do

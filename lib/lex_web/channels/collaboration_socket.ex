@@ -3,6 +3,7 @@ defmodule LexWeb.CollaborationSocket do
 
   alias AshAuthentication.Plug.Helpers
   alias Lex.Accounts
+  alias Lex.Accounts.Space
   alias Lex.Accounts.User
 
   channel "y_doc:*", LexWeb.CollaborationChannel
@@ -14,9 +15,17 @@ defmodule LexWeb.CollaborationSocket do
            Helpers.authenticate_resource_from_session(User, session, :lex, []),
          scope = %Lex.Scope{current_user: current_user, space_id: space_id},
          {:ok, %{status: :active} = membership} <-
-           Accounts.get_membership(scope, current_user) do
+           Accounts.get_membership(scope, current_user),
+         {:ok, space} <- Ash.get(Space, space_id, authorize?: false) do
       scope = %{scope | current_membership: membership}
-      {:ok, assign(socket, :scope, scope)}
+      can_edit_pages? = Accounts.has_privilege?(scope, space, :edit_pages)
+
+      socket =
+        socket
+        |> assign(:can_edit_pages?, can_edit_pages?)
+        |> assign(:scope, scope)
+
+      {:ok, socket}
     else
       _error -> :error
     end
