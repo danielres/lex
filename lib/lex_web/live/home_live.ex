@@ -2,7 +2,7 @@ defmodule LexWeb.HomeLive do
   use LexWeb, :live_view
   use LiveDelegate
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
   alias LexWeb.UI
 
@@ -14,7 +14,7 @@ defmodule LexWeb.HomeLive do
     scope = socket.assigns.scope
 
     space_form = scope |> space_form()
-    memberships = scope |> Accounts.list_memberships!()
+    memberships = scope |> Membership.list!()
 
     socket =
       socket

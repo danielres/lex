@@ -3,7 +3,7 @@ defmodule LexWeb.HomeLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
 
   setup :authenticate
@@ -70,6 +70,6 @@ defmodule LexWeb.HomeLiveTest do
     assert [
              %{space: %{name: "Existing Space"}, status: :invited},
              %{space: %{name: "New Space"}, status: :invited}
-           ] = scope |> Accounts.list_memberships!()
+           ] = scope |> Membership.list!()
   end
 end

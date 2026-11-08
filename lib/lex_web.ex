@@ -86,6 +86,7 @@ defmodule LexWeb do
       import Phoenix.HTML
       # Core UI components
       import LexWeb.CoreComponents
+      import Lex.Accounts.Membership.Access, only: [can?: 2]
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS

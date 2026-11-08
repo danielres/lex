@@ -2,17 +2,17 @@ defmodule LexWeb.Space do
   use LexWeb, :live_view
 
   alias Ash.Error.Query.NotFound
-  alias Lex.Accounts
   alias Lex.Accounts.Membership
+  alias Lex.Accounts.Space
 
   def on_mount(%{"space_slug" => slug}, _session, socket) do
     scope = socket.assigns.scope
-    space = Accounts.Space.get_by_slug!(slug, scope: scope)
+    space = Space.get_by_slug!(slug, scope: scope)
     scope = %{scope | space: space}
 
     membership =
       scope
-      |> Accounts.get_membership()
+      |> Membership.get()
       |> case do
         {:ok, %Membership{} = membership} -> membership
         {:ok, nil} -> raise NotFound, resource: Membership, primary_key: nil

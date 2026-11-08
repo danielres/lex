@@ -5,7 +5,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
   require Ash.Query
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias Lex.Collaboration
   alias Lex.Collaboration.Contributors
   alias Lex.Wiki.Page
@@ -399,10 +399,10 @@ defmodule LexWeb.CollaborationChannelTest do
 
   defp read_only_member_scope(scope) do
     member = create_user("Reader")
-    {:ok, membership} = scope |> Accounts.invite_membership(member)
+    {:ok, membership} = scope |> Membership.invite(member.id)
     member_scope = %{scope | membership: membership, user: member}
-    {:ok, membership} = member_scope |> Accounts.accept_membership(membership, "Reader")
-    {:ok, membership} = scope |> Accounts.set_membership_privileges(membership, [])
+    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
 
     %{member_scope | membership: membership}
   end

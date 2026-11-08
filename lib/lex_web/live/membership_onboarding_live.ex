@@ -2,7 +2,7 @@ defmodule LexWeb.MembershipOnboardingLive do
   use LexWeb, :live_view
   use LiveDelegate
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
   alias LexWeb.Space
 
   delegate(:space, Space)
@@ -59,7 +59,7 @@ defmodule LexWeb.MembershipOnboardingLive do
     scope = socket.assigns.scope
 
     scope
-    |> Accounts.decline_membership(scope.membership)
+    |> Membership.decline(scope.membership)
     |> case do
       {:ok, _membership} ->
         socket = socket |> push_navigate(to: ~p"/")

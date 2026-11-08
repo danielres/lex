@@ -2,7 +2,8 @@ defmodule LexWeb.CollaborationSocket do
   use Phoenix.Socket
 
   alias AshAuthentication.Plug.Helpers
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
+  alias Lex.Accounts.Membership.Access
   alias Lex.Accounts.Space
   alias Lex.Accounts.User
 
@@ -16,9 +17,9 @@ defmodule LexWeb.CollaborationSocket do
          {:ok, space} <- Ash.get(Space, space_id, authorize?: false),
          scope = %Lex.Scope{space: space, user: current_user},
          {:ok, %{status: :active} = membership} <-
-           Accounts.get_membership(scope) do
+           Membership.get(scope) do
       scope = %{scope | membership: membership}
-      can_edit_pages? = Accounts.has_privilege?(scope, :edit_pages)
+      can_edit_pages? = scope |> Access.can?(:edit_pages)
 
       socket =
         socket

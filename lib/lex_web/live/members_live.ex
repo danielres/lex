@@ -4,7 +4,8 @@ defmodule LexWeb.MembersLive do
 
   require Logger
 
-  alias Lex.Accounts
+  alias Lex.Accounts.Membership
+  alias Lex.Accounts.Membership.Access
   alias Lex.Accounts.Privilege
   alias LexWeb.Space
   alias LexWeb.UI
@@ -15,14 +16,11 @@ defmodule LexWeb.MembersLive do
   @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
-    scope = socket.assigns.scope
-    available_privileges = Accounts.available_privileges()
-    effective_privileges = scope |> Accounts.effective_privileges()
+    available_privileges = Access.available_privileges()
 
     socket =
       socket
       |> assign(:available_privileges, available_privileges)
-      |> assign(:effective_privileges, effective_privileges)
       |> reload_memberships()
 
     {:ok, socket}
@@ -37,10 +35,10 @@ defmodule LexWeb.MembersLive do
     scope = socket.assigns.scope
 
     with {:ok, privilege} <- Privilege.match(value),
-         {:ok, membership} <- scope |> Accounts.get_membership(membership_id),
+         {:ok, membership} <- scope |> Membership.get(membership_id),
          privileges = toggle(membership.privileges, privilege),
          {:ok, _membership} <-
-           scope |> Accounts.set_membership_privileges(membership, privileges) do
+           scope |> Membership.set_privileges(membership, privileges) do
       socket = socket |> reload_memberships()
 
       {:noreply, socket}
@@ -55,8 +53,7 @@ defmodule LexWeb.MembersLive do
   def handle_event("invite", %{"user_id" => user_id}, socket) do
     scope = socket.assigns.scope
 
-    with {:ok, user} <- scope |> Accounts.get_user(user_id),
-         {:ok, _membership} <- scope |> Accounts.invite_membership(user) do
+    with {:ok, _membership} <- scope |> Membership.invite(user_id) do
       socket = socket |> reload_memberships()
 
       {:noreply, socket}
@@ -71,8 +68,8 @@ defmodule LexWeb.MembersLive do
   def handle_event("disable", %{"membership_id" => membership_id}, socket) do
     scope = socket.assigns.scope
 
-    with {:ok, membership} <- scope |> Accounts.get_membership(membership_id),
-         {:ok, _membership} <- scope |> Accounts.disable_membership(membership) do
+    with {:ok, membership} <- scope |> Membership.get(membership_id),
+         {:ok, _membership} <- scope |> Membership.disable(membership) do
       socket = socket |> reload_memberships()
 
       {:noreply, socket}
@@ -87,8 +84,8 @@ defmodule LexWeb.MembersLive do
   def handle_event("reinvite", %{"membership_id" => membership_id}, socket) do
     scope = socket.assigns.scope
 
-    with {:ok, membership} <- scope |> Accounts.get_membership(membership_id),
-         {:ok, _membership} <- scope |> Accounts.reinvite_membership(membership) do
+    with {:ok, membership} <- scope |> Membership.get(membership_id),
+         {:ok, _membership} <- scope |> Membership.reinvite(membership) do
       socket = socket |> reload_memberships()
 
       {:noreply, socket}
@@ -119,7 +116,7 @@ defmodule LexWeb.MembersLive do
         </div>
 
         <section
-          :if={:manage_members in @effective_privileges}
+          :if={can?(@scope, :manage_members)}
           class="rounded-box border border-base-content/15 bg-base-200 p-4"
           data-testid="invite-members"
         >
@@ -208,7 +205,7 @@ defmodule LexWeb.MembersLive do
                 </div>
 
                 <div :if={
-                  :manage_members in @effective_privileges &&
+                  can?(@scope, :manage_members) &&
                     membership.user_id != @scope.space.owner_id &&
                     membership.user_id != @scope.user.id
                 }>
@@ -237,7 +234,7 @@ defmodule LexWeb.MembersLive do
 
               <div
                 :if={
-                  :manage_privileges in @effective_privileges &&
+                  can?(@scope, :manage_privileges) &&
                     membership.user_id != @scope.space.owner_id &&
                     membership.user_id != @scope.user.id
                 }
@@ -272,14 +269,14 @@ defmodule LexWeb.MembersLive do
   defp reload_memberships(socket) do
     scope = socket.assigns.scope
 
-    active_memberships = scope |> Accounts.list_memberships!(:active)
+    active_memberships = scope |> Membership.list!(:active)
     pending_memberships = scope |> list_memberships_or_empty(:pending)
     declined_memberships = scope |> list_memberships_or_empty(:declined)
     disabled_memberships = scope |> list_memberships_or_empty(:disabled)
 
     invitable_users =
-      if :manage_members in socket.assigns.effective_privileges do
-        scope |> Accounts.list_invitable_users!()
+      if can?(scope, :manage_members) do
+        scope |> Membership.list_invitable_users!()
       else
         []
       end
@@ -294,7 +291,7 @@ defmodule LexWeb.MembersLive do
 
   defp list_memberships_or_empty(scope, selection) do
     scope
-    |> Accounts.list_memberships(selection)
+    |> Membership.list(selection)
     |> case do
       {:ok, memberships} -> memberships
       {:error, %Ash.Error.Forbidden{}} -> []
