@@ -147,7 +147,7 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert :ok = scope |> Page.persist_document(page, "main", document("updated"))
+    assert :ok = page |> Page.persist_collaboration_document("main", document("updated"))
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
   end

@@ -115,6 +115,28 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^reopened_monitor, :process, ^reopened_shared_doc, :normal}
   end
 
+  test "room persistence does not depend on the member who opened it", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    room = "#{page.id}/main"
+    editor = create_user("Initial Editor")
+    editor_scope = scope |> member_scope(editor, "Initial Editor")
+    {:ok, shared_doc} = editor_scope |> Collaboration.open_document(room)
+    :ok = SharedDoc.observe(shared_doc)
+
+    :ok =
+      SharedDoc.update_doc(shared_doc, fn doc ->
+        doc |> Yex.Doc.get_text("content") |> Yex.Text.insert(0, "survives revocation")
+      end)
+
+    {:ok, _membership} = scope |> Membership.disable(editor_scope.membership)
+
+    monitor = Process.monitor(shared_doc)
+    :ok = Collaboration.close_document(shared_doc)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+
+    assert scope |> persisted_text(room) == "survives revocation"
+  end
+
   test "nested documents persist independently", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"

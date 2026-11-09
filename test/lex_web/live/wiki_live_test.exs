@@ -132,7 +132,7 @@ defmodule LexWeb.WikiLiveTest do
     scope |> Page.ensure!("Second Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    assert :ok = scope |> Page.persist_document(first_page, "main", document("updated"))
+    assert :ok = first_page |> Page.persist_collaboration_document("main", document("updated"))
 
     assert has_element?(view, "tbody tr:first-child", "First Page")
   end
