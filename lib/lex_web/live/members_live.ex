@@ -17,14 +17,19 @@ defmodule LexWeb.MembersLive do
   @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
-    available_privileges = Access.available_privileges()
 
-    socket =
-      socket
-      |> assign(:available_privileges, available_privileges)
-      |> reload_memberships()
+    if socket.redirected do
+      {:ok, socket}
+    else
+      available_privileges = Access.available_privileges()
 
-    {:ok, socket}
+      socket =
+        socket
+        |> assign(:available_privileges, available_privileges)
+        |> reload_memberships()
+
+      {:ok, socket}
+    end
   end
 
   @impl true
