@@ -3,6 +3,7 @@ defmodule LexWeb.WikiLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Accounts.Membership
   alias Lex.Wiki.Page
 
   setup :authenticate
@@ -55,7 +56,10 @@ defmodule LexWeb.WikiLiveTest do
 
   test "shows the author of a page created by another user", %{conn: conn, scope: scope} do
     other_user = create_user("Other User")
-    other_scope = %{scope | user: other_user}
+    {:ok, membership} = scope |> Membership.invite(other_user.id)
+    other_scope = %{scope | membership: membership, user: other_user}
+    {:ok, membership} = other_scope |> Membership.accept(membership, "Other User")
+    other_scope = %{other_scope | membership: membership}
     page = other_scope |> Page.ensure!("Shared Knowledge")
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")

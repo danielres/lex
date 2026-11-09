@@ -22,6 +22,15 @@ defmodule LexWeb.HomePageLiveTest do
 
     refute has_element?(first_view, "[data-testid='missing-page']")
     refute has_element?(second_view, "[data-testid='missing-page']")
+
+    first_view
+    |> element("button[aria-label='Show page info']")
+    |> render_click()
+
+    second_view
+    |> element("button[aria-label='Show page info']")
+    |> render_click()
+
     assert has_element?(first_view, "[data-testid='page-author']", current_user.display_name)
     assert has_element?(second_view, "[data-testid='page-author']", current_user.display_name)
 

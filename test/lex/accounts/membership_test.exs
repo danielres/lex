@@ -209,9 +209,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert [_pending_membership] = viewer_scope |> Membership.list!(:pending)
 
-    assert_raise Ash.Error.Forbidden, fn ->
-      viewer_scope |> Membership.list!(:disabled)
-    end
+    assert [] = viewer_scope |> Membership.list!(:disabled)
 
     {:ok, viewer_membership} =
       scope
