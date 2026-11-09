@@ -8,11 +8,9 @@ defmodule LexWeb.Layouts.Navbar do
 
   attr :drawer_open?, :boolean, required: true
   attr :scope, :map, required: true
-  attr :space, :map, required: true
 
   def render(assigns) do
     ~H"""
-    <% current_user = @scope.current_user %>
     <div class={[
       "bg-base-300",
       "px-2 py-1 sm:py-2 pr-4 max-sm:pl-0",
@@ -22,17 +20,17 @@ defmodule LexWeb.Layouts.Navbar do
       <.toggle_button {assigns} />
       <div class="grow">
         <.link
-          navigate={~p"/#{@space.slug}"}
+          navigate={~p"/#{@scope.space.slug}"}
           class="opacity-80 hover:opacity-100 transition cursor-pointer"
         >
-          {@space.name}
+          {@scope.space.name}
         </.link>
       </div>
 
       <Dropdown.render id="navbar-user-dropdown">
         <Avatar.render
           class="reactive"
-          user={current_user}
+          user={@scope.user}
         />
 
         <:content>
@@ -48,7 +46,7 @@ defmodule LexWeb.Layouts.Navbar do
             <div class={[
               "text-sm"
             ]}>
-              {current_user.display_name}
+              {@scope.user.display_name}
             </div>
 
             <.button_sign_out />

@@ -76,6 +76,12 @@ defmodule Lex.Accounts.User do
     end
   end
 
+  relationships do
+    has_many :memberships, Lex.Accounts.Membership do
+      destination_attribute :user_id
+    end
+  end
+
   identities do
     identity :unique_display_name, [:display_name]
   end

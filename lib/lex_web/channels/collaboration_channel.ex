@@ -2,6 +2,7 @@ defmodule LexWeb.CollaborationChannel do
   use LexWeb, :channel
 
   alias Lex.Collaboration
+  alias Yex.Sync
   alias Yex.Sync.SharedDoc
 
   @impl true
@@ -22,8 +23,14 @@ defmodule LexWeb.CollaborationChannel do
   end
 
   def handle_in("yjs_sync", message, socket) when is_binary(message) do
-    :ok = SharedDoc.start_sync(socket.assigns.shared_doc, message)
-    {:noreply, socket}
+    case Sync.message_decode(message) do
+      {:ok, {:sync, {:sync_step1, _state_vector}}} ->
+        :ok = SharedDoc.start_sync(socket.assigns.shared_doc, message)
+        {:noreply, socket}
+
+      _message ->
+        {:reply, {:error, %{reason: "invalid sync request"}}, socket}
+    end
   end
 
   def handle_in("yjs", {:binary, message}, socket) when is_binary(message) do
@@ -31,12 +38,16 @@ defmodule LexWeb.CollaborationChannel do
   end
 
   def handle_in("yjs", message, socket) when is_binary(message) do
-    current_user = socket.assigns.scope.current_user
+    if socket.assigns.can_edit_pages? or !Collaboration.document_update?(message) do
+      user = socket.assigns.scope.user
 
-    :ok = SharedDoc.send_yjs_message(socket.assigns.shared_doc, message)
-    :ok = Collaboration.record_update(socket.assigns.room, current_user.id, message)
+      :ok = SharedDoc.send_yjs_message(socket.assigns.shared_doc, message)
+      :ok = Collaboration.record_update(socket.assigns.room, user.id, message)
 
-    {:noreply, socket}
+      {:noreply, socket}
+    else
+      {:reply, {:error, %{reason: "editing not permitted"}}, socket}
+    end
   end
 
   def handle_in("confirm_updates_applied", _payload, socket) do

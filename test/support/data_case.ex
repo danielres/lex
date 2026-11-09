@@ -45,9 +45,15 @@ defmodule Lex.DataCase do
   end
 
   def create_scope(name \\ "Test Space", current_user \\ create_user()) do
-    scope = %Lex.Scope{current_user: current_user}
+    scope = %Lex.Scope{user: current_user}
     space = Lex.Accounts.Space.create!(%{name: name}, scope: scope)
-    %{scope | space_id: space.id}
+    scope = %{scope | space: space}
+    {:ok, membership} = scope |> Lex.Accounts.Membership.get()
+
+    {:ok, membership} =
+      scope |> Lex.Accounts.Membership.accept(membership, current_user.display_name)
+
+    %{scope | membership: membership}
   end
 
   @doc """

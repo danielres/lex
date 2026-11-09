@@ -1,20 +1,20 @@
 defmodule LexWeb.SpaceTest do
   use Lex.DataCase
 
-  alias Lex.Accounts.Space
-
   test "assigns the space resolved from the route slug" do
     current_user = create_user()
-    scope = %Lex.Scope{current_user: current_user}
-    space = Space.create!(%{name: "Test Space"}, scope: scope)
-    socket = %Phoenix.LiveView.Socket{assigns: %{__changed__: %{}, scope: scope}}
+    scope = create_scope("Test Space", current_user)
+    space = scope.space
+
+    socket = %Phoenix.LiveView.Socket{
+      assigns: %{__changed__: %{}, live_action: nil, scope: %{scope | membership: nil}}
+    }
 
     socket = LexWeb.Space.on_mount(%{"space_slug" => space.slug}, %{}, socket)
 
-    assert socket.assigns.scope.current_user.id == current_user.id
-    assert socket.assigns.scope.space_id == space.id
-    assert socket.assigns.space.id == space.id
-    assert socket.assigns.space.name == "Test Space"
-    assert socket.assigns.space.slug == "test-space"
+    assert socket.assigns.scope.user.id == current_user.id
+    assert socket.assigns.scope.membership.id == scope.membership.id
+    assert socket.assigns.scope.space.id == space.id
+    refute Map.has_key?(socket.assigns, :space)
   end
 end

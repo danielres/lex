@@ -1,9 +1,13 @@
 defmodule Lex.Wiki.PageRevision do
   @moduledoc false
 
+  alias Lex.Accounts.Membership.Checks.ActiveMember
+  alias Lex.Accounts.Membership.Checks.HasPrivilege
+
   use Ash.Resource,
     domain: Lex.Wiki,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     notifiers: [Ash.Notifier.PubSub]
 
   postgres do
@@ -30,6 +34,16 @@ defmodule Lex.Wiki.PageRevision do
 
       change relate_actor(:saved_by)
       change manage_relationship(:contributor_ids, :contributors, type: :append)
+    end
+  end
+
+  policies do
+    policy action_type(:read) do
+      authorize_if ActiveMember
+    end
+
+    policy action(:create) do
+      authorize_if {HasPrivilege, privilege: :edit_pages}
     end
   end
 

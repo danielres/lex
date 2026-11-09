@@ -8,6 +8,7 @@ defmodule Lex.Accounts do
   end
 
   resources do
+    resource Lex.Accounts.Membership
     resource Lex.Accounts.Space
     resource Lex.Accounts.Token
     resource Lex.Accounts.User

@@ -8,7 +8,7 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
       :if={!@active?}
       aria-label="Browse revisions"
       class="btn btn-sm btn-circle btn-neutral hover:btn-info"
-      patch={~p"/#{@space.slug}/wiki/#{@page.slug}/revisions"}
+      patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}/revisions"}
       title="Browse revisions"
     >
       <.icon name="hero-clock-solid" />
@@ -18,7 +18,7 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
       :if={@active?}
       aria-label="Return to current page"
       class="btn btn-sm btn-circle btn-info"
-      patch={~p"/#{@space.slug}/wiki/#{@page.slug}"}
+      patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}"}
       title="Return to current page"
     >
       <.icon name="hero-clock-solid" />

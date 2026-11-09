@@ -29,8 +29,8 @@ defmodule LexWeb.Router do
       auth_routes DevAuthController, Lex.Accounts.User, path: "/dev/auth"
     end
 
-    post "", AshTypescriptRpcController, :run
-    post "", AshTypescriptRpcController, :validate
+    post "/rpc/run", AshTypescriptRpcController, :run
+    post "/rpc/validate", AshTypescriptRpcController, :validate
     get "/ash-typescript", PageController, :index
 
     sign_out_route AuthController, "/sign-out",
@@ -41,7 +41,9 @@ defmodule LexWeb.Router do
       live "/", HomeLive
 
       scope "/:space_slug" do
+        live "/join", MembershipOnboardingLive, :join
         live "/", SpaceLive
+        live "/members", MembersLive
         live "/wiki", WikiLive
         live "/wiki/:page_slug", PageLive, :show
         live "/wiki/:page_slug/revisions", PageLive, :revisions

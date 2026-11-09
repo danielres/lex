@@ -18,28 +18,34 @@ defmodule LexWeb.WikiLive do
     "title" => :title
   }
 
+  @impl true
   def mount(params, session, socket) do
-    if connected?(socket), do: Page.subscribe()
-
     socket = socket |> delegate_mount(params, session)
-    scope = socket.assigns.scope
 
-    tz =
-      case get_connect_params(socket) do
-        %{"tz" => timezone} -> timezone
-        _ -> "Etc/UTC"
-      end
+    if socket.redirected do
+      {:ok, socket}
+    else
+      if connected?(socket), do: Page.subscribe()
 
-    pages = scope |> list_pages(:last_updated_at, :desc)
+      scope = socket.assigns.scope
 
-    socket =
-      socket
-      |> assign(pages: pages)
-      |> assign(sort_by: :last_updated_at)
-      |> assign(sort_direction: :desc)
-      |> assign(tz: tz)
+      tz =
+        case get_connect_params(socket) do
+          %{"tz" => timezone} -> timezone
+          _ -> "Etc/UTC"
+        end
 
-    {:ok, socket}
+      pages = scope |> list_pages(:last_updated_at, :desc)
+
+      socket =
+        socket
+        |> assign(pages: pages)
+        |> assign(sort_by: :last_updated_at)
+        |> assign(sort_direction: :desc)
+        |> assign(tz: tz)
+
+      {:ok, socket}
+    end
   end
 
   def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)
@@ -81,6 +87,7 @@ defmodule LexWeb.WikiLive do
     {:noreply, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app
@@ -88,13 +95,12 @@ defmodule LexWeb.WikiLive do
       flash={@flash}
       scope={@scope}
       socket={@socket}
-      space={@space}
       ui={@ui}
     >
       <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">
           <.link
-            navigate={~p"/#{@space.slug}/wiki/home"}
+            navigate={~p"/#{@scope.space.slug}/wiki/home"}
             class="btn btn-info px-2 rounded-box"
           >
             <.icon name="hero-home-micro" />
@@ -149,7 +155,7 @@ defmodule LexWeb.WikiLive do
                       "hover:text-info",
                       "transition"
                     ]}
-                    navigate={~p"/#{@space.slug}/wiki/#{page.slug}"}
+                    navigate={~p"/#{@scope.space.slug}/wiki/#{page.slug}"}
                   >
                     {page.title}
                     <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />

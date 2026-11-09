@@ -1,0 +1,322 @@
+defmodule LexWeb.MembersLive do
+  use LexWeb, :live_view
+  use LiveDelegate
+
+  require Logger
+
+  alias Lex.Accounts.Membership
+  alias Lex.Accounts.Membership.Access
+  alias Lex.Accounts.Privilege
+  alias LexWeb.Space
+  alias LexWeb.UI
+  alias LexWeb.Components.Avatar
+
+  delegate(:space, Space)
+  delegate(:ui, UI)
+
+  @impl true
+  def mount(params, session, socket) do
+    socket = socket |> delegate_mount(params, session)
+    available_privileges = Access.available_privileges()
+
+    socket =
+      socket
+      |> assign(:available_privileges, available_privileges)
+      |> reload_memberships()
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "toggle_privilege",
+        %{"membership_id" => membership_id, "privilege" => value},
+        socket
+      ) do
+    scope = socket.assigns.scope
+
+    with {:ok, privilege} <- Privilege.match(value),
+         {:ok, membership} <- scope |> Membership.get(membership_id),
+         privileges = toggle(membership.privileges, privilege),
+         {:ok, _membership} <-
+           scope |> Membership.set_privileges(membership, privileges) do
+      socket = socket |> reload_memberships()
+
+      {:noreply, socket}
+    else
+      error ->
+        socket = socket |> operation_failed("Could not change privileges", error)
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("invite", %{"user_id" => user_id}, socket) do
+    scope = socket.assigns.scope
+
+    with {:ok, _membership} <- scope |> Membership.invite(user_id) do
+      socket = socket |> reload_memberships()
+
+      {:noreply, socket}
+    else
+      error ->
+        socket = socket |> operation_failed("Could not invite member", error)
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("disable", %{"membership_id" => membership_id}, socket) do
+    scope = socket.assigns.scope
+
+    with {:ok, membership} <- scope |> Membership.get(membership_id),
+         {:ok, _membership} <- scope |> Membership.disable(membership) do
+      socket = socket |> reload_memberships()
+
+      {:noreply, socket}
+    else
+      error ->
+        socket = socket |> operation_failed("Could not disable member", error)
+
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("reinvite", %{"membership_id" => membership_id}, socket) do
+    scope = socket.assigns.scope
+
+    with {:ok, membership} <- scope |> Membership.get(membership_id),
+         {:ok, _membership} <- scope |> Membership.reinvite(membership) do
+      socket = socket |> reload_memberships()
+
+      {:noreply, socket}
+    else
+      error ->
+        socket = socket |> operation_failed("Could not reinvite member", error)
+
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <Layouts.app
+      active="members"
+      flash={@flash}
+      scope={@scope}
+      socket={@socket}
+      ui={@ui}
+    >
+      <div class="mx-auto max-w-3xl space-y-6">
+        <div>
+          <h1 class="text-2xl font-semibold">Members</h1>
+          <p class="text-base-content/60">
+            Memberships for {@scope.space.name}.
+          </p>
+        </div>
+
+        <section
+          :if={can?(@scope, :manage_members)}
+          class="rounded-box border border-base-content/15 bg-base-200 p-4"
+          data-testid="invite-members"
+        >
+          <h2 class="font-semibold">Invite a member</h2>
+          <p class="mt-1 text-sm text-base-content/60">
+            Invite an existing user to {@scope.space.name}.
+          </p>
+
+          <p :if={@invitable_users == []} class="mt-4 text-sm text-base-content/60">
+            There are no users available to invite.
+          </p>
+
+          <div :if={@invitable_users != []} class="mt-4 grid gap-2">
+            <div
+              :for={user <- @invitable_users}
+              class="flex items-center justify-between gap-3 rounded-box bg-base-100 p-3"
+              data-testid="invitable-user"
+            >
+              <span class="font-medium">{user.display_name}</span>
+              <button
+                class="btn btn-sm btn-info"
+                data-testid="invite-member"
+                phx-click="invite"
+                phx-value-user_id={user.id}
+                type="button"
+              >
+                Invite
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div class="grid gap-3" data-testid="memberships">
+          <%= for memberships <- [
+            @active_memberships,
+            @pending_memberships,
+            @declined_memberships,
+            @disabled_memberships
+          ] do %>
+            <article
+              :for={membership <- memberships}
+              class="rounded-box border border-base-content/15 bg-base-300 p-4"
+              data-testid="membership"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="font-semibold">
+                      <Avatar.render user={membership.user} />
+                      {membership_name(membership)}
+                    </h2>
+                    <span
+                      :if={membership.status == :active}
+                      class="badge badge-sm badge-success"
+                    >
+                      Active
+                    </span>
+                    <span :if={membership.status == :declined} class="badge badge-sm">
+                      Declined
+                    </span>
+                    <span
+                      :if={membership.status == :disabled}
+                      class="badge badge-sm badge-error"
+                    >
+                      Disabled
+                    </span>
+                    <span
+                      :if={membership.status == :invited}
+                      class="badge badge-sm badge-warning"
+                    >
+                      Pending
+                    </span>
+                    <span
+                      :if={membership.user_id == @scope.space.owner_id}
+                      class="badge badge-sm badge-info"
+                    >
+                      Owner
+                    </span>
+                  </div>
+                  <p
+                    :if={
+                      membership.display_name != nil &&
+                        membership.display_name != membership.user.display_name
+                    }
+                    class="text-sm text-base-content/50"
+                  >
+                    {membership.user.display_name}
+                  </p>
+                </div>
+
+                <div :if={
+                  can?(@scope, :manage_members) &&
+                    membership.user_id != @scope.space.owner_id &&
+                    membership.user_id != @scope.user.id
+                }>
+                  <button
+                    :if={membership.status == :active}
+                    class="btn btn-sm btn-ghost hover:btn-error"
+                    data-testid="disable-member"
+                    phx-click="disable"
+                    phx-value-membership_id={membership.id}
+                    type="button"
+                  >
+                    Disable
+                  </button>
+                  <button
+                    :if={membership.status in [:declined, :disabled]}
+                    class="btn btn-sm btn-ghost hover:btn-info"
+                    data-testid="reinvite-member"
+                    phx-click="reinvite"
+                    phx-value-membership_id={membership.id}
+                    type="button"
+                  >
+                    Reinvite
+                  </button>
+                </div>
+              </div>
+
+              <div
+                :if={
+                  can?(@scope, :manage_privileges) &&
+                    membership.user_id != @scope.space.owner_id &&
+                    membership.user_id != @scope.user.id
+                }
+                class="mt-4 flex flex-wrap gap-2 border-t border-base-content/10 pt-3"
+              >
+                <button
+                  :for={privilege <- @available_privileges}
+                  aria-pressed={privilege in membership.privileges}
+                  class={[
+                    "btn btn-sm",
+                    privilege in membership.privileges && "btn-info",
+                    privilege not in membership.privileges && "btn-ghost"
+                  ]}
+                  data-testid="membership-privilege"
+                  phx-click="toggle_privilege"
+                  phx-value-membership_id={membership.id}
+                  phx-value-privilege={privilege}
+                  title={Privilege.description(privilege)}
+                  type="button"
+                >
+                  {Privilege.label(privilege)}
+                </button>
+              </div>
+            </article>
+          <% end %>
+        </div>
+      </div>
+    </Layouts.app>
+    """
+  end
+
+  defp reload_memberships(socket) do
+    scope = socket.assigns.scope
+
+    active_memberships = scope |> Membership.list!(:active)
+    pending_memberships = scope |> list_memberships_or_empty(:pending)
+    declined_memberships = scope |> list_memberships_or_empty(:declined)
+    disabled_memberships = scope |> list_memberships_or_empty(:disabled)
+
+    invitable_users =
+      if can?(scope, :manage_members) do
+        scope |> Membership.list_invitable_users!()
+      else
+        []
+      end
+
+    socket
+    |> assign(:active_memberships, active_memberships)
+    |> assign(:pending_memberships, pending_memberships)
+    |> assign(:declined_memberships, declined_memberships)
+    |> assign(:disabled_memberships, disabled_memberships)
+    |> assign(:invitable_users, invitable_users)
+  end
+
+  defp list_memberships_or_empty(scope, selection) do
+    scope
+    |> Membership.list(selection)
+    |> case do
+      {:ok, memberships} -> memberships
+      {:error, %Ash.Error.Forbidden{}} -> []
+      {:error, error} -> raise error
+    end
+  end
+
+  defp toggle(privileges, privilege) do
+    if privilege in privileges do
+      List.delete(privileges, privilege)
+    else
+      [privilege | privileges]
+    end
+  end
+
+  defp membership_name(%{display_name: nil, user: user}), do: user.display_name
+  defp membership_name(membership), do: membership.display_name
+
+  defp operation_failed(socket, message, error) do
+    Logger.warning("#{message}: #{inspect(error)}")
+
+    socket |> put_flash(:error, message)
+  end
+end

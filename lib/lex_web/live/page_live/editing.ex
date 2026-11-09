@@ -14,7 +14,11 @@ defmodule LexWeb.PageLive.Editing do
 
   def reload(socket, page) do
     scope = socket.assigns.scope
-    form = scope |> title_form(page)
+
+    form =
+      if can?(scope, :edit_pages) do
+        scope |> title_form(page)
+      end
 
     socket |> delegate_assign(:title_form, form)
   end
@@ -58,7 +62,7 @@ defmodule LexWeb.PageLive.Editing do
           |> assign(:live_action, :show)
           |> push_patch(
             replace: true,
-            to: ~p"/#{socket.assigns.space.slug}/wiki/#{socket.assigns.page.slug}"
+            to: ~p"/#{socket.assigns.scope.space.slug}/wiki/#{socket.assigns.page.slug}"
           )
 
         {:reply, %{ok: true, result: counts}, socket}
@@ -87,7 +91,7 @@ defmodule LexWeb.PageLive.Editing do
 
   def handle_event("title_change", %{"page_title" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.editing.title_form, params)
-    socket = delegate_assign(socket, :title_form, form)
+    socket = socket |> delegate_assign(:title_form, form)
 
     {:noreply, socket}
   end

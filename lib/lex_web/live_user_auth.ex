@@ -8,7 +8,7 @@ defmodule LexWeb.LiveUserAuth do
   def on_mount(:live_user_required, _params, _session, socket) do
     case socket.assigns[:current_user] do
       %Lex.Accounts.User{} = current_user ->
-        scope = %Lex.Scope{current_user: current_user}
+        scope = %Lex.Scope{user: current_user}
         {:cont, assign(socket, :scope, scope)}
 
       nil ->

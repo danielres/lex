@@ -3,6 +3,7 @@ defmodule LexWeb.PageLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Accounts.Membership
   alias Lex.Collaboration
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
@@ -50,6 +51,37 @@ defmodule LexWeb.PageLiveTest do
     assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
   end
 
+  test "members without page editing privileges can read but cannot edit or create pages", %{
+    conn: conn,
+    scope: scope
+  } do
+    page = scope |> Page.ensure!("Existing Page")
+    member = create_user("Reader")
+    {:ok, membership} = scope |> Membership.invite(member.id)
+    member_scope = %{scope | membership: membership, user: member}
+    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
+    member_scope = %{member_scope | membership: membership}
+    conn = conn |> recycle() |> log_in_user(member)
+
+    assert {:ok, fetched_page} = member_scope |> Page.fetch_by_slug(page.slug)
+    assert fetched_page.id == page.id
+    assert {:error, _error} = member_scope |> Page.ensure("Forbidden Page")
+    assert {:error, _error} = Page.rename(page, "Forbidden Rename", scope: member_scope)
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/#{page.slug}")
+
+    refute has_element?(view, "button[phx-click='editing:toggle']")
+    assert has_element?(view, "[phx-hook='LexicalEditor'][data-editable='false']")
+
+    missing_conn = conn |> recycle() |> log_in_user(member)
+    {:ok, missing_view, _html} = live(missing_conn, ~p"/test-space/wiki/missing-page")
+
+    assert has_element?(missing_view, "[data-testid='missing-page']", "doesn’t exist")
+    assert has_element?(missing_view, "[data-testid='missing-page']", "don’t have permission")
+    refute has_element?(missing_view, "[data-testid='page-creation-form']")
+  end
+
   test "preloads page references and creates missing link targets", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     scope |> Page.ensure!("Summer Activities")
@@ -79,7 +111,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, _view, first_html} = live(conn, ~p"/test-space/wiki/summer-activities")
     [page] = Ash.read!(Page, scope: scope)
 
-    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    second_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, _view, second_html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     assert first_html =~ ~s(data-document-id="#{page.id}")
@@ -91,7 +123,7 @@ defmodule LexWeb.PageLiveTest do
     scope |> Page.ensure!("Home")
     scope |> Page.ensure!("Summer Activities")
     {:ok, _view, home_html} = live(conn, ~p"/test-space/wiki/home")
-    summer_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    summer_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, _view, summer_html} = live(summer_conn, ~p"/test-space/wiki/summer-activities")
 
     [home, summer] = Page |> Ash.Query.sort(:slug) |> Ash.read!(scope: scope)
@@ -145,7 +177,7 @@ defmodule LexWeb.PageLiveTest do
 
   test "does not expose content updates from another space", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
-    other_scope = create_scope("Other Space", scope.current_user)
+    other_scope = create_scope("Other Space", scope.user)
     other_page = other_scope |> Page.ensure!("Private Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
     snapshot = document_snapshot("main", "Private content")
@@ -201,8 +233,8 @@ defmodule LexWeb.PageLiveTest do
     enable_editing(view)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
-    assert has_element?(view, "button[aria-label='Make editor read-only']")
-    refute has_element?(view, "[aria-label='Browse revisions']")
+    assert has_element?(view, "button[aria-label='End editing']")
+    assert has_element?(view, "[aria-label='Browse revisions']")
 
     view
     |> element("button[phx-click='editing:toggle']")
@@ -218,9 +250,9 @@ defmodule LexWeb.PageLiveTest do
 
     assert_patch(view, ~p"/test-space/wiki/home")
     assert has_element?(view, "button[aria-label='Enable editing']")
-    assert [page_document] = Ash.read!(PageDocument)
+    assert [page_document] = Ash.read!(PageDocument, scope: scope)
     assert page_document.search_text == "Home content"
-    assert [revision] = Ash.read!(PageRevision)
+    assert [revision] = Ash.read!(PageRevision, scope: scope)
     assert revision.lexical_state == document_snapshot("main", "Home content")["lexical_state"]
     assert revision.search_text == "Home content"
 
@@ -244,7 +276,7 @@ defmodule LexWeb.PageLiveTest do
     render_hook(view, "editing:save", %{"error" => "snapshot_failed"})
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
-    assert has_element?(view, "button[aria-label='Make editor read-only']")
+    assert has_element?(view, "button[aria-label='End editing']")
     assert render(view) =~ "Could not save the document"
   end
 
@@ -270,7 +302,7 @@ defmodule LexWeb.PageLiveTest do
   test "propagates a rename to other viewers of the same page", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Summer Activities")
     {:ok, first_view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
-    second_conn = conn |> recycle() |> log_in_user(scope.current_user)
+    second_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, second_view, _html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
     enable_editing(first_view)
@@ -390,7 +422,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "#revision-preview-#{second_revision.id}")
     assert render(view) =~ "First version"
-    refute has_element?(view, "[aria-label='Enable editing']")
+    assert has_element?(view, "[aria-label='Enable editing']")
     assert has_element?(view, "a#previous-revision")
     assert has_element?(view, "button#next-revision[disabled]")
 

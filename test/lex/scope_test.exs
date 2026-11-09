@@ -10,7 +10,7 @@ defmodule Lex.ScopeTest do
       hue: 25
     }
 
-    scope = %Lex.Scope{current_user: current_user}
+    scope = %Lex.Scope{user: current_user}
     opts = Ash.Scope.to_opts(scope)
 
     assert opts[:actor] == current_user
@@ -24,11 +24,19 @@ defmodule Lex.ScopeTest do
       hue: 115
     }
 
-    space_id = Ecto.UUID.generate()
-    scope = %Lex.Scope{current_user: current_user, space_id: space_id}
+    membership = %{id: Ecto.UUID.generate()}
+    space = %Lex.Accounts.Space{id: Ecto.UUID.generate()}
+
+    scope = %Lex.Scope{
+      membership: membership,
+      space: space,
+      user: current_user
+    }
+
     opts = Ash.Scope.to_opts(scope)
 
     assert opts[:actor] == current_user
-    assert opts[:tenant] == space_id
+    assert opts[:tenant] == space.id
+    assert scope.membership == membership
   end
 end
