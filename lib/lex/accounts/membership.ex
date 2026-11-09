@@ -14,7 +14,8 @@ defmodule Lex.Accounts.Membership do
     otp_app: :lex,
     domain: Lex.Accounts,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    notifiers: [Ash.Notifier.PubSub]
 
   postgres do
     table "memberships"
@@ -157,6 +158,14 @@ defmodule Lex.Accounts.Membership do
     end
   end
 
+  pub_sub do
+    module Phoenix.PubSub
+    name Lex.PubSub
+    prefix "membership"
+
+    publish_all :update, [:space_id, :user_id]
+  end
+
   changes do
     change optimistic_lock(:version), on: :update
   end
@@ -223,6 +232,10 @@ defmodule Lex.Accounts.Membership do
     __MODULE__
     |> Ash.Changeset.for_create(:invite, %{user_id: user_id}, scope: scope)
     |> Ash.create()
+  end
+
+  def subscribe(%Lex.Scope{space: %Space{id: space_id}, user: %User{id: user_id}}) do
+    Phoenix.PubSub.subscribe(Lex.PubSub, "membership:#{space_id}:#{user_id}")
   end
 
   def accept(scope, membership, display_name) do
