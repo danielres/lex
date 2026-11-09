@@ -129,6 +129,27 @@ defmodule Lex.Accounts.MembershipTest do
     assert membership.privileges == [:edit_pages, :manage_space]
   end
 
+  test "privilege managers cannot read declined memberships", %{scope: scope} do
+    scope = scope |> activate_owner()
+    manager = create_user("Privilege Manager")
+    member = create_user("Declined Member")
+    {:ok, manager_membership} = scope |> Membership.invite(manager.id)
+    {:ok, membership} = scope |> Membership.invite(member.id)
+    manager_scope = scope |> membership_scope(manager, manager_membership)
+    member_scope = scope |> membership_scope(member, membership)
+
+    {:ok, manager_membership} =
+      manager_scope |> Membership.accept(manager_membership, "Privilege Manager")
+
+    {:ok, manager_membership} =
+      scope |> Membership.set_privileges(manager_membership, [:manage_privileges])
+
+    {:ok, membership} = member_scope |> Membership.decline(membership)
+    manager_scope = %{manager_scope | membership: manager_membership}
+
+    assert {:error, _error} = manager_scope |> Membership.get(membership.id)
+  end
+
   test "ordinary members cannot change privileges", %{scope: scope} do
     scope = scope |> activate_owner()
     first_member = create_user("First Member")
