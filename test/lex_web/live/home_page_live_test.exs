@@ -3,6 +3,7 @@ defmodule LexWeb.HomePageLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Lex.Accounts.Membership
   alias Lex.Wiki.Page
 
   setup :authenticate
@@ -82,5 +83,25 @@ defmodule LexWeb.HomePageLiveTest do
              Page.list!(scope: scope)
 
     assert space_id == space.id
+  end
+
+  test "read-only members cannot automatically create a missing home page", %{
+    conn: conn,
+    current_user: current_user
+  } do
+    scope = create_scope("Test Space", current_user)
+    user = create_user("Reader")
+    {:ok, membership} = scope |> Membership.invite(user.id)
+    user_scope = %{scope | membership: membership, user: user}
+    {:ok, membership} = user_scope |> Membership.accept(membership, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
+    user_scope = %{user_scope | membership: membership}
+    conn = conn |> recycle() |> log_in_user(user)
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+
+    assert has_element?(view, "[data-testid='missing-page']", "don’t have permission")
+    refute has_element?(view, "[data-testid='page-creation-form']")
+    assert Page.list!(scope: user_scope) == []
   end
 end

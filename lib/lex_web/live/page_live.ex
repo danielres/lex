@@ -41,8 +41,16 @@ defmodule LexWeb.PageLive do
     |> Page.fetch_by_slug(slug)
     |> case do
       {:ok, nil} when slug == "home" ->
-        page = scope |> Page.ensure!("Home")
-        socket = socket |> load_page(page, params["revision_id"])
+        socket =
+          if can?(scope, :edit_pages) do
+            page = scope |> Page.ensure!("Home")
+
+            socket |> load_page(page, params["revision_id"])
+          else
+            socket
+            |> assign(page: nil)
+            |> Creation.reload(scope, slug)
+          end
 
         {:noreply, socket}
 
