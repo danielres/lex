@@ -30,7 +30,7 @@ defmodule Lex.Accounts.Membership.Changes.SetIdentity do
     if slug == "" do
       Ash.Changeset.add_error(changeset,
         field: :display_name,
-        message: "Must contain at least one letter or number"
+        message: "must contain at least one Latin letter (a-z) or number"
       )
     else
       changeset
