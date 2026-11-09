@@ -74,6 +74,16 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(view, "button[phx-click='editing:toggle']")
     assert has_element?(view, "[phx-hook='LexicalEditor'][data-editable='false']")
 
+    render_hook(view, "editing:title_change", %{
+      "page_title" => %{"title" => "Forbidden Rename"}
+    })
+
+    render_hook(view, "editing:title_save", %{
+      "page_title" => %{"title" => "Forbidden Rename"}
+    })
+
+    assert Page.get!(page.id, scope: member_scope).title == "Existing Page"
+
     missing_conn = conn |> recycle() |> log_in_user(member)
     {:ok, missing_view, _html} = live(missing_conn, ~p"/test-space/wiki/missing-page")
 
