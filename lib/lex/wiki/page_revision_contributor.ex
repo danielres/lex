@@ -3,6 +3,7 @@ defmodule Lex.Wiki.PageRevisionContributor do
 
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
+  alias Lex.Wiki.Validations.ParentInSpace
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -20,6 +21,7 @@ defmodule Lex.Wiki.PageRevisionContributor do
     create :create do
       primary? true
       accept [:page_revision_id, :user_id]
+      validate {ParentInSpace, relationship: :page_revision}
     end
   end
 
@@ -33,6 +35,11 @@ defmodule Lex.Wiki.PageRevisionContributor do
     end
   end
 
+  multitenancy do
+    strategy :attribute
+    attribute :space_id
+  end
+
   relationships do
     belongs_to :page_revision, Lex.Wiki.PageRevision do
       allow_nil? false
@@ -42,6 +49,10 @@ defmodule Lex.Wiki.PageRevisionContributor do
     belongs_to :user, Lex.Accounts.User do
       allow_nil? false
       primary_key? true
+    end
+
+    belongs_to :space, Lex.Accounts.Space do
+      allow_nil? false
     end
   end
 end

@@ -3,6 +3,7 @@ defmodule Lex.Wiki.PageDocument do
 
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
+  alias Lex.Wiki.Validations.ParentInSpace
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -20,6 +21,7 @@ defmodule Lex.Wiki.PageDocument do
 
     create :persist do
       accept [:document_key, :page_id, :yjs_state]
+      validate {ParentInSpace, relationship: :page}
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:yjs_state]
@@ -36,6 +38,7 @@ defmodule Lex.Wiki.PageDocument do
       ]
 
       require_attributes [:content_hash, :lexical_state, :search_text]
+      validate {ParentInSpace, relationship: :page}
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:content_hash, :lexical_state, :search_text, :yjs_state]
@@ -59,6 +62,11 @@ defmodule Lex.Wiki.PageDocument do
 
     publish :persist, "pages"
     publish :save, "pages"
+  end
+
+  multitenancy do
+    strategy :attribute
+    attribute :space_id
   end
 
   attributes do
@@ -98,6 +106,10 @@ defmodule Lex.Wiki.PageDocument do
     belongs_to :page, Lex.Wiki.Page do
       allow_nil? false
       attribute_public? true
+    end
+
+    belongs_to :space, Lex.Accounts.Space do
+      allow_nil? false
     end
   end
 
