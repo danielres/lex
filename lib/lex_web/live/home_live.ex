@@ -137,7 +137,10 @@ defmodule LexWeb.HomeLive do
       "bg-base-100 rounded"
     ]
 
+    assigns = assigns |> assign(grid_item_class: grid_item_class)
+
     ~H"""
+    <%  %>
     <div>
       <h1 class="text-xl font-semibold border-b border-base-content/20 pb-2 mb-4">
         Your spaces
@@ -149,7 +152,7 @@ defmodule LexWeb.HomeLive do
           navigate={~p"/#{membership.space.slug}"}
           data-testid="space"
           class={[
-            grid_item_class,
+            @grid_item_class,
             "font-semibold",
             "leading-tight"
           ]}
@@ -168,7 +171,7 @@ defmodule LexWeb.HomeLive do
           phx-click="show_space_form"
           data-testid="show-space-form"
           class={[
-            grid_item_class,
+            @grid_item_class,
             "hover:bg-info",
             "cursor-pointer"
           ]}
