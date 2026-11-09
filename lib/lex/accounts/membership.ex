@@ -157,6 +157,10 @@ defmodule Lex.Accounts.Membership do
     end
   end
 
+  changes do
+    change optimistic_lock(:version), on: :update
+  end
+
   multitenancy do
     strategy :attribute
     attribute :space_id
@@ -165,6 +169,11 @@ defmodule Lex.Accounts.Membership do
   attributes do
     uuid_v7_primary_key :id
     timestamps()
+
+    attribute :version, :integer do
+      allow_nil? false
+      default 1
+    end
 
     attribute :status, :atom do
       allow_nil? false

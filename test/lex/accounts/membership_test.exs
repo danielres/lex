@@ -46,6 +46,32 @@ defmodule Lex.Accounts.MembershipTest do
     assert membership.slug == "team-member"
   end
 
+  test "stale acceptance cannot overwrite an established identity", %{scope: scope} do
+    {:ok, invitation} = scope |> Membership.get()
+
+    assert {:ok, membership} = scope |> Membership.accept(invitation, "First Identity")
+    assert {:error, _error} = scope |> Membership.accept(invitation, "Second Identity")
+
+    assert {:ok, reloaded} = scope |> Membership.get(membership.id)
+    assert reloaded.display_name == "First Identity"
+    assert reloaded.slug == "first-identity"
+  end
+
+  test "stale privilege updates cannot overwrite newer privileges", %{scope: scope} do
+    scope = scope |> activate_owner()
+    member = create_user("Member")
+    {:ok, membership} = scope |> Membership.invite(member.id)
+
+    assert {:ok, _membership} =
+             scope |> Membership.set_privileges(membership, [:manage_space])
+
+    assert {:error, _error} =
+             scope |> Membership.set_privileges(membership, [:manage_members])
+
+    assert {:ok, reloaded} = scope |> Membership.get(membership.id)
+    assert reloaded.privileges == [:manage_space]
+  end
+
   test "declining an invitation preserves a declined membership", %{scope: scope} do
     scope = scope |> activate_owner()
     member = create_user("Member")
