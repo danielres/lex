@@ -9,6 +9,7 @@ defmodule LexWeb.MembersLive do
   alias Lex.Accounts.Privilege
   alias LexWeb.Space
   alias LexWeb.UI
+  alias LexWeb.Components.Avatar
 
   delegate(:space, Space)
   delegate(:ui, UI)
@@ -164,7 +165,10 @@ defmodule LexWeb.MembersLive do
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="font-semibold">{membership_name(membership)}</h2>
+                    <h2 class="font-semibold">
+                      <Avatar.render user={membership.user} />
+                      {membership_name(membership)}
+                    </h2>
                     <span
                       :if={membership.status == :active}
                       class="badge badge-sm badge-success"
