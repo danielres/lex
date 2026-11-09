@@ -89,6 +89,11 @@ defmodule LexWeb.PageLive.Editing do
     save_failed(socket)
   end
 
+  def handle_event(event, _params, %{assigns: %{editing: %{title_form: nil}}} = socket)
+      when event in ["title_change", "title_save"] do
+    {:noreply, socket}
+  end
+
   def handle_event("title_change", %{"page_title" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.editing.title_form, params)
     socket = socket |> delegate_assign(:title_form, form)
