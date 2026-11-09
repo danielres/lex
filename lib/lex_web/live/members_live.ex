@@ -158,7 +158,7 @@ defmodule LexWeb.MembersLive do
           ] do %>
             <article
               :for={membership <- memberships}
-              class="rounded-box border border-base-content/15 bg-base-200 p-4"
+              class="rounded-box border border-base-content/15 bg-base-300 p-4"
               data-testid="membership"
             >
               <div class="flex flex-wrap items-start justify-between gap-3">
