@@ -120,8 +120,8 @@ defmodule Lex.Accounts.Membership do
     end
 
     policy action(:read) do
-      authorize_if {HasPrivilege, privilege: :manage_privileges}
       forbid_if expr(status == :declined)
+      authorize_if {HasPrivilege, privilege: :manage_privileges}
     end
 
     policy action(:active) do
