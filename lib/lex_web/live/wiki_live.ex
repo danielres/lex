@@ -18,6 +18,7 @@ defmodule LexWeb.WikiLive do
     "title" => :title
   }
 
+  @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
 
@@ -86,6 +87,7 @@ defmodule LexWeb.WikiLive do
     {:noreply, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app
