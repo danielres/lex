@@ -19,7 +19,7 @@ defmodule Lex.Collaboration do
   def open_document(scope, room) when is_binary(room) do
     with {:ok, document_ref} <- parse_room(room),
          {:ok, page} <- scope |> load_page(document_ref.page_id) do
-      document_ref = %{document_key: document_ref.document_key, page: page, scope: scope}
+      document_ref = %{document_key: document_ref.document_key, page: page}
       find_or_start_document(room, document_ref)
     end
   end

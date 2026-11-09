@@ -190,14 +190,20 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  def persist_document(scope, page, document_key, doc) do
+  def restore_collaboration_document(page, document_key, doc) do
+    with {:ok, page_document} <- page |> get_collaboration_page_document(document_key) do
+      restore_page_document(page_document, doc)
+    end
+  end
+
+  def persist_collaboration_document(page, document_key, doc) do
     with {:ok, yjs_state} <- Yex.encode_state_as_update(doc),
-         {:ok, page_document} <- scope |> get_page_document(page, document_key) do
+         {:ok, page_document} <- page |> get_collaboration_page_document(document_key) do
       if page_document != nil and page_document.yjs_state == yjs_state do
         :ok
       else
         with {:ok, _page_document} <-
-               scope |> persist_page_document(page, document_key, yjs_state) do
+               page |> persist_page_document(document_key, yjs_state) do
           :ok
         end
       end
@@ -349,20 +355,28 @@ defmodule Lex.Wiki.Page do
     |> Ash.read_one(scope: scope)
   end
 
+  defp get_collaboration_page_document(page, document_key) do
+    page_id = page.id
+
+    PageDocument
+    |> Ash.Query.filter(page_id == ^page_id and document_key == ^document_key)
+    |> Ash.read_one(authorize?: false, tenant: page.space_id)
+  end
+
   defp restore_page_document(nil, _doc), do: :ok
 
   defp restore_page_document(page_document, doc) do
     Yex.apply_update(doc, page_document.yjs_state)
   end
 
-  defp persist_page_document(scope, page, document_key, yjs_state) do
+  defp persist_page_document(page, document_key, yjs_state) do
     PageDocument
     |> Ash.Changeset.for_create(:persist, %{
       page_id: page.id,
       document_key: document_key,
       yjs_state: yjs_state
     })
-    |> Ash.create(scope: scope, authorize?: false)
+    |> Ash.create(authorize?: false, tenant: page.space_id)
   end
 
   defp save_page_document(

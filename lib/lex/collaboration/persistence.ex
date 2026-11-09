@@ -7,12 +7,11 @@ defmodule Lex.Collaboration.Persistence do
 
   @impl true
   def bind(document_ref, _room, doc) do
-    scope = document_ref.scope
     page = document_ref.page
     document_key = document_ref.document_key
 
-    scope
-    |> Page.restore(page, document_key, doc)
+    page
+    |> Page.restore_collaboration_document(document_key, doc)
     |> case do
       :ok ->
         document_ref
@@ -24,12 +23,11 @@ defmodule Lex.Collaboration.Persistence do
 
   @impl true
   def unbind(document_ref, room, doc) do
-    scope = document_ref.scope
     page = document_ref.page
     document_key = document_ref.document_key
 
-    scope
-    |> Page.persist_document(page, document_key, doc)
+    page
+    |> Page.persist_collaboration_document(document_key, doc)
     |> case do
       :ok ->
         :ok
