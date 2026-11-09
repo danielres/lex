@@ -29,6 +29,15 @@ defmodule LexWeb.MembersLiveTest do
     assert member_scope.membership.status == :active
   end
 
+  test "invited members are redirected to onboarding", %{conn: conn, scope: scope} do
+    user = create_user("Invited Member")
+    {:ok, _membership} = scope |> Membership.invite(user.id)
+    conn = conn |> recycle() |> log_in_user(user)
+
+    assert {:error, {:redirect, %{to: "/test-space/join"}}} =
+             live(conn, ~p"/test-space/members")
+  end
+
   test "the owner can invite an existing user", %{conn: conn, scope: scope} do
     user = create_user("New Member")
 
