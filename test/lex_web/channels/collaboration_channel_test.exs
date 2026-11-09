@@ -404,12 +404,16 @@ defmodule LexWeb.CollaborationChannelTest do
     page = scope |> Page.ensure!(unique_slug())
 
     PageDocument
-    |> Ash.Changeset.for_create(:persist, %{
-      page_id: page.id,
-      document_key: "main",
-      yjs_state: <<255>>
-    })
-    |> Ash.create!(scope: scope)
+    |> Ash.Changeset.for_create(
+      :persist,
+      %{
+        page_id: page.id,
+        document_key: "main",
+        yjs_state: <<255>>
+      },
+      scope: scope
+    )
+    |> Ash.create!()
 
     assert {:error, %{reason: reason}} = scope |> join_error("#{page.id}/main")
     assert reason =~ "could not restore Yjs document"

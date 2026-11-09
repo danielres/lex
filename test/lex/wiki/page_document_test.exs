@@ -94,14 +94,18 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     result =
       PageDocument
-      |> Ash.Changeset.for_create(:save, %{
-        content_hash: String.duplicate("0", 64),
-        document_key: "main",
-        lexical_state: lexical_state("Text", format: 0),
-        page_id: page.id,
-        yjs_state: <<0>>
-      })
-      |> Ash.create(scope: scope)
+      |> Ash.Changeset.for_create(
+        :save,
+        %{
+          content_hash: String.duplicate("0", 64),
+          document_key: "main",
+          lexical_state: lexical_state("Text", format: 0),
+          page_id: page.id,
+          yjs_state: <<0>>
+        },
+        scope: scope
+      )
+      |> Ash.create()
 
     assert {:error, %Ash.Error.Invalid{errors: errors}} = result
 
