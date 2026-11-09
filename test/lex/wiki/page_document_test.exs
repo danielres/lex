@@ -13,11 +13,11 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert :ok = scope |> Page.persist_document(page, "main", document("first version"))
     assert scope |> restored_text(page, "main") == "first version"
-    [first_document] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument, scope: scope)
 
     assert :ok = scope |> Page.persist_document(page, "main", document("second version"))
     assert scope |> restored_text(page, "main") == "second version"
-    [second_document] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument, scope: scope)
 
     assert DateTime.after?(second_document.updated_at, first_document.updated_at)
   end
@@ -35,7 +35,7 @@ defmodule Lex.Wiki.PageDocumentTest do
                %{lexical_state: lexical_state, search_text: "First version"}
              )
 
-    [page_document] = Ash.read!(PageDocument)
+    [page_document] = Ash.read!(PageDocument, scope: scope)
 
     assert page_document.lexical_state == lexical_state
     assert page_document.search_text == "First version"
@@ -125,13 +125,13 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert {:ok, :saved} =
              scope |> Page.save_document(page, "main", document("first state"), content)
 
-    [first_document] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument, scope: scope)
 
     assert {:ok, :unchanged} =
              scope
              |> Page.save_document(page, "main", document("different yjs state"), content)
 
-    [second_document] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument, scope: scope)
 
     assert second_document.updated_at == first_document.updated_at
     assert second_document.yjs_state == first_document.yjs_state
@@ -149,7 +149,7 @@ defmodule Lex.Wiki.PageDocumentTest do
                %{lexical_state: lexical_state("Text", format: 0), search_text: "Text"}
              )
 
-    [first_document] = Ash.read!(PageDocument)
+    [first_document] = Ash.read!(PageDocument, scope: scope)
 
     assert {:ok, :saved} =
              scope
@@ -160,7 +160,7 @@ defmodule Lex.Wiki.PageDocumentTest do
                %{lexical_state: lexical_state("Text", format: 1), search_text: "Text"}
              )
 
-    [second_document] = Ash.read!(PageDocument)
+    [second_document] = Ash.read!(PageDocument, scope: scope)
 
     refute second_document.content_hash == first_document.content_hash
   end
@@ -180,7 +180,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert :ok = scope |> Page.persist_document(page, "main", document("second"))
 
-    [page_document] = Ash.read!(PageDocument)
+    [page_document] = Ash.read!(PageDocument, scope: scope)
 
     assert page_document.lexical_state == lexical_state
     assert page_document.search_text == "Searchable"
@@ -202,12 +202,16 @@ defmodule Lex.Wiki.PageDocumentTest do
     page = scope |> Page.ensure!("Home")
 
     assert :ok = scope |> Page.persist_document(page, "main", document("main"))
-    [main_document] = Ash.read!(PageDocument)
+    [main_document] = Ash.read!(PageDocument, scope: scope)
 
     assert :ok = scope |> Page.persist_document(page, "caption-1", document("caption"))
 
     page = Page.list!(scope: scope) |> List.first()
-    latest_document = PageDocument |> Ash.Query.sort(updated_at: :desc) |> Ash.read_first!()
+
+    latest_document =
+      PageDocument
+      |> Ash.Query.sort(updated_at: :desc)
+      |> Ash.read_first!(scope: scope)
 
     assert DateTime.after?(latest_document.updated_at, main_document.updated_at)
     assert page.last_updated_at == latest_document.updated_at

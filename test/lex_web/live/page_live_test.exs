@@ -233,8 +233,8 @@ defmodule LexWeb.PageLiveTest do
     enable_editing(view)
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
-    assert has_element?(view, "button[aria-label='Make editor read-only']")
-    refute has_element?(view, "[aria-label='Browse revisions']")
+    assert has_element?(view, "button[aria-label='End editing']")
+    assert has_element?(view, "[aria-label='Browse revisions']")
 
     view
     |> element("button[phx-click='editing:toggle']")
@@ -250,9 +250,9 @@ defmodule LexWeb.PageLiveTest do
 
     assert_patch(view, ~p"/test-space/wiki/home")
     assert has_element?(view, "button[aria-label='Enable editing']")
-    assert [page_document] = Ash.read!(PageDocument)
+    assert [page_document] = Ash.read!(PageDocument, scope: scope)
     assert page_document.search_text == "Home content"
-    assert [revision] = Ash.read!(PageRevision)
+    assert [revision] = Ash.read!(PageRevision, scope: scope)
     assert revision.lexical_state == document_snapshot("main", "Home content")["lexical_state"]
     assert revision.search_text == "Home content"
 
@@ -276,7 +276,7 @@ defmodule LexWeb.PageLiveTest do
     render_hook(view, "editing:save", %{"error" => "snapshot_failed"})
 
     assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
-    assert has_element?(view, "button[aria-label='Make editor read-only']")
+    assert has_element?(view, "button[aria-label='End editing']")
     assert render(view) =~ "Could not save the document"
   end
 
@@ -422,7 +422,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "#revision-preview-#{second_revision.id}")
     assert render(view) =~ "First version"
-    refute has_element?(view, "[aria-label='Enable editing']")
+    assert has_element?(view, "[aria-label='Enable editing']")
     assert has_element?(view, "a#previous-revision")
     assert has_element?(view, "button#next-revision[disabled]")
 

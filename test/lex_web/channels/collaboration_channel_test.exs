@@ -80,14 +80,14 @@ defmodule LexWeb.CollaborationChannelTest do
     close_channel(first_socket)
     assert Process.alive?(shared_doc)
     assert {:ok, ^shared_doc} = scope |> Collaboration.open_document(room)
-    assert persisted_document_count(room) == 0
+    assert persisted_document_count(scope, room) == 0
 
     close_channel(second_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
     assert_eventually(fn -> Registry.lookup(Lex.Collaboration.Registry, room) == [] end)
-    assert persisted_document_count(room) == 1
+    assert persisted_document_count(scope, room) == 1
     assert scope |> persisted_text(room) == "persisted text"
-    assert Ash.read!(PageRevision) == []
+    assert Ash.read!(PageRevision, scope: scope) == []
   end
 
   test "persisted state hydrates the document when its room reopens", %{scope: scope} do
@@ -169,12 +169,15 @@ defmodule LexWeb.CollaborationChannelTest do
     assert {:ok, %{revision: :unchanged, saved: 0, unchanged: 2}} =
              scope |> Collaboration.save(page, documents)
 
-    page_documents = PageDocument |> Ash.Query.sort(:document_key) |> Ash.read!()
+    page_documents =
+      PageDocument
+      |> Ash.Query.sort(:document_key)
+      |> Ash.read!(scope: scope)
 
     assert Enum.map(page_documents, & &1.document_key) == ["caption-1", "main"]
     assert Enum.map(page_documents, & &1.search_text) == ["Caption", "Main"]
 
-    assert [revision] = Ash.read!(PageRevision)
+    assert [revision] = Ash.read!(PageRevision, scope: scope)
     assert revision.lexical_state == document_snapshot("main", "Main")["lexical_state"]
     assert revision.search_text == "Caption\nMain"
 
@@ -234,6 +237,7 @@ defmodule LexWeb.CollaborationChannelTest do
     room = "#{page.id}/main"
     read_only_scope = scope |> read_only_member_scope()
     socket = read_only_scope |> join_channel(room, false)
+    observer_socket = read_only_scope |> join_channel(room, false)
     {:ok, shared_doc} = read_only_scope |> Collaboration.open_document(room)
 
     push(socket, "yjs_sync", {:binary, sync_step1_message()})
@@ -267,6 +271,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
     monitor = Process.monitor(shared_doc)
     close_channel(socket)
+    close_channel(observer_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
   end
 
@@ -276,8 +281,8 @@ defmodule LexWeb.CollaborationChannelTest do
     caption_room = "#{page.id}/caption-1"
     main_editor = create_user("Main Editor")
     caption_editor = create_user("Caption Editor")
-    main_editor_scope = %{scope | user: main_editor}
-    caption_editor_scope = %{scope | user: caption_editor}
+    main_editor_scope = scope |> member_scope(main_editor, "Main Editor")
+    caption_editor_scope = scope |> member_scope(caption_editor, "Caption Editor")
     saver_socket = scope |> join_channel(main_room)
     main_socket = main_editor_scope |> join_channel(main_room)
     caption_socket = caption_editor_scope |> join_channel(caption_room)
@@ -352,7 +357,7 @@ defmodule LexWeb.CollaborationChannelTest do
       document_key: "main",
       yjs_state: <<255>>
     })
-    |> Ash.create!()
+    |> Ash.create!(scope: scope)
 
     assert {:error, %{reason: reason}} = scope |> join_error("#{page.id}/main")
     assert reason =~ "could not restore Yjs document"
@@ -399,10 +404,16 @@ defmodule LexWeb.CollaborationChannelTest do
 
   defp read_only_member_scope(scope) do
     member = create_user("Reader")
-    {:ok, membership} = scope |> Membership.invite(member.id)
-    member_scope = %{scope | membership: membership, user: member}
-    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
-    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
+    member_scope = scope |> member_scope(member, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(member_scope.membership, [])
+
+    %{member_scope | membership: membership}
+  end
+
+  defp member_scope(scope, user, display_name) do
+    {:ok, membership} = scope |> Membership.invite(user.id)
+    member_scope = %{scope | membership: membership, user: user}
+    {:ok, membership} = member_scope |> Membership.accept(membership, display_name)
 
     %{member_scope | membership: membership}
   end
@@ -422,12 +433,12 @@ defmodule LexWeb.CollaborationChannelTest do
     "test-#{System.unique_integer([:positive])}"
   end
 
-  defp persisted_document_count(room) do
+  defp persisted_document_count(scope, room) do
     [page_id, document_key] = String.split(room, "/", parts: 2)
 
     PageDocument
     |> Ash.Query.filter(page_id == ^page_id and document_key == ^document_key)
-    |> Ash.count!()
+    |> Ash.count!(scope: scope)
   end
 
   defp persisted_text(scope, room) do
