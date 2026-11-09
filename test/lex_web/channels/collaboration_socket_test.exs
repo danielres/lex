@@ -27,7 +27,6 @@ defmodule LexWeb.CollaborationSocketTest do
     assert socket.assigns.scope.user.id == current_user.id
     assert socket.assigns.scope.membership.id == membership.id
     assert socket.assigns.scope.space.id == space.id
-    assert socket.assigns.can_edit_pages?
   end
 
   test "connects active members without editing privileges as read-only", %{conn: conn} do
@@ -47,7 +46,6 @@ defmodule LexWeb.CollaborationSocketTest do
              )
 
     assert socket.assigns.scope.membership.id == membership.id
-    refute socket.assigns.can_edit_pages?
   end
 
   test "rejects an invited member", %{conn: conn} do

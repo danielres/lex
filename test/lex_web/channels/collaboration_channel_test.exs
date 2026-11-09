@@ -258,8 +258,8 @@ defmodule LexWeb.CollaborationChannelTest do
     page = scope |> Page.ensure!(unique_slug())
     room = "#{page.id}/main"
     read_only_scope = scope |> read_only_member_scope()
-    socket = read_only_scope |> join_channel(room, false)
-    observer_socket = read_only_scope |> join_channel(room, false)
+    socket = read_only_scope |> join_channel(room)
+    observer_socket = read_only_scope |> join_channel(room)
     {:ok, shared_doc} = read_only_scope |> Collaboration.open_document(room)
 
     push(socket, "yjs_sync", {:binary, sync_step1_message()})
@@ -295,6 +295,36 @@ defmodule LexWeb.CollaborationChannelTest do
     close_channel(socket)
     close_channel(observer_socket)
     assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+  end
+
+  test "revoking edit privileges affects an existing channel", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    room = "#{page.id}/main"
+    editor = create_user("Editor")
+    editor_scope = scope |> member_scope(editor, "Editor")
+    socket = editor_scope |> join_channel(room)
+
+    {:ok, _membership} = scope |> Membership.set_privileges(editor_scope.membership, [])
+
+    reference = push(socket, "yjs", {:binary, document_update_message("forbidden")})
+    assert_reply reference, :error, %{reason: "editing not permitted"}
+
+    close_channel(socket)
+  end
+
+  test "disabling a member stops their existing channel", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    room = "#{page.id}/main"
+    editor = create_user("Editor")
+    editor_scope = scope |> member_scope(editor, "Editor")
+    socket = editor_scope |> join_channel(room)
+    channel_pid = socket.channel_pid
+    Process.unlink(channel_pid)
+    monitor = Process.monitor(channel_pid)
+
+    {:ok, _membership} = scope |> Membership.disable(editor_scope.membership)
+
+    assert_receive {:DOWN, ^monitor, :process, ^channel_pid, :normal}
   end
 
   test "a revision attributes document updates without counting awareness", %{scope: scope} do
@@ -412,15 +442,15 @@ defmodule LexWeb.CollaborationChannelTest do
     }
   end
 
-  defp join_channel(scope, room, can_edit_pages? \\ true) do
+  defp join_channel(scope, room) do
     LexWeb.CollaborationSocket
-    |> socket(nil, %{can_edit_pages?: can_edit_pages?, scope: scope})
+    |> socket(nil, %{scope: scope})
     |> subscribe_and_join!(LexWeb.CollaborationChannel, "y_doc:#{room}")
   end
 
   defp join_error(scope, room) do
     LexWeb.CollaborationSocket
-    |> socket(nil, %{can_edit_pages?: true, scope: scope})
+    |> socket(nil, %{scope: scope})
     |> subscribe_and_join(LexWeb.CollaborationChannel, "y_doc:#{room}")
   end
 

@@ -3,7 +3,6 @@ defmodule LexWeb.CollaborationSocket do
 
   alias AshAuthentication.Plug.Helpers
   alias Lex.Accounts.Membership
-  alias Lex.Accounts.Membership.Access
   alias Lex.Accounts.Space
   alias Lex.Accounts.User
 
@@ -19,12 +18,7 @@ defmodule LexWeb.CollaborationSocket do
          {:ok, %{status: :active} = membership} <-
            Membership.get(scope) do
       scope = %{scope | membership: membership}
-      can_edit_pages? = scope |> Access.can?(:edit_pages)
-
-      socket =
-        socket
-        |> assign(:can_edit_pages?, can_edit_pages?)
-        |> assign(:scope, scope)
+      socket = socket |> assign(:scope, scope)
 
       {:ok, socket}
     else
