@@ -7,8 +7,8 @@ defmodule Lex.Wiki.PageTenantTest do
   alias Lex.Wiki.PageRevisionContributor
 
   setup do
-    first_scope = create_scope("First Space")
-    second_scope = create_scope("Second Space")
+    first_scope = create_scope("First Space", create_user("First Owner"))
+    second_scope = create_scope("Second Space", create_user("Second Owner"))
     page = first_scope |> Page.ensure!("Tenant Boundary")
 
     {:ok, first_scope: first_scope, page: page, second_scope: second_scope}

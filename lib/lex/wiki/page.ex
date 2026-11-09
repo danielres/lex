@@ -371,12 +371,16 @@ defmodule Lex.Wiki.Page do
 
   defp persist_page_document(page, document_key, yjs_state) do
     PageDocument
-    |> Ash.Changeset.for_create(:persist, %{
-      page_id: page.id,
-      document_key: document_key,
-      yjs_state: yjs_state
-    })
-    |> Ash.create(authorize?: false, tenant: page.space_id)
+    |> Ash.Changeset.for_create(
+      :persist,
+      %{
+        page_id: page.id,
+        document_key: document_key,
+        yjs_state: yjs_state
+      },
+      tenant: page.space_id
+    )
+    |> Ash.create(authorize?: false)
   end
 
   defp save_page_document(
@@ -389,15 +393,19 @@ defmodule Lex.Wiki.Page do
          content_hash
        ) do
     PageDocument
-    |> Ash.Changeset.for_create(:save, %{
-      content_hash: content_hash,
-      document_key: document_key,
-      lexical_state: lexical_state,
-      page_id: page.id,
-      search_text: search_text,
-      yjs_state: yjs_state
-    })
-    |> Ash.create(scope: scope)
+    |> Ash.Changeset.for_create(
+      :save,
+      %{
+        content_hash: content_hash,
+        document_key: document_key,
+        lexical_state: lexical_state,
+        page_id: page.id,
+        search_text: search_text,
+        yjs_state: yjs_state
+      },
+      scope: scope
+    )
+    |> Ash.create()
   end
 
   defp create_revision(
