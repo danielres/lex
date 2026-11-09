@@ -29,8 +29,8 @@ defmodule LexWeb.Router do
       auth_routes DevAuthController, Lex.Accounts.User, path: "/dev/auth"
     end
 
-    post "", AshTypescriptRpcController, :run
-    post "", AshTypescriptRpcController, :validate
+    post "/rpc/run", AshTypescriptRpcController, :run
+    post "/rpc/validate", AshTypescriptRpcController, :validate
     get "/ash-typescript", PageController, :index
 
     sign_out_route AuthController, "/sign-out",
