@@ -1,6 +1,8 @@
 defmodule LexWeb.SpaceTest do
   use Lex.DataCase
 
+  alias LexWeb.Router
+
   test "assigns the space resolved from the route slug" do
     current_user = create_user()
     scope = create_scope("Test Space", current_user)
@@ -10,7 +12,13 @@ defmodule LexWeb.SpaceTest do
       assigns: %{__changed__: %{}, live_action: nil, scope: %{scope | membership: nil}}
     }
 
-    socket = LexWeb.Space.on_mount(%{"space_slug" => space.slug}, %{}, socket)
+    {:cont, socket} =
+      Router.LiveSpaceAccess.on_mount(
+        :default,
+        %{"space_slug" => space.slug},
+        %{},
+        socket
+      )
 
     assert socket.assigns.scope.user.id == current_user.id
     assert socket.assigns.scope.membership.id == scope.membership.id

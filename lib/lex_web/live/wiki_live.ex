@@ -6,10 +6,8 @@ defmodule LexWeb.WikiLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias LexWeb.Components.Avatar
-  alias LexWeb.Space
   alias LexWeb.UI
 
-  delegate(:space, Space)
   delegate(:ui, UI)
 
   @sort_fields %{
@@ -22,30 +20,26 @@ defmodule LexWeb.WikiLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
 
-    if socket.redirected do
-      {:ok, socket}
-    else
-      if connected?(socket), do: Page.subscribe()
+    if connected?(socket), do: Page.subscribe()
 
-      scope = socket.assigns.scope
+    scope = socket.assigns.scope
 
-      tz =
-        case get_connect_params(socket) do
-          %{"tz" => timezone} -> timezone
-          _ -> "Etc/UTC"
-        end
+    tz =
+      case get_connect_params(socket) do
+        %{"tz" => timezone} -> timezone
+        _ -> "Etc/UTC"
+      end
 
-      pages = scope |> list_pages(:last_updated_at, :desc)
+    pages = scope |> list_pages(:last_updated_at, :desc)
 
-      socket =
-        socket
-        |> assign(pages: pages)
-        |> assign(sort_by: :last_updated_at)
-        |> assign(sort_direction: :desc)
-        |> assign(tz: tz)
+    socket =
+      socket
+      |> assign(pages: pages)
+      |> assign(sort_by: :last_updated_at)
+      |> assign(sort_direction: :desc)
+      |> assign(tz: tz)
 
-      {:ok, socket}
-    end
+    {:ok, socket}
   end
 
   def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)

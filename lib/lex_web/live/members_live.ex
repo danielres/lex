@@ -7,29 +7,22 @@ defmodule LexWeb.MembersLive do
   alias Lex.Accounts.Membership
   alias Lex.Accounts.Membership.Access
   alias Lex.Accounts.Privilege
-  alias LexWeb.Space
   alias LexWeb.UI
   alias LexWeb.Components.Avatar
 
-  delegate(:space, Space)
   delegate(:ui, UI)
 
   @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
+    available_privileges = Access.available_privileges()
 
-    if socket.redirected do
-      {:ok, socket}
-    else
-      available_privileges = Access.available_privileges()
+    socket =
+      socket
+      |> assign(:available_privileges, available_privileges)
+      |> reload_memberships()
 
-      socket =
-        socket
-        |> assign(:available_privileges, available_privileges)
-        |> reload_memberships()
-
-      {:ok, socket}
-    end
+    {:ok, socket}
   end
 
   @impl true
