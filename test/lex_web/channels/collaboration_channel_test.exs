@@ -375,8 +375,12 @@ defmodule LexWeb.CollaborationChannelTest do
     assert channel_socket.assigns.membership_retry_timer == nil
     assert channel_socket.assigns.membership_status == :active
 
-    push(socket, "yjs", {:binary, document_update_message("recovered")})
+    send(channel_pid, {:yjs, document_update_message("forwarded"), shared_doc})
     assert_push "yjs", {:binary, _message}
+
+    push(socket, "yjs", {:binary, document_update_message("recovered")})
+    confirmation_reference = push(socket, "confirm_updates_applied", %{})
+    assert_reply confirmation_reference, :ok, %{}
 
     text =
       shared_doc

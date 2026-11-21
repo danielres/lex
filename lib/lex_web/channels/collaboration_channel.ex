@@ -154,7 +154,9 @@ defmodule LexWeb.CollaborationChannel do
           |> assign(:membership_status, :active)
           |> assign(:scope, scope)
 
-        socket = if recovering?, do: push(socket, "yjs_resync", %{}), else: socket
+        if recovering? do
+          :ok = push(socket, "yjs_resync", %{})
+        end
 
         {:ok, socket}
 
