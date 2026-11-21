@@ -327,6 +327,69 @@ defmodule LexWeb.CollaborationChannelTest do
     assert_receive {:DOWN, ^monitor, :process, ^channel_pid, :normal}
   end
 
+  test "membership lookup errors pause and resynchronize an existing channel", %{scope: scope} do
+    page = scope |> Page.ensure!(unique_slug())
+    room = "#{page.id}/main"
+    editor = create_user("Editor")
+    editor_scope = scope |> member_scope(editor, "Editor")
+    socket = editor_scope |> join_channel(room)
+    channel_pid = socket.channel_pid
+    {:ok, shared_doc} = editor_scope |> Collaboration.open_document(room)
+    monitor = Process.monitor(shared_doc)
+    invalid_scope = %{editor_scope | space: nil}
+
+    replace_channel_scope(socket, invalid_scope)
+
+    sync_reference = push(socket, "yjs_sync", {:binary, sync_step1_message()})
+    update_reference = push(socket, "yjs", {:binary, document_update_message("blocked")})
+    confirmation_reference = push(socket, "confirm_updates_applied", %{})
+
+    assert_reply sync_reference, :error, %{reason: "membership verification unavailable"}
+    assert_reply update_reference, :error, %{reason: "membership verification unavailable"}
+
+    assert_reply confirmation_reference, :error, %{
+      reason: "membership verification unavailable"
+    }
+
+    channel_socket = Phoenix.Channel.Server.socket(channel_pid)
+    retry_timer = channel_socket.assigns.membership_retry_timer
+    assert is_reference(retry_timer)
+    assert channel_socket.assigns.membership_status == :unavailable
+
+    second_reference = push(socket, "confirm_updates_applied", %{})
+    assert_reply second_reference, :error, %{reason: "membership verification unavailable"}
+
+    channel_socket = Phoenix.Channel.Server.socket(channel_pid)
+    assert channel_socket.assigns.membership_retry_timer == retry_timer
+
+    send(channel_pid, {:yjs, document_update_message("not forwarded"), shared_doc})
+    refute_push "yjs", _message, 50
+    refute_receive {:DOWN, ^monitor, :process, ^shared_doc, _reason}
+
+    replace_channel_scope(socket, editor_scope)
+    send(channel_pid, :retry_membership)
+
+    assert_push "yjs_resync", %{}
+
+    channel_socket = Phoenix.Channel.Server.socket(channel_pid)
+    assert channel_socket.assigns.membership_retry_timer == nil
+    assert channel_socket.assigns.membership_status == :active
+
+    push(socket, "yjs", {:binary, document_update_message("recovered")})
+    assert_push "yjs", {:binary, _message}
+
+    text =
+      shared_doc
+      |> SharedDoc.get_doc()
+      |> Yex.Doc.get_text("content")
+      |> Yex.Text.to_string()
+
+    assert text == "recovered"
+
+    close_channel(socket)
+    assert_receive {:DOWN, ^monitor, :process, ^shared_doc, :normal}
+  end
+
   test "a revision attributes document updates without counting awareness", %{scope: scope} do
     page = scope |> Page.ensure!(unique_slug())
     main_room = "#{page.id}/main"
@@ -422,6 +485,15 @@ defmodule LexWeb.CollaborationChannelTest do
   defp close_channel(socket) do
     Process.unlink(socket.channel_pid)
     :ok = close(socket)
+  end
+
+  defp replace_channel_scope(socket, scope) do
+    :sys.replace_state(socket.channel_pid, fn channel_socket ->
+      assigns = channel_socket.assigns |> Map.put(:scope, scope)
+      %{channel_socket | assigns: assigns}
+    end)
+
+    :ok
   end
 
   defp document_update_message(text) do
