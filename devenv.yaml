@@ -1,0 +1,10 @@
+inputs:
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+
+  expert:
+    url: github:expert-lsp/expert?ref=v0.2.2
+
+  refactorex:
+    url: github:gp-pereira/refactorex?ref=0.1.54
+    flake: false

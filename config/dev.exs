@@ -2,27 +2,36 @@ import Config
 config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
-database_connection =
-  case System.get_env("PGHOST") do
-    "/" <> _path = socket_dir -> [socket_dir: socket_dir]
-    hostname when is_binary(hostname) -> [hostname: hostname]
-    nil -> [hostname: "localhost"]
-  end
+# database_connection =
+#   case System.get_env("PGHOST") do
+#     "/" <> _path = socket_dir -> [socket_dir: socket_dir]
+#     hostname when is_binary(hostname) -> [hostname: hostname]
+#     nil -> [hostname: "localhost"]
+#   end
+#
+# config :lex,
+#        Lex.Repo,
+#        Keyword.merge(
+#          [
+#            port: String.to_integer(System.get_env("PGPORT", "5432")),
+#            username: "postgres",
+#            password: "postgres",
+#            database: "lex_dev",
+#            pool_size: 10,
+#            stacktrace: true,
+#            show_sensitive_data_on_connection_error: true
+#          ],
+#          database_connection
+#        )
 
-config :lex,
-       Lex.Repo,
-       Keyword.merge(
-         [
-           port: String.to_integer(System.get_env("PGPORT", "5432")),
-           username: "postgres",
-           password: "postgres",
-           database: "lex_dev",
-           pool_size: 10,
-           stacktrace: true,
-           show_sensitive_data_on_connection_error: true
-         ],
-         database_connection
-       )
+config :lex, Lex.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "lex_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

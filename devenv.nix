@@ -1,16 +1,24 @@
 {
+  inputs,
   pkgs,
   lib,
   config,
   ...
 }:
 
+let
+  expert = inputs.expert.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  refactorexSource = inputs.refactorex;
+  refactorexStateDirectory =
+    "refactorex-${builtins.substring 0 12 (builtins.hashString "sha256" (toString refactorexSource))}";
+in
 {
   packages =
     with pkgs;
     [
       #
       beam27Packages.elixir-ls
+      expert
       emmet-language-server
       typescript-language-server
       git
@@ -44,11 +52,36 @@
 
   languages.typescript.enable = true;
 
+  scripts.refactorex.exec = ''
+    set -eu
+
+    install_dir="$DEVENV_STATE/${refactorexStateDirectory}"
+    compiled_marker="$install_dir/.devenv-compiled"
+
+    if [ ! -f "$compiled_marker" ]; then
+      mkdir -p "$install_dir"
+      cp -R ${refactorexSource}/. "$install_dir/"
+      chmod -R u+w "$install_dir"
+
+      (
+        cd "$install_dir/refactorex_lsp"
+        mix deps.get >&2
+        mix compile >&2
+      )
+
+      touch "$compiled_marker"
+    fi
+
+    exec "$install_dir/bin/start" "$@"
+  '';
+
   services.adminer.enable = true;
 
   services.postgres = {
     enable = true;
     port = 5432;
+    listen_addresses = "localhost";
+
     initialDatabases = [
       { name = "lex_dev"; }
       { name = "lex_test"; }
