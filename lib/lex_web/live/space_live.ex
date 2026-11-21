@@ -2,10 +2,8 @@ defmodule LexWeb.SpaceLive do
   use LexWeb, :live_view
   use LiveDelegate
 
-  alias LexWeb.Space
   alias LexWeb.UI
 
-  delegate(:space, Space)
   delegate(:ui, UI)
 
   def mount(params, session, socket) do

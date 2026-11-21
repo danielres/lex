@@ -1,7 +1,8 @@
 defmodule LexWeb.Router do
   use LexWeb, :router
-
   use AshAuthentication.Phoenix.Router
+
+  alias LexWeb.Router
 
   import AshAuthentication.Plug.Helpers
 
@@ -37,7 +38,10 @@ defmodule LexWeb.Router do
       overrides: [LexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
 
     ash_authentication_live_session :app,
-      on_mount: [{LexWeb.LiveUserAuth, :live_user_required}] do
+      on_mount: [
+        {Router.LiveUserAuth, :live_user_required},
+        {Router.LiveSpaceAccess, :default}
+      ] do
       live "/", HomeLive
 
       scope "/:space_slug" do

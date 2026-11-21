@@ -13,10 +13,8 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Info
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
-  alias LexWeb.Space
   alias LexWeb.UI
 
-  delegate(:space, Space)
   delegate(:creation, Creation, info: false)
   delegate(:editing, Editing, info: false)
   delegate(:info, Info, info: false, mount: false)
@@ -28,7 +26,7 @@ defmodule LexWeb.PageLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
 
-    if connected?(socket) and !socket.redirected, do: Page.subscribe()
+    if connected?(socket), do: Page.subscribe()
 
     {:ok, socket}
   end
@@ -248,6 +246,7 @@ defmodule LexWeb.PageLive do
         >
           <div
             class="lexical-editor"
+            data-testid="page-editor"
             data-save-event={Editing.save_event()}
             data-collaborator-display-name={@scope.user.display_name}
             data-collaborator-hue={@scope.user.hue}

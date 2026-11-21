@@ -13,6 +13,7 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
         "btn btn-sm btn-circle btn-neutral hover:btn-info",
         @active? && "btn-info"
       ]}
+      data-testid="editing-toggle"
       disabled={@editing.saving?}
       phx-click={delegate_event("toggle")}
       title={button_label(@active?, @editing.saving?)}

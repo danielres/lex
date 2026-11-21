@@ -1,34 +1,24 @@
 defmodule LexWeb.MembershipOnboardingLive do
   use LexWeb, :live_view
-  use LiveDelegate
 
   alias Lex.Accounts.Membership
-  alias LexWeb.Space
-
-  delegate(:space, Space)
 
   @impl true
-  def mount(params, session, socket) do
-    socket = socket |> delegate_mount(params, session)
+  def mount(_params, _session, socket) do
+    scope = socket.assigns.scope
 
-    if socket.redirected do
-      {:ok, socket}
-    else
-      scope = socket.assigns.scope
+    form =
+      scope.membership
+      |> AshPhoenix.Form.for_update(:accept,
+        as: "membership",
+        params: %{"display_name" => scope.user.display_name},
+        scope: scope
+      )
+      |> to_form()
 
-      form =
-        scope.membership
-        |> AshPhoenix.Form.for_update(:accept,
-          as: "membership",
-          params: %{"display_name" => scope.user.display_name},
-          scope: scope
-        )
-        |> to_form()
+    socket = socket |> assign(form: form)
 
-      socket = socket |> assign(form: form)
-
-      {:ok, socket}
-    end
+    {:ok, socket}
   end
 
   @impl true

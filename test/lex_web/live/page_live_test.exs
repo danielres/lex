@@ -57,10 +57,8 @@ defmodule LexWeb.PageLiveTest do
   } do
     page = scope |> Page.ensure!("Existing Page")
     member = create_user("Reader")
-    {:ok, membership} = scope |> Membership.invite(member.id)
-    member_scope = %{scope | membership: membership, user: member}
-    {:ok, membership} = member_scope |> Membership.accept(membership, "Reader")
-    {:ok, membership} = scope |> Membership.set_privileges(membership, [])
+    member_scope = scope |> add_member(member, "Reader")
+    {:ok, membership} = scope |> Membership.set_privileges(member_scope.membership, [])
     member_scope = %{member_scope | membership: membership}
     conn = conn |> recycle() |> log_in_user(member)
 
@@ -71,8 +69,8 @@ defmodule LexWeb.PageLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/#{page.slug}")
 
-    refute has_element?(view, "button[phx-click='editing:toggle']")
-    assert has_element?(view, "[phx-hook='LexicalEditor'][data-editable='false']")
+    refute has_element?(view, "[data-testid='editing-toggle']")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable='false']")
 
     render_hook(view, "editing:title_change", %{
       "page_title" => %{"title" => "Forbidden Rename"}
@@ -92,12 +90,47 @@ defmodule LexWeb.PageLiveTest do
     refute has_element?(missing_view, "[data-testid='page-creation-form']")
   end
 
+  test "removes a disabled member from a connected page", %{conn: conn, scope: scope} do
+    page = scope |> Page.ensure!("Home")
+    member = create_user("Connected Member")
+    member_scope = scope |> add_member(member, "Connected Member")
+    conn = conn |> recycle() |> log_in_user(member)
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+
+    assert has_element?(view, "[data-testid='page-editor'][data-document-id='#{page.id}']")
+    view_pid = view.pid
+    monitor = Process.monitor(view_pid)
+
+    assert {:ok, _membership} = scope |> Membership.disable(member_scope.membership)
+    assert_redirect(view, ~p"/")
+    assert_receive {:DOWN, ^monitor, :process, ^view_pid, _reason}
+  end
+
+  test "refreshes privileges for a connected member", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+    member = create_user("Connected Editor")
+    member_scope = scope |> add_member(member, "Connected Editor")
+    conn = conn |> recycle() |> log_in_user(member)
+
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
+
+    enable_editing(view)
+    assert has_element?(view, "[data-testid='page-editor'][data-editable='true']")
+
+    assert {:ok, _membership} =
+             scope |> Membership.set_privileges(member_scope.membership, [])
+
+    refute has_element?(view, "[data-testid='editing-toggle']")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable='false']")
+  end
+
   test "preloads page references and creates missing link targets", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+    assert has_element?(view, "[data-testid='page-editor'][data-pages*='Summer Activities']")
     assert render(view) =~ "/test-space/wiki/summer-activities"
 
     render_hook(view, "page_repository:ensure", %{"title" => "Winter Plans"})
@@ -112,7 +145,7 @@ defmodule LexWeb.PageLiveTest do
 
     page = scope |> Page.ensure!("New Page")
 
-    assert has_element?(view, "[phx-hook='LexicalEditor'][data-document-id='#{page.id}']")
+    assert has_element?(view, "[data-testid='page-editor'][data-document-id='#{page.id}']")
     refute has_element?(view, "[data-testid='missing-page']")
   end
 
@@ -149,7 +182,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert :ok = page |> Page.persist_collaboration_document("main", document("updated"))
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-document-id='#{page.id}']")
+    assert has_element?(view, "[data-testid='page-editor'][data-document-id='#{page.id}']")
   end
 
   test "pushes updated content for embedded pages in the same space", %{
@@ -237,21 +270,21 @@ defmodule LexWeb.PageLiveTest do
     {:ok, shared_doc} = scope |> Collaboration.open_document("#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable=false]")
     assert has_element?(view, "button[aria-label='Enable editing']")
 
     enable_editing(view)
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable=true]")
     assert has_element?(view, "button[aria-label='End editing']")
     assert has_element?(view, "[aria-label='Browse revisions']")
 
     view
-    |> element("button[phx-click='editing:toggle']")
+    |> element("[data-testid='editing-toggle']")
     |> render_click()
 
     assert_push_event(view, "page_save_requested", %{})
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=false]")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable=false]")
     assert has_element?(view, "button[aria-label='Saving document'][disabled]")
 
     render_hook(view, "editing:save", %{
@@ -278,14 +311,14 @@ defmodule LexWeb.PageLiveTest do
     enable_editing(view)
 
     view
-    |> element("button[phx-click='editing:toggle']")
+    |> element("[data-testid='editing-toggle']")
     |> render_click()
 
     assert_push_event(view, "page_save_requested", %{})
 
     render_hook(view, "editing:save", %{"error" => "snapshot_failed"})
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-editable=true]")
+    assert has_element?(view, "[data-testid='page-editor'][data-editable=true]")
     assert has_element?(view, "button[aria-label='End editing']")
     assert render(view) =~ "Could not save the document"
   end
@@ -332,8 +365,8 @@ defmodule LexWeb.PageLiveTest do
 
     Page.rename!(summer, "Winter Activities", scope: scope)
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Winter Activities']")
-    refute has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+    assert has_element?(view, "[data-testid='page-editor'][data-pages*='Winter Activities']")
+    refute has_element?(view, "[data-testid='page-editor'][data-pages*='Summer Activities']")
   end
 
   test "refreshes page references when another page is created", %{conn: conn, scope: scope} do
@@ -342,7 +375,7 @@ defmodule LexWeb.PageLiveTest do
 
     scope |> Page.ensure!("Summer Activities")
 
-    assert has_element?(view, "[phx-hook=LexicalEditor][data-pages*='Summer Activities']")
+    assert has_element?(view, "[data-testid='page-editor'][data-pages*='Summer Activities']")
   end
 
   test "resets an unsaved page title", %{conn: conn, scope: scope} do
@@ -564,9 +597,17 @@ defmodule LexWeb.PageLiveTest do
     doc
   end
 
+  defp add_member(scope, user, display_name) do
+    {:ok, membership} = scope |> Membership.invite(user.id)
+    member_scope = %{scope | membership: membership, user: user}
+    {:ok, membership} = member_scope |> Membership.accept(membership, display_name)
+
+    %{member_scope | membership: membership}
+  end
+
   defp enable_editing(view) do
     view
-    |> element("button[phx-click='editing:toggle']")
+    |> element("[data-testid='editing-toggle']")
     |> render_click()
 
     refute_patched(view)
