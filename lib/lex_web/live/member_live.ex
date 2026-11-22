@@ -98,6 +98,7 @@ defmodule LexWeb.MemberLive do
 
   defp find_profile(scope, slug) do
     Membership
+    |> Ash.Query.for_read(:active)
     |> Ash.Query.filter(space_id == ^scope.space.id and slug == ^slug)
     |> Ash.read_one(not_found_error?: true, scope: scope)
   end
