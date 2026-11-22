@@ -208,6 +208,26 @@ defmodule Lex.TopicsTest do
              )
   end
 
+  test "taggings reject unsupported target types", %{owner_scope: owner_scope} do
+    assert {:ok, topic} = owner_scope |> create_topic("Elixir")
+
+    assert {:error, _error} =
+             Tagging
+             |> Ash.Changeset.for_create(
+               :create,
+               %{
+                 dimensions: %{},
+                 taggable_id: owner_scope.membership.id,
+                 taggable_type: "page",
+                 tagged_by_membership_id: owner_scope.membership.id,
+                 text: "Unsupported target",
+                 topic_id: topic.id
+               },
+               scope: owner_scope
+             )
+             |> Ash.create()
+  end
+
   defp create_topic(scope, name) do
     Topic
     |> Ash.Changeset.for_create(:create, %{name: name}, scope: scope)

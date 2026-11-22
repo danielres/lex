@@ -40,6 +40,7 @@ defmodule Lex.Topics.Tagging do
 
       primary? true
 
+      validate attribute_in(:taggable_type, ["membership"])
       validate {RelationshipInSpace, relationship: :tagged_by_membership}
       validate {RelationshipInSpace, relationship: :tagged_membership}
       validate {RelationshipInSpace, relationship: :topic}
