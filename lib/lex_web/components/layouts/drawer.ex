@@ -105,6 +105,7 @@ defmodule LexWeb.Layouts.Drawer do
         </.link>
       </li>
 
+
       <li>
         <.link
           navigate={~p"/#{@scope.space.slug}/wiki/home"}
@@ -116,6 +117,19 @@ defmodule LexWeb.Layouts.Drawer do
         >
           <.icon name="hero-book-open-mini" />
           <span :if={@open?}>Wiki</span>
+        </.link>
+      </li>
+
+      <li>
+        <.link
+          navigate={~p"/#{@scope.space.slug}/topics"}
+          class={[
+            link_class,
+            @active == "topics" && active_class,
+          ]}
+        >
+          <.icon name="hero-tag-mini" />
+          <span :if={@open?}>Topics</span>
         </.link>
       </li>
     </ul>

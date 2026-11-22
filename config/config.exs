@@ -84,7 +84,11 @@ config :spark,
 
 config :lex,
   ecto_repos: [Lex.Repo],
-  ash_domains: [Lex.Wiki, Lex.Accounts],
+  ash_domains: [
+    Lex.Wiki,
+    Lex.Accounts,
+    Lex.Topics
+  ],
   generators: [timestamp_type: :utc_datetime]
 
 # Configure the endpoint
