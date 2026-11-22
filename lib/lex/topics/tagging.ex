@@ -106,7 +106,12 @@ defmodule Lex.Topics.Tagging do
 
   relationships do
     belongs_to :space, Accounts.Space, allow_nil?: false
-    belongs_to :tagged_by_membership, Membership, allow_nil?: false
+
+    belongs_to :tagged_by_membership, Membership do
+      allow_nil? false
+      read_action :active
+    end
+
     belongs_to :topic, Topic, allow_nil?: false
 
     has_one :tagged_membership, Membership do
