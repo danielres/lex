@@ -228,6 +228,48 @@ defmodule Lex.TopicsTest do
              |> Ash.create()
   end
 
+  test "taggings validate dimensions on creates and updates", %{owner_scope: owner_scope} do
+    assert {:ok, topic} = owner_scope |> create_topic("Phoenix")
+
+    assert {:error, _error} =
+             Tagging.set(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               %{dimensions: %{"unknown" => 5}, text: nil},
+               scope: owner_scope
+             )
+
+    assert {:ok, tagging} =
+             Tagging.set(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               %{dimensions: %{"interest" => 5}, text: nil},
+               scope: owner_scope
+             )
+
+    assert {:error, _error} =
+             Tagging.set(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               %{dimensions: %{"interest" => 11}, text: nil},
+               scope: owner_scope
+             )
+
+    assert {:ok, persisted_tagging} =
+             Tagging.get(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               scope: owner_scope
+             )
+
+    assert persisted_tagging.id == tagging.id
+    assert persisted_tagging.dimensions == %{"interest" => 5}
+  end
+
   defp create_topic(scope, name) do
     Topic
     |> Ash.Changeset.for_create(:create, %{name: name}, scope: scope)

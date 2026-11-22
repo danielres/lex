@@ -3,6 +3,7 @@ defmodule Lex.Topics.Tagging do
   alias Lex.Accounts.Membership
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Topics.Tagging.Presenter
+  alias Lex.Topics.Tagging.Validations.ValidDimensions
   alias Lex.Topics.Topic
   alias Lex.Validations.RelationshipInSpace
 
@@ -41,6 +42,7 @@ defmodule Lex.Topics.Tagging do
       primary? true
 
       validate attribute_in(:taggable_type, ["membership"])
+      validate ValidDimensions
       validate {RelationshipInSpace, relationship: :tagged_by_membership}
       validate {RelationshipInSpace, relationship: :tagged_membership}
       validate {RelationshipInSpace, relationship: :topic}
@@ -48,6 +50,9 @@ defmodule Lex.Topics.Tagging do
 
     update :update do
       accept [:dimensions, :text]
+      require_atomic? false
+
+      validate ValidDimensions
     end
   end
 
