@@ -78,7 +78,7 @@ defmodule LexWeb.TopicLive do
   defp find_topic(scope, slug) do
     Topic
     |> Ash.Query.filter(slug == ^slug)
-    |> Ash.read_one(scope: scope)
+    |> Ash.read_one(not_found_error?: true, scope: scope)
   end
 
   attr :mode, :atom, required: true
