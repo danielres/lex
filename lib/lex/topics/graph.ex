@@ -1,5 +1,6 @@
 defmodule Lex.Topics.Graph do
   alias Lex.Accounts
+  alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Topics.Topic
 
   use Ash.Resource,
@@ -35,15 +36,15 @@ defmodule Lex.Topics.Graph do
 
   policies do
     policy action_type(:read) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:create) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:update) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
   end
 

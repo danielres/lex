@@ -1,5 +1,6 @@
 defmodule Lex.Topics.Topic do
   alias Lex.Accounts
+  alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Changes
 
   use Ash.Resource,
@@ -44,18 +45,19 @@ defmodule Lex.Topics.Topic do
 
   policies do
     policy action_type(:read) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:create) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:update) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:destroy) do
+      forbid_unless ActiveMember
       authorize_if relates_to_actor_via([:space, :owner])
       authorize_if relates_to_actor_via([:author])
     end

@@ -1,8 +1,10 @@
 defmodule Lex.Topics.Tagging do
   alias Lex.Accounts
   alias Lex.Accounts.Membership
+  alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Topics.Tagging.Presenter
   alias Lex.Topics.Topic
+  alias Lex.Validations.RelationshipInSpace
 
   use Ash.Resource,
     otp_app: :lex,
@@ -37,6 +39,10 @@ defmodule Lex.Topics.Tagging do
       ]
 
       primary? true
+
+      validate {RelationshipInSpace, relationship: :tagged_by_membership}
+      validate {RelationshipInSpace, relationship: :tagged_membership}
+      validate {RelationshipInSpace, relationship: :topic}
     end
 
     update :update do
@@ -46,18 +52,21 @@ defmodule Lex.Topics.Tagging do
 
   policies do
     policy action_type(:read) do
-      authorize_if relates_to_actor_via([:space, :members])
+      authorize_if ActiveMember
     end
 
     policy action(:create) do
+      forbid_unless ActiveMember
       authorize_if relates_to_actor_via([:tagged_by_membership, :user])
     end
 
     policy action(:update) do
+      forbid_unless ActiveMember
       authorize_if relates_to_actor_via([:tagged_by_membership, :user])
     end
 
     policy action_type(:destroy) do
+      forbid_unless ActiveMember
       authorize_if relates_to_actor_via([:tagged_by_membership, :user])
       authorize_if relates_to_actor_via([:tagged_membership, :user])
     end

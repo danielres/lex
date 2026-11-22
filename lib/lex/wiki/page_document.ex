@@ -3,7 +3,7 @@ defmodule Lex.Wiki.PageDocument do
 
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
-  alias Lex.Wiki.Validations.ParentInSpace
+  alias Lex.Validations.RelationshipInSpace
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -21,7 +21,7 @@ defmodule Lex.Wiki.PageDocument do
 
     create :persist do
       accept [:document_key, :page_id, :yjs_state]
-      validate {ParentInSpace, relationship: :page}
+      validate {RelationshipInSpace, relationship: :page}
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:yjs_state]
@@ -38,7 +38,7 @@ defmodule Lex.Wiki.PageDocument do
       ]
 
       require_attributes [:content_hash, :lexical_state, :search_text]
-      validate {ParentInSpace, relationship: :page}
+      validate {RelationshipInSpace, relationship: :page}
       upsert? true
       upsert_identity :unique_page_document
       upsert_fields [:content_hash, :lexical_state, :search_text, :yjs_state]

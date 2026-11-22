@@ -3,7 +3,7 @@ defmodule Lex.Wiki.PageRevision do
 
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
-  alias Lex.Wiki.Validations.ParentInSpace
+  alias Lex.Validations.RelationshipInSpace
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -35,7 +35,7 @@ defmodule Lex.Wiki.PageRevision do
 
       change relate_actor(:saved_by)
       change manage_relationship(:contributor_ids, :contributors, type: :append)
-      validate {ParentInSpace, relationship: :page}
+      validate {RelationshipInSpace, relationship: :page}
     end
   end
 
