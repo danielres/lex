@@ -9,7 +9,15 @@ defmodule Lex.Changes.GenerateSlug do
     case Ash.Changeset.fetch_change(changeset, source) do
       {:ok, value} when is_binary(value) ->
         slug = Utils.Slugify.generate(value)
-        Ash.Changeset.force_change_attribute(changeset, target, slug)
+
+        if slug == "" do
+          Ash.Changeset.add_error(changeset,
+            field: source,
+            message: "must contain at least one Latin letter (a-z) or number"
+          )
+        else
+          Ash.Changeset.force_change_attribute(changeset, target, slug)
+        end
 
       _other ->
         changeset
