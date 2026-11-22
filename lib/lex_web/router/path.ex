@@ -28,7 +28,7 @@ defmodule LexWeb.Router.Path do
   end
 
   def onboarding(%Space{} = space) do
-    ~p"/#{space.slug}/onboarding"
+    ~p"/#{space.slug}/join"
   end
 
   def topics(%Scope{} = scope) do
