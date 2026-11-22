@@ -28,6 +28,7 @@ import Toast from "../../deps/toast/assets/js/toast.js"
 
 import { AutoAnimate } from "./hooks/AutoAnimate"
 import { CapitalizeFirstLetter } from "./hooks/CapitalizeFirstLetter"
+import { Combobox } from "./hooks/Combobox"
 import { ScrollToTop } from "./hooks/ScrollToTop.js"
 import { createLexicalHooks } from "./lexical_adapter/hooks"
 import * as localSettings from "./localSettings"
@@ -49,8 +50,9 @@ const liveSocket = new LiveSocket("/live", Socket, {
     ...colocatedHooks,
     Toast,
     AutoAnimate,
-    ScrollToTop,
     CapitalizeFirstLetter,
+    Combobox,
+    ScrollToTop,
     ...lexicalHooks,
   },
 })
