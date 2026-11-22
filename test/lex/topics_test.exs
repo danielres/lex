@@ -183,6 +183,31 @@ defmodule Lex.TopicsTest do
     assert removed_tagging.id == tagging.id
   end
 
+  test "self-assessments retain notes without ratings", %{owner_scope: owner_scope} do
+    assert {:ok, topic} = owner_scope |> create_topic("Documentation")
+
+    assert {:ok, tagging} =
+             Tagging.set(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               %{dimensions: %{}, text: "Enjoys writing guides"},
+               scope: owner_scope
+             )
+
+    assert tagging.dimensions == %{}
+    assert tagging.text == "Enjoys writing guides"
+
+    assert {:ok, nil} =
+             Tagging.set(
+               owner_scope.membership,
+               topic,
+               owner_scope.membership,
+               %{dimensions: %{}, text: ""},
+               scope: owner_scope
+             )
+  end
+
   defp create_topic(scope, name) do
     Topic
     |> Ash.Changeset.for_create(:create, %{name: name}, scope: scope)

@@ -247,7 +247,7 @@ defmodule Lex.Topics.Tagging do
 
   defp empty?(%Membership{} = target, %Membership{} = tagged_by, dimensions, text) do
     if target.id == tagged_by.id do
-      dimensions == %{}
+      dimensions == %{} and is_nil(text)
     else
       is_nil(text)
     end
