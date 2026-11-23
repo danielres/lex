@@ -2,6 +2,8 @@ defmodule LexWeb.TopicsLive.Graph do
   use LexWeb, :live_view
   use LiveDelegate, path: [:graph]
 
+  require Logger
+
   alias Lex.Scope
   alias Lex.Topics.Graph
   alias Lex.Topics.Topic
@@ -238,17 +240,31 @@ defmodule LexWeb.TopicsLive.Graph do
 
   defp reload_data(socket) do
     scope = socket.assigns.scope
+
+    # Read the graph first so newly referenced topics cannot be mistaken for dangling IDs.
+    graph = Graph |> Ash.read_one!(scope: scope)
     topics = Topic |> Ash.read!(scope: scope)
 
-    graph = Graph |> Ash.read_one!(scope: scope)
-
-    children = if graph, do: graph.children, else: %{}
+    children = repair_graph_children(graph, topics, scope)
     tree = Graph.tree(topics, children)
 
     socket
     |> delegate_assign(:children, children)
     |> delegate_assign(:tree, tree)
     |> delegate_assign(:topics, topics)
+  end
+
+  defp repair_graph_children(nil, _topics, _scope), do: %{}
+
+  defp repair_graph_children(graph, topics, scope) do
+    case Graph.repair(graph, topics, scope: scope) do
+      {:ok, graph} ->
+        graph.children
+
+      {:error, error} ->
+        Logger.warning("Could not repair topic graph #{graph.id}: #{inspect(error)}")
+        Graph.normalize_children(topics, graph.children)
+    end
   end
 
   defp subscribe(socket) do
