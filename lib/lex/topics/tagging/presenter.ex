@@ -1,27 +1,45 @@
 defmodule Lex.Topics.Tagging.Presenter do
   alias Lex.Accounts.Membership
+  alias Lex.Topics.Tagging
 
-  def present(taggings, target, sorting) do
+  def present(taggings, sorting) do
     taggings
-    |> group_by_topic(target)
+    |> group_by_topic()
     |> sort(sorting)
   end
 
-  defp group_by_topic(taggings, target) do
-    taggings
-    |> Enum.filter(fn tagging ->
-      tagging.tagged_by_membership_id == target.id or
+  defp group_by_topic(taggings) do
+    taggings_with_active_authors =
+      Enum.filter(taggings, fn tagging ->
         is_struct(tagging.tagged_by_membership, Membership)
-    end)
-    |> Enum.group_by(& &1.topic_id)
-    |> Enum.map(fn {_topic_id, [first | _rest] = topic_taggings} ->
+      end)
+
+    taggings_by_topic =
+      Enum.group_by(taggings_with_active_authors, fn tagging ->
+        tagging.topic_id
+      end)
+
+    Enum.map(taggings_by_topic, fn {_topic_id, topic_taggings} ->
+      [first_tagging | _remaining_taggings] = topic_taggings
+
+      self_assessment =
+        Enum.find(topic_taggings, fn tagging ->
+          Tagging.self_assessment?(tagging)
+        end)
+
+      endorsements =
+        topic_taggings
+        |> Enum.filter(fn tagging ->
+          Tagging.endorsement?(tagging)
+        end)
+        |> Enum.sort_by(fn endorsement ->
+          String.downcase(endorsement.tagged_by_membership.display_name)
+        end)
+
       %{
-        endorsements:
-          topic_taggings
-          |> Enum.reject(&(&1.tagged_by_membership_id == target.id))
-          |> Enum.sort_by(&String.downcase(&1.tagged_by_membership.display_name)),
-        self_assessment: Enum.find(topic_taggings, &(&1.tagged_by_membership_id == target.id)),
-        topic: first.topic
+        endorsements: endorsements,
+        self_assessment: self_assessment,
+        topic: first_tagging.topic
       }
     end)
   end

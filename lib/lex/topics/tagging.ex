@@ -144,8 +144,17 @@ defmodule Lex.Topics.Tagging do
 
   def present_for_target(target, sorting, opts) do
     with {:ok, taggings} <- for_target(target, opts) do
-      {:ok, Presenter.present(taggings, target, sorting)}
+      {:ok, Presenter.present(taggings, sorting)}
     end
+  end
+
+  def self_assessment?(tagging) do
+    tagging.taggable_type == "membership" and
+      tagging.taggable_id == tagging.tagged_by_membership_id
+  end
+
+  def endorsement?(tagging) do
+    !self_assessment?(tagging)
   end
 
   def set(target, topic, tagged_by_membership, content, opts) do
