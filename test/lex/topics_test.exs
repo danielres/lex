@@ -119,6 +119,51 @@ defmodule Lex.TopicsTest do
     assert detached_graph.children == %{}
   end
 
+  test "topic deletion keeps pruning graph references", %{owner_scope: owner_scope} do
+    assert {:ok, root} = owner_scope |> create_topic("Root Topic")
+    assert {:ok, middle} = owner_scope |> create_topic("Middle Topic")
+    assert {:ok, child} = owner_scope |> create_topic("Child Topic")
+
+    assert {:ok, _graph} = Graph.attach(root.id, middle.id, scope: owner_scope)
+    assert {:ok, _graph} = Graph.attach(middle.id, child.id, scope: owner_scope)
+    assert :ok = Ash.destroy(middle, scope: owner_scope)
+
+    graph = Graph |> Ash.read_one!(scope: owner_scope)
+
+    assert graph.children == %{}
+  end
+
+  test "topic graph repair persists normalized children once", %{owner_scope: owner_scope} do
+    assert {:ok, root} = owner_scope |> create_topic("Root Topic")
+    assert {:ok, child} = owner_scope |> create_topic("Child Topic")
+    assert {:ok, graph} = Graph.attach(root.id, child.id, scope: owner_scope)
+
+    missing_topic_id = Ash.UUID.generate()
+    dangling_children = %{root.id => [missing_topic_id], missing_topic_id => [child.id]}
+
+    assert {:ok, graph} =
+             graph
+             |> Ash.Changeset.for_update(:update, %{}, scope: owner_scope)
+             |> Ash.Changeset.force_change_attribute(:children, dangling_children)
+             |> Ash.update()
+
+    assert {:ok, repaired_graph} =
+             Graph.repair(graph, [root, child], scope: owner_scope)
+
+    assert repaired_graph.children == %{root.id => [child.id]}
+    assert repaired_graph.version == graph.version + 1
+
+    assert {:ok, unchanged_graph} =
+             Graph.repair(repaired_graph, [root, child], scope: owner_scope)
+
+    assert unchanged_graph.version == repaired_graph.version
+
+    persisted_graph = Graph |> Ash.read_one!(scope: owner_scope)
+
+    assert persisted_graph.children == repaired_graph.children
+    assert persisted_graph.version == repaired_graph.version
+  end
+
   test "taggings enforce their author, target, and space boundaries", %{
     owner_scope: owner_scope,
     second_scope: second_scope

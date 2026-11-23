@@ -121,6 +121,33 @@ defmodule Lex.Topics.Graph do
     end
   end
 
+  def repair(graph, topics, opts) do
+    scope = Keyword.fetch!(opts, :scope)
+    children = normalize_children(topics, graph.children)
+
+    persist_children(graph, children, scope)
+  end
+
+  def normalize_children(topics, children) do
+    topic_ids = topics |> MapSet.new(& &1.id)
+
+    Enum.reduce(children, %{}, fn {parent_id, child_ids}, normalized ->
+      if MapSet.member?(topic_ids, parent_id) do
+        child_ids =
+          child_ids
+          |> Enum.flat_map(&resolve_child_ids(&1, topic_ids, children, MapSet.new()))
+          |> Enum.uniq()
+
+        case child_ids do
+          [] -> normalized
+          child_ids -> Map.put(normalized, parent_id, child_ids)
+        end
+      else
+        normalized
+      end
+    end)
+  end
+
   def parent_candidates(topics, children, child_id) do
     topics
     |> Enum.filter(&is_nil(attachment_error(children, &1.id, child_id)))
@@ -229,6 +256,23 @@ defmodule Lex.Topics.Graph do
   defp read_graph(scope) do
     __MODULE__
     |> Ash.read_one(scope: scope)
+  end
+
+  defp resolve_child_ids(topic_id, topic_ids, children, visited) do
+    cond do
+      MapSet.member?(topic_ids, topic_id) ->
+        [topic_id]
+
+      MapSet.member?(visited, topic_id) ->
+        raise ArgumentError, "cycle detected in topic graph at #{topic_id}"
+
+      true ->
+        visited = MapSet.put(visited, topic_id)
+
+        children
+        |> Map.get(topic_id, [])
+        |> Enum.flat_map(&resolve_child_ids(&1, topic_ids, children, visited))
+    end
   end
 
   defp prune_children(children, topic_id) do
