@@ -9,7 +9,8 @@ defmodule Lex.Topics.Tagging.Presenter do
 
   defp group_by_topic(taggings) do
     taggings_with_active_authors =
-      Enum.filter(taggings, &Tagging.active_author?/1)
+      taggings
+      |> Enum.reject(&is_nil(&1.tagged_by_membership))
 
     taggings_by_topic = Enum.group_by(taggings_with_active_authors, & &1.topic_id)
 
