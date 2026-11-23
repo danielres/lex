@@ -26,9 +26,7 @@ defmodule Lex.Topics.Graph.Topology do
     Enum.reduce(children, %{}, fn {parent_id, child_ids}, normalized ->
       if MapSet.member?(topic_ids, parent_id) do
         child_ids =
-          child_ids
-          |> Enum.flat_map(&resolve_child_ids(&1, topic_ids, children, MapSet.new()))
-          |> Enum.uniq()
+          resolve_child_ids(child_ids, topic_ids, children)
 
         case child_ids do
           [] -> normalized
@@ -66,20 +64,47 @@ defmodule Lex.Topics.Graph.Topology do
     end
   end
 
-  defp resolve_child_ids(topic_id, topic_ids, children, visited) do
+  defp resolve_child_ids(child_ids, topic_ids, children) do
+    initial = {[], MapSet.new(), MapSet.new()}
+
+    {resolved_ids, _expanded_missing, _emitted_ids} =
+      Enum.reduce(child_ids, initial, fn child_id, state ->
+        resolve_child_id(child_id, topic_ids, children, MapSet.new(), state)
+      end)
+
+    Enum.reverse(resolved_ids)
+  end
+
+  defp resolve_child_id(
+         topic_id,
+         topic_ids,
+         children,
+         path,
+         {resolved_ids, expanded_missing, emitted_ids} = state
+       ) do
     cond do
       MapSet.member?(topic_ids, topic_id) ->
-        [topic_id]
+        if MapSet.member?(emitted_ids, topic_id) do
+          state
+        else
+          {[topic_id | resolved_ids], expanded_missing, MapSet.put(emitted_ids, topic_id)}
+        end
 
-      MapSet.member?(visited, topic_id) ->
+      MapSet.member?(path, topic_id) ->
         raise ArgumentError, "cycle detected in topic graph at #{topic_id}"
 
+      MapSet.member?(expanded_missing, topic_id) ->
+        state
+
       true ->
-        visited = MapSet.put(visited, topic_id)
+        path = MapSet.put(path, topic_id)
+        state = {resolved_ids, MapSet.put(expanded_missing, topic_id), emitted_ids}
 
         children
         |> Map.get(topic_id, [])
-        |> Enum.flat_map(&resolve_child_ids(&1, topic_ids, children, visited))
+        |> Enum.reduce(state, fn child_id, state ->
+          resolve_child_id(child_id, topic_ids, children, path, state)
+        end)
     end
   end
 
