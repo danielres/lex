@@ -157,6 +157,12 @@ defmodule Lex.Topics.Tagging do
     !self_assessment?(tagging)
   end
 
+  # The relationship uses Membership's :active read action, so inactive authors
+  # load as nil instead of a Membership struct.
+  def active_author?(tagging) do
+    is_struct(tagging.tagged_by_membership, Membership)
+  end
+
   def set(target, topic, tagged_by_membership, content, opts) do
     dimensions = dimensions_for(target, tagged_by_membership, content.dimensions)
     text = normalize_text(content.text)

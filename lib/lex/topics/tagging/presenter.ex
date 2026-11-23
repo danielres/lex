@@ -1,5 +1,4 @@
 defmodule Lex.Topics.Tagging.Presenter do
-  alias Lex.Accounts.Membership
   alias Lex.Topics.Tagging
 
   def present(taggings, sorting) do
@@ -10,14 +9,9 @@ defmodule Lex.Topics.Tagging.Presenter do
 
   defp group_by_topic(taggings) do
     taggings_with_active_authors =
-      Enum.filter(taggings, fn tagging ->
-        is_struct(tagging.tagged_by_membership, Membership)
-      end)
+      Enum.filter(taggings, &Tagging.active_author?/1)
 
-    taggings_by_topic =
-      Enum.group_by(taggings_with_active_authors, fn tagging ->
-        tagging.topic_id
-      end)
+    taggings_by_topic = Enum.group_by(taggings_with_active_authors, & &1.topic_id)
 
     Enum.map(taggings_by_topic, fn {_topic_id, topic_taggings} ->
       [first_tagging | _remaining_taggings] = topic_taggings
