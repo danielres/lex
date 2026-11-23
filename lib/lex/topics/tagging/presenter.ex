@@ -22,7 +22,7 @@ defmodule Lex.Topics.Tagging.Presenter do
       endorsements =
         topic_taggings
         |> Enum.filter(&Tagging.endorsement?/1)
-        |> Enum.sort_by(&String.downcase(&1.tagged_by_membership.display_name))
+        |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
 
       %{
         endorsements: endorsements,
