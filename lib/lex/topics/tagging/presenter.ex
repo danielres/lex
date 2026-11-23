@@ -29,7 +29,7 @@ defmodule Lex.Topics.Tagging.Presenter do
   end
 
   defp sort(groups, %{by: :alpha, direction: direction}) do
-    Enum.sort_by(groups, &topic_name/1, direction)
+    Enum.sort_by(groups, &String.downcase(&1.topic.name), direction)
   end
 
   defp sort(groups, %{by: dimension, direction: direction}) do
@@ -42,7 +42,7 @@ defmodule Lex.Topics.Tagging.Presenter do
       right_level = dimension_level(right, dimension)
 
       if left_level == right_level do
-        topic_name(left) <= topic_name(right)
+        String.downcase(left.topic.name) <= String.downcase(right.topic.name)
       else
         case direction do
           :asc -> left_level < right_level
@@ -57,6 +57,4 @@ defmodule Lex.Topics.Tagging.Presenter do
   defp dimension_level(group, dimension) do
     Map.get(group.self_assessment.dimensions, dimension, 0)
   end
-
-  defp topic_name(group), do: String.downcase(group.topic.name)
 end
