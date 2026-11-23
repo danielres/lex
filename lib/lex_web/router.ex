@@ -48,6 +48,9 @@ defmodule LexWeb.Router do
         live "/join", MembershipOnboardingLive, :join
         live "/", SpaceLive
         live "/members", MembersLive
+        live "/members/:member_slug", MemberLive
+        live "/topics", TopicsLive
+        live "/topics/:topic_slug", TopicLive
         live "/wiki", WikiLive
         live "/wiki/:page_slug", PageLive, :show
         live "/wiki/:page_slug/revisions", PageLive, :revisions

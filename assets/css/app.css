@@ -160,3 +160,7 @@ html, body {
   /* justify-content: start; */
   /* align-content: center; */
 }
+
+.clickable {
+  @apply opacity-80 hover:opacity-100 transition;
+}

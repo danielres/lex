@@ -72,6 +72,49 @@ defmodule LexWeb.Layouts do
     """
   end
 
+  attr :dialog?, :boolean, default: false
+
+  slot :actions, required: false
+  slot :dialog, required: false
+  slot :title, required: true
+
+  def page_head(assigns) do
+    ~H"""
+    <div class="mb-4">
+      <div class={[
+        "text-xl border-b-2 border-base-content/20 pb-2",
+        @dialog? && "border-none",
+        "flex items-end gap-2"
+      ]}>
+        <h2 class="grow flex items-center gap-2">
+          <%= for {title, index} <- Enum.with_index(@title) do %>
+            <.icon
+              :if={index > 0}
+              name="hero-chevron-right-micro"
+              class="size-4 opacity-60"
+            />
+            <span class="leading-none">{render_slot(title)}</span>
+          <% end %>
+        </h2>
+        {render_slot(@actions)}
+      </div>
+
+      <div id="layout-dialog-wrapper" phx-hook="AutoAnimate" class="relative">
+        <div
+          :if={@dialog?}
+          class={[
+            "bg-base-300/60 rounded-lg p-4 pb-4",
+            "border-2 border-info",
+            "space-y-2"
+          ]}
+        >
+          {render_slot(@dialog)}
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   @doc """
   Shows the flash group with standard titles and content.
 

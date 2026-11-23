@@ -7,8 +7,9 @@ defmodule LexWeb.MembersLive do
   alias Lex.Accounts.Membership
   alias Lex.Accounts.Membership.Access
   alias Lex.Accounts.Privilege
-  alias LexWeb.UI
   alias LexWeb.Components.Avatar
+  alias LexWeb.Router.Path
+  alias LexWeb.UI
 
   delegate(:ui, UI)
 
@@ -164,8 +165,19 @@ defmodule LexWeb.MembersLive do
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
                     <h2 class="font-semibold">
-                      <Avatar.render user={membership.user} />
-                      {membership_name(membership)}
+                      <.link
+                        :if={membership.slug}
+                        navigate={Path.to(@scope, membership)}
+                        class="clickable"
+                      >
+                        <Avatar.render user={membership.user} />
+                        {membership_name(membership)}
+                      </.link>
+
+                      <span :if={!membership.slug}>
+                        <Avatar.render user={membership.user} />
+                        {membership_name(membership)}
+                      </span>
                     </h2>
                     <span
                       :if={membership.status == :active}

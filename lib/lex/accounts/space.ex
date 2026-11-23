@@ -75,6 +75,12 @@ defmodule Lex.Accounts.Space do
       destination_attribute :space_id
       default_sort inserted_at: :asc
     end
+
+    many_to_many :members, Lex.Accounts.User do
+      through Lex.Accounts.Membership
+      source_attribute_on_join_resource :space_id
+      destination_attribute_on_join_resource :user_id
+    end
   end
 
   identities do
