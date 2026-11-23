@@ -1,4 +1,6 @@
 defmodule Lex.Topics.Tagging.Presenter do
+  alias Lex.Accounts.Membership
+
   def present(taggings, target, sorting) do
     taggings
     |> group_by_topic(target)
@@ -7,6 +9,10 @@ defmodule Lex.Topics.Tagging.Presenter do
 
   defp group_by_topic(taggings, target) do
     taggings
+    |> Enum.filter(fn tagging ->
+      tagging.tagged_by_membership_id == target.id or
+        is_struct(tagging.tagged_by_membership, Membership)
+    end)
     |> Enum.group_by(& &1.topic_id)
     |> Enum.map(fn {_topic_id, [first | _rest] = topic_taggings} ->
       %{

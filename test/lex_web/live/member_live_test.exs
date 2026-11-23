@@ -39,7 +39,7 @@ defmodule LexWeb.MemberLiveTest do
              live(conn, ~p"/test-space/members/#{profile_scope.membership.slug}")
   end
 
-  test "active members can see endorsement authors without management privileges", %{
+  test "active members see active endorsement authors and not disabled ones", %{
     conn: conn,
     scope: scope
   } do
@@ -68,6 +68,15 @@ defmodule LexWeb.MemberLiveTest do
       live(conn, ~p"/test-space/members/#{profile_scope.membership.slug}")
 
     assert render(view) =~ "Endorsement Author"
+
+    assert {:ok, _membership} = scope |> Membership.disable(endorser_scope.membership)
+    conn = conn |> recycle() |> log_in_user(profile)
+
+    {:ok, view, _html} =
+      live(conn, ~p"/test-space/members/#{profile_scope.membership.slug}")
+
+    refute render(view) =~ "Endorsement Author"
+    refute render(view) =~ "A thoughtful mentor"
   end
 
   defp add_member(scope, user, display_name) do
