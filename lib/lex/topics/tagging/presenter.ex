@@ -22,19 +22,12 @@ defmodule Lex.Topics.Tagging.Presenter do
     Enum.map(taggings_by_topic, fn {_topic_id, topic_taggings} ->
       [first_tagging | _remaining_taggings] = topic_taggings
 
-      self_assessment =
-        Enum.find(topic_taggings, fn tagging ->
-          Tagging.self_assessment?(tagging)
-        end)
+      self_assessment = topic_taggings |> Enum.find(&Tagging.self_assessment?/1)
 
       endorsements =
         topic_taggings
-        |> Enum.filter(fn tagging ->
-          Tagging.endorsement?(tagging)
-        end)
-        |> Enum.sort_by(fn endorsement ->
-          String.downcase(endorsement.tagged_by_membership.display_name)
-        end)
+        |> Enum.filter(&Tagging.endorsement?/1)
+        |> Enum.sort_by(&String.downcase(&1.tagged_by_membership.display_name))
 
       %{
         endorsements: endorsements,
