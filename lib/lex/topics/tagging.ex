@@ -29,6 +29,10 @@ defmodule Lex.Topics.Tagging do
   actions do
     defaults [:read, :destroy]
 
+    read :list do
+      filter expr(exists(tagged_by_membership, true))
+    end
+
     create :create do
       accept [
         :dimensions,
@@ -137,6 +141,7 @@ defmodule Lex.Topics.Tagging do
     {taggable_type, taggable_id} = target_ref(target)
 
     __MODULE__
+    |> Ash.Query.for_read(:list)
     |> Ash.Query.filter(taggable_type == ^taggable_type and taggable_id == ^taggable_id)
     |> Ash.Query.load([:topic, :tagged_by_membership])
     |> Ash.read(scope: scope)

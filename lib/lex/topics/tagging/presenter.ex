@@ -3,14 +3,8 @@ defmodule Lex.Topics.Tagging.Presenter do
 
   def present(taggings, sorting) do
     taggings
-    |> reject_inactive_authors()
     |> group_by_topic()
     |> sort(sorting)
-  end
-
-  # Inactive memberships load as nil through the relationship's :active read action.
-  defp reject_inactive_authors(taggings) do
-    Enum.reject(taggings, &is_nil(&1.tagged_by_membership))
   end
 
   defp group_by_topic(taggings) do
