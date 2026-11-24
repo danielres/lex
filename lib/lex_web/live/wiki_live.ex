@@ -92,7 +92,7 @@ defmodule LexWeb.WikiLive do
       socket={@socket}
       ui={@ui}
     >
-      <div class="space-y-4 max-w-[80ch]">
+      <div class="space-y-4">
         <div class="flex justify-end">
           <.link
             navigate={Path.wiki_home(@scope)}

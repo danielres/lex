@@ -8,20 +8,20 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
     ~H"""
     <.link
       :if={!@active?}
-      aria-label="Browse revisions"
+      aria-label="Page versions"
       class="btn btn-sm btn-circle btn-neutral hover:btn-info"
       patch={Path.revisions(@scope, @page)}
-      title="Browse revisions"
+      title="Page versions"
     >
       <.icon name="hero-clock-solid" />
     </.link>
 
     <.link
       :if={@active?}
-      aria-label="Return to current page"
+      aria-label="Close"
       class="btn btn-sm btn-circle btn-info"
       patch={Path.to(@scope, @page)}
-      title="Return to current page"
+      title="Close"
     >
       <.icon name="hero-clock-solid" />
     </.link>

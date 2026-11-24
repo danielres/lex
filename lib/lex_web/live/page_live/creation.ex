@@ -11,11 +11,7 @@ defmodule LexWeb.PageLive.Creation do
   end
 
   def reload(socket, scope, slug) do
-    form =
-      if can?(scope, :edit_pages) do
-        scope |> creation_form(slug)
-      end
-
+    form = if can?(scope, :edit_pages), do: scope |> creation_form(slug)
     socket |> delegate_assign(%{form: form, slug: slug})
   end
 
