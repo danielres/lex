@@ -142,39 +142,40 @@ defmodule LexWeb.PageLive.Revisions do
   defp selected_index(_entries, nil), do: nil
   defp selected_index(entries, selected), do: Enum.find_index(entries, &(&1.id == selected.id))
 
-  @impl true
-  def render(assigns) do
+  def render_dialog(assigns) do
     ~H"""
-    <% user = @scope.user %>
+    <div :if={@revisions.selected}>
+      <h2 class="small-caps text-lg inline">Version</h2>
+
+      <span class="ml-2">
+        <span class="font-bold">{position(@revisions)}</span>
+        <span class="font-bold text-base-content/75">/</span>
+        <span class="text-sm">{length(@revisions.entries)}</span>
+      </span>
+
+      <span class="mx-1 text-base-content/75">-</span>
+
+      <span class="text-sm text-base-content/75">
+        {Utils.Time.relative(@revisions.selected.inserted_at)}
+      </span>
+    </div>
+
+    <div :if={is_nil(@revisions.selected)}>
+      No versions yet
+    </div>
+
     <div
       :if={@revisions.selected}
       class={[
-        "flex items-end justify-between gap-3 mb-6",
-        "bg-info/25 pl-4 pr-2 py-2 rounded-box border-2 border-info/20 shadow"
+        "flex items-end justify-between gap-3"
       ]}
     >
       <div class="grid grow gap-0">
-        <div class={[
-          "flex gap-2 items-baseline"
-        ]}>
-          <h2 class="font-semibold">
-            V. {position(@revisions)} of {length(@revisions.entries)}
-          </h2>
-          <span class="text-sm text-base-content/75">
-            {Utils.Time.relative(@revisions.selected.inserted_at)}
-          </span>
-        </div>
-
         <div
           :if={@revisions.selected.contributors != []}
           class="flex items-center gap-3"
           data-testid="revision-contributors"
         >
-          <%!-- <span data-testid="revision-saved-by"> --%>
-          <%!--   Saved by {@revisions.selected.saved_by.display_name} --%>
-          <%!-- </span> --%>
-          <%!-- <span class="text-sm">Contributors:</span> --%>
-          <h3 class="small-caps">Contributors:</h3>
           <div class="flex flex-wrap gap-2">
             <Tooltip.render
               :for={contributor <- @revisions.selected.contributors}
@@ -238,6 +239,13 @@ defmodule LexWeb.PageLive.Revisions do
         </button>
       </div>
     </div>
+    """
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <% user = @scope.user %>
 
     <div
       :if={@revisions.selected}
@@ -256,17 +264,6 @@ defmodule LexWeb.PageLive.Revisions do
       phx-hook="LexicalRevisionPreview"
       phx-update="ignore"
     >
-    </div>
-
-    <div :if={!@revisions.selected} class="hero min-h-64 rounded-box bg-base-200">
-      <div class="hero-content text-center">
-        <div>
-          <h2 class="text-xl font-semibold">No revisions yet</h2>
-          <p class="py-2 opacity-70">
-            A revision will be created the next time the page is saved.
-          </p>
-        </div>
-      </div>
     </div>
     """
   end

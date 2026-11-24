@@ -81,7 +81,7 @@ defmodule LexWeb.MemberLive do
           </:dialog>
         </Layouts.page_head>
 
-        <div class="space-y-4 max-w-[80ch]" inert={@mode == :sort_taggings}>
+        <div class="space-y-4" inert={@mode == :sort_taggings}>
           <Taggings.render_list
             dimensions={@taggings.dimensions}
             groups={@taggings.groups}

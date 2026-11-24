@@ -10,18 +10,7 @@ defmodule LexWeb.PageLive.Editing do
   def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, %{saving?: false, title_form: nil})
-  end
-
-  def reload(socket, page) do
-    scope = socket.assigns.scope
-
-    form =
-      if can?(scope, :edit_pages) do
-        scope |> title_form(page)
-      end
-
-    socket |> delegate_assign(:title_form, form)
+    delegate_assign(socket, %{saving?: false})
   end
 
   def save_event, do: delegate_event("save")
@@ -88,45 +77,6 @@ defmodule LexWeb.PageLive.Editing do
     )
 
     save_failed(socket)
-  end
-
-  def handle_event(event, _params, %{assigns: %{editing: %{title_form: nil}}} = socket)
-      when event in ["title_change", "title_save"] do
-    {:noreply, socket}
-  end
-
-  def handle_event("title_change", %{"page_title" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.editing.title_form, params)
-    socket = socket |> delegate_assign(:title_form, form)
-
-    {:noreply, socket}
-  end
-
-  def handle_event("title_reset", _params, socket) do
-    socket = reload(socket, socket.assigns.page)
-
-    {:noreply, socket}
-  end
-
-  def handle_event("title_save", %{"page_title" => params}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.editing.title_form, params: params) do
-      {:ok, _page} ->
-        {:noreply, socket}
-
-      {:error, form} ->
-        socket =
-          socket
-          |> delegate_assign(:title_form, form)
-          |> push_event("page_title_blur", %{})
-
-        {:noreply, socket}
-    end
-  end
-
-  defp title_form(scope, page) do
-    page
-    |> AshPhoenix.Form.for_update(:rename, as: "page_title", scope: scope)
-    |> to_form()
   end
 
   defp save_failed(socket) do

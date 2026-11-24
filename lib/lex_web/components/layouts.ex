@@ -62,7 +62,7 @@ defmodule LexWeb.Layouts do
         scope={@scope}
         socket={@socket}
       >
-        <main class="min-w-0 max-w-full p-2 sm:p-8">
+        <main class="min-w-0 max-w-[90ch] mx-auto p-2 sm:p-8">
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
@@ -99,17 +99,16 @@ defmodule LexWeb.Layouts do
         {render_slot(@actions)}
       </div>
 
-      <div id="layout-dialog-wrapper" phx-hook="AutoAnimate" class="relative">
-        <div
-          :if={@dialog?}
-          class={[
-            "bg-base-300/60 rounded-lg p-4 pb-4",
-            "border-2 border-info",
-            "space-y-2"
-          ]}
-        >
-          {render_slot(@dialog)}
-        </div>
+      <div
+        id="layout-dialog-wrapper"
+        phx-hook="AutoAnimate"
+        class={[
+          "relative",
+          @dialog? && "bg-base-300/60 rounded px-6 py-4",
+          @dialog? && "border-2 border-base-content/30"
+        ]}
+      >
+        {render_slot(@dialog)}
       </div>
     </div>
     """

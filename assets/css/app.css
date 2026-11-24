@@ -162,5 +162,5 @@ html, body {
 }
 
 .clickable {
-  @apply opacity-80 hover:opacity-100 transition;
+  @apply opacity-80 hover:opacity-100 transition cursor-pointer;
 }
