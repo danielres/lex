@@ -58,6 +58,8 @@ defmodule LexWeb.TopicsLive do
     {:noreply, socket}
   end
 
+  defp dialog?(mode), do: mode == :creation
+
   @impl true
   def render(assigns) do
     focus_topic_id =
@@ -77,18 +79,20 @@ defmodule LexWeb.TopicsLive do
       ui={@ui}
     >
       <div
-        phx-click-away={if @mode == :creation, do: "mode:reset"}
+        phx-click-away={if dialog?(@mode), do: "mode:reset"}
         phx-key="escape"
-        phx-window-keydown={if @mode == :creation, do: "mode:reset"}
+        phx-window-keydown={if dialog?(@mode), do: "mode:reset"}
       >
-        <Layouts.page_head dialog?={@mode == :creation}>
+        <Layouts.page_head dialog?={dialog?(@mode)}>
           <:title>Topics</:title>
           <:actions><.action_buttons mode={@mode} /></:actions>
-          <:dialog><Creation.render_form creation={@creation} topics={@graph.topics} /></:dialog>
+          <:dialog :if={dialog?(@mode)}>
+            <Creation.render_form creation={@creation} topics={@graph.topics} />
+          </:dialog>
         </Layouts.page_head>
       </div>
 
-      <div inert={@mode == :creation}>
+      <div inert={dialog?(@mode)}>
         <Graph.render
           edit?={@mode == :edit}
           focus_topic_id={@focus_topic_id}
