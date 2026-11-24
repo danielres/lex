@@ -44,6 +44,10 @@ defmodule LexWeb.MembersLiveTest do
     {:ok, view, _html} = live(conn, ~p"/test-space/members")
 
     view
+    |> element("[data-testid='add-members-button']")
+    |> render_click()
+
+    view
     |> element("[data-testid='invite-member'][phx-value-user_id='#{user.id}']")
     |> render_click()
 
