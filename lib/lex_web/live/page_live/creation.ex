@@ -4,6 +4,7 @@ defmodule LexWeb.PageLive.Creation do
 
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageTitle
+  alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     socket |> delegate_assign(%{form: nil, slug: nil})
@@ -29,13 +30,13 @@ defmodule LexWeb.PageLive.Creation do
 
   def handle_event("create", %{"page" => params}, socket) do
     form = socket.assigns.creation.form
-    space = socket.assigns.scope.space
+    scope = socket.assigns.scope
 
     form
     |> AshPhoenix.Form.submit(params: params)
     |> case do
       {:ok, page} ->
-        path = ~p"/#{space.slug}/wiki/#{page.slug}"
+        path = Path.to(scope, page)
         socket = socket |> push_navigate(to: path)
 
         {:noreply, socket}

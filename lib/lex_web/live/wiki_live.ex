@@ -6,6 +6,7 @@ defmodule LexWeb.WikiLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias LexWeb.Components.Avatar
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   delegate(:ui, UI)
@@ -94,7 +95,7 @@ defmodule LexWeb.WikiLive do
       <div class="space-y-4 max-w-[80ch]">
         <div class="flex justify-end">
           <.link
-            navigate={~p"/#{@scope.space.slug}/wiki/home"}
+            navigate={Path.wiki_home(@scope)}
             class="btn btn-info px-2 rounded-box"
           >
             <.icon name="hero-home-micro" />
@@ -149,7 +150,7 @@ defmodule LexWeb.WikiLive do
                       "hover:text-info",
                       "transition"
                     ]}
-                    navigate={~p"/#{@scope.space.slug}/wiki/#{page.slug}"}
+                    navigate={Path.to(@scope, page)}
                   >
                     {page.title}
                     <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />

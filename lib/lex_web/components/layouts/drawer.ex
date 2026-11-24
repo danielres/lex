@@ -3,6 +3,7 @@ defmodule LexWeb.Layouts.Drawer do
 
   alias LexWeb.Components
   alias LexWeb.PresencesLive
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   attr :active, :string, required: true
@@ -81,7 +82,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@scope.space.slug}"}
+          navigate={Path.to(@scope.space)}
           class={[
             link_class,
             @active == "space" && active_class
@@ -94,7 +95,7 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@scope.space.slug}/members"}
+          navigate={Path.members(@scope)}
           class={[
             link_class,
             @active == "members" && active_class
@@ -105,10 +106,9 @@ defmodule LexWeb.Layouts.Drawer do
         </.link>
       </li>
 
-
       <li>
         <.link
-          navigate={~p"/#{@scope.space.slug}/wiki/home"}
+          navigate={Path.wiki_home(@scope)}
           class={[
             link_class,
             @active == "page" && active_class,
@@ -122,10 +122,10 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={~p"/#{@scope.space.slug}/topics"}
+          navigate={Path.topics(@scope)}
           class={[
             link_class,
-            @active == "topics" && active_class,
+            @active == "topics" && active_class
           ]}
         >
           <.icon name="hero-tag-mini" />

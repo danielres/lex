@@ -2,8 +2,10 @@ defmodule LexWeb.AuthController do
   use LexWeb, :controller
   use AshAuthentication.Phoenix.Controller
 
+  alias LexWeb.Router.Path
+
   def success(conn, activity, user, _token) do
-    return_to = get_session(conn, :return_to) || ~p"/"
+    return_to = get_session(conn, :return_to) || Path.spaces()
 
     message =
       case activity do
@@ -50,11 +52,11 @@ defmodule LexWeb.AuthController do
 
     conn
     |> put_flash(:error, message)
-    |> redirect(to: ~p"/sign-in")
+    |> redirect(to: Path.sign_in())
   end
 
   def sign_out(conn, _params) do
-    return_to = get_session(conn, :return_to) || ~p"/"
+    return_to = get_session(conn, :return_to) || Path.spaces()
 
     conn
     |> clear_session(:lex)

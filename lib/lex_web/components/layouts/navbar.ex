@@ -4,6 +4,7 @@ defmodule LexWeb.Layouts.Navbar do
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Dropdown
   alias LexWeb.Layouts.ThemeToggle
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   attr :drawer_open?, :boolean, required: true
@@ -20,7 +21,7 @@ defmodule LexWeb.Layouts.Navbar do
       <.toggle_button {assigns} />
       <div class="grow">
         <.link
-          navigate={~p"/#{@scope.space.slug}"}
+          navigate={Path.to(@scope.space)}
           class="opacity-80 hover:opacity-100 transition cursor-pointer"
         >
           {@scope.space.name}
@@ -66,7 +67,7 @@ defmodule LexWeb.Layouts.Navbar do
 
   def button_sign_out(assigns) do
     ~H"""
-    <.form for={%{}} action={~p"/sign-out"} method="delete" class="contents">
+    <.form for={%{}} action={Path.sign_out()} method="delete" class="contents">
       <button type="submit" class="btn btn-sm">
         Sign out <.icon name="hero-chevron-right-micro" />
       </button>

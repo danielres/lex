@@ -5,30 +5,40 @@ defmodule LexWeb.Router.Path do
   alias Lex.Accounts.Space
   alias Lex.Scope
   alias Lex.Topics.Topic
+  alias Lex.Wiki.Page
+  alias Lex.Wiki.PageRevision
 
   def to(%Space{} = space) do
     ~p"/#{space.slug}"
-  end
-
-  def to(%Scope{} = scope, %Topic{} = topic) do
-    ~p"/#{scope.space.slug}/topics/#{topic.slug}"
   end
 
   def to(%Scope{} = scope, %Membership{} = membership) do
     ~p"/#{scope.space.slug}/members/#{membership.slug}"
   end
 
-  def spaces do
-    "/"
+  def to(%Scope{} = scope, %Topic{} = topic) do
+    ~p"/#{scope.space.slug}/topics/#{topic.slug}"
   end
 
-  def sign_in do
-    # TODO: redirect to non-dev route outside of dev
-    "/dev/auth/sign-in"
+  def to(%Scope{} = scope, %Page{} = page) do
+    ~p"/#{scope.space.slug}/wiki/#{page.slug}"
   end
 
-  def onboarding(%Space{} = space) do
-    ~p"/#{space.slug}/join"
+  def to(%Scope{} = scope, %Page{} = page, %PageRevision{} = revision) do
+    ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions/#{revision.id}"
+  end
+
+  def spaces, do: ~p"/"
+  def sign_in, do: ~p"/sign-in"
+  def dev_sign_in, do: ~p"/dev/auth/sign-in"
+  def sign_out, do: ~p"/sign-out"
+
+  def onboarding(%Scope{} = scope) do
+    ~p"/#{scope.space.slug}/join"
+  end
+
+  def revisions(%Scope{} = scope, %Page{} = page) do
+    ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions"
   end
 
   def topics(%Scope{} = scope) do
@@ -37,5 +47,13 @@ defmodule LexWeb.Router.Path do
 
   def members(%Scope{} = scope) do
     ~p"/#{scope.space.slug}/members"
+  end
+
+  def wiki(%Scope{} = scope) do
+    ~p"/#{scope.space.slug}/wiki"
+  end
+
+  def wiki_home(%Scope{} = scope) do
+    ~p"/#{scope.space.slug}/wiki/home"
   end
 end

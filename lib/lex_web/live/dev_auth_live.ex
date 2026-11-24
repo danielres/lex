@@ -3,6 +3,7 @@ defmodule LexWeb.DevAuthLive do
 
   alias Lex.Accounts.User
   alias LexWeb.Components.Avatar
+  alias LexWeb.Router.Path
 
   @impl true
   def mount(_params, _session, socket) do
@@ -18,7 +19,12 @@ defmodule LexWeb.DevAuthLive do
         <h1 class="text-xl font-semibold">Choose a user</h1>
 
         <div class="grid gap-2">
-          <.form :for={{key, user} <- @users} for={%{}} action="/dev/auth/sign-in" method="post">
+          <.form
+            :for={{key, user} <- @users}
+            for={%{}}
+            action={Path.dev_sign_in()}
+            method="post"
+          >
             <input name="user" type="hidden" value={key} />
             <button
               class="btn btn-block btn-ghost justify-start"

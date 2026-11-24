@@ -13,6 +13,7 @@ defmodule LexWeb.Router.LiveSpaceAccess do
   alias Ash.Notifier.Notification
   alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
+  alias LexWeb.Router.Path
 
   def on_mount(:default, %{"space_slug" => slug}, _session, socket) do
     scope = socket.assigns.scope
@@ -68,20 +69,20 @@ defmodule LexWeb.Router.LiveSpaceAccess do
         {socket, destination}
 
       {:ok, nil} ->
-        {socket, ~p"/"}
+        {socket, Path.spaces()}
 
       {:error, _error} ->
-        {socket, ~p"/"}
+        {socket, Path.spaces()}
     end
   end
 
   defp membership_destination(scope, membership, live_action) do
     case {membership.status, live_action} do
-      {:active, :join} -> ~p"/#{scope.space.slug}"
+      {:active, :join} -> Path.to(scope.space)
       {:active, _live_action} -> nil
       {:invited, :join} -> nil
-      {:invited, _live_action} -> ~p"/#{scope.space.slug}/join"
-      {_status, _live_action} -> ~p"/"
+      {:invited, _live_action} -> Path.onboarding(scope)
+      {_status, _live_action} -> Path.spaces()
     end
   end
 end

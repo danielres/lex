@@ -34,7 +34,7 @@ defmodule LexWeb.TopicLive do
          socket
          |> assign(:topic, nil)
          |> Toast.put_toast(:error, "Topic not found")
-         |> push_navigate(to: ~p"/#{scope.space.slug}")}
+         |> push_navigate(to: Path.to(scope.space))}
     end
   end
 

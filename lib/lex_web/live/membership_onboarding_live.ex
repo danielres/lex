@@ -2,6 +2,7 @@ defmodule LexWeb.MembershipOnboardingLive do
   use LexWeb, :live_view
 
   alias Lex.Accounts.Membership
+  alias LexWeb.Router.Path
 
   @impl true
   def mount(_params, _session, socket) do
@@ -34,7 +35,8 @@ defmodule LexWeb.MembershipOnboardingLive do
     |> AshPhoenix.Form.submit(params: params)
     |> case do
       {:ok, _membership} ->
-        socket = socket |> push_navigate(to: ~p"/#{socket.assigns.scope.space.slug}")
+        space = socket.assigns.scope.space
+        socket = socket |> push_navigate(to: Path.to(space))
 
         {:noreply, socket}
 
@@ -52,7 +54,7 @@ defmodule LexWeb.MembershipOnboardingLive do
     |> Membership.decline(scope.membership)
     |> case do
       {:ok, _membership} ->
-        socket = socket |> push_navigate(to: ~p"/")
+        socket = socket |> push_navigate(to: Path.spaces())
 
         {:noreply, socket}
 

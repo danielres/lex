@@ -6,6 +6,7 @@ defmodule LexWeb.PageLive.Revisions do
   alias Lex.Wiki.Page
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Tooltip
+  alias LexWeb.Router.Path
 
   def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
@@ -90,7 +91,7 @@ defmodule LexWeb.PageLive.Revisions do
           socket
           |> delegate_assign(:restoring?, false)
           |> put_flash(:info, "Revision restored")
-          |> push_patch(to: ~p"/#{scope.space.slug}/wiki/#{page.slug}")
+          |> push_patch(to: Path.to(scope, page))
 
         {:reply, %{ok: true}, socket}
 
@@ -192,7 +193,7 @@ defmodule LexWeb.PageLive.Revisions do
           aria-label="Previous revision"
           class="btn btn-square hover:btn-info"
           id="previous-revision"
-          patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}/revisions/#{previous(@revisions).id}"}
+          patch={Path.to(@scope, @page, previous(@revisions))}
         >
           <.icon name="hero-chevron-left-micro" class="size-4" />
         </.link>
@@ -211,7 +212,7 @@ defmodule LexWeb.PageLive.Revisions do
           aria-label="Next revision"
           class="btn btn-square hover:btn-info"
           id="next-revision"
-          patch={~p"/#{@scope.space.slug}/wiki/#{@page.slug}/revisions/#{next(@revisions).id}"}
+          patch={Path.to(@scope, @page, next(@revisions))}
         >
           <.icon name="hero-chevron-right-micro" class="size-4" />
         </.link>

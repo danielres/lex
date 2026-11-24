@@ -35,7 +35,7 @@ defmodule LexWeb.MemberLive do
          socket
          |> assign(:profile, nil)
          |> Toast.put_toast(:error, "Member not found")
-         |> push_navigate(to: ~p"/#{scope.space.slug}")}
+         |> push_navigate(to: Path.to(scope.space))}
     end
   end
 

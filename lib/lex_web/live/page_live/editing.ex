@@ -5,6 +5,7 @@ defmodule LexWeb.PageLive.Editing do
   require Logger
 
   alias Lex.Collaboration
+  alias LexWeb.Router.Path
 
   def button_toggle(assigns), do: __MODULE__.ButtonToggle.render(assigns)
 
@@ -62,7 +63,7 @@ defmodule LexWeb.PageLive.Editing do
           |> assign(:live_action, :show)
           |> push_patch(
             replace: true,
-            to: ~p"/#{socket.assigns.scope.space.slug}/wiki/#{socket.assigns.page.slug}"
+            to: Path.to(socket.assigns.scope, socket.assigns.page)
           )
 
         {:reply, %{ok: true, result: counts}, socket}

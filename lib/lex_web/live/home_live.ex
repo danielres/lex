@@ -4,6 +4,7 @@ defmodule LexWeb.HomeLive do
 
   alias Lex.Accounts.Membership
   alias Lex.Accounts.Space
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   delegate(:ui, UI)
@@ -55,9 +56,11 @@ defmodule LexWeb.HomeLive do
   def handle_event("create_space", %{"space" => params}, socket) do
     case AshPhoenix.Form.submit(socket.assigns.space_form, params: params) do
       {:ok, space} ->
+        scope = %{socket.assigns.scope | space: space}
+
         socket =
           socket
-          |> push_navigate(to: ~p"/#{space.slug}/join")
+          |> push_navigate(to: Path.onboarding(scope))
 
         {:noreply, socket}
 
@@ -148,7 +151,7 @@ defmodule LexWeb.HomeLive do
       <div class="autogrid gap-4 [--autogrid-min:8rem]">
         <.link
           :for={membership <- @memberships}
-          navigate={~p"/#{membership.space.slug}"}
+          navigate={Path.to(membership.space)}
           data-testid="space"
           class={[
             @grid_item_class,
