@@ -34,7 +34,7 @@ defmodule LexWeb.PageLive.Info do
           "flex items-center gap-2"
         ]}>
           <span>Page name and path</span>
-          <EditTitle.button_edit :if={Ash.can?({@page, :rename}, @scope)} />
+          <EditTitle.button_edit :if={@page.slug != "home" && Ash.can?({@page, :rename}, @scope)} />
         </h2>
 
         <div class="ml-4">
