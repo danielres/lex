@@ -13,6 +13,7 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Info
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   delegate(:creation, Creation, info: false)
@@ -203,7 +204,7 @@ defmodule LexWeb.PageLive do
       <div :if={@page != nil} class="text-base-content/50">
         <.link
           class="hover:text-base-content transition"
-          navigate={~p"/#{@scope.space.slug}/wiki"}
+          navigate={Path.wiki(@scope)}
         >
           Wiki
         </.link>
@@ -312,21 +313,23 @@ defmodule LexWeb.PageLive do
          %{
            assigns: %{
              live_action: :revisions,
-             revisions: %{requested_id: revision_id},
-             scope: %{space: %{slug: space_slug}}
+             revisions: %{
+               requested_id: revision_id,
+               selected: %PageRevision{} = revision
+             },
+             scope: scope
            }
          },
          page
        )
        when revision_id != nil,
-       do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions/#{revision_id}"
+       do: Path.to(scope, page, revision)
 
   defp page_path(
-         %{assigns: %{live_action: :revisions, scope: %{space: %{slug: space_slug}}}},
+         %{assigns: %{live_action: :revisions, scope: scope}},
          page
        ),
-       do: ~p"/#{space_slug}/wiki/#{page.slug}/revisions"
+       do: Path.revisions(scope, page)
 
-  defp page_path(%{assigns: %{scope: %{space: %{slug: space_slug}}}}, page),
-    do: ~p"/#{space_slug}/wiki/#{page.slug}"
+  defp page_path(%{assigns: %{scope: scope}}, page), do: Path.to(scope, page)
 end

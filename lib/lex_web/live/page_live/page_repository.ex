@@ -4,6 +4,7 @@ defmodule LexWeb.PageLive.PageRepository do
 
   alias Lex.Collaboration
   alias Lex.Wiki.Page
+  alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     socket |> delegate_assign(%{pages: []})
@@ -18,7 +19,7 @@ defmodule LexWeb.PageLive.PageRepository do
 
   def encode(page_repository, scope) do
     page_repository.pages
-    |> Enum.map(fn page -> scope.space |> page_reference(page) end)
+    |> Enum.map(fn page -> scope |> page_reference(page) end)
     |> Jason.encode!()
   end
 
@@ -40,7 +41,7 @@ defmodule LexWeb.PageLive.PageRepository do
     |> Page.ensure(title)
     |> case do
       {:ok, page} ->
-        reference = scope.space |> page_reference(page)
+        reference = scope |> page_reference(page)
 
         {:reply, %{ok: true, page: reference}, socket}
 
@@ -56,7 +57,7 @@ defmodule LexWeb.PageLive.PageRepository do
 
     case Page.get(id, scope: scope) do
       {:ok, page} ->
-        reference = scope.space |> page_reference(page)
+        reference = scope |> page_reference(page)
 
         {:reply, %{ok: true, page: reference}, socket}
 
@@ -96,10 +97,10 @@ defmodule LexWeb.PageLive.PageRepository do
     {:reply, %{ok: false, error: "invalid save"}, socket}
   end
 
-  defp page_reference(space, page) do
+  defp page_reference(scope, page) do
     %{
       id: page.id,
-      path: ~p"/#{space.slug}/wiki/#{page.slug}",
+      path: Path.to(scope, page),
       slug: page.slug,
       title: page.title
     }

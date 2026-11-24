@@ -2,6 +2,7 @@ defmodule LexWeb.SpaceLive do
   use LexWeb, :live_view
   use LiveDelegate
 
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   delegate(:ui, UI)
@@ -23,7 +24,7 @@ defmodule LexWeb.SpaceLive do
     >
       <div class="space-y-2">
         <div>
-          <.link navigate={~p"/"} class="opacity-80 hover:opacity-100 transition">
+          <.link navigate={Path.spaces()} class="opacity-80 hover:opacity-100 transition">
             <.icon name="hero-arrow-left-micro" class="font-semibold size-3" />
             <span class="text-xs">All spaces</span>
           </.link>

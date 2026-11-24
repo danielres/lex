@@ -7,6 +7,7 @@ defmodule LexWeb.Router.LiveUserAuth do
 
   alias Lex.Accounts
   alias Lex.Scope
+  alias LexWeb.Router.Path
 
   import Phoenix.Component
 
@@ -18,7 +19,7 @@ defmodule LexWeb.Router.LiveUserAuth do
         {:cont, socket}
 
       nil ->
-        socket = socket |> redirect(to: "/dev/auth/sign-in")
+        socket = socket |> redirect(to: Path.dev_sign_in())
         {:halt, socket}
     end
   end
