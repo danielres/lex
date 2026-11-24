@@ -57,6 +57,13 @@ const liveSocket = new LiveSocket("/live", Socket, {
   },
 })
 
+window.addEventListener("focus-at-end", event => {
+  const input = event.target
+  const end = input.value.length
+
+  input.setSelectionRange(end, end)
+})
+
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
