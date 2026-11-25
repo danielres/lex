@@ -67,6 +67,31 @@ defmodule LexWeb.TopicLive do
     Graph.handle_info(msg, socket)
   end
 
+  def handle_info(
+        %{resource: Topic, action: %{name: :update}, data: %Topic{id: id} = topic},
+        %{assigns: %{topic: %Topic{id: id, name: previous_name}, scope: scope}} = socket
+      )
+      when previous_name != topic.name do
+    socket =
+      socket
+      |> Toast.put_toast(:info, "Topic #{previous_name} was renamed to #{topic.name}")
+      |> push_navigate(to: Path.to(scope, topic), replace: true)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(
+        %{resource: Topic, action: %{name: :destroy}, data: %Topic{id: id, name: name}},
+        %{assigns: %{topic: %Topic{id: id}, scope: scope}} = socket
+      ) do
+    socket =
+      socket
+      |> Toast.put_toast(:info, "Topic #{name} was deleted")
+      |> push_navigate(to: Path.topics(scope), replace: true)
+
+    {:noreply, socket}
+  end
+
   def handle_info(%{resource: Topic} = msg, socket) do
     Graph.handle_info(msg, socket)
   end
