@@ -22,21 +22,14 @@ defmodule LexWeb.SpaceLive do
       socket={@socket}
       ui={@ui}
     >
-      <div class="space-y-2">
-        <div>
-          <.link navigate={Path.spaces()} class="opacity-80 hover:opacity-100 transition">
-            <.icon name="hero-arrow-left-micro" class="font-semibold size-3" />
-            <span class="text-xs">All spaces</span>
+      <Layouts.page_head>
+        <:title>
+          <.link navigate={Path.spaces()} class="clickable">
+            Spaces
           </.link>
-        </div>
-
-        <h1 class={[
-          "text-2xl",
-          "border-b-2 border-base-content/20"
-        ]}>
-          {@scope.space.name}
-        </h1>
-      </div>
+        </:title>
+        <:title>{@scope.space.name}</:title>
+      </Layouts.page_head>
     </Layouts.app>
     """
   end
