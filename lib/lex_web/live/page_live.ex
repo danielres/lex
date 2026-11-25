@@ -17,6 +17,7 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Revisions
   alias LexWeb.Router.Path
   alias LexWeb.UI
+  alias Utils.Slugify
 
   delegate(:creation, Creation, info: false)
   delegate(:edit_title, EditTitle, info: false)
@@ -37,7 +38,24 @@ defmodule LexWeb.PageLive do
   @impl true
   def handle_params(%{"page_slug" => slug} = params, _uri, socket) do
     scope = socket.assigns.scope
+    canonical_slug = slug |> Slugify.generate()
 
+    cond do
+      canonical_slug == "" ->
+        raise NotFound, resource: Page, primary_key: %{slug: slug}
+
+      canonical_slug != slug ->
+        path = scope |> Path.wiki(canonical_slug)
+        socket = socket |> push_patch(to: path)
+
+        {:noreply, socket}
+
+      true ->
+        socket |> load_page_from_slug(scope, slug, params)
+    end
+  end
+
+  defp load_page_from_slug(socket, scope, slug, params) do
     scope
     |> Page.fetch_by_slug(slug)
     |> case do

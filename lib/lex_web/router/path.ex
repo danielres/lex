@@ -53,6 +53,10 @@ defmodule LexWeb.Router.Path do
     ~p"/#{scope.space.slug}/wiki"
   end
 
+  def wiki(%Scope{} = scope, page_slug) do
+    ~p"/#{scope.space.slug}/wiki/#{page_slug}"
+  end
+
   def wiki_home(%Scope{} = scope) do
     ~p"/#{scope.space.slug}/wiki/home"
   end

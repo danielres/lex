@@ -51,6 +51,17 @@ defmodule LexWeb.PageLiveTest do
     assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
   end
 
+  test "redirects a noncanonical page URL to its canonical slug", %{conn: conn} do
+    path = ~p"/test-space/wiki/#{"Été à l'assemblée"}"
+    canonical_path = ~p"/test-space/wiki/été-à-l-assemblée"
+
+    result = live(conn, path)
+    assert {:error, {:live_redirect, %{to: ^canonical_path}}} = result
+
+    assert {:ok, view, _html} = follow_redirect(result, conn, canonical_path)
+    assert has_element?(view, "[data-testid='missing-page']")
+  end
+
   test "members without page editing privileges can read but cannot edit or create pages", %{
     conn: conn,
     scope: scope
