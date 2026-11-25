@@ -93,14 +93,15 @@ defmodule LexWeb.MembersLive.Invites do
       :if={can?(@scope, :manage_members)}
       aria-label="Add members"
       class={[
-        "btn btn-sm btn-circle",
+        "btn btn-xs btn-circle",
         @invites.open? && "btn-info"
       ]}
       data-testid="add-members-button"
       title="Add members"
       phx-click={delegate_event("toggle")}
     >
-      <.icon name="hero-user-plus-micro" />
+      <.icon :if={!@invites.open?} name="hero-user-plus-micro" />
+      <.icon :if={@invites.open?} name="hero-x-mark-micro" />
     </button>
     """
   end
