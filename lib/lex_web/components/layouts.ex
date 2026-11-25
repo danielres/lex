@@ -77,6 +77,7 @@ defmodule LexWeb.Layouts do
   slot :actions, required: false
   slot :dialog, required: false
   slot :title, required: true
+  slot :crumb, required: false
 
   def page_head(assigns) do
     ~H"""
@@ -86,7 +87,19 @@ defmodule LexWeb.Layouts do
         @dialog? && "border-none",
         "flex items-end gap-2"
       ]}>
-        <h2 class="grow flex items-center gap-2">
+        <h2 class="grow">
+          <div class="flex items-center gap-1 text-sm">
+            <%= for crumb <- @crumb do %>
+              <span class="leading-none">{render_slot(crumb)}</span>
+              <.icon
+                name="hero-chevron-right-micro"
+                class="size-3 opacity-60"
+              />
+            <% end %>
+
+            <span class="opacity-50">&nbsp;</span>
+          </div>
+
           <%= for {title, index} <- Enum.with_index(@title) do %>
             <.icon
               :if={index > 0}

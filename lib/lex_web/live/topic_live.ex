@@ -63,9 +63,9 @@ defmodule LexWeb.TopicLive do
         phx-window-keydown={if dialog?(@mode), do: "toggle_mode:edit"}
       >
         <Layouts.page_head dialog?={dialog?(@mode)}>
-          <:title>
+          <:crumb>
             <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
-          </:title>
+          </:crumb>
           <:title>{@topic.name}</:title>
           <:actions><.action_buttons mode={@mode} /></:actions>
           <:dialog :if={dialog?(@mode)}>

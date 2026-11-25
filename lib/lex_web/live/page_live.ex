@@ -12,6 +12,7 @@ defmodule LexWeb.PageLive do
   alias LexWeb.PageLive.Notifications
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
+  alias LexWeb.Router.Path
   alias LexWeb.UI
 
   delegate(:creation, Creation, info: false)
@@ -61,6 +62,7 @@ defmodule LexWeb.PageLive do
         :if={@page}
         dialog?={dialog?(@live_action)}
       >
+        <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
         <:title>{@page.title}</:title>
 
         <:actions>

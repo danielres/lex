@@ -60,9 +60,9 @@ defmodule LexWeb.MemberLive do
         phx-window-keydown={if @mode != :view, do: "taggings:mode:reset"}
       >
         <Layouts.page_head dialog?={@mode != :view}>
-          <:title>
+          <:crumb>
             <.link navigate={Path.members(@scope)} class="opacity-80 hover:opacity-100 transition">Members</.link>
-          </:title>
+          </:crumb>
           <:title>{@profile.display_name}</:title>
           <:actions><Taggings.render_actions mode={@mode} /></:actions>
           <:dialog>
