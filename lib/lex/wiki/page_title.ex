@@ -41,8 +41,17 @@ defmodule Lex.Wiki.PageTitle do
 
   defp capitalize_first(title) do
     case String.next_grapheme(title) do
-      {first, rest} -> String.upcase(first) <> rest
-      nil -> title
+      {first, rest} ->
+        capitalized = String.upcase(first) <> rest
+
+        if Slugify.generate(capitalized) == Slugify.generate(title) do
+          capitalized
+        else
+          title
+        end
+
+      nil ->
+        title
     end
   end
 end
