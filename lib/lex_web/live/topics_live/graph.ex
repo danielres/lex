@@ -173,7 +173,7 @@ defmodule LexWeb.TopicsLive.Graph do
           :if={not @attaching? or not @parent_candidate?}
           navigate={if !@patch?, do: Path.to(@scope, @node.topic)}
           patch={if @patch?, do: Path.to(@scope, @node.topic)}
-          class={["grow", "py-1 px-2", "group"]}
+          class={["grow", "py-1 px-2", "group", "leading-tight"]}
         >
           <span class={[
             "opacity-80 group-hover:opacity-100 transition",

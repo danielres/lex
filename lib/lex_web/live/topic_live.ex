@@ -139,7 +139,7 @@ defmodule LexWeb.TopicLive do
 
         <hr class="my-6 sm:hidden border-base-content/20 border-t-2" />
 
-        <aside class="text-sm min-w-[13rem]">
+        <aside class="text-sm min-w-42">
           <Graph.render
             edit?={false}
             focus_topic_id={@topic.id}
