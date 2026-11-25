@@ -9,6 +9,7 @@ defmodule LexWeb.PageLive do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
+  alias Lex.Wiki.PageTitle
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.EditTitle
   alias LexWeb.PageLive.Editing
@@ -18,6 +19,8 @@ defmodule LexWeb.PageLive do
   alias LexWeb.Router.Path
   alias LexWeb.UI
   alias Utils.Slugify
+
+  @creation_title_flash "page_creation_title"
 
   delegate(:creation, Creation, info: false)
   delegate(:edit_title, EditTitle, info: false)
@@ -46,16 +49,33 @@ defmodule LexWeb.PageLive do
 
       canonical_slug != slug ->
         path = scope |> Path.wiki(canonical_slug)
+
+        socket =
+          case PageTitle.normalize(slug) do
+            {:ok, title} -> socket |> put_flash(@creation_title_flash, title)
+            {:error, _message} -> socket
+          end
+
         socket = socket |> push_patch(to: path)
 
         {:noreply, socket}
 
       true ->
-        socket |> load_page_from_slug(scope, slug, params)
+        flash = socket.assigns.flash
+        suggested_title = flash |> Phoenix.Flash.get(@creation_title_flash)
+
+        socket =
+          if connected?(socket) do
+            socket |> clear_flash(@creation_title_flash)
+          else
+            socket
+          end
+
+        socket |> load_page_from_slug(scope, slug, params, suggested_title)
     end
   end
 
-  defp load_page_from_slug(socket, scope, slug, params) do
+  defp load_page_from_slug(socket, scope, slug, params, suggested_title) do
     scope
     |> Page.fetch_by_slug(slug)
     |> case do
@@ -68,7 +88,7 @@ defmodule LexWeb.PageLive do
           else
             socket
             |> assign(page: nil)
-            |> Creation.reload(scope, slug)
+            |> Creation.reload(scope, slug, suggested_title)
           end
 
         {:noreply, socket}
@@ -77,7 +97,7 @@ defmodule LexWeb.PageLive do
         socket =
           socket
           |> assign(page: nil)
-          |> Creation.reload(scope, slug)
+          |> Creation.reload(scope, slug, suggested_title)
 
         {:noreply, socket}
 
@@ -216,7 +236,8 @@ defmodule LexWeb.PageLive do
         :if={@page}
         dialog?={dialog?(@live_action)}
       >
-        <:title><.link class="clickable" navigate={Path.wiki(@scope)}>Wiki</.link></:title>
+        <%!-- <:crumb><.link class="clickable" navigate={Path.to(@scope.space)}>Space</.link></:crumb> --%>
+        <%!-- <:crumb><.link class="clickable" navigate={Path.wiki(@scope)}>Wiki</.link></:crumb> --%>
         <:title>{@page.title}</:title>
         <:actions><.action_buttons {assigns} /></:actions>
         <:dialog>

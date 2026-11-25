@@ -60,6 +60,11 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, view, _html} = follow_redirect(result, conn, canonical_path)
     assert has_element?(view, "[data-testid='missing-page']")
+
+    assert has_element?(
+             view,
+             "[data-testid='page-creation-form'] input[value=\"Été à l'assemblée\"]"
+           )
   end
 
   test "members without page editing privileges can read but cannot edit or create pages", %{

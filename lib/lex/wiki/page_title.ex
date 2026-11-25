@@ -9,6 +9,7 @@ defmodule Lex.Wiki.PageTitle do
       |> String.normalize(:nfc)
       |> String.trim()
       |> String.replace(@whitespace, " ")
+      |> capitalize_first()
 
     case String.length(title) do
       0 -> {:error, "Cannot be empty"}
@@ -34,7 +35,14 @@ defmodule Lex.Wiki.PageTitle do
 
   def from_slug(slug) do
     slug
-    |> String.split("-", trim: true)
-    |> Enum.map_join(" ", &String.capitalize/1)
+    |> String.replace("-", " ")
+    |> capitalize_first()
+  end
+
+  defp capitalize_first(title) do
+    case String.next_grapheme(title) do
+      {first, rest} -> String.upcase(first) <> rest
+      nil -> title
+    end
   end
 end
