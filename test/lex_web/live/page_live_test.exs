@@ -67,6 +67,20 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
+  test "preserves revision routes when canonicalizing a page URL", %{conn: conn} do
+    revisions_path = ~p"/test-space/wiki/Home/revisions"
+    canonical_revisions_path = ~p"/test-space/wiki/home/revisions"
+
+    assert {:error, {:live_redirect, %{to: ^canonical_revisions_path}}} =
+             live(conn, revisions_path)
+
+    revision_path = ~p"/test-space/wiki/Home/revisions/3"
+    canonical_revision_path = ~p"/test-space/wiki/home/revisions/3"
+
+    assert {:error, {:live_redirect, %{to: ^canonical_revision_path}}} =
+             live(conn, revision_path)
+  end
+
   test "members without page editing privileges can read but cannot edit or create pages", %{
     conn: conn,
     scope: scope
@@ -591,7 +605,7 @@ defmodule LexWeb.PageLiveTest do
   test "invalid slugs return not found and do not create pages", %{conn: conn, scope: scope} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->
-        get(conn, "/test-space/wiki/Summer-Activities")
+        get(conn, "/test-space/wiki/---")
       end
 
     assert Plug.Exception.status(error) == 404

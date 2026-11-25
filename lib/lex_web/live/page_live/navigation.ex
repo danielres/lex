@@ -25,7 +25,7 @@ defmodule LexWeb.PageLive.Navigation do
         raise NotFound, resource: Page, primary_key: %{slug: slug}
 
       canonical_slug != slug ->
-        socket |> redirect_to_canonical_slug(scope, slug, canonical_slug)
+        socket |> redirect_to_canonical_slug(scope, params, slug, canonical_slug)
 
       true ->
         socket |> load_page_from_slug(scope, slug, params)
@@ -64,8 +64,9 @@ defmodule LexWeb.PageLive.Navigation do
 
   def page_path(%{assigns: %{scope: scope}}, page), do: Path.to(scope, page)
 
-  defp redirect_to_canonical_slug(socket, scope, slug, canonical_slug) do
-    path = scope |> Path.wiki(canonical_slug)
+  defp redirect_to_canonical_slug(socket, scope, params, slug, canonical_slug) do
+    route_params = params |> Map.put("page_slug", canonical_slug)
+    path = scope |> Path.wiki(socket.assigns.live_action, route_params)
 
     socket =
       case PageTitle.normalize(slug) do
