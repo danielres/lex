@@ -67,8 +67,23 @@ defmodule LexWeb.PageLive.Navigation do
   defp redirect_to_canonical_slug(socket, scope, params, slug, canonical_slug) do
     path =
       case socket.assigns.live_action do
-        :revisions -> scope |> Path.revisions_for_slug(canonical_slug, params["revision_number"])
-        _live_action -> scope |> Path.wiki(canonical_slug)
+        :revisions ->
+          page =
+            scope
+            |> Page.fetch_by_slug(canonical_slug)
+            |> case do
+              {:ok, %Page{} = page} -> page
+              {:ok, nil} -> raise NotFound, resource: Page, primary_key: %{slug: canonical_slug}
+              {:error, error} -> raise error
+            end
+
+          case params["revision_number"] do
+            nil -> Path.revisions(scope, page)
+            revision_number -> Path.to(scope, page, revision_number)
+          end
+
+        _live_action ->
+          scope |> Path.wiki(canonical_slug)
       end
 
     socket =
@@ -83,6 +98,7 @@ defmodule LexWeb.PageLive.Navigation do
   end
 
   defp load_page_from_slug(socket, scope, slug, params) do
+    live_action = socket.assigns.live_action
     suggested_title = socket.assigns.flash |> Phoenix.Flash.get(@creation_title_flash)
 
     socket =
@@ -95,6 +111,9 @@ defmodule LexWeb.PageLive.Navigation do
     scope
     |> Page.fetch_by_slug(slug)
     |> case do
+      {:ok, nil} when live_action == :revisions ->
+        raise NotFound, resource: Page, primary_key: %{slug: slug}
+
       {:ok, nil} when slug == "home" ->
         socket =
           socket

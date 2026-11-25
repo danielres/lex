@@ -67,7 +67,9 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
-  test "preserves revision routes when canonicalizing a page URL", %{conn: conn} do
+  test "preserves revision routes when canonicalizing a page URL", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+
     revisions_path = ~p"/test-space/wiki/Home/revisions"
     canonical_revisions_path = ~p"/test-space/wiki/home/revisions"
 
@@ -79,6 +81,22 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:error, {:live_redirect, %{to: ^canonical_revision_path}}} =
              live(conn, revision_path)
+  end
+
+  test "revision routes require an existing page", %{conn: conn, scope: scope} do
+    canonical_error =
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        get(conn, "/test-space/wiki/missing/revisions")
+      end
+
+    noncanonical_error =
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        get(conn, "/test-space/wiki/Missing/revisions")
+      end
+
+    assert Plug.Exception.status(canonical_error) == 404
+    assert Plug.Exception.status(noncanonical_error) == 404
+    assert Ash.read!(Page, scope: scope) == []
   end
 
   test "members without page editing privileges can read but cannot edit or create pages", %{

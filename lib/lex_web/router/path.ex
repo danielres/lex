@@ -24,7 +24,7 @@ defmodule LexWeb.Router.Path do
   end
 
   def to(%Scope{} = scope, %Page{} = page, revision_number)
-      when is_integer(revision_number) do
+      when is_integer(revision_number) or is_binary(revision_number) do
     ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions/#{revision_number}"
   end
 
@@ -39,14 +39,6 @@ defmodule LexWeb.Router.Path do
 
   def revisions(%Scope{} = scope, %Page{} = page) do
     ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions"
-  end
-
-  def revisions_for_slug(%Scope{} = scope, page_slug, nil) do
-    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions"
-  end
-
-  def revisions_for_slug(%Scope{} = scope, page_slug, revision_number) do
-    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions/#{revision_number}"
   end
 
   def topics(%Scope{} = scope) do
