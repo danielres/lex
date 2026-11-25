@@ -45,6 +45,8 @@ defmodule LexWeb.TopicLive do
     {:noreply, socket}
   end
 
+  defp dialog?(mode), do: mode == :edit
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -56,17 +58,19 @@ defmodule LexWeb.TopicLive do
       ui={@ui}
     >
       <div
-        phx-click-away={if @mode == :edit, do: "toggle_mode:edit"}
+        phx-click-away={if dialog?(@mode), do: "toggle_mode:edit"}
         phx-key="escape"
-        phx-window-keydown={if @mode == :edit, do: "toggle_mode:edit"}
+        phx-window-keydown={if dialog?(@mode), do: "toggle_mode:edit"}
       >
-        <Layouts.page_head dialog?={@mode == :edit}>
+        <Layouts.page_head dialog?={dialog?(@mode)}>
           <:title>
             <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
           </:title>
           <:title>{@topic.name}</:title>
           <:actions><.action_buttons mode={@mode} /></:actions>
-          <:dialog><Edition.render_form edition={@edition} /></:dialog>
+          <:dialog :if={dialog?(@mode)}>
+            <Edition.render_form edition={@edition} />
+          </:dialog>
         </Layouts.page_head>
       </div>
 

@@ -10,8 +10,10 @@ defmodule LexWeb.PageLive.Creation do
     socket |> delegate_assign(%{form: nil, slug: nil})
   end
 
-  def reload(socket, scope, slug) do
-    form = if can?(scope, :edit_pages), do: scope |> creation_form(slug)
+  def reload(socket, scope, slug, suggested_title) do
+    title = suggested_title || PageTitle.from_slug(slug)
+    form = if can?(scope, :edit_pages), do: scope |> creation_form(title)
+
     socket |> delegate_assign(%{form: form, slug: slug})
   end
 
@@ -98,9 +100,7 @@ defmodule LexWeb.PageLive.Creation do
     """
   end
 
-  defp creation_form(scope, slug) do
-    title = PageTitle.from_slug(slug)
-
+  defp creation_form(scope, title) do
     Page
     |> AshPhoenix.Form.for_create(:create,
       as: "page",

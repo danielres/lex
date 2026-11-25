@@ -11,11 +11,11 @@ defmodule Lex.Wiki.PageDocumentTest do
   test "persists and restores a document", %{scope: scope} do
     page = scope |> Page.ensure!("home")
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("first version"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("first version"))
     assert scope |> restored_text(page, "main") == "first version"
     [first_document] = Ash.read!(PageDocument, scope: scope)
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("second version"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("second version"))
     assert scope |> restored_text(page, "main") == "second version"
     [second_document] = Ash.read!(PageDocument, scope: scope)
 
@@ -28,7 +28,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "main",
                document("first version"),
@@ -41,7 +41,7 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert page_document.search_text == "First version"
     assert String.length(page_document.content_hash) == 64
 
-    assert {:ok, content} = scope |> Page.get_document_content(page, "main")
+    assert {:ok, content} = scope |> PageDocument.get_content(page, "main")
     assert content.lexical_state == lexical_state
     assert content.content_hash == page_document.content_hash
   end
@@ -52,7 +52,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "caption-1",
                document(""),
@@ -78,7 +78,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "main",
                document(""),
@@ -118,7 +118,7 @@ defmodule Lex.Wiki.PageDocumentTest do
   test "returns no page content before a document is saved", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
-    assert {:ok, nil} = scope |> Page.get_document_content(page, "main")
+    assert {:ok, nil} = scope |> PageDocument.get_content(page, "main")
   end
 
   test "does not update unchanged page content", %{scope: scope} do
@@ -127,13 +127,13 @@ defmodule Lex.Wiki.PageDocumentTest do
     content = %{lexical_state: lexical_state, search_text: "Same content"}
 
     assert {:ok, :saved} =
-             scope |> Page.save_document(page, "main", document("first state"), content)
+             scope |> PageDocument.save(page, "main", document("first state"), content)
 
     [first_document] = Ash.read!(PageDocument, scope: scope)
 
     assert {:ok, :unchanged} =
              scope
-             |> Page.save_document(page, "main", document("different yjs state"), content)
+             |> PageDocument.save(page, "main", document("different yjs state"), content)
 
     [second_document] = Ash.read!(PageDocument, scope: scope)
 
@@ -146,7 +146,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "main",
                document("text"),
@@ -157,7 +157,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "main",
                document("text"),
@@ -175,14 +175,14 @@ defmodule Lex.Wiki.PageDocumentTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                page,
                "main",
                document("first"),
                %{lexical_state: lexical_state, search_text: "Searchable"}
              )
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("second"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("second"))
 
     [page_document] = Ash.read!(PageDocument, scope: scope)
 
@@ -196,7 +196,7 @@ defmodule Lex.Wiki.PageDocumentTest do
     assert [page_before_persist] = Page.list!(scope: scope)
     assert page_before_persist.last_updated_at == page.updated_at
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("first version"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("first version"))
 
     assert [page_after_persist] = Page.list!(scope: scope)
     assert DateTime.after?(page_after_persist.last_updated_at, page.updated_at)
@@ -205,10 +205,10 @@ defmodule Lex.Wiki.PageDocumentTest do
   test "uses the newest persisted nested document", %{scope: scope} do
     page = scope |> Page.ensure!("Home")
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("main"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("main"))
     [main_document] = Ash.read!(PageDocument, scope: scope)
 
-    assert :ok = page |> Page.persist_collaboration_document("caption-1", document("caption"))
+    assert :ok = page |> PageDocument.persist_collaboration("caption-1", document("caption"))
 
     page = Page.list!(scope: scope) |> List.first()
 
@@ -225,14 +225,14 @@ defmodule Lex.Wiki.PageDocumentTest do
     first_page = scope |> Page.ensure!("first-page")
     second_page = scope |> Page.ensure!("second-page")
 
-    assert :ok = first_page |> Page.persist_collaboration_document("main", document("first main"))
+    assert :ok = first_page |> PageDocument.persist_collaboration("main", document("first main"))
 
     assert :ok =
              first_page
-             |> Page.persist_collaboration_document("caption-1", document("first caption"))
+             |> PageDocument.persist_collaboration("caption-1", document("first caption"))
 
     assert :ok =
-             second_page |> Page.persist_collaboration_document("main", document("second main"))
+             second_page |> PageDocument.persist_collaboration("main", document("second main"))
 
     assert scope |> restored_text(first_page, "main") == "first main"
     assert scope |> restored_text(first_page, "caption-1") == "first caption"
@@ -248,11 +248,11 @@ defmodule Lex.Wiki.PageDocumentTest do
   test "rejects invalid document keys", %{scope: scope} do
     page = scope |> Page.ensure!("home")
 
-    assert {:error, _error} = page |> Page.persist_collaboration_document("", document("text"))
+    assert {:error, _error} = page |> PageDocument.persist_collaboration("", document("text"))
 
     assert {:error, _error} =
              page
-             |> Page.persist_collaboration_document(String.duplicate("x", 256), document("text"))
+             |> PageDocument.persist_collaboration(String.duplicate("x", 256), document("text"))
   end
 
   defp document(text) do
@@ -289,7 +289,7 @@ defmodule Lex.Wiki.PageDocumentTest do
 
   defp restored_text(scope, page, document_key) do
     doc = Yex.Doc.new()
-    assert :ok = scope |> Page.restore(page, document_key, doc)
+    assert :ok = scope |> PageDocument.restore(page, document_key, doc)
     doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string()
   end
 end

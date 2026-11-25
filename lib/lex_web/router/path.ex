@@ -6,7 +6,6 @@ defmodule LexWeb.Router.Path do
   alias Lex.Scope
   alias Lex.Topics.Topic
   alias Lex.Wiki.Page
-  alias Lex.Wiki.PageRevision
 
   def to(%Space{} = space) do
     ~p"/#{space.slug}"
@@ -24,8 +23,9 @@ defmodule LexWeb.Router.Path do
     ~p"/#{scope.space.slug}/wiki/#{page.slug}"
   end
 
-  def to(%Scope{} = scope, %Page{} = page, %PageRevision{} = revision) do
-    ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions/#{revision.id}"
+  def to(%Scope{} = scope, %Page{} = page, revision_number)
+      when is_integer(revision_number) or is_binary(revision_number) do
+    ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions/#{revision_number}"
   end
 
   def spaces, do: ~p"/"
@@ -51,6 +51,10 @@ defmodule LexWeb.Router.Path do
 
   def wiki(%Scope{} = scope) do
     ~p"/#{scope.space.slug}/wiki"
+  end
+
+  def wiki(%Scope{} = scope, page_slug) do
+    ~p"/#{scope.space.slug}/wiki/#{page_slug}"
   end
 
   def wiki_home(%Scope{} = scope) do

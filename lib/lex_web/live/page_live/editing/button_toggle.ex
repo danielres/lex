@@ -10,7 +10,7 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
       aria-label={button_label(@active?, @editing.saving?)}
       aria-pressed={@active?}
       class={[
-        "btn btn-sm btn-circle btn-neutral hover:btn-info",
+        "btn btn-xs btn-circle btn-neutral hover:btn-info",
         @active? && "btn-info"
       ]}
       data-testid="editing-toggle"

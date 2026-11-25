@@ -3,7 +3,7 @@ defmodule LexWeb.PageLive.Revisions do
   use LiveDelegate, path: [:revisions]
 
   alias Lex.Collaboration
-  alias Lex.Wiki.Page
+  alias Lex.Wiki.PageRevision
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Tooltip
   alias LexWeb.Router.Path
@@ -12,52 +12,42 @@ defmodule LexWeb.PageLive.Revisions do
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{
-      entries: [],
-      requested_id: nil,
+      latest_number: nil,
+      previous_lexical_state: nil,
+      requested_number: nil,
       restoring?: false,
       selected: nil,
-      selected_index: nil
+      selected_number: nil
     })
   end
 
-  def reload(socket, page, revision_id \\ nil) do
+  def reload(socket, page, requested_number \\ nil) do
     scope = socket.assigns.scope
-    entries = scope |> Page.list_revisions!(page)
-    selected = select_revision!(entries, revision_id)
-    selected_index = selected_index(entries, selected)
+    requested_number = parse_number!(requested_number)
+    selection = scope |> PageRevision.selection!(page, requested_number)
 
     socket
-    |> delegate_assign(:entries, entries)
-    |> delegate_assign(:requested_id, revision_id)
-    |> delegate_assign(:selected, selected)
-    |> delegate_assign(:selected_index, selected_index)
+    |> delegate_assign(:latest_number, selection.latest_number)
+    |> delegate_assign(:previous_lexical_state, selection.previous_lexical_state)
+    |> delegate_assign(:requested_number, requested_number)
+    |> delegate_assign(:selected, selection.selected)
+    |> delegate_assign(:selected_number, selection.selected_number)
   end
 
   def commit_restore_event, do: delegate_event("commit_restore")
   def preserve_event, do: delegate_event("preserve")
   def restore_request_event, do: "revision_restore_requested"
 
-  def previous(revisions) do
-    if revisions.selected_index < length(revisions.entries) - 1 do
-      Enum.at(revisions.entries, revisions.selected_index + 1)
-    end
-  end
+  def previous_number(%{selected_number: number}) when is_integer(number) and number > 1,
+    do: number - 1
 
-  def next(revisions) do
-    if revisions.selected_index > 0 do
-      Enum.at(revisions.entries, revisions.selected_index - 1)
-    end
-  end
+  def previous_number(_revisions), do: nil
 
-  def previous_lexical_state(revisions) do
-    case previous(revisions) do
-      nil -> nil
-      revision -> revision.lexical_state
-    end
-  end
+  def next_number(%{latest_number: latest, selected_number: number})
+      when is_integer(latest) and is_integer(number) and number < latest,
+      do: number + 1
 
-  def position(%{selected_index: nil}), do: nil
-  def position(revisions), do: length(revisions.entries) - revisions.selected_index
+  def next_number(_revisions), do: nil
 
   @impl true
   def handle_event("restore", _params, socket) do
@@ -129,18 +119,21 @@ defmodule LexWeb.PageLive.Revisions do
     {:reply, %{ok: false}, socket}
   end
 
-  defp select_revision!([], nil), do: nil
-  defp select_revision!([revision | _revisions], nil), do: revision
+  defp parse_number!(nil), do: nil
+  defp parse_number!(value) when is_integer(value) and value > 0, do: value
 
-  defp select_revision!(revisions, revision_id) do
-    Enum.find(revisions, &(&1.id == revision_id)) ||
-      raise Ash.Error.Query.NotFound,
-        resource: Lex.Wiki.PageRevision,
-        primary_key: %{id: revision_id}
+  defp parse_number!(value) do
+    case Integer.parse(value) do
+      {number, ""} when number > 0 -> number
+      _other -> revision_not_found!(value)
+    end
   end
 
-  defp selected_index(_entries, nil), do: nil
-  defp selected_index(entries, selected), do: Enum.find_index(entries, &(&1.id == selected.id))
+  defp revision_not_found!(revision_number) do
+    raise Ash.Error.Query.NotFound,
+      resource: Lex.Wiki.PageRevision,
+      primary_key: %{number: revision_number}
+  end
 
   def render_dialog(assigns) do
     ~H"""
@@ -148,9 +141,9 @@ defmodule LexWeb.PageLive.Revisions do
       <h2 class="small-caps text-lg inline">Version</h2>
 
       <span class="ml-2">
-        <span class="font-bold">{position(@revisions)}</span>
+        <span class="font-bold">{@revisions.selected_number}</span>
         <span class="font-bold text-base-content/75">/</span>
-        <span class="text-sm">{length(@revisions.entries)}</span>
+        <span class="text-sm">{@revisions.latest_number}</span>
       </span>
 
       <span class="mx-1 text-base-content/75">-</span>
@@ -190,16 +183,16 @@ defmodule LexWeb.PageLive.Revisions do
 
       <div class="flex gap-1">
         <.link
-          :if={previous(@revisions)}
+          :if={previous_number(@revisions)}
           aria-label="Previous revision"
           class="btn btn-square hover:btn-info"
           id="previous-revision"
-          patch={Path.to(@scope, @page, previous(@revisions))}
+          patch={Path.to(@scope, @page, previous_number(@revisions))}
         >
           <.icon name="hero-chevron-left-micro" class="size-4" />
         </.link>
         <button
-          :if={!previous(@revisions)}
+          :if={!previous_number(@revisions)}
           aria-label="Previous revision"
           class="btn btn-square hover:btn-info"
           disabled
@@ -209,16 +202,16 @@ defmodule LexWeb.PageLive.Revisions do
           <.icon name="hero-chevron-left-micro" class="size-4" />
         </button>
         <.link
-          :if={next(@revisions)}
+          :if={next_number(@revisions)}
           aria-label="Next revision"
           class="btn btn-square hover:btn-info"
           id="next-revision"
-          patch={Path.to(@scope, @page, next(@revisions))}
+          patch={Path.to(@scope, @page, next_number(@revisions))}
         >
           <.icon name="hero-chevron-right-micro" class="size-4" />
         </.link>
         <button
-          :if={!next(@revisions)}
+          :if={!next_number(@revisions)}
           aria-label="Next revision"
           class="btn btn-square hover:btn-info"
           disabled
@@ -257,7 +250,7 @@ defmodule LexWeb.PageLive.Revisions do
       data-load-page-content-event={assigns[:"data-load-page-content-event"]}
       data-page-id={assigns[:"data-page-id"]}
       data-pages={assigns[:"data-pages"]}
-      data-previous-lexical-state={Jason.encode!(previous_lexical_state(@revisions))}
+      data-previous-lexical-state={Jason.encode!(@revisions.previous_lexical_state)}
       data-resolve-page-event={assigns[:"data-resolve-page-event"]}
       data-space-id={assigns[:"data-space-id"]}
       id={"revision-preview-#{@revisions.selected.id}"}

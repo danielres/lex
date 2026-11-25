@@ -4,6 +4,7 @@ defmodule LexWeb.PageLive.PageRepository do
 
   alias Lex.Collaboration
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
   alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
@@ -70,7 +71,7 @@ defmodule LexWeb.PageLive.PageRepository do
     scope = socket.assigns.scope
 
     with {:ok, page} <- Page.get(id, scope: scope),
-         {:ok, content} <- scope |> Page.get_document_content(page, "main") do
+         {:ok, content} <- scope |> PageDocument.get_content(page, "main") do
       {:reply, %{ok: true, content: content}, socket}
     else
       {:error, _error} -> {:reply, %{ok: false}, socket}

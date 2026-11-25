@@ -3,6 +3,7 @@ defmodule LexWeb.WikiLive do
   use LiveDelegate
 
   alias Ash.Notifier.Notification
+  alias Lex.Wiki
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias LexWeb.Components.Avatar
@@ -21,7 +22,7 @@ defmodule LexWeb.WikiLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
 
-    if connected?(socket), do: Page.subscribe()
+    if connected?(socket), do: Wiki.subscribe()
 
     scope = socket.assigns.scope
 

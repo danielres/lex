@@ -2,6 +2,7 @@ defmodule Lex.Wiki.PageRevisionTest do
   use Lex.DataCase
 
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageRevision
 
   setup do
     {:ok, scope: create_scope()}
@@ -14,7 +15,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
@@ -22,7 +23,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :unchanged} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
@@ -30,16 +31,18 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{lexical_state: second_state, search_text: "Second version"},
                nil
              )
 
-    [second_revision, first_revision] = scope |> Page.list_revisions!(page)
+    [second_revision, first_revision] = scope |> PageRevision.list!(page)
 
+    assert second_revision.number == 2
     assert second_revision.lexical_state == second_state
     assert second_revision.search_text == "Second version"
+    assert first_revision.number == 1
     assert first_revision.lexical_state == first_state
     assert first_revision.search_text == "First version"
   end
@@ -50,7 +53,7 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{
                  contributor_ids: [contributor.id],
@@ -60,10 +63,37 @@ defmodule Lex.Wiki.PageRevisionTest do
                nil
              )
 
-    [revision] = scope |> Page.list_revisions!(page)
+    [revision] = scope |> PageRevision.list!(page)
 
     assert revision.saved_by.id == scope.user.id
     assert Enum.map(revision.contributors, & &1.id) == [contributor.id]
+  end
+
+  test "numbers revisions independently for each page", %{scope: scope} do
+    first_page = scope |> Page.ensure!("First Page")
+    second_page = scope |> Page.ensure!("Second Page")
+
+    assert {:ok, :saved} =
+             scope
+             |> PageRevision.record(
+               first_page,
+               %{lexical_state: lexical_state("First"), search_text: "First"},
+               nil
+             )
+
+    assert {:ok, :saved} =
+             scope
+             |> PageRevision.record(
+               second_page,
+               %{lexical_state: lexical_state("Second"), search_text: "Second"},
+               nil
+             )
+
+    [first_revision] = scope |> PageRevision.list!(first_page)
+    [second_revision] = scope |> PageRevision.list!(second_page)
+
+    assert first_revision.number == 1
+    assert second_revision.number == 1
   end
 
   test "records restore provenance and requires the source revision to belong to the page", %{
@@ -75,17 +105,17 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{lexical_state: first_state, search_text: "First version"},
                nil
              )
 
-    [source_revision] = scope |> Page.list_revisions!(page)
+    [source_revision] = scope |> PageRevision.list!(page)
 
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{
                  lexical_state: lexical_state("Restored version"),
@@ -94,18 +124,18 @@ defmodule Lex.Wiki.PageRevisionTest do
                source_revision.id
              )
 
-    [restored_revision, ^source_revision] = scope |> Page.list_revisions!(page)
+    [restored_revision, ^source_revision] = scope |> PageRevision.list!(page)
     assert restored_revision.restored_from_revision_id == source_revision.id
 
     assert {:error, _error} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                other_page,
                %{lexical_state: lexical_state("Invalid"), search_text: "Invalid"},
                source_revision.id
              )
 
-    assert scope |> Page.list_revisions!(other_page) == []
+    assert scope |> PageRevision.list!(other_page) == []
   end
 
   defp lexical_state(text) do

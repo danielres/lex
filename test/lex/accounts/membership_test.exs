@@ -34,7 +34,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert membership.status == :active
     assert membership.display_name == "Téam Member"
-    assert membership.slug == "team-member"
+    assert membership.slug == "téam-member"
 
     assert {:ok, membership} = scope |> Membership.disable(membership)
     assert membership.status == :disabled
@@ -43,7 +43,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert membership.status == :active
     assert membership.display_name == "Téam Member"
-    assert membership.slug == "team-member"
+    assert membership.slug == "téam-member"
   end
 
   test "stale acceptance cannot overwrite an established identity", %{scope: scope} do
@@ -286,7 +286,7 @@ defmodule Lex.Accounts.MembershipTest do
     assert {:error, error} = scope |> Membership.accept(membership, "---")
 
     assert Exception.message(error) =~
-             "must contain at least one Latin letter (a-z) or number"
+             "must contain at least one letter or number"
 
     assert {:ok, reloaded} = Ash.get(Membership, membership.id, scope: scope)
     assert reloaded.status == :invited

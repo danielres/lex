@@ -9,6 +9,8 @@ defmodule Lex.Collaboration do
   alias Lex.Collaboration.Contributors
   alias Lex.Collaboration.Persistence
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
+  alias Lex.Wiki.PageRevision
   alias Yex.Sync
   alias Yex.Sync.SharedDoc
 
@@ -69,7 +71,7 @@ defmodule Lex.Collaboration do
         with {:ok, counts} <- save_documents(scope, page, snapshots),
              {:ok, revision} <-
                scope
-               |> Page.record_revision(
+               |> PageRevision.record(
                  page,
                  %{
                    contributor_ids: contributions.contributor_ids,
@@ -96,7 +98,7 @@ defmodule Lex.Collaboration do
 
   defp validate_source_revision(scope, page, revision_id) do
     scope
-    |> Page.get_revision(page, revision_id)
+    |> PageRevision.get(page, revision_id)
     |> case do
       {:ok, nil} -> {:error, :revision_not_found}
       {:ok, _revision} -> :ok
@@ -122,7 +124,7 @@ defmodule Lex.Collaboration do
     with {:ok, shared_doc} <- active_document(page, snapshot.document_key) do
       doc = SharedDoc.get_doc(shared_doc)
 
-      scope |> Page.save_document(page, snapshot.document_key, doc, snapshot)
+      scope |> PageDocument.save(page, snapshot.document_key, doc, snapshot)
     end
   end
 

@@ -1,5 +1,6 @@
 defmodule Lex.Wiki.PageTitle do
-  @separator ~r/[^\p{L}\p{N}]+/u
+  alias Utils.Slugify
+
   @whitespace ~r/\s+/u
 
   def normalize(title) when is_binary(title) do
@@ -8,6 +9,7 @@ defmodule Lex.Wiki.PageTitle do
       |> String.normalize(:nfc)
       |> String.trim()
       |> String.replace(@whitespace, " ")
+      |> capitalize_first()
 
     case String.length(title) do
       0 -> {:error, "Cannot be empty"}
@@ -21,11 +23,7 @@ defmodule Lex.Wiki.PageTitle do
 
   def slug(title) do
     with {:ok, title} <- normalize(title) do
-      slug =
-        title
-        |> String.downcase()
-        |> String.replace(@separator, "-")
-        |> String.trim("-")
+      slug = Slugify.generate(title)
 
       if slug == "" do
         {:error, "Must contain at least one letter or number"}
@@ -37,7 +35,23 @@ defmodule Lex.Wiki.PageTitle do
 
   def from_slug(slug) do
     slug
-    |> String.split("-", trim: true)
-    |> Enum.map_join(" ", &String.capitalize/1)
+    |> String.replace("-", " ")
+    |> capitalize_first()
+  end
+
+  defp capitalize_first(title) do
+    case String.next_grapheme(title) do
+      {first, rest} ->
+        capitalized = String.upcase(first) <> rest
+
+        if Slugify.generate(capitalized) == Slugify.generate(title) do
+          capitalized
+        else
+          title
+        end
+
+      nil ->
+        title
+    end
   end
 end

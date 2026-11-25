@@ -1,6 +1,7 @@
 defmodule Lex.Wiki.PageTest do
   use Lex.DataCase
 
+  alias Lex.Wiki
   alias Lex.Wiki.Page
 
   setup do
@@ -44,7 +45,7 @@ defmodule Lex.Wiki.PageTest do
     end
 
     test "publishes a notification after creating a page", %{scope: scope} do
-      Page.subscribe()
+      Wiki.subscribe()
 
       page = scope |> Page.ensure!("Summer Activities")
 
@@ -148,7 +149,7 @@ defmodule Lex.Wiki.PageTest do
 
     test "publishes a notification after a successful rename", %{scope: scope} do
       page = scope |> Page.ensure!("Summer Activities")
-      Page.subscribe()
+      Wiki.subscribe()
 
       renamed_page = Page.rename!(page, "Winter Activities", scope: scope)
 

@@ -63,7 +63,7 @@ defmodule LexWeb.MemberLive do
           <:title>
             <.link navigate={Path.members(@scope)} class="opacity-80 hover:opacity-100 transition">Members</.link>
           </:title>
-          <:title><span>{@profile.display_name}</span></:title>
+          <:title>{@profile.display_name}</:title>
           <:actions><Taggings.render_actions mode={@mode} /></:actions>
           <:dialog>
             <Taggings.render_form

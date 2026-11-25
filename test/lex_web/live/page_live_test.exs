@@ -51,6 +51,54 @@ defmodule LexWeb.PageLiveTest do
     assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
   end
 
+  test "redirects a noncanonical page URL to its canonical slug", %{conn: conn} do
+    path = ~p"/test-space/wiki/#{"Été à l'assemblée"}"
+    canonical_path = ~p"/test-space/wiki/été-à-l-assemblée"
+
+    result = live(conn, path)
+    assert {:error, {:live_redirect, %{to: ^canonical_path}}} = result
+
+    assert {:ok, view, _html} = follow_redirect(result, conn, canonical_path)
+    assert has_element?(view, "[data-testid='missing-page']")
+
+    assert has_element?(
+             view,
+             "[data-testid='page-creation-form'] input[value=\"Été à l'assemblée\"]"
+           )
+  end
+
+  test "preserves revision routes when canonicalizing a page URL", %{conn: conn, scope: scope} do
+    scope |> Page.ensure!("Home")
+
+    revisions_path = ~p"/test-space/wiki/Home/revisions"
+    canonical_revisions_path = ~p"/test-space/wiki/home/revisions"
+
+    assert {:error, {:live_redirect, %{to: ^canonical_revisions_path}}} =
+             live(conn, revisions_path)
+
+    revision_path = ~p"/test-space/wiki/Home/revisions/3"
+    canonical_revision_path = ~p"/test-space/wiki/home/revisions/3"
+
+    assert {:error, {:live_redirect, %{to: ^canonical_revision_path}}} =
+             live(conn, revision_path)
+  end
+
+  test "revision routes require an existing page", %{conn: conn, scope: scope} do
+    canonical_error =
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        get(conn, "/test-space/wiki/missing/revisions")
+      end
+
+    noncanonical_error =
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        get(conn, "/test-space/wiki/Missing/revisions")
+      end
+
+    assert Plug.Exception.status(canonical_error) == 404
+    assert Plug.Exception.status(noncanonical_error) == 404
+    assert Ash.read!(Page, scope: scope) == []
+  end
+
   test "members without page editing privileges can read but cannot edit or create pages", %{
     conn: conn,
     scope: scope
@@ -186,7 +234,7 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("updated"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("updated"))
 
     assert has_element?(view, "[data-testid='page-editor'][data-document-id='#{page.id}']")
   end
@@ -202,7 +250,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                embedded_page,
                "main",
                document("Reusable content"),
@@ -233,7 +281,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              other_scope
-             |> Page.save_document(
+             |> PageDocument.save(
                other_page,
                "main",
                document("Private content"),
@@ -261,8 +309,10 @@ defmodule LexWeb.PageLiveTest do
       "page_id" => embedded_page.id
     })
 
-    assert [%{search_text: "Embedded content"}] = scope |> Page.list_revisions!(embedded_page)
-    assert [] = scope |> Page.list_revisions!(containing_page)
+    assert [%{search_text: "Embedded content"}] =
+             scope |> PageRevision.list!(embedded_page)
+
+    assert [] = scope |> PageRevision.list!(containing_page)
 
     monitor = Process.monitor(shared_doc)
     :ok = Collaboration.close_document(shared_doc)
@@ -462,7 +512,7 @@ defmodule LexWeb.PageLiveTest do
     |> element("a#previous-revision")
     |> render_click()
 
-    assert_patch(view, ~p"/test-space/wiki/home/revisions/#{first_revision.id}")
+    assert_patch(view, ~p"/test-space/wiki/home/revisions/1")
     assert has_element?(view, "#revision-preview-#{first_revision.id}")
 
     assert has_element?(
@@ -475,11 +525,11 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")
   end
 
-  test "shows an empty history before the first revision", %{conn: conn, scope: scope} do
+  test "shows an empty history before the first version", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
-    assert render(view) =~ "No revisions yet"
+    assert render(view) =~ "No versions yet"
     refute has_element?(view, "button[aria-label='Restore revision']")
   end
 
@@ -509,13 +559,13 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
-  test "does not open another page's revision", %{conn: conn, scope: scope} do
+  test "does not open an out-of-range revision number", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     other_page = scope |> Page.ensure!("Other Page")
-    revision = scope |> create_revision(other_page, "Other content")
+    _revision = scope |> create_revision(other_page, "Other content")
 
     assert_raise Ash.Error.Query.NotFound, fn ->
-      live(conn, ~p"/test-space/wiki/home/revisions/#{revision.id}")
+      live(conn, ~p"/test-space/wiki/home/revisions/1")
     end
   end
 
@@ -529,7 +579,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, shared_doc} = scope |> Collaboration.open_document("#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
-    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/#{source_revision.id}")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/1")
 
     view
     |> element("button[aria-label='Restore revision']")
@@ -547,7 +597,7 @@ defmodule LexWeb.PageLiveTest do
       "documents" => [document_snapshot("main", "Unsaved collaborative edits")]
     })
 
-    [preserved_revision | _revisions] = scope |> Page.list_revisions!(page)
+    [preserved_revision | _revisions] = scope |> PageRevision.list!(page)
     assert preserved_revision.restored_from_revision_id == nil
     assert preserved_revision.search_text == "Unsaved collaborative edits"
 
@@ -559,7 +609,7 @@ defmodule LexWeb.PageLiveTest do
     assert_patch(view, ~p"/test-space/wiki/home")
 
     [restored_revision, preserved_revision_after_restore | _revisions] =
-      scope |> Page.list_revisions!(page)
+      scope |> PageRevision.list!(page)
 
     assert restored_revision.restored_from_revision_id == source_revision.id
     assert restored_revision.search_text == "First version restored"
@@ -573,7 +623,7 @@ defmodule LexWeb.PageLiveTest do
   test "invalid slugs return not found and do not create pages", %{conn: conn, scope: scope} do
     error =
       assert_raise Ash.Error.Query.NotFound, fn ->
-        get(conn, "/test-space/wiki/Summer-Activities")
+        get(conn, "/test-space/wiki/---")
       end
 
     assert Plug.Exception.status(error) == 404
@@ -630,7 +680,7 @@ defmodule LexWeb.PageLiveTest do
   defp create_revision(scope, page, text, contributor_ids \\ []) do
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{
                  contributor_ids: contributor_ids,
@@ -640,6 +690,6 @@ defmodule LexWeb.PageLiveTest do
                nil
              )
 
-    scope |> Page.list_revisions!(page) |> List.first()
+    scope |> PageRevision.list!(page) |> List.first()
   end
 end

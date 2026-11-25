@@ -431,7 +431,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
     assert {:ok, %{revision: :saved}} = scope |> Collaboration.save(page, documents)
 
-    [revision] = scope |> Page.list_revisions!(page)
+    [revision] = scope |> PageRevision.list!(page)
     contributor_ids = Enum.map(revision.contributors, & &1.id)
 
     assert revision.saved_by.id == scope.user.id
@@ -577,7 +577,7 @@ defmodule LexWeb.CollaborationChannelTest do
     [page_id, document_key] = String.split(room, "/", parts: 2)
     page = Page.get!(page_id, scope: scope)
     doc = Yex.Doc.new()
-    :ok = scope |> Page.restore(page, document_key, doc)
+    :ok = scope |> PageDocument.restore(page, document_key, doc)
     doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string()
   end
 
