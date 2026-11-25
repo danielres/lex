@@ -54,6 +54,7 @@ defmodule LexWeb.TopicsLive.Graph do
   attr :edit?, :boolean, required: true
   attr :focus_topic_id, :string, required: true
   attr :graph, :map, required: true
+  attr :patch?, :boolean, default: false
   attr :scope, Scope, required: true
 
   @impl true
@@ -121,6 +122,7 @@ defmodule LexWeb.TopicsLive.Graph do
           focus_topic_id={@focus_topic_id}
           node={node}
           parent_candidate_ids={@parent_candidate_ids}
+          patch?={@patch?}
           edit?={@edit?}
         />
       </ul>
@@ -134,6 +136,7 @@ defmodule LexWeb.TopicsLive.Graph do
   attr :node, :map, required: true
   attr :parent_candidate_ids, :any, required: true
   attr :scope, Scope, required: true
+  attr :patch?, :boolean, required: true
 
   def topic_node(assigns) do
     assigns =
@@ -168,12 +171,9 @@ defmodule LexWeb.TopicsLive.Graph do
 
         <.link
           :if={not @attaching? or not @parent_candidate?}
-          navigate={Path.to(@scope, @node.topic)}
-          class={[
-            "grow",
-            "py-1 px-2",
-            "group"
-          ]}
+          navigate={if !@patch?, do: Path.to(@scope, @node.topic)}
+          patch={if @patch?, do: Path.to(@scope, @node.topic)}
+          class={["grow", "py-1 px-2", "group"]}
         >
           <span class={[
             "opacity-80 group-hover:opacity-100 transition",
@@ -229,6 +229,7 @@ defmodule LexWeb.TopicsLive.Graph do
           edit?={@edit?}
           focus_topic_id={@focus_topic_id}
           attaching?={@attaching?}
+          patch?={@patch?}
           node={child}
           parent_candidate_ids={@parent_candidate_ids}
           scope={@scope}
