@@ -9,7 +9,7 @@ defmodule LexWeb.TopicLive.Edition do
     socket |> reload_form()
   end
 
-  defp reload_form(socket) do
+  def reload_form(socket) do
     scope = socket.assigns.scope
     topic = socket.assigns.topic
     form = make_form(topic, scope)
