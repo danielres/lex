@@ -6,7 +6,7 @@ defmodule LexWeb.MemberLive.Taggings do
   alias Lex.Topics.Dimensions
   alias Lex.Topics.Tagging
   alias Lex.Topics.Topic
-  alias LexWeb.Live.TaggingComponents
+  alias LexWeb.Live.Tagging.Components
   alias LexWeb.MemberLive.Taggings.Form
   alias LexWeb.MemberLive.Taggings.Sorting
   alias LexWeb.Router.Path
@@ -139,10 +139,10 @@ defmodule LexWeb.MemberLive.Taggings do
 
   def render_list(assigns) do
     ~H"""
-    <div id="profile-taggings" class="space-y-3" phx-hook="AutoAnimate">
+    <Components.cards>
       <p :if={@groups == []} class="opacity-60">No topics assigned yet</p>
 
-      <TaggingComponents.card :for={group <- @groups} id={"profile-topic-#{group.topic.id}"}>
+      <Components.card :for={group <- @groups} id={"profile-topic-#{group.topic.id}"}>
         <:title>
           <.link class="clickable" navigate={Path.to(@scope, group.topic)}>
             {group.topic.name}
@@ -165,23 +165,23 @@ defmodule LexWeb.MemberLive.Taggings do
           />
         </:action_buttons>
 
-        <TaggingComponents.assessment
+        <Components.assessment
           :if={group.self_assessment}
           dimensions={@dimensions}
           levels={group.self_assessment.dimensions}
           text={group.self_assessment.text}
         />
 
-        <TaggingComponents.endorsements :if={group.endorsements != []}>
+        <Components.endorsements :if={group.endorsements != []}>
           <.endorsement
             :for={endorsement <- group.endorsements}
             endorsement={endorsement}
             scope={@scope}
             topic={group.topic}
           />
-        </TaggingComponents.endorsements>
-      </TaggingComponents.card>
-    </div>
+        </Components.endorsements>
+      </Components.card>
+    </Components.cards>
     """
   end
 
@@ -191,7 +191,7 @@ defmodule LexWeb.MemberLive.Taggings do
 
   defp endorsement(assigns) do
     ~H"""
-    <TaggingComponents.endorsement endorsement={@endorsement} scope={@scope}>
+    <Components.endorsement endorsement={@endorsement} scope={@scope}>
       <:action_buttons>
         <.button_edit
           :if={Ash.can?({@endorsement, :update}, @scope)}
@@ -219,7 +219,7 @@ defmodule LexWeb.MemberLive.Taggings do
           <.icon name="hero-x-mark" class="size-4" />
         </button>
       </:action_buttons>
-    </TaggingComponents.endorsement>
+    </Components.endorsement>
     """
   end
 

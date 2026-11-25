@@ -1,4 +1,4 @@
-defmodule LexWeb.Live.TaggingSorting do
+defmodule LexWeb.Live.Tagging.Sorting do
   import Phoenix.LiveView, only: [get_connect_params: 1, push_event: 3]
 
   @default %{by: :interest, direction: :desc}

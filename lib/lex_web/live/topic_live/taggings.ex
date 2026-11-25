@@ -4,14 +4,14 @@ defmodule LexWeb.TopicLive.Taggings do
 
   alias Lex.Topics.Dimensions
   alias Lex.Topics.Tagging
-  alias LexWeb.Live.TaggingComponents
-  alias LexWeb.Live.TaggingSorting
+  alias LexWeb.Live.Tagging.Components
+  alias LexWeb.Live.Tagging.Sorting
   alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     socket
     |> delegate_assign(%{
-      sorting: TaggingSorting.load(socket, :topic_taggings),
+      sorting: Sorting.load(socket, :topic_taggings),
       dimensions: Dimensions.all_for("membership"),
       subscribed_topic: nil
     })
@@ -54,13 +54,13 @@ defmodule LexWeb.TopicLive.Taggings do
 
   @impl true
   def handle_event("sort", %{"by" => by}, socket) do
-    case TaggingSorting.change(socket.assigns.taggings.sorting, by) do
+    case Sorting.change(socket.assigns.taggings.sorting, by) do
       {:ok, sorting} ->
         socket =
           socket
           |> delegate_assign(:sorting, sorting)
           |> reload()
-          |> TaggingSorting.persist(:topic_taggings, sorting)
+          |> Sorting.persist(:topic_taggings, sorting)
 
         {:noreply, socket}
 
@@ -70,7 +70,7 @@ defmodule LexWeb.TopicLive.Taggings do
   end
 
   @impl true
-  def handle_info(%{data: %{topic_id: id}}, %{assigns: %{topic: %{id: id}}} = socket) do
+  def handle_info(%{data: %{topic_id: id}}, socket) when id == socket.assigns.topic.id do
     {:noreply, reload(socket)}
   end
 
@@ -80,7 +80,7 @@ defmodule LexWeb.TopicLive.Taggings do
 
   def render_sorting(assigns) do
     ~H"""
-    <TaggingComponents.sort_controls
+    <Components.sort_controls
       alpha_label="Member name"
       event={delegate_event("sort")}
       sorting={@taggings.sorting}
@@ -99,30 +99,30 @@ defmodule LexWeb.TopicLive.Taggings do
       <%!-- <p :if={@taggings.status == :empty} class="opacity-60">No members tagged with this topic yet</p> --%>
       <p :if={@taggings.status == :error} role="alert">Could not load members for this topic</p>
 
-      <div id="topic-members" class="space-y-3 relative" phx-hook="AutoAnimate">
-        <TaggingComponents.card :for={group <- @taggings.members} id={"tagged_members-#{group.id}"}>
+      <Components.cards>
+        <Components.card :for={group <- @taggings.members} id={"tagged_members-#{group.id}"}>
           <:title>
             <.link class="clickable" navigate={Path.to(@scope, group.tagged_membership)}>
               {group.tagged_membership.display_name}
             </.link>
           </:title>
 
-          <TaggingComponents.assessment
+          <Components.assessment
             :if={group.self_assessment}
             dimensions={@taggings.dimensions}
             levels={group.self_assessment.dimensions}
             text={group.self_assessment.text}
           />
 
-          <TaggingComponents.endorsements :if={group.endorsements != []}>
-            <TaggingComponents.endorsement
+          <Components.endorsements :if={group.endorsements != []}>
+            <Components.endorsement
               :for={endorsement <- group.endorsements}
               endorsement={endorsement}
               scope={@scope}
             />
-          </TaggingComponents.endorsements>
-        </TaggingComponents.card>
-      </div>
+          </Components.endorsements>
+        </Components.card>
+      </Components.cards>
     </section>
     """
   end

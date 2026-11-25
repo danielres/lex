@@ -1,10 +1,18 @@
-defmodule LexWeb.Live.TaggingComponents do
+defmodule LexWeb.Live.Tagging.Components do
   use LexWeb, :html
 
   alias Lex.Topics.Dimensions
   alias LexWeb.Components.Avatar
   alias LexWeb.Live.Components
   alias LexWeb.Router.Path
+
+  def cards(assigns) do
+    ~H"""
+    <div id="taggings-list" class="space-y-3" phx-hook="AutoAnimate">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
 
   attr :id, :string, required: true
   slot :title, required: true

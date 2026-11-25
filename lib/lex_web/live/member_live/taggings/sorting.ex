@@ -3,11 +3,11 @@ defmodule LexWeb.MemberLive.Taggings.Sorting do
   use LiveDelegate, path: [:taggings, :sorting]
 
   alias Lex.Topics.Tagging
-  alias LexWeb.Live.TaggingComponents
-  alias LexWeb.Live.TaggingSorting
+  alias LexWeb.Live.Tagging.Components
+  alias LexWeb.Live.Tagging.Sorting
 
   def on_mount(_params, _session, socket) do
-    delegate_assign(socket, TaggingSorting.load(socket, :member_taggings))
+    delegate_assign(socket, Sorting.load(socket, :member_taggings))
   end
 
   @impl true
@@ -16,7 +16,7 @@ defmodule LexWeb.MemberLive.Taggings.Sorting do
   end
 
   def handle_event("sort", %{"by" => by}, socket) do
-    case TaggingSorting.change(socket.assigns.taggings.sorting, by) do
+    case Sorting.change(socket.assigns.taggings.sorting, by) do
       {:ok, sorting} ->
         scope = socket.assigns.scope
         profile = socket.assigns.profile
@@ -26,7 +26,7 @@ defmodule LexWeb.MemberLive.Taggings.Sorting do
           socket
           |> delegate_assign(sorting)
           |> update(:taggings, &Map.put(&1, :groups, groups))
-          |> TaggingSorting.persist(:member_taggings, sorting)
+          |> Sorting.persist(:member_taggings, sorting)
 
         {:noreply, socket}
 
@@ -38,7 +38,7 @@ defmodule LexWeb.MemberLive.Taggings.Sorting do
   @impl true
   def render(assigns) do
     ~H"""
-    <TaggingComponents.sort_controls
+    <Components.sort_controls
       alpha_label="Topic name"
       event={delegate_event("sort")}
       sorting={@sorting}
