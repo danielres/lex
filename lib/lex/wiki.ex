@@ -11,4 +11,8 @@ defmodule Lex.Wiki do
     resource Lex.Wiki.PageRevision
     resource Lex.Wiki.PageRevisionContributor
   end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
+  end
 end

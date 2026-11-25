@@ -5,6 +5,7 @@ defmodule LexWeb.PageLive do
   alias Ash.Error
   alias Ash.Error.Query.NotFound
   alias Ash.Notifier.Notification
+  alias Lex.Wiki
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
@@ -29,7 +30,7 @@ defmodule LexWeb.PageLive do
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
     # socket = socket |> assign(live_action: :edit_title)
-    if connected?(socket), do: Page.subscribe()
+    if connected?(socket), do: Wiki.subscribe()
     {:ok, socket}
   end
 

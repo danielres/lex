@@ -148,10 +148,6 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  def subscribe do
-    Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
-  end
-
   defp ensure_title_and_slug(scope, title, slug) do
     scope
     |> get_by_slug(slug)
