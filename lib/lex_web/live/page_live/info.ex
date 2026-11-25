@@ -69,7 +69,7 @@ defmodule LexWeb.PageLive.Info do
     <button
       aria-label="Show page info"
       class={[
-        "btn btn-sm btn-circle",
+        "btn btn-xs btn-circle",
         @active? && "btn-info"
       ]}
       data-testid="page-info-toggle"

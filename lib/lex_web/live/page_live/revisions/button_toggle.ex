@@ -9,7 +9,7 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
     <.link
       :if={!@active?}
       aria-label="Page versions"
-      class="btn btn-sm btn-circle btn-neutral hover:btn-info"
+      class="btn btn-xs btn-circle btn-neutral hover:btn-info"
       patch={Path.revisions(@scope, @page)}
       title="Page versions"
     >
@@ -19,7 +19,7 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
     <.link
       :if={@active?}
       aria-label="Close"
-      class="btn btn-sm btn-circle btn-info"
+      class="btn btn-xs btn-circle btn-info"
       patch={Path.to(@scope, @page)}
       title="Close"
     >
