@@ -45,7 +45,7 @@ defmodule LexWeb.PageLive do
           if scope |> can?(:edit_pages) do
             page = scope |> Page.ensure!("Home")
 
-            socket |> load_page(page, params["revision_id"])
+            socket |> load_page(page, params["revision_number"])
           else
             socket
             |> assign(page: nil)
@@ -63,7 +63,7 @@ defmodule LexWeb.PageLive do
         {:noreply, socket}
 
       {:ok, page} ->
-        socket = socket |> load_page(page, params["revision_id"])
+        socket = socket |> load_page(page, params["revision_number"])
 
         {:noreply, socket}
 
@@ -112,10 +112,10 @@ defmodule LexWeb.PageLive do
     socket =
       case page do
         %{id: page_id} = page when revision.page_id == page_id ->
-          revision_id = requested_revision_id(socket)
+          revision_number = requested_revision_number(socket)
 
           socket
-          |> Revisions.reload(page, revision_id)
+          |> Revisions.reload(page, revision_number)
           |> Toast.put_toast(:success, "Page saved", duration: 3000)
 
         _page ->
@@ -295,17 +295,19 @@ defmodule LexWeb.PageLive do
     """
   end
 
-  defp requested_revision_id(%{assigns: %{live_action: :revisions, revisions: revisions}}) do
-    revisions.requested_id
+  defp requested_revision_number(%{
+         assigns: %{live_action: :revisions, revisions: revisions}
+       }) do
+    revisions.requested_number
   end
 
-  defp requested_revision_id(_socket), do: nil
+  defp requested_revision_number(_socket), do: nil
 
-  defp load_page(socket, page, revision_id) do
+  defp load_page(socket, page, revision_number) do
     socket
     |> assign(page: page)
     |> EditTitle.reload(page)
-    |> Revisions.reload(page, revision_id)
+    |> Revisions.reload(page, revision_number)
     |> PageRepository.reload()
   end
 
@@ -314,16 +316,16 @@ defmodule LexWeb.PageLive do
            assigns: %{
              live_action: :revisions,
              revisions: %{
-               requested_id: revision_id,
-               selected: %PageRevision{} = revision
+               requested_number: revision_number,
+               selected: %PageRevision{}
              },
              scope: scope
            }
          },
          page
        )
-       when revision_id != nil,
-       do: Path.to(scope, page, revision)
+       when revision_number != nil,
+       do: Path.to(scope, page, revision_number)
 
   defp page_path(
          %{assigns: %{live_action: :revisions, scope: scope}},

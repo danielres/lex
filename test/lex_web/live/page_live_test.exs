@@ -462,7 +462,7 @@ defmodule LexWeb.PageLiveTest do
     |> element("a#previous-revision")
     |> render_click()
 
-    assert_patch(view, ~p"/test-space/wiki/home/revisions/#{first_revision.id}")
+    assert_patch(view, ~p"/test-space/wiki/home/revisions/1")
     assert has_element?(view, "#revision-preview-#{first_revision.id}")
 
     assert has_element?(
@@ -475,11 +475,11 @@ defmodule LexWeb.PageLiveTest do
     assert has_element?(view, "#current-page-editor.hidden #lexical-editor-#{page.id}")
   end
 
-  test "shows an empty history before the first revision", %{conn: conn, scope: scope} do
+  test "shows an empty history before the first version", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions")
 
-    assert render(view) =~ "No revisions yet"
+    assert render(view) =~ "No versions yet"
     refute has_element?(view, "button[aria-label='Restore revision']")
   end
 
@@ -509,13 +509,13 @@ defmodule LexWeb.PageLiveTest do
            )
   end
 
-  test "does not open another page's revision", %{conn: conn, scope: scope} do
+  test "does not open an out-of-range revision number", %{conn: conn, scope: scope} do
     scope |> Page.ensure!("Home")
     other_page = scope |> Page.ensure!("Other Page")
-    revision = scope |> create_revision(other_page, "Other content")
+    _revision = scope |> create_revision(other_page, "Other content")
 
     assert_raise Ash.Error.Query.NotFound, fn ->
-      live(conn, ~p"/test-space/wiki/home/revisions/#{revision.id}")
+      live(conn, ~p"/test-space/wiki/home/revisions/1")
     end
   end
 
@@ -529,7 +529,7 @@ defmodule LexWeb.PageLiveTest do
     {:ok, shared_doc} = scope |> Collaboration.open_document("#{page.id}/main")
     :ok = SharedDoc.observe(shared_doc)
 
-    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/#{source_revision.id}")
+    {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home/revisions/1")
 
     view
     |> element("button[aria-label='Restore revision']")

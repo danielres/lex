@@ -158,8 +158,44 @@ defmodule Lex.Wiki.Page do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id)
     |> Ash.Query.load([:saved_by, :contributors])
-    |> Ash.Query.sort(inserted_at: :desc, id: :desc)
+    |> Ash.Query.sort(number: :desc)
     |> Ash.read!(scope: scope)
+  end
+
+  def revision_selection!(scope, page, requested_number) do
+    query = PageRevision |> Ash.Query.filter(page_id == ^page.id)
+    latest_number = query |> Ash.max!(:number, scope: scope)
+    selected_number = requested_number || latest_number
+    previous_number = if selected_number, do: selected_number - 1
+
+    numbers =
+      [selected_number, previous_number]
+      |> Enum.filter(&is_integer/1)
+      |> Enum.filter(&(&1 > 0))
+
+    revisions =
+      query
+      |> Ash.Query.filter(number in ^numbers)
+      |> Ash.Query.load([:saved_by, :contributors])
+      |> Ash.read!(scope: scope)
+
+    selected = Enum.find(revisions, &(&1.number == selected_number))
+    previous = Enum.find(revisions, &(&1.number == previous_number))
+
+    if selected_number != nil and selected == nil do
+      raise Ash.Error.Query.NotFound,
+        resource: PageRevision,
+        primary_key: %{number: selected_number}
+    end
+
+    previous_lexical_state = if previous, do: previous.lexical_state
+
+    %{
+      latest_number: latest_number,
+      previous_lexical_state: previous_lexical_state,
+      selected: selected,
+      selected_number: selected_number
+    }
   end
 
   def get_revision(scope, page, revision_id) do
@@ -312,7 +348,7 @@ defmodule Lex.Wiki.Page do
   defp latest_revision(scope, page) do
     PageRevision
     |> Ash.Query.filter(page_id == ^page.id)
-    |> Ash.Query.sort(inserted_at: :desc, id: :desc)
+    |> Ash.Query.sort(number: :desc)
     |> Ash.read_first(scope: scope)
   end
 

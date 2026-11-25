@@ -54,7 +54,7 @@ defmodule LexWeb.Router do
         live "/wiki", WikiLive
         live "/wiki/:page_slug", PageLive, :show
         live "/wiki/:page_slug/revisions", PageLive, :revisions
-        live "/wiki/:page_slug/revisions/:revision_id", PageLive, :revisions
+        live "/wiki/:page_slug/revisions/:revision_number", PageLive, :revisions
       end
     end
   end

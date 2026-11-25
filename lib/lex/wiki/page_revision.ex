@@ -4,6 +4,7 @@ defmodule Lex.Wiki.PageRevision do
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
   alias Lex.Validations.RelationshipInSpace
+  alias Lex.Wiki.PageRevision.Changes.SetNumber
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -33,6 +34,7 @@ defmodule Lex.Wiki.PageRevision do
         :search_text
       ]
 
+      change SetNumber
       change relate_actor(:saved_by)
       change manage_relationship(:contributor_ids, :contributors, type: :append)
       validate {RelationshipInSpace, relationship: :page}
@@ -76,6 +78,12 @@ defmodule Lex.Wiki.PageRevision do
       public? true
     end
 
+    attribute :number, :integer do
+      allow_nil? false
+      constraints min: 1
+      public? true
+    end
+
     attribute :restored_from_revision_id, :uuid do
       public? true
     end
@@ -109,5 +117,9 @@ defmodule Lex.Wiki.PageRevision do
       destination_attribute_on_join_resource :user_id
       sort display_name: :asc
     end
+  end
+
+  identities do
+    identity :unique_page_number, [:page_id, :number]
   end
 end

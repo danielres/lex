@@ -38,8 +38,10 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     [second_revision, first_revision] = scope |> Page.list_revisions!(page)
 
+    assert second_revision.number == 2
     assert second_revision.lexical_state == second_state
     assert second_revision.search_text == "Second version"
+    assert first_revision.number == 1
     assert first_revision.lexical_state == first_state
     assert first_revision.search_text == "First version"
   end
@@ -64,6 +66,33 @@ defmodule Lex.Wiki.PageRevisionTest do
 
     assert revision.saved_by.id == scope.user.id
     assert Enum.map(revision.contributors, & &1.id) == [contributor.id]
+  end
+
+  test "numbers revisions independently for each page", %{scope: scope} do
+    first_page = scope |> Page.ensure!("First Page")
+    second_page = scope |> Page.ensure!("Second Page")
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.record_revision(
+               first_page,
+               %{lexical_state: lexical_state("First"), search_text: "First"},
+               nil
+             )
+
+    assert {:ok, :saved} =
+             scope
+             |> Page.record_revision(
+               second_page,
+               %{lexical_state: lexical_state("Second"), search_text: "Second"},
+               nil
+             )
+
+    [first_revision] = scope |> Page.list_revisions!(first_page)
+    [second_revision] = scope |> Page.list_revisions!(second_page)
+
+    assert first_revision.number == 1
+    assert second_revision.number == 1
   end
 
   test "records restore provenance and requires the source revision to belong to the page", %{
