@@ -2,6 +2,7 @@ defmodule LexWeb.TopicLive do
   use LexWeb, :live_view
   use LiveDelegate
 
+  alias Lex.Topics
   alias Lex.Topics.Topic
   alias LexWeb.Layouts
   alias LexWeb.Router.Path
@@ -59,6 +60,15 @@ defmodule LexWeb.TopicLive do
          |> Toast.put_toast(:error, "Topic not found")
          |> push_navigate(to: Path.to(scope.space))}
     end
+  end
+
+  @impl true
+  def handle_info(%{resource: Topics.Graph} = msg, socket) do
+    Graph.handle_info(msg, socket)
+  end
+
+  def handle_info(%{resource: Topic} = msg, socket) do
+    Graph.handle_info(msg, socket)
   end
 
   @impl true
