@@ -65,8 +65,11 @@ defmodule LexWeb.PageLive.Navigation do
   def page_path(%{assigns: %{scope: scope}}, page), do: Path.to(scope, page)
 
   defp redirect_to_canonical_slug(socket, scope, params, slug, canonical_slug) do
-    route_params = params |> Map.put("page_slug", canonical_slug)
-    path = scope |> Path.wiki(socket.assigns.live_action, route_params)
+    path =
+      case socket.assigns.live_action do
+        :revisions -> scope |> Path.revisions(canonical_slug, params["revision_number"])
+        _live_action -> scope |> Path.wiki(canonical_slug)
+      end
 
     socket =
       case PageTitle.normalize(slug) do

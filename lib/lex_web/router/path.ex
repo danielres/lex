@@ -57,20 +57,12 @@ defmodule LexWeb.Router.Path do
     ~p"/#{scope.space.slug}/wiki/#{page_slug}"
   end
 
-  def wiki(
-        %Scope{} = scope,
-        :revisions,
-        %{"page_slug" => page_slug, "revision_number" => revision_number}
-      ) do
-    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions/#{revision_number}"
-  end
-
-  def wiki(%Scope{} = scope, :revisions, %{"page_slug" => page_slug}) do
+  def revisions(%Scope{} = scope, page_slug, nil) do
     ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions"
   end
 
-  def wiki(%Scope{} = scope, _live_action, %{"page_slug" => page_slug}) do
-    wiki(scope, page_slug)
+  def revisions(%Scope{} = scope, page_slug, revision_number) do
+    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions/#{revision_number}"
   end
 
   def wiki_home(%Scope{} = scope) do
