@@ -67,7 +67,7 @@ defmodule LexWeb.PageLive.Navigation do
   defp redirect_to_canonical_slug(socket, scope, params, slug, canonical_slug) do
     path =
       case socket.assigns.live_action do
-        :revisions -> scope |> Path.revisions(canonical_slug, params["revision_number"])
+        :revisions -> scope |> Path.revisions_for_slug(canonical_slug, params["revision_number"])
         _live_action -> scope |> Path.wiki(canonical_slug)
       end
 

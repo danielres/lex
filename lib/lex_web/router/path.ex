@@ -41,6 +41,14 @@ defmodule LexWeb.Router.Path do
     ~p"/#{scope.space.slug}/wiki/#{page.slug}/revisions"
   end
 
+  def revisions_for_slug(%Scope{} = scope, page_slug, nil) do
+    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions"
+  end
+
+  def revisions_for_slug(%Scope{} = scope, page_slug, revision_number) do
+    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions/#{revision_number}"
+  end
+
   def topics(%Scope{} = scope) do
     ~p"/#{scope.space.slug}/topics"
   end
@@ -55,14 +63,6 @@ defmodule LexWeb.Router.Path do
 
   def wiki(%Scope{} = scope, page_slug) do
     ~p"/#{scope.space.slug}/wiki/#{page_slug}"
-  end
-
-  def revisions(%Scope{} = scope, page_slug, nil) do
-    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions"
-  end
-
-  def revisions(%Scope{} = scope, page_slug, revision_number) do
-    ~p"/#{scope.space.slug}/wiki/#{page_slug}/revisions/#{revision_number}"
   end
 
   def wiki_home(%Scope{} = scope) do
