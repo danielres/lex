@@ -3,7 +3,7 @@ defmodule LexWeb.PageLive.Revisions do
   use LiveDelegate, path: [:revisions]
 
   alias Lex.Collaboration
-  alias Lex.Wiki.Page
+  alias Lex.Wiki.PageRevision
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Tooltip
   alias LexWeb.Router.Path
@@ -24,7 +24,7 @@ defmodule LexWeb.PageLive.Revisions do
   def reload(socket, page, requested_number \\ nil) do
     scope = socket.assigns.scope
     requested_number = parse_number!(requested_number)
-    selection = scope |> Page.revision_selection!(page, requested_number)
+    selection = scope |> PageRevision.selection!(page, requested_number)
 
     socket
     |> delegate_assign(:latest_number, selection.latest_number)

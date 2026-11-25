@@ -261,8 +261,10 @@ defmodule LexWeb.PageLiveTest do
       "page_id" => embedded_page.id
     })
 
-    assert [%{search_text: "Embedded content"}] = scope |> Page.list_revisions!(embedded_page)
-    assert [] = scope |> Page.list_revisions!(containing_page)
+    assert [%{search_text: "Embedded content"}] =
+             scope |> PageRevision.list!(embedded_page)
+
+    assert [] = scope |> PageRevision.list!(containing_page)
 
     monitor = Process.monitor(shared_doc)
     :ok = Collaboration.close_document(shared_doc)
@@ -547,7 +549,7 @@ defmodule LexWeb.PageLiveTest do
       "documents" => [document_snapshot("main", "Unsaved collaborative edits")]
     })
 
-    [preserved_revision | _revisions] = scope |> Page.list_revisions!(page)
+    [preserved_revision | _revisions] = scope |> PageRevision.list!(page)
     assert preserved_revision.restored_from_revision_id == nil
     assert preserved_revision.search_text == "Unsaved collaborative edits"
 
@@ -559,7 +561,7 @@ defmodule LexWeb.PageLiveTest do
     assert_patch(view, ~p"/test-space/wiki/home")
 
     [restored_revision, preserved_revision_after_restore | _revisions] =
-      scope |> Page.list_revisions!(page)
+      scope |> PageRevision.list!(page)
 
     assert restored_revision.restored_from_revision_id == source_revision.id
     assert restored_revision.search_text == "First version restored"
@@ -630,7 +632,7 @@ defmodule LexWeb.PageLiveTest do
   defp create_revision(scope, page, text, contributor_ids \\ []) do
     assert {:ok, :saved} =
              scope
-             |> Page.record_revision(
+             |> PageRevision.record(
                page,
                %{
                  contributor_ids: contributor_ids,
@@ -640,6 +642,6 @@ defmodule LexWeb.PageLiveTest do
                nil
              )
 
-    scope |> Page.list_revisions!(page) |> List.first()
+    scope |> PageRevision.list!(page) |> List.first()
   end
 end

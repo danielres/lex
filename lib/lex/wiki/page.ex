@@ -6,7 +6,6 @@ defmodule Lex.Wiki.Page do
   alias Lex.Accounts.User
   alias Lex.Wiki.Page.Changes.SetTitleAndSlug
   alias Lex.Wiki.PageDocument
-  alias Lex.Wiki.PageRevision
   alias Lex.Wiki.PageSlug
   alias Lex.Wiki.PageTitle
 
@@ -154,56 +153,6 @@ defmodule Lex.Wiki.Page do
     Phoenix.PubSub.subscribe(Lex.PubSub, "wiki:pages")
   end
 
-  def list_revisions!(scope, page) do
-    PageRevision
-    |> Ash.Query.filter(page_id == ^page.id)
-    |> Ash.Query.load([:saved_by, :contributors])
-    |> Ash.Query.sort(number: :desc)
-    |> Ash.read!(scope: scope)
-  end
-
-  def revision_selection!(scope, page, requested_number) do
-    query = PageRevision |> Ash.Query.filter(page_id == ^page.id)
-    latest_number = query |> Ash.max!(:number, scope: scope)
-    selected_number = requested_number || latest_number
-    previous_number = if selected_number, do: selected_number - 1
-
-    numbers =
-      [selected_number, previous_number]
-      |> Enum.filter(&is_integer/1)
-      |> Enum.filter(&(&1 > 0))
-
-    revisions =
-      query
-      |> Ash.Query.filter(number in ^numbers)
-      |> Ash.Query.load([:saved_by, :contributors])
-      |> Ash.read!(scope: scope)
-
-    selected = Enum.find(revisions, &(&1.number == selected_number))
-    previous = Enum.find(revisions, &(&1.number == previous_number))
-
-    if selected_number != nil and selected == nil do
-      raise Ash.Error.Query.NotFound,
-        resource: PageRevision,
-        primary_key: %{number: selected_number}
-    end
-
-    previous_lexical_state = if previous, do: previous.lexical_state
-
-    %{
-      latest_number: latest_number,
-      previous_lexical_state: previous_lexical_state,
-      selected: selected,
-      selected_number: selected_number
-    }
-  end
-
-  def get_revision(scope, page, revision_id) do
-    PageRevision
-    |> Ash.Query.filter(page_id == ^page.id and id == ^revision_id)
-    |> Ash.read_one(scope: scope)
-  end
-
   def get_document_content(scope, page, document_key) do
     with {:ok, page_document} <- scope |> get_page_document(page, document_key) do
       case page_document do
@@ -241,37 +190,6 @@ defmodule Lex.Wiki.Page do
         with {:ok, _page_document} <-
                page |> persist_page_document(document_key, yjs_state) do
           :ok
-        end
-      end
-    end
-  end
-
-  def record_revision(
-        scope,
-        page,
-        %{lexical_state: lexical_state, search_text: search_text} = content,
-        restored_from_revision_id
-      ) do
-    content_hash = content_hash(lexical_state)
-    contributor_ids = Map.get(content, :contributor_ids, [])
-
-    with :ok <- scope |> validate_source_revision(page, restored_from_revision_id),
-         {:ok, latest_revision} <- scope |> latest_revision(page) do
-      if latest_revision != nil and latest_revision.content_hash == content_hash do
-        {:ok, :unchanged}
-      else
-        scope
-        |> create_revision(
-          page,
-          lexical_state,
-          search_text,
-          content_hash,
-          restored_from_revision_id,
-          contributor_ids
-        )
-        |> case do
-          {:ok, _revision} -> {:ok, :saved}
-          {:error, error} -> {:error, error}
         end
       end
     end
@@ -343,25 +261,6 @@ defmodule Lex.Wiki.Page do
     |> Ash.Query.filter(slug == ^slug)
     |> Ash.Query.load(:author)
     |> Ash.read_one(scope: scope)
-  end
-
-  defp latest_revision(scope, page) do
-    PageRevision
-    |> Ash.Query.filter(page_id == ^page.id)
-    |> Ash.Query.sort(number: :desc)
-    |> Ash.read_first(scope: scope)
-  end
-
-  defp validate_source_revision(_scope, _page, nil), do: :ok
-
-  defp validate_source_revision(scope, page, revision_id) do
-    scope
-    |> get_revision(page, revision_id)
-    |> case do
-      {:ok, nil} -> invalid_attribute(:restored_from_revision_id, revision_id, "does not exist")
-      {:ok, _revision} -> :ok
-      {:error, error} -> {:error, error}
-    end
   end
 
   defp title_collision(title, slug) do
@@ -438,31 +337,6 @@ defmodule Lex.Wiki.Page do
         page_id: page.id,
         search_text: search_text,
         yjs_state: yjs_state
-      },
-      scope: scope
-    )
-    |> Ash.create()
-  end
-
-  defp create_revision(
-         scope,
-         page,
-         lexical_state,
-         search_text,
-         content_hash,
-         restored_from_revision_id,
-         contributor_ids
-       ) do
-    PageRevision
-    |> Ash.Changeset.for_create(
-      :create,
-      %{
-        contributor_ids: contributor_ids,
-        content_hash: content_hash,
-        lexical_state: lexical_state,
-        page_id: page.id,
-        restored_from_revision_id: restored_from_revision_id,
-        search_text: search_text
       },
       scope: scope
     )

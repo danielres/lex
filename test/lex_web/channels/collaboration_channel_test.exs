@@ -431,7 +431,7 @@ defmodule LexWeb.CollaborationChannelTest do
 
     assert {:ok, %{revision: :saved}} = scope |> Collaboration.save(page, documents)
 
-    [revision] = scope |> Page.list_revisions!(page)
+    [revision] = scope |> PageRevision.list!(page)
     contributor_ids = Enum.map(revision.contributors, & &1.id)
 
     assert revision.saved_by.id == scope.user.id
