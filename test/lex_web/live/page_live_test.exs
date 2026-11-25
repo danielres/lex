@@ -186,7 +186,7 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Home")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/home")
 
-    assert :ok = page |> Page.persist_collaboration_document("main", document("updated"))
+    assert :ok = page |> PageDocument.persist_collaboration("main", document("updated"))
 
     assert has_element?(view, "[data-testid='page-editor'][data-document-id='#{page.id}']")
   end
@@ -202,7 +202,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              scope
-             |> Page.save_document(
+             |> PageDocument.save(
                embedded_page,
                "main",
                document("Reusable content"),
@@ -233,7 +233,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert {:ok, :saved} =
              other_scope
-             |> Page.save_document(
+             |> PageDocument.save(
                other_page,
                "main",
                document("Private content"),

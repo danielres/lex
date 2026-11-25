@@ -3,7 +3,7 @@ defmodule Lex.Collaboration.Persistence do
 
   require Logger
 
-  alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
 
   @impl true
   def bind(document_ref, _room, doc) do
@@ -11,7 +11,7 @@ defmodule Lex.Collaboration.Persistence do
     document_key = document_ref.document_key
 
     page
-    |> Page.restore_collaboration_document(document_key, doc)
+    |> PageDocument.restore_collaboration(document_key, doc)
     |> case do
       :ok ->
         document_ref
@@ -27,7 +27,7 @@ defmodule Lex.Collaboration.Persistence do
     document_key = document_ref.document_key
 
     page
-    |> Page.persist_collaboration_document(document_key, doc)
+    |> PageDocument.persist_collaboration(document_key, doc)
     |> case do
       :ok ->
         :ok

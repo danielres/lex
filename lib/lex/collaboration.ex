@@ -9,6 +9,7 @@ defmodule Lex.Collaboration do
   alias Lex.Collaboration.Contributors
   alias Lex.Collaboration.Persistence
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
   alias Yex.Sync
   alias Yex.Sync.SharedDoc
@@ -123,7 +124,7 @@ defmodule Lex.Collaboration do
     with {:ok, shared_doc} <- active_document(page, snapshot.document_key) do
       doc = SharedDoc.get_doc(shared_doc)
 
-      scope |> Page.save_document(page, snapshot.document_key, doc, snapshot)
+      scope |> PageDocument.save(page, snapshot.document_key, doc, snapshot)
     end
   end
 

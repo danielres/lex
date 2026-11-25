@@ -5,6 +5,7 @@ defmodule LexWeb.WikiLiveTest do
 
   alias Lex.Accounts.Membership
   alias Lex.Wiki.Page
+  alias Lex.Wiki.PageDocument
 
   setup :authenticate
 
@@ -132,7 +133,7 @@ defmodule LexWeb.WikiLiveTest do
     scope |> Page.ensure!("Second Page")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki")
 
-    assert :ok = first_page |> Page.persist_collaboration_document("main", document("updated"))
+    assert :ok = first_page |> PageDocument.persist_collaboration("main", document("updated"))
 
     assert has_element?(view, "tbody tr:first-child", "First Page")
   end

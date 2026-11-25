@@ -577,7 +577,7 @@ defmodule LexWeb.CollaborationChannelTest do
     [page_id, document_key] = String.split(room, "/", parts: 2)
     page = Page.get!(page_id, scope: scope)
     doc = Yex.Doc.new()
-    :ok = scope |> Page.restore(page, document_key, doc)
+    :ok = scope |> PageDocument.restore(page, document_key, doc)
     doc |> Yex.Doc.get_text("content") |> Yex.Text.to_string()
   end
 
