@@ -1,14 +1,18 @@
 defmodule LexWeb.Components.Avatar do
   use LexWeb, :html
 
+  alias Lex.Accounts.Membership
+  alias Lex.Accounts.User
+
   attr :user, :map, required: true
   attr :class, :string, default: ""
 
   def render(assigns) do
-    initials = assigns.user.display_name |> String.slice(0..1)
+    {display_name, hue} = appearance(assigns.user)
+    initials = String.slice(display_name, 0..1)
 
     color =
-      "oklch(var(--collaboration-color-lightness) var(--collaboration-color-chroma) #{assigns.user.hue}deg)"
+      "oklch(var(--collaboration-color-lightness) var(--collaboration-color-chroma) #{hue}deg)"
 
     assigns =
       assigns
@@ -32,4 +36,7 @@ defmodule LexWeb.Components.Avatar do
     </div>
     """
   end
+
+  defp appearance(%Membership{display_name: name, user: %User{hue: hue}}), do: {name, hue}
+  defp appearance(%{display_name: name, hue: hue}), do: {name, hue}
 end
