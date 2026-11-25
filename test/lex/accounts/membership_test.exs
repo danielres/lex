@@ -34,7 +34,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert membership.status == :active
     assert membership.display_name == "Téam Member"
-    assert membership.slug == "team-member"
+    assert membership.slug == "téam-member"
 
     assert {:ok, membership} = scope |> Membership.disable(membership)
     assert membership.status == :disabled
@@ -43,7 +43,7 @@ defmodule Lex.Accounts.MembershipTest do
 
     assert membership.status == :active
     assert membership.display_name == "Téam Member"
-    assert membership.slug == "team-member"
+    assert membership.slug == "téam-member"
   end
 
   test "stale acceptance cannot overwrite an established identity", %{scope: scope} do
