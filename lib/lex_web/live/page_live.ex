@@ -2,25 +2,17 @@ defmodule LexWeb.PageLive do
   use LexWeb, :live_view
   use LiveDelegate
 
-  alias Ash.Error
-  alias Ash.Error.Query.NotFound
   alias Ash.Notifier.Notification
   alias Lex.Wiki
-  alias Lex.Wiki.Page
-  alias Lex.Wiki.PageDocument
-  alias Lex.Wiki.PageRevision
-  alias Lex.Wiki.PageTitle
   alias LexWeb.PageLive.Creation
   alias LexWeb.PageLive.EditTitle
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Info
+  alias LexWeb.PageLive.Navigation
+  alias LexWeb.PageLive.Notifications
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
-  alias LexWeb.Router.Path
   alias LexWeb.UI
-  alias Utils.Slugify
-
-  @creation_title_flash "page_creation_title"
 
   delegate(:creation, Creation, info: false)
   delegate(:edit_title, EditTitle, info: false)
@@ -39,179 +31,12 @@ defmodule LexWeb.PageLive do
   end
 
   @impl true
-  def handle_params(%{"page_slug" => slug} = params, _uri, socket) do
-    scope = socket.assigns.scope
-    canonical_slug = slug |> Slugify.generate()
-
-    cond do
-      canonical_slug == "" ->
-        raise NotFound, resource: Page, primary_key: %{slug: slug}
-
-      canonical_slug != slug ->
-        path = scope |> Path.wiki(canonical_slug)
-
-        socket =
-          case PageTitle.normalize(slug) do
-            {:ok, title} -> socket |> put_flash(@creation_title_flash, title)
-            {:error, _message} -> socket
-          end
-
-        socket = socket |> push_patch(to: path)
-
-        {:noreply, socket}
-
-      true ->
-        flash = socket.assigns.flash
-        suggested_title = flash |> Phoenix.Flash.get(@creation_title_flash)
-
-        socket =
-          if connected?(socket) do
-            socket |> clear_flash(@creation_title_flash)
-          else
-            socket
-          end
-
-        socket |> load_page_from_slug(scope, slug, params, suggested_title)
-    end
-  end
-
-  defp load_page_from_slug(socket, scope, slug, params, suggested_title) do
-    scope
-    |> Page.fetch_by_slug(slug)
-    |> case do
-      {:ok, nil} when slug == "home" ->
-        socket =
-          if scope |> can?(:edit_pages) do
-            page = scope |> Page.ensure!("Home")
-
-            socket |> load_page(page, params["revision_number"])
-          else
-            socket
-            |> assign(page: nil)
-            |> Creation.reload(scope, slug, suggested_title)
-          end
-
-        {:noreply, socket}
-
-      {:ok, nil} ->
-        socket =
-          socket
-          |> assign(page: nil)
-          |> Creation.reload(scope, slug, suggested_title)
-
-        {:noreply, socket}
-
-      {:ok, page} ->
-        socket = socket |> load_page(page, params["revision_number"])
-
-        {:noreply, socket}
-
-      {:error, %Error.Invalid{}} ->
-        raise NotFound, resource: Page, primary_key: %{slug: slug}
-
-      {:error, error} ->
-        raise error
-    end
-  end
+  def handle_params(params, _uri, socket),
+    do: Navigation.handle_params(socket, params)
 
   @impl true
-  def handle_info(
-        %Notification{
-          resource: PageDocument,
-          action: %{name: :save},
-          data: %{document_key: "main"} = page_document
-        },
-        socket
-      ) do
-    page_repository = socket.assigns.page_repository
-    page_id = page_document.page_id
-
-    socket =
-      if page_repository |> PageRepository.includes?(page_id) do
-        push_event(socket, PageRepository.content_updated_event(), %{
-          content_hash: page_document.content_hash,
-          lexical_state: page_document.lexical_state,
-          page_id: page_document.page_id
-        })
-      else
-        socket
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_info(%Notification{resource: PageDocument}, socket), do: {:noreply, socket}
-
-  def handle_info(
-        %Notification{resource: PageRevision, action: %{name: :create}, data: revision},
-        socket
-      ) do
-    page = socket.assigns.page
-
-    socket =
-      case page do
-        %{id: page_id} = page when revision.page_id == page_id ->
-          revision_number = requested_revision_number(socket)
-
-          socket
-          |> Revisions.reload(page, revision_number)
-          |> Toast.put_toast(:success, "Page saved", duration: 3000)
-
-        _page ->
-          socket
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_info(
-        %Notification{resource: Page, action: %{name: :create}, data: created_page},
-        socket
-      ) do
-    page = socket.assigns.page
-    space = socket.assigns.scope.space
-    creation = socket.assigns.creation
-
-    socket =
-      if page == nil and created_page.space_id == space.id and created_page.slug == creation.slug do
-        socket |> load_page(created_page, nil)
-      else
-        socket |> PageRepository.reload()
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_info(
-        %Notification{resource: Page, action: %{name: :rename}, data: renamed_page},
-        socket
-      ) do
-    current_page = socket.assigns.page
-
-    live_action = socket.assigns.live_action
-    socket = socket |> PageRepository.reload()
-
-    if current_page != nil and current_page.id == renamed_page.id do
-      socket =
-        socket
-        |> assign(page: renamed_page)
-        |> EditTitle.reload(renamed_page)
-        |> push_event("page_title_blur", %{})
-
-      socket =
-        if live_action == :editing do
-          socket
-        else
-          path = page_path(socket, renamed_page)
-
-          socket |> push_patch(to: path)
-        end
-
-      {:noreply, socket}
-    else
-      {:noreply, socket}
-    end
-  end
+  def handle_info(%Notification{} = notification, socket),
+    do: Notifications.handle(socket, notification)
 
   def dialog?(live_action) do
     live_action == :info ||
@@ -236,10 +61,12 @@ defmodule LexWeb.PageLive do
         :if={@page}
         dialog?={dialog?(@live_action)}
       >
-        <%!-- <:crumb><.link class="clickable" navigate={Path.to(@scope.space)}>Space</.link></:crumb> --%>
-        <%!-- <:crumb><.link class="clickable" navigate={Path.wiki(@scope)}>Wiki</.link></:crumb> --%>
         <:title>{@page.title}</:title>
-        <:actions><.action_buttons {assigns} /></:actions>
+
+        <:actions>
+          <.action_buttons editing={@editing} live_action={@live_action} page={@page} scope={@scope} />
+        </:actions>
+
         <:dialog>
           <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
           <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
@@ -256,7 +83,12 @@ defmodule LexWeb.PageLive do
           ]}
           id="current-page-editor"
         >
-          <.editor {assigns} />
+          <.editor
+            editable?={can?(@scope, :edit_pages) && @live_action == :editing && !@editing.saving?}
+            page={@page}
+            page_repository={@page_repository}
+            scope={@scope}
+          />
         </section>
 
         <section
@@ -264,12 +96,22 @@ defmodule LexWeb.PageLive do
           class="w-full min-w-0"
           id="page-revisions"
         >
-          <.revision {assigns} />
+          <.revision
+            page={@page}
+            page_repository={@page_repository}
+            revisions={@revisions}
+            scope={@scope}
+          />
         </section>
       </div>
     </Layouts.app>
     """
   end
+
+  attr :page, Lex.Wiki.Page, required: true
+  attr :page_repository, :map, required: true
+  attr :revisions, :map, required: true
+  attr :scope, Lex.Scope, required: true
 
   defp revision(assigns) do
     ~H"""
@@ -288,6 +130,11 @@ defmodule LexWeb.PageLive do
     """
   end
 
+  attr :editable?, :boolean, required: true
+  attr :page, Lex.Wiki.Page, required: true
+  attr :page_repository, :map, required: true
+  attr :scope, Lex.Scope, required: true
+
   defp editor(assigns) do
     ~H"""
     <div
@@ -297,9 +144,7 @@ defmodule LexWeb.PageLive do
       data-collaborator-display-name={@scope.user.display_name}
       data-collaborator-hue={@scope.user.hue}
       data-document-id={@page.id}
-      data-editable={
-        to_string(can?(@scope, :edit_pages) && @live_action == :editing && !@editing.saving?)
-      }
+      data-editable={@editable? |> to_string()}
       data-save-page-event={PageRepository.save_event()}
       data-ensure-page-event={PageRepository.ensure_event()}
       data-load-page-content-event={PageRepository.load_content_event()}
@@ -316,6 +161,11 @@ defmodule LexWeb.PageLive do
     />
     """
   end
+
+  attr :editing, :map, required: true
+  attr :live_action, :atom, required: true
+  attr :page, Lex.Wiki.Page, required: true
+  attr :scope, Lex.Scope, required: true
 
   defp action_buttons(assigns) do
     ~H"""
@@ -334,44 +184,4 @@ defmodule LexWeb.PageLive do
     />
     """
   end
-
-  defp requested_revision_number(%{
-         assigns: %{live_action: :revisions, revisions: revisions}
-       }) do
-    revisions.requested_number
-  end
-
-  defp requested_revision_number(_socket), do: nil
-
-  defp load_page(socket, page, revision_number) do
-    socket
-    |> assign(page: page)
-    |> EditTitle.reload(page)
-    |> Revisions.reload(page, revision_number)
-    |> PageRepository.reload()
-  end
-
-  defp page_path(
-         %{
-           assigns: %{
-             live_action: :revisions,
-             revisions: %{
-               requested_number: revision_number,
-               selected: %PageRevision{}
-             },
-             scope: scope
-           }
-         },
-         page
-       )
-       when revision_number != nil,
-       do: Path.to(scope, page, revision_number)
-
-  defp page_path(
-         %{assigns: %{live_action: :revisions, scope: scope}},
-         page
-       ),
-       do: Path.revisions(scope, page)
-
-  defp page_path(%{assigns: %{scope: scope}}, page), do: Path.to(scope, page)
 end
