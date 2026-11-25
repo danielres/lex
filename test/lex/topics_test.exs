@@ -39,11 +39,9 @@ defmodule Lex.TopicsTest do
              )
   end
 
-  test "topics reject names that cannot produce a slug", %{owner_scope: owner_scope} do
-    assert {:error, error} = owner_scope |> create_topic("東京")
-
-    assert Exception.message(error) =~
-             "must contain at least one Latin letter (a-z) or number"
+  test "topics support Unicode names", %{owner_scope: owner_scope} do
+    assert {:ok, topic} = owner_scope |> create_topic("東京")
+    assert topic.slug == "東京"
   end
 
   test "topic and graph access requires an active membership", %{owner_scope: owner_scope} do

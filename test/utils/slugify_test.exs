@@ -3,7 +3,8 @@ defmodule Utils.SlugifyTest do
 
   alias Utils.Slugify
 
-  test "generates an ASCII slug" do
-    assert Slugify.generate("  Déjà Vu!  ") == "deja-vu"
+  test "generates a Unicode slug" do
+    assert Slugify.generate("  Déjà Vu!  ") == "déjà-vu"
+    assert Slugify.generate("東京 Guide") == "東京-guide"
   end
 end

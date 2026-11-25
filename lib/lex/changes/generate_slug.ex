@@ -13,7 +13,7 @@ defmodule Lex.Changes.GenerateSlug do
         if slug == "" do
           Ash.Changeset.add_error(changeset,
             field: source,
-            message: "must contain at least one Latin letter (a-z) or number"
+            message: "must contain at least one letter or number"
           )
         else
           Ash.Changeset.force_change_attribute(changeset, target, slug)

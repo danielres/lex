@@ -1,5 +1,6 @@
 defmodule Lex.Wiki.PageTitle do
-  @separator ~r/[^\p{L}\p{N}]+/u
+  alias Utils.Slugify
+
   @whitespace ~r/\s+/u
 
   def normalize(title) when is_binary(title) do
@@ -21,11 +22,7 @@ defmodule Lex.Wiki.PageTitle do
 
   def slug(title) do
     with {:ok, title} <- normalize(title) do
-      slug =
-        title
-        |> String.downcase()
-        |> String.replace(@separator, "-")
-        |> String.trim("-")
+      slug = Slugify.generate(title)
 
       if slug == "" do
         {:error, "Must contain at least one letter or number"}

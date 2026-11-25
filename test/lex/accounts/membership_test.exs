@@ -286,7 +286,7 @@ defmodule Lex.Accounts.MembershipTest do
     assert {:error, error} = scope |> Membership.accept(membership, "---")
 
     assert Exception.message(error) =~
-             "must contain at least one Latin letter (a-z) or number"
+             "must contain at least one letter or number"
 
     assert {:ok, reloaded} = Ash.get(Membership, membership.id, scope: scope)
     assert reloaded.status == :invited
