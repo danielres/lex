@@ -134,7 +134,7 @@ defmodule LexWeb.MembersLive.Memberships do
           <div class="flex flex-wrap items-center gap-2">
             <h2 class="font-semibold">
               <.link
-                :if={@membership.slug}
+                :if={@membership.status == :active}
                 navigate={Path.to(@scope, @membership)}
                 class="clickable"
               >
@@ -142,7 +142,7 @@ defmodule LexWeb.MembersLive.Memberships do
                 {membership_name(@membership)}
               </.link>
 
-              <span :if={!@membership.slug} class="opacity-50">
+              <span :if={@membership.status != :active} class="opacity-50">
                 <Avatar.render user={@membership.user} />
                 {membership_name(@membership)}
               </span>
