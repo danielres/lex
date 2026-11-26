@@ -31,7 +31,6 @@ defmodule LexWeb.Layouts do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :active, :string, default: ""
-  attr :editing?, :boolean, default: false
   attr :scope, :map, required: true
   attr :socket, :any, required: true
   attr :ui, :map, required: true
@@ -48,7 +47,6 @@ defmodule LexWeb.Layouts do
         "max-sm:z-40",
         "max-sm:transition",
         @ui.drawer_open? && "max-sm:opacity-0",
-        @editing? && "max-sm:opacity-0"
       ]}>
         <Navbar.render
           drawer_open?={@ui.drawer_open?}
