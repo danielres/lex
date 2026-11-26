@@ -71,6 +71,7 @@ defmodule LexWeb.TopicLive do
     Graph.handle_info(msg, socket)
   end
 
+  @impl true
   def handle_info(
         %{resource: Topic, action: %{name: :update}, data: %Topic{id: id} = topic},
         %{assigns: %{topic: %Topic{id: id, name: previous_name}, scope: scope}} = socket
@@ -84,6 +85,7 @@ defmodule LexWeb.TopicLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_info(
         %{resource: Topic, action: %{name: :destroy}, data: %Topic{id: id, name: name}},
         %{assigns: %{topic: %Topic{id: id}, scope: scope}} = socket
@@ -96,10 +98,12 @@ defmodule LexWeb.TopicLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_info(%{resource: Topic} = msg, socket) do
     Graph.handle_info(msg, socket)
   end
 
+  @impl true
   def handle_info(%{resource: Tagging} = msg, socket) do
     Taggings.handle_info(msg, socket)
   end
@@ -115,6 +119,7 @@ defmodule LexWeb.TopicLive do
     {:noreply, assign(socket, :live_action, live_action)}
   end
 
+  @impl true
   def handle_event("close_dialog", _params, socket) do
     {:noreply, assign(socket, :live_action, :show)}
   end
@@ -129,29 +134,26 @@ defmodule LexWeb.TopicLive do
       socket={@socket}
       ui={@ui}
     >
-      <div
-        phx-click-away={if @live_action == :sort_taggings, do: "close_dialog"}
-        phx-key="escape"
-        phx-window-keydown={if @live_action == :sort_taggings, do: "close_dialog"}
+      <Layouts.page_head
+        close_event={@live_action != :show && "close_dialog"}
+        dialog?={@live_action != :show}
       >
-        <Layouts.page_head dialog?={@live_action != :show}>
-          <:crumb>
-            <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
-          </:crumb>
-          <:title>{@topic.name}</:title>
-          <:actions>
-            <.action_buttons
-              live_action={@live_action}
-              sortable?={@taggings.status == :ready}
-            />
-          </:actions>
-          <:dialog>
-            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
-            <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
-            <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
-          </:dialog>
-        </Layouts.page_head>
-      </div>
+        <:crumb>
+          <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
+        </:crumb>
+        <:title>{@topic.name}</:title>
+        <:actions>
+          <.action_buttons
+            live_action={@live_action}
+            sortable?={@taggings.status == :ready}
+          />
+        </:actions>
+        <:dialog>
+          <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+          <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
+          <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
+        </:dialog>
+      </Layouts.page_head>
 
       <div class="sm:flex gap-3" inert={@live_action == :sort_taggings}>
         <div class="space-y-4 min-w-0 grow">

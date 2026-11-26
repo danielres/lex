@@ -60,6 +60,7 @@ defmodule LexWeb.PageLive do
       <Layouts.page_head
         :if={@page}
         dialog?={dialog?(@live_action)}
+        close_event={@live_action == :info && "close_dialog"}
       >
         <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
         <:title>{@page.title}</:title>
@@ -75,14 +76,15 @@ defmodule LexWeb.PageLive do
         </:dialog>
       </Layouts.page_head>
 
-      <div :if={@page}>
+      <div :if={@page} class="stacked items-start">
         <section
           class={[
-            @live_action == :revisions && "hidden",
+            @live_action == :revisions && "invisible",
             @live_action != :editing && "mt-8",
             "min-w-0"
           ]}
           id="current-page-editor"
+          inert={@live_action == :revisions}
         >
           <.editor
             editable?={can?(@scope, :edit_pages) && @live_action == :editing && !@editing.saving?}
@@ -184,5 +186,9 @@ defmodule LexWeb.PageLive do
       active?={@live_action == :editing}
     />
     """
+  end
+
+  def handle_event("close_dialog", _params, socket) do
+    {:noreply, assign(socket, :live_action, :view)}
   end
 end

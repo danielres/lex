@@ -78,19 +78,13 @@ defmodule LexWeb.TopicsLive do
       socket={@socket}
       ui={@ui}
     >
-      <div
-        phx-click-away={if dialog?(@mode), do: "mode:reset"}
-        phx-key="escape"
-        phx-window-keydown={if dialog?(@mode), do: "mode:reset"}
-      >
-        <Layouts.page_head dialog?={dialog?(@mode)}>
-          <:title>Topics</:title>
-          <:actions><.action_buttons mode={@mode} /></:actions>
-          <:dialog :if={dialog?(@mode)}>
-            <Creation.render_form creation={@creation} topics={@graph.topics} />
-          </:dialog>
-        </Layouts.page_head>
-      </div>
+      <Layouts.page_head dialog?={dialog?(@mode)}>
+        <:title>Topics</:title>
+        <:actions><.action_buttons mode={@mode} /></:actions>
+        <:dialog :if={dialog?(@mode)}>
+          <Creation.render_form creation={@creation} topics={@graph.topics} />
+        </:dialog>
+      </Layouts.page_head>
 
       <div inert={dialog?(@mode)}>
         <Graph.render

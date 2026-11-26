@@ -46,7 +46,7 @@ defmodule LexWeb.Layouts do
         "max-sm:w-full",
         "max-sm:z-40",
         "max-sm:transition",
-        @ui.drawer_open? && "max-sm:opacity-0",
+        @ui.drawer_open? && "max-sm:opacity-0"
       ]}>
         <Navbar.render
           drawer_open?={@ui.drawer_open?}
@@ -71,6 +71,7 @@ defmodule LexWeb.Layouts do
   end
 
   attr :dialog?, :boolean, default: false
+  attr :close_event, :string, required: false
 
   slot :actions, required: false
   slot :dialog, required: false
@@ -79,7 +80,14 @@ defmodule LexWeb.Layouts do
 
   def page_head(assigns) do
     ~H"""
-    <div class="mb-4">
+    <button
+      :if={assigns[:close_event]}
+      class={[@dialog? && "bg-base-200/30 cursor-pointer fixed inset-0 transition z-30"]}
+      phx-click={@close_event}
+      type="button"
+    />
+
+    <div class="mb-4 sticky top-0 bg-base-200 z-50">
       <div class={[
         "text-xl border-b-2 border-base-content/20 pb-2",
         @dialog? && "border-none",
