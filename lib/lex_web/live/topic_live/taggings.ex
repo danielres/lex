@@ -82,7 +82,7 @@ defmodule LexWeb.TopicLive.Taggings do
   def render_sorting(assigns) do
     ~H"""
     <Components.sort_controls
-      alpha_label="Member name"
+      alpha_label="Name"
       event={delegate_event("sort")}
       sorting={@taggings.sorting}
     />
