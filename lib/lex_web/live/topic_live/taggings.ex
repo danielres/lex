@@ -4,6 +4,7 @@ defmodule LexWeb.TopicLive.Taggings do
 
   alias Lex.Topics.Dimensions
   alias Lex.Topics.Tagging
+  alias LexWeb.Components.Avatar
   alias LexWeb.Live.Tagging.Components
   alias LexWeb.Live.Tagging.Sorting
   alias LexWeb.Router.Path
@@ -102,7 +103,8 @@ defmodule LexWeb.TopicLive.Taggings do
       <Components.cards>
         <Components.card :for={group <- @taggings.members} id={"tagged_members-#{group.id}"}>
           <:title>
-            <.link class="clickable" navigate={Path.to(@scope, group.tagged_membership)}>
+            <.link class="clickable flex gap-3 items-center" navigate={Path.to(@scope, group.tagged_membership)}>
+              <Avatar.render  user={group.tagged_membership} />
               {group.tagged_membership.display_name}
             </.link>
           </:title>
