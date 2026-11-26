@@ -95,7 +95,7 @@ defmodule LexWeb.WikiLive do
     >
       <:page_head>
         <Layouts.page_head>
-          <:crumb>Wiki</:crumb>
+          <:crumb><span class="opacity-80">Wiki</span></:crumb>
           <:title>Overview</:title>
           <:actions>
             <.link

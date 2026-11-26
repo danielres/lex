@@ -80,7 +80,7 @@ defmodule LexWeb.TopicsLive do
     >
       <:page_head>
         <Layouts.page_head dialog?={dialog?(@mode)}>
-          <:crumb>Topics</:crumb>
+          <:crumb><span class="opacity-80">Topics</span></:crumb>
           <:title>Overview</:title>
           <:actions><.action_buttons mode={@mode} /></:actions>
           <:dialog :if={dialog?(@mode)}>

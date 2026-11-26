@@ -28,7 +28,7 @@ defmodule LexWeb.MembersLive do
     >
       <:page_head>
         <Layouts.page_head dialog?={@invites.open?}>
-          <:crumb>Members</:crumb>
+          <:crumb><span class="opacity-80">Members</span></:crumb>
           <:title>Overview</:title>
 
           <:dialog :if={@invites.open?}>
