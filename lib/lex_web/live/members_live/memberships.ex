@@ -138,7 +138,7 @@ defmodule LexWeb.MembersLive.Memberships do
                 navigate={Path.to(@scope, @membership)}
                 class="clickable"
               >
-                <Avatar.render user={@membership.user} />
+                <Avatar.render size="lg" user={@membership.user} />
                 {membership_name(@membership)}
               </.link>
 
