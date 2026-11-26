@@ -88,8 +88,11 @@ defmodule Lex.Topics.Tagging do
     prefix "topics"
 
     publish :create, ["taggings", :taggable_type, :taggable_id]
+    publish :create, ["taggings", "topic", :topic_id]
     publish :destroy, ["taggings", :taggable_type, :taggable_id]
+    publish :destroy, ["taggings", "topic", :topic_id]
     publish :update, ["taggings", :taggable_type, :taggable_id]
+    publish :update, ["taggings", "topic", :topic_id]
   end
 
   multitenancy do
@@ -153,6 +156,22 @@ defmodule Lex.Topics.Tagging do
     end
   end
 
+  def present_for_topic(%Topic{id: id}, sorting, opts) do
+    scope = Keyword.fetch!(opts, :scope)
+    active_memberships = Ash.Query.for_read(Membership, :active, %{}, scope: scope)
+
+    query =
+      __MODULE__
+      |> Ash.Query.for_read(:list)
+      |> Ash.Query.filter(topic_id == ^id and taggable_type == "membership")
+      |> Ash.Query.load([:tagged_by_membership, tagged_membership: active_memberships])
+
+    with {:ok, taggings} <- Ash.read(query, scope: scope) do
+      taggings = Enum.filter(taggings, &match?(%Membership{}, &1.tagged_membership))
+      {:ok, Presenter.present(taggings, sorting, :tagged_membership)}
+    end
+  end
+
   def self_assessment?(tagging) do
     tagging.taggable_type == "membership" and
       tagging.taggable_id == tagging.tagged_by_membership_id
@@ -203,6 +222,8 @@ defmodule Lex.Topics.Tagging do
     scope = Keyword.fetch!(opts, :scope)
     get_with_scope(target, topic, tagged_by_membership, scope)
   end
+
+  def pub_sub_topic(%Topic{id: id}), do: "topics:taggings:topic:#{id}"
 
   def pub_sub_topic(target) do
     {taggable_type, taggable_id} = target_ref(target)

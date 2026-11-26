@@ -4,6 +4,7 @@ defmodule LexWeb.MemberLive do
 
   alias Lex.Accounts.Membership
   alias Lex.Topics.Tagging
+  alias LexWeb.Components.Avatar
   alias LexWeb.Layouts
   alias LexWeb.MemberLive.Taggings
   alias LexWeb.Router.Path
@@ -44,6 +45,10 @@ defmodule LexWeb.MemberLive do
     Taggings.handle_info(message, socket)
   end
 
+  defp dialog?(mode) do
+    mode != :view
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -55,15 +60,17 @@ defmodule LexWeb.MemberLive do
       ui={@ui}
     >
       <div
-        phx-click-away={if @mode != :view, do: "taggings:mode:reset"}
+        phx-click-away={if dialog?(@mode), do: "taggings:mode:reset"}
         phx-key="escape"
-        phx-window-keydown={if @mode != :view, do: "taggings:mode:reset"}
+        phx-window-keydown={if dialog?(@mode), do: "taggings:mode:reset"}
       >
-        <Layouts.page_head dialog?={@mode != :view}>
+        <Layouts.page_head dialog?={dialog?(@mode)}>
           <:crumb>
             <.link navigate={Path.members(@scope)} class="opacity-80 hover:opacity-100 transition">Members</.link>
           </:crumb>
-          <:title>{@profile.display_name}</:title>
+          <:title>
+            {@profile.display_name}
+          </:title>
           <:actions><Taggings.render_actions mode={@mode} /></:actions>
           <:dialog>
             <Taggings.render_form
@@ -72,16 +79,15 @@ defmodule LexWeb.MemberLive do
               taggings={@taggings}
             />
 
-            <div phx-click-away={if @mode == :sort_taggings, do: "taggings:mode:reset"}>
-              <Taggings.render_sorting
-                :if={@mode == :sort_taggings}
-                taggings={@taggings}
-              />
-            </div>
+            <Taggings.render_sorting :if={@mode == :sort_taggings} taggings={@taggings} />
+            <%!-- <div phx-click-away={if @mode == :sort_taggings, do: "taggings:mode:reset"}> --%>
+            <%!-- </div> --%>
           </:dialog>
         </Layouts.page_head>
 
         <div class="space-y-4" inert={@mode == :sort_taggings}>
+          <Avatar.render size="xl" class="reactive" user={@profile} />
+
           <Taggings.render_list
             dimensions={@taggings.dimensions}
             groups={@taggings.groups}

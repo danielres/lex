@@ -50,7 +50,6 @@ defmodule LexWeb.PageLive do
     ~H"""
     <Layouts.app
       active="page"
-      editing?={@live_action == :editing}
       flash={@flash}
       scope={@scope}
       socket={@socket}

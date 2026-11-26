@@ -6,7 +6,8 @@ defmodule LexWeb.MemberLive.Taggings do
   alias Lex.Topics.Dimensions
   alias Lex.Topics.Tagging
   alias Lex.Topics.Topic
-  alias LexWeb.Live.Components
+  alias LexWeb.Layouts
+  alias LexWeb.Live.Tagging.Components
   alias LexWeb.MemberLive.Taggings.Form
   alias LexWeb.MemberLive.Taggings.Sorting
   alias LexWeb.Router.Path
@@ -83,35 +84,19 @@ defmodule LexWeb.MemberLive.Taggings do
 
   def render_actions(assigns) do
     ~H"""
-    <button
-      :if={@mode == :view}
-      type="button"
-      class="btn btn-circle btn-xs"
-      phx-click={delegate_event("sorting:start")}
-      aria-label="Sort"
-    >
-      <.icon name="hero-arrows-up-down" />
-    </button>
+    <Layouts.action_button
+      active?={@mode == :sort_taggings}
+      icon="hero-arrows-up-down"
+      phx-click={delegate_event((@mode == :sort_taggings && "mode:reset") || "sorting:start")}
+      title="Sort"
+    />
 
-    <button
-      :if={@mode == :view}
-      type="button"
-      class="btn btn-circle btn-xs"
-      phx-click={delegate_event("form:new")}
-      aria-label="Add topic assessment"
-    >
-      <.icon name="hero-plus-micro" />
-    </button>
-
-    <button
-      :if={@mode != :view}
-      type="button"
-      class="btn btn-circle btn-info btn-xs"
-      phx-click={delegate_event("mode:reset")}
-      aria-label="Close dialog"
-    >
-      <.icon name="hero-x-mark-micro" />
-    </button>
+    <Layouts.action_button
+      active?={@mode == :add_tagging}
+      icon="hero-plus-micro"
+      phx-click={delegate_event((@mode == :add_tagging && "mode:reset") || "form:new")}
+      title="Add assessment"
+    />
     """
   end
 
@@ -139,19 +124,17 @@ defmodule LexWeb.MemberLive.Taggings do
 
   def render_list(assigns) do
     ~H"""
-    <div id="profile-taggings" class="space-y-2" phx-hook="AutoAnimate">
-      <p :if={@groups == []} class="opacity-60">No topics assigned yet</p>
+    <Components.cards>
+      <%!-- <p :if={@groups == []} class="opacity-60">No topics assigned yet</p> --%>
 
-      <div
-        :for={group <- @groups}
-        id={"profile-topic-#{group.topic.id}"}
-        class="rounded-lg bg-base-300/50 px-4 py-3"
-      >
-        <div class="flex items-start gap-3">
-          <.link class="clickable font-semibold" navigate={Path.to(@scope, group.topic)}>
+      <Components.card :for={group <- @groups} id={"profile-topic-#{group.topic.id}"}>
+        <:title>
+          <.link class="clickable" navigate={Path.to(@scope, group.topic)}>
             {group.topic.name}
           </.link>
+        </:title>
 
+        <:action_buttons>
           <.button_edit
             :if={group.self_assessment && Ash.can?({group.self_assessment, :update}, @scope)}
             phx-click={delegate_event("form:edit")}
@@ -165,56 +148,25 @@ defmodule LexWeb.MemberLive.Taggings do
             phx-value-topic-id={group.topic.id}
             aria-label={"Add #{group.topic.name} assessment"}
           />
-        </div>
+        </:action_buttons>
 
-        <div :if={group.self_assessment} class="mt-2 mb-3 flex flex-wrap gap-4">
-          <%= for dimension <- @dimensions do %>
-            <% level = group.self_assessment.dimensions |> Map.get(dimension.key, 0) %>
-            <.dimension :if={level > 0} dimension={dimension} level={level} />
-          <% end %>
-        </div>
-
-        <Components.text_preview
-          :if={group.self_assessment && group.self_assessment.text}
-          class={["text-sm", "opacity-80"]}
+        <Components.assessment
+          :if={group.self_assessment}
+          dimensions={@dimensions}
+          levels={group.self_assessment.dimensions}
           text={group.self_assessment.text}
         />
 
-        <div :if={group.endorsements != []} class="mt-4 space-y-2">
-          <h3 class={[
-            "small-caps opacity-80",
-            "flex items-center gap-2"
-          ]}>
-            <div>Endorsements</div>
-            <div class="border-t grow h-0 border-base-content/20" />
-          </h3>
-
+        <Components.endorsements :if={group.endorsements != []}>
           <.endorsement
             :for={endorsement <- group.endorsements}
             endorsement={endorsement}
             scope={@scope}
             topic={group.topic}
           />
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr :text, :string, required: true
-  attr :class, :any, default: ""
-
-  def blockquote(assigns) do
-    ~H"""
-    <Components.text_preview
-      class={[
-        "text-sm",
-        "opacity-60",
-        "border-l-4 pl-3 ml-0 border-base-content/20",
-        @class
-      ]}
-      text={@text}
-    />
+        </Components.endorsements>
+      </Components.card>
+    </Components.cards>
     """
   end
 
@@ -224,15 +176,8 @@ defmodule LexWeb.MemberLive.Taggings do
 
   defp endorsement(assigns) do
     ~H"""
-    <div class="space-y-2">
-      <div class="flex items-center gap-1">
-        <span class="text-sm opacity-80">
-          <span class="opacity-80">by</span>
-          <.link navigate={Path.to(@scope, @endorsement.tagged_by_membership)} class="clickable">
-            {@endorsement.tagged_by_membership.display_name}
-          </.link>
-        </span>
-
+    <Components.endorsement endorsement={@endorsement} scope={@scope}>
+      <:action_buttons>
         <.button_edit
           :if={Ash.can?({@endorsement, :update}, @scope)}
           phx-click={delegate_event("form:edit")}
@@ -258,39 +203,8 @@ defmodule LexWeb.MemberLive.Taggings do
         >
           <.icon name="hero-x-mark" class="size-4" />
         </button>
-      </div>
-
-      <.blockquote :if={@endorsement.text} text={@endorsement.text} />
-    </div>
-    """
-  end
-
-  attr :dimension, :map, required: true
-  attr :level, :integer, required: true
-  attr :class, :any, default: "w-24 h-2"
-
-  defp dimension(assigns) do
-    ~H"""
-    <div
-      class={[
-        "stacked",
-        "tooltip",
-        @class
-      ]}
-      style={"--tt-bg:#{@dimension.color}"}
-    >
-      <div
-        class="rounded-sm h-full w-full opacity-20"
-        style={"background-color: #{@dimension.color}"}
-      />
-      <div
-        class="rounded-sm h-full"
-        style={"background-color: #{@dimension.color}; width: #{100/@dimension.max*@level}%"}
-      />
-      <div class="tooltip-content">
-        <span class="font-bold">{@dimension.label}:</span> {@level}/{@dimension.max}
-      </div>
-    </div>
+      </:action_buttons>
+    </Components.endorsement>
     """
   end
 

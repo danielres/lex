@@ -3,15 +3,20 @@ defmodule LexWeb.TopicLive do
   use LiveDelegate
 
   alias Lex.Topics
+  alias Lex.Topics.Tagging
   alias Lex.Topics.Topic
   alias LexWeb.Layouts
   alias LexWeb.Router.Path
-  alias LexWeb.TopicLive.Edition
+  alias LexWeb.TopicLive.EditTitle
+  alias LexWeb.TopicLive.Info
+  alias LexWeb.TopicLive.Taggings
   alias LexWeb.TopicsLive.Graph
   alias LexWeb.UI
 
-  delegate(:edition, Edition)
+  delegate(:edit_title, EditTitle, info: false)
   delegate(:graph, Graph)
+  delegate(:info, Info, info: false, mount: false)
+  delegate(:taggings, Taggings)
   delegate(:ui, UI)
 
   require Ash.Query
@@ -27,7 +32,6 @@ defmodule LexWeb.TopicLive do
         socket =
           socket
           |> assign(:topic, topic)
-          |> assign(:mode, :view)
           |> delegate_mount(params, session)
 
         {:ok, socket}
@@ -49,8 +53,8 @@ defmodule LexWeb.TopicLive do
       {:ok, topic} ->
         socket =
           socket
-          |> assign(topic: topic, mode: :view)
-          |> Edition.reload_form()
+          |> assign(topic: topic)
+          |> Taggings.load_topic()
 
         {:noreply, socket}
 
@@ -96,14 +100,24 @@ defmodule LexWeb.TopicLive do
     Graph.handle_info(msg, socket)
   end
 
-  @impl true
-  def handle_event("toggle_mode:edit", _params, socket) do
-    mode = if socket.assigns.mode == :edit, do: :view, else: :edit
-    socket = socket |> assign(mode: mode)
-    {:noreply, socket}
+  def handle_info(%{resource: Tagging} = msg, socket) do
+    Taggings.handle_info(msg, socket)
   end
 
-  defp dialog?(mode), do: mode == :edit
+  @impl true
+  def handle_event("toggle_sort_taggings", _params, socket) do
+    live_action =
+      case socket.assigns.live_action do
+        :sort_taggings -> :show
+        _ -> :sort_taggings
+      end
+
+    {:noreply, assign(socket, :live_action, live_action)}
+  end
+
+  def handle_event("close_dialog", _params, socket) do
+    {:noreply, assign(socket, :live_action, :show)}
+  end
 
   @impl true
   def render(assigns) do
@@ -116,28 +130,39 @@ defmodule LexWeb.TopicLive do
       ui={@ui}
     >
       <div
-        phx-click-away={if dialog?(@mode), do: "toggle_mode:edit"}
+        phx-click-away={if @live_action == :sort_taggings, do: "close_dialog"}
         phx-key="escape"
-        phx-window-keydown={if dialog?(@mode), do: "toggle_mode:edit"}
+        phx-window-keydown={if @live_action == :sort_taggings, do: "close_dialog"}
       >
-        <Layouts.page_head dialog?={dialog?(@mode)}>
+        <Layouts.page_head dialog?={@live_action != :show}>
           <:crumb>
             <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
           </:crumb>
           <:title>{@topic.name}</:title>
-          <:actions><.action_buttons mode={@mode} /></:actions>
-          <:dialog :if={dialog?(@mode)}>
-            <Edition.render_form edition={@edition} />
+          <:actions>
+            <.action_buttons
+              live_action={@live_action}
+              sortable?={@taggings.status == :ready}
+            />
+          </:actions>
+          <:dialog>
+            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
+            <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
           </:dialog>
         </Layouts.page_head>
       </div>
 
-      <div class="sm:flex gap-8">
-        <div class="space-y-4 grow">
-          <p>Added: {Utils.Time.relative(@topic.inserted_at)}</p>
+      <div class="sm:flex gap-3" inert={@live_action == :sort_taggings}>
+        <div class="space-y-4 min-w-0 grow">
+          <Taggings.render scope={@scope} taggings={@taggings} />
+          <%!-- <p>Added: {Utils.Time.relative(@topic.inserted_at)}</p> --%>
         </div>
 
-        <hr class="my-6 sm:hidden border-base-content/20 border-t-2" />
+        <hr
+          :if={@taggings.members |> length() > 0}
+          class="my-6 sm:hidden border-base-content/20 border-t-2"
+        />
 
         <aside class="text-sm min-w-42">
           <Graph.render
@@ -156,25 +181,23 @@ defmodule LexWeb.TopicLive do
   defp find_topic(scope, slug) do
     Topic
     |> Ash.Query.filter(slug == ^slug)
+    |> Ash.Query.load(:author)
     |> Ash.read_one(not_found_error?: true, scope: scope)
   end
 
-  attr :mode, :atom, required: true
+  attr :sortable?, :boolean, required: true
+  attr :live_action, :atom, required: true
 
   def action_buttons(assigns) do
     ~H"""
-    <button
-      :if={@mode == :view || @mode == :edit}
-      type="button"
-      phx-click="toggle_mode:edit"
-      class={[
-        "btn btn-circle btn-xs",
-        @mode == :edit && "btn-info"
-      ]}
-    >
-      <.icon :if={@mode == :view} name="hero-pencil-micro" />
-      <.icon :if={@mode == :edit} name="hero-x-mark-micro" />
-    </button>
+    <Info.button_toggle active?={@live_action == :info || @live_action == :edit_title} />
+
+    <Layouts.action_button
+      active?={@live_action == :sort_taggings}
+      icon="hero-arrows-up-down"
+      phx-click="toggle_sort_taggings"
+      title="Sort"
+    />
     """
   end
 end

@@ -3,6 +3,7 @@ defmodule LexWeb.PageLive.Info do
   use LiveDelegate, path: [:info]
 
   alias LexWeb.Components.Avatar
+  alias LexWeb.Layouts
   alias LexWeb.PageLive.EditTitle
   alias LexWeb.Router.Path
 
@@ -66,18 +67,13 @@ defmodule LexWeb.PageLive.Info do
 
   def button_toggle(assigns) do
     ~H"""
-    <button
-      aria-label="Show page info"
-      class={[
-        "btn btn-xs btn-circle",
-        @active? && "btn-info"
-      ]}
-      data-testid="page-info-toggle"
+    <Layouts.action_button
       title="Page info"
+      active?={@active?}
+      icon="hero-information-circle-micro"
+      data-testid="page-info-toggle"
       phx-click={delegate_event("toggle")}
-    >
-      <.icon name="hero-information-circle-micro" />
-    </button>
+    />
     """
   end
 end

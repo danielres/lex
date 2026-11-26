@@ -5,6 +5,7 @@ defmodule LexWeb.MembersLive.Invites do
   require Logger
 
   alias Lex.Accounts.Membership
+  alias LexWeb.Layouts
   alias LexWeb.MembersLive.Memberships
 
   def on_mount(_params, _session, socket) do
@@ -89,20 +90,14 @@ defmodule LexWeb.MembersLive.Invites do
 
   def button_toggle(assigns) do
     ~H"""
-    <button
+    <Layouts.action_button
       :if={can?(@scope, :manage_members)}
-      aria-label="Add members"
-      class={[
-        "btn btn-xs btn-circle",
-        @invites.open? && "btn-info"
-      ]}
+      active?={@invites.open?}
       data-testid="add-members-button"
-      title="Add members"
+      icon="hero-user-plus-micro"
       phx-click={delegate_event("toggle")}
-    >
-      <.icon :if={!@invites.open?} name="hero-user-plus-micro" />
-      <.icon :if={@invites.open?} name="hero-x-mark-micro" />
-    </button>
+      title="Add members"
+    />
     """
   end
 

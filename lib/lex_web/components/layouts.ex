@@ -31,7 +31,6 @@ defmodule LexWeb.Layouts do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   attr :active, :string, default: ""
-  attr :editing?, :boolean, default: false
   attr :scope, :map, required: true
   attr :socket, :any, required: true
   attr :ui, :map, required: true
@@ -48,7 +47,6 @@ defmodule LexWeb.Layouts do
         "max-sm:z-40",
         "max-sm:transition",
         @ui.drawer_open? && "max-sm:opacity-0",
-        @editing? && "max-sm:opacity-0"
       ]}>
         <Navbar.render
           drawer_open?={@ui.drawer_open?}
@@ -124,6 +122,36 @@ defmodule LexWeb.Layouts do
         {render_slot(@dialog)}
       </div>
     </div>
+    """
+  end
+
+  attr :active?, :boolean, default: false
+  attr :title, :string, required: true
+  attr :icon, :string, required: true
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :rest, :global, include: ~w(disabled)
+
+  def action_button(assigns) do
+    attrs =
+      Map.merge(assigns.rest, %{
+        "aria-label": assigns.title,
+        title: assigns.title,
+        class: [
+          "btn btn-sm btn-circle hover:btn-info",
+          assigns.active? && "btn-info"
+        ]
+      })
+
+    assigns = assign(assigns, :attrs, attrs)
+
+    ~H"""
+    <.link :if={@patch || @navigate} patch={@patch} navigate={@navigate} {@attrs}>
+      <.icon name={@icon} />
+    </.link>
+    <button :if={is_nil(@patch) && is_nil(@navigate)} type="button" {@attrs}>
+      <.icon name={@icon} />
+    </button>
     """
   end
 
