@@ -42,11 +42,11 @@
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --bc: 0.010;
+  --bc: 0.015;
   --bh: 240;
   --color-base-100: oklch(31% var(--bc) var(--bh));
   --color-base-200: oklch(22% var(--bc) var(--bh));
-  --color-base-300: oklch(13% var(--bc) var(--bh));
+  --color-base-300: oklch(16% var(--bc) var(--bh));
   --color-base-content: oklch(97.807% 0.029 256.847);
 
   --l: 50%;
@@ -170,5 +170,5 @@ html, body {
 }
 
 .bg-card {
-  @apply bg-base-100/40;
+  @apply bg-base-100/30;
 }
