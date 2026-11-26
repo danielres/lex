@@ -192,18 +192,12 @@ defmodule LexWeb.TopicLive do
     ~H"""
     <Info.button_toggle active?={@live_action == :info || @live_action == :edit_title} />
 
-    <button
-      :if={@sortable?}
-      type="button"
-      class={[
-        "btn btn-circle btn-xs hover:btn-info",
-        @live_action == :sort_taggings && "btn-info"
-      ]}
+    <Layouts.action_button
+      active?={@live_action == :sort_taggings}
+      icon="hero-arrows-up-down"
       phx-click="toggle_sort_taggings"
-      aria-label="Sort"
-    >
-      <.icon name="hero-arrows-up-down" />
-    </button>
+      title="Sort"
+    />
     """
   end
 end

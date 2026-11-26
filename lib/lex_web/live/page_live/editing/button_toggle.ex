@@ -2,26 +2,18 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
   use LexWeb, :html
   use LiveDelegate, path: [:editing]
 
+  alias LexWeb.Layouts
+
   attr :active?, :boolean, required: true
 
   def render(assigns) do
     ~H"""
-    <button
-      aria-label={button_label(@active?, @editing.saving?)}
-      aria-pressed={@active?}
-      class={[
-        "btn btn-xs btn-circle btn-neutral hover:btn-info",
-        @active? && "btn-info"
-      ]}
-      data-testid="editing-toggle"
-      disabled={@editing.saving?}
-      phx-click={delegate_event("toggle")}
+    <Layouts.action_button
+      active?={@active?}
       title={button_label(@active?, @editing.saving?)}
-      type="button"
-    >
-      <.icon :if={@active?} name="hero-check-micro" />
-      <.icon :if={!@active?} name="hero-pencil-mini" />
-    </button>
+      phx-click={delegate_event("toggle")}
+      icon="hero-pencil-mini"
+    />
     """
   end
 

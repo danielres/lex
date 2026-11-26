@@ -3,8 +3,9 @@ defmodule LexWeb.TopicLive.Info do
   use LiveDelegate, path: [:info]
 
   alias LexWeb.Components.Avatar
-  alias LexWeb.TopicLive.EditTitle
+  alias LexWeb.Layouts
   alias LexWeb.Router.Path
+  alias LexWeb.TopicLive.EditTitle
 
   @impl true
   def handle_event("toggle", _, socket) do
@@ -66,18 +67,13 @@ defmodule LexWeb.TopicLive.Info do
 
   def button_toggle(assigns) do
     ~H"""
-    <button
-      aria-label="Show topic info"
-      class={[
-        "btn btn-xs btn-circle",
-        @active? && "btn-info"
-      ]}
-      data-testid="topic-info-toggle"
+    <Layouts.action_button
+      active?={@active?}
       title="Topic info"
+      data-testid="topic-info-toggle"
       phx-click={delegate_event("toggle")}
-    >
-      <.icon name="hero-information-circle-micro" />
-    </button>
+      icon="hero-information-circle-micro"
+    />
     """
   end
 end

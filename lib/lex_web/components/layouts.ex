@@ -127,6 +127,36 @@ defmodule LexWeb.Layouts do
     """
   end
 
+  attr :active?, :boolean, default: false
+  attr :title, :string, required: true
+  attr :icon, :string, required: true
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :rest, :global, include: ~w(patch)
+
+  def action_button(assigns) do
+    attrs =
+      Map.merge(assigns.rest, %{
+        "aria-label": assigns.title,
+        title: assigns.title,
+        class: [
+          "btn btn-sm btn-circle hover:btn-info",
+          assigns.active? && "btn-info"
+        ]
+      })
+
+    assigns = assign(assigns, :attrs, attrs)
+
+    ~H"""
+    <.link :if={@patch || @navigate} patch={@patch} navigate={@navigate} {@attrs}>
+      <.icon name={@icon} />
+    </.link>
+    <button :if={is_nil(@patch) && is_nil(@navigate)} type="button" {@attrs}>
+      <.icon name={@icon} />
+    </button>
+    """
+  end
+
   @doc """
   Shows the flash group with standard titles and content.
 

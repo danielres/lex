@@ -6,6 +6,7 @@ defmodule LexWeb.MemberLive.Taggings do
   alias Lex.Topics.Dimensions
   alias Lex.Topics.Tagging
   alias Lex.Topics.Topic
+  alias LexWeb.Layouts
   alias LexWeb.Live.Tagging.Components
   alias LexWeb.MemberLive.Taggings.Form
   alias LexWeb.MemberLive.Taggings.Sorting
@@ -83,35 +84,19 @@ defmodule LexWeb.MemberLive.Taggings do
 
   def render_actions(assigns) do
     ~H"""
-    <button
-      :if={@mode == :view}
-      type="button"
-      class="btn btn-circle btn-xs"
-      phx-click={delegate_event("sorting:start")}
-      aria-label="Sort"
-    >
-      <.icon name="hero-arrows-up-down" />
-    </button>
+    <Layouts.action_button
+      active?={@mode == :sort_taggings}
+      icon="hero-arrows-up-down"
+      phx-click={delegate_event((@mode == :sort_taggings && "mode:reset") || "sorting:start")}
+      title="Sort"
+    />
 
-    <button
-      :if={@mode == :view}
-      type="button"
-      class="btn btn-circle btn-xs"
-      phx-click={delegate_event("form:new")}
-      aria-label="Add topic assessment"
-    >
-      <.icon name="hero-plus-micro" />
-    </button>
-
-    <button
-      :if={@mode != :view}
-      type="button"
-      class="btn btn-circle btn-info btn-xs"
-      phx-click={delegate_event("mode:reset")}
-      aria-label="Close dialog"
-    >
-      <.icon name="hero-x-mark-micro" />
-    </button>
+    <Layouts.action_button
+      active?={@mode == :add_tagging}
+      icon="hero-plus-micro"
+      phx-click={delegate_event((@mode == :add_tagging && "mode:reset") || "form:new")}
+      title="Sort"
+    />
     """
   end
 

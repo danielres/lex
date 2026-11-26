@@ -108,31 +108,19 @@ defmodule LexWeb.TopicsLive do
 
   def action_buttons(assigns) do
     ~H"""
-    <button
-      :if={@mode == :view || @mode == :creation}
-      type="button"
+    <Layouts.action_button
+      active?={@mode == :creation}
+      icon="hero-plus-micro"
       phx-click="toggle_mode:creation"
-      class={[
-        "btn btn-circle btn-xs",
-        @mode == :creation && "btn-info"
-      ]}
-    >
-      <.icon :if={@mode == :view} name="hero-plus-micro" />
-      <.icon :if={@mode == :creation} name="hero-x-mark-micro" />
-    </button>
+      title="Add topic"
+    />
 
-    <button
-      :if={@mode == :view || @mode == :edit}
-      type="button"
+    <Layouts.action_button
+      active?={@mode == :edit}
+      icon="hero-pencil-micro"
       phx-click="toggle_mode:edit"
-      class={[
-        "btn btn-circle btn-xs",
-        @mode == :edit && "btn-info"
-      ]}
-    >
-      <.icon :if={@mode == :view} name="hero-pencil-micro" />
-      <.icon :if={@mode == :edit} name="hero-x-mark-micro" />
-    </button>
+      title="Edit topic"
+    />
     """
   end
 end
