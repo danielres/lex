@@ -49,7 +49,7 @@ defmodule LexWeb.PageLive do
   def render(assigns) do
     ~H"""
     <Layouts.app
-      active="page"
+      active="wiki"
       flash={@flash}
       scope={@scope}
       socket={@socket}

@@ -67,7 +67,7 @@ defmodule LexWeb.Layouts.Drawer do
 
   defp main_links(assigns) do
     ~H"""
-    <ul class="grid gap-2">
+    <ul class="grid gap-1.5">
       <% link_class = [
         !@open? && "aspect-square",
         !@open? && "justify-center",
@@ -75,18 +75,18 @@ defmodule LexWeb.Layouts.Drawer do
         "font-semibold",
         "flex items-center gap-2",
         "h-8 rounded",
-        "text-sm"
+        "text-sm",
+        "transition",
       ] %>
 
-      <% active_class = "bg-info text-white" %>
+      <% non_active_class = "opacity-50 hover:opacity-100" %>
 
       <li>
         <.link
           navigate={Path.wiki_home(@scope)}
           class={[
             link_class,
-            @active == "page" && active_class,
-            @active == "wiki" && active_class
+            @active != "wiki" && non_active_class
           ]}
         >
           <.icon name="hero-book-open-mini" />
@@ -99,7 +99,7 @@ defmodule LexWeb.Layouts.Drawer do
           navigate={Path.topics(@scope)}
           class={[
             link_class,
-            @active == "topics" && active_class
+            @active != "topics" && non_active_class
           ]}
         >
           <.icon name="hero-tag-mini" />
@@ -112,7 +112,7 @@ defmodule LexWeb.Layouts.Drawer do
           navigate={Path.members(@scope)}
           class={[
             link_class,
-            @active == "members" && active_class
+            @active != "members" && non_active_class
           ]}
         >
           <.icon name="hero-user-group-mini" />
