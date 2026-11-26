@@ -50,7 +50,7 @@ defmodule LexWeb.Router do
         live "/members", MembersLive
         live "/members/:member_slug", MemberLive
         live "/topics", TopicsLive
-        live "/topics/:topic_slug", TopicLive
+        live "/topics/:topic_slug", TopicLive, :show
         live "/wiki", WikiLive
         live "/wiki/:page_slug", PageLive, :show
         live "/wiki/:page_slug/revisions", PageLive, :revisions

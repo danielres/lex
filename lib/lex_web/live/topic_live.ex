@@ -7,13 +7,15 @@ defmodule LexWeb.TopicLive do
   alias Lex.Topics.Topic
   alias LexWeb.Layouts
   alias LexWeb.Router.Path
-  alias LexWeb.TopicLive.Edition
+  alias LexWeb.TopicLive.EditTitle
+  alias LexWeb.TopicLive.Info
   alias LexWeb.TopicLive.Taggings
   alias LexWeb.TopicsLive.Graph
   alias LexWeb.UI
 
-  delegate(:edition, Edition)
+  delegate(:edit_title, EditTitle, info: false)
   delegate(:graph, Graph)
+  delegate(:info, Info, info: false, mount: false)
   delegate(:taggings, Taggings)
   delegate(:ui, UI)
 
@@ -30,7 +32,6 @@ defmodule LexWeb.TopicLive do
         socket =
           socket
           |> assign(:topic, topic)
-          |> assign(:mode, :view)
           |> delegate_mount(params, session)
 
         {:ok, socket}
@@ -52,8 +53,7 @@ defmodule LexWeb.TopicLive do
       {:ok, topic} ->
         socket =
           socket
-          |> assign(topic: topic, mode: :view)
-          |> Edition.reload_form()
+          |> assign(topic: topic)
           |> Taggings.load_topic()
 
         {:noreply, socket}
@@ -105,18 +105,18 @@ defmodule LexWeb.TopicLive do
   end
 
   @impl true
-  def handle_event("toggle_mode:edit", _params, socket) do
-    mode = if socket.assigns.mode == :edit, do: :view, else: :edit
-    socket = socket |> assign(mode: mode)
-    {:noreply, socket}
-  end
+  def handle_event("toggle_sort_taggings", _params, socket) do
+    live_action =
+      case socket.assigns.live_action do
+        :sort_taggings -> :show
+        _ -> :sort_taggings
+      end
 
-  def handle_event("sort_taggings", _params, socket) do
-    {:noreply, assign(socket, :mode, :sort_taggings)}
+    {:noreply, assign(socket, :live_action, live_action)}
   end
 
   def handle_event("close_dialog", _params, socket) do
-    {:noreply, assign(socket, :mode, :view)}
+    {:noreply, assign(socket, :live_action, :show)}
   end
 
   @impl true
@@ -130,30 +130,39 @@ defmodule LexWeb.TopicLive do
       ui={@ui}
     >
       <div
-        phx-click-away={if @mode != :view, do: "close_dialog"}
+        phx-click-away={if @live_action == :sort_taggings, do: "close_dialog"}
         phx-key="escape"
-        phx-window-keydown={if @mode != :view, do: "close_dialog"}
+        phx-window-keydown={if @live_action == :sort_taggings, do: "close_dialog"}
       >
-        <Layouts.page_head dialog?={@mode != :view}>
+        <Layouts.page_head dialog?={@live_action != :show}>
           <:crumb>
             <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
           </:crumb>
           <:title>{@topic.name}</:title>
-          <:actions><.action_buttons mode={@mode} sortable?={@taggings.status == :ready} /></:actions>
+          <:actions>
+            <.action_buttons
+              live_action={@live_action}
+              sortable?={@taggings.status == :ready}
+            />
+          </:actions>
           <:dialog>
-            <Edition.render_form :if={@mode == :edit} edition={@edition} />
-            <Taggings.render_sorting :if={@mode == :sort_taggings} taggings={@taggings} />
+            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
+            <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
           </:dialog>
         </Layouts.page_head>
       </div>
 
-      <div class="sm:flex gap-3" inert={@mode == :sort_taggings}>
+      <div class="sm:flex gap-3" inert={@live_action == :sort_taggings}>
         <div class="space-y-4 min-w-0 grow">
           <Taggings.render scope={@scope} taggings={@taggings} />
           <%!-- <p>Added: {Utils.Time.relative(@topic.inserted_at)}</p> --%>
         </div>
 
-        <hr class="my-6 sm:hidden border-base-content/20 border-t-2" />
+        <hr
+          :if={@taggings.members |> length() > 0}
+          class="my-6 sm:hidden border-base-content/20 border-t-2"
+        />
 
         <aside class="text-sm min-w-42">
           <Graph.render
@@ -172,42 +181,28 @@ defmodule LexWeb.TopicLive do
   defp find_topic(scope, slug) do
     Topic
     |> Ash.Query.filter(slug == ^slug)
+    |> Ash.Query.load(:author)
     |> Ash.read_one(not_found_error?: true, scope: scope)
   end
 
-  attr :mode, :atom, required: true
   attr :sortable?, :boolean, required: true
+  attr :live_action, :atom, required: true
 
   def action_buttons(assigns) do
     ~H"""
+    <Info.button_toggle active?={@live_action == :info || @live_action == :edit_title} />
+
     <button
-      :if={@mode == :view && @sortable?}
+      :if={@sortable?}
       type="button"
-      class="btn btn-circle btn-xs"
-      phx-click="sort_taggings"
+      class={[
+        "btn btn-circle btn-xs hover:btn-info",
+        @live_action == :sort_taggings && "btn-info"
+      ]}
+      phx-click="toggle_sort_taggings"
       aria-label="Sort"
     >
       <.icon name="hero-arrows-up-down" />
-    </button>
-
-    <button
-      :if={@mode == :view}
-      type="button"
-      class="btn btn-circle btn-xs"
-      phx-click="toggle_mode:edit"
-      aria-label="Edit topic"
-    >
-      <.icon name="hero-pencil-micro" />
-    </button>
-
-    <button
-      :if={@mode != :view}
-      type="button"
-      class="btn btn-circle btn-info btn-xs"
-      phx-click="close_dialog"
-      aria-label="Close dialog"
-    >
-      <.icon name="hero-x-mark-micro" />
     </button>
     """
   end
