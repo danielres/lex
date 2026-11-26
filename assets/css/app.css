@@ -132,6 +132,10 @@
   @apply border-2;
 }
 
+html {
+  overscroll-behavior-y: contain;
+}
+
 html, body {
   @apply bg-base-200 h-full;
 }
