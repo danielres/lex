@@ -26,17 +26,25 @@ defmodule LexWeb.Components.Drawer do
       />
 
       <div class={[
-        "max-sm:z-50",
-        @open? && "w-42",
-        !@open? && "w-12 overflow-hidden",
-        "max-sm:fixed",
-        "max-sm:inset-0",
-        !@open? && "max-sm:-left-13",
-        "transition-[width] translition-[left] duration-200 ease-in-out",
-        "bg-base-300/50 backdrop-blur-lg",
-        "border-r border-base-content/20"
+        "sm:bg-base-300/50 sm:backdrop-blur-lg",
+        "sm:border-r sm:border-base-content/20"
       ]}>
-        {render_slot(@aside)}
+        <div class={[
+          "max-sm:z-50",
+          @open? && "w-42",
+          !@open? && "w-12 overflow-hidden",
+          "max-sm:fixed",
+          "max-sm:inset-0",
+          "max-sm:bg-base-300/50 max-sm:backdrop-blur-lg",
+          "max-sm:border-r max-sm:border-base-content/20",
+          "sm:sticky",
+          "sm:top-0",
+          "sm:self-start",
+          !@open? && "max-sm:-left-13",
+          "transition-[width] translition-[left] duration-200 ease-in-out"
+        ]}>
+          {render_slot(@aside)}
+        </div>
       </div>
     </div>
     """
