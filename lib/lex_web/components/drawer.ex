@@ -10,13 +10,12 @@ defmodule LexWeb.Components.Drawer do
     ~H"""
     <div
       class={[
-        "sm:grid sm:grid-cols-[auto_minmax(0,1fr)]",
-        "h-full"
+        "flex flex-1 flex-col sm:grid sm:grid-cols-[auto_minmax(0,1fr)]"
       ]}
       data-drawer-open={to_string(@open?)}
       data-testid="drawer"
     >
-      <div class="order-2 min-w-0 max-sm:mt-11">
+      <div class="order-2 flex min-w-0 flex-col max-sm:flex-1">
         {render_slot(@inner_block)}
       </div>
 

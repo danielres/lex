@@ -83,12 +83,12 @@ defmodule LexWeb.PageLive do
 
       <Creation.render :if={@page == nil} creation={@creation} scope={@scope} />
 
-      <div :if={@page} class="stacked items-start">
+      <div :if={@page} class="stacked flex-1">
         <section
           class={[
+            "flex min-w-0 flex-col",
             @live_action == :revisions && "invisible",
-            @live_action != :editing && "mt-8",
-            "min-w-0"
+            @live_action != :editing && "max-sm:px-2 max-sm:py-4 sm:p-6 pb-0 bg-card rounded-box"
           ]}
           id="current-page-editor"
           inert={@live_action == :revisions}

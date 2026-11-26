@@ -40,13 +40,14 @@ defmodule LexWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <div class="h-full">
+    <div class="flex min-h-dvh flex-col">
       <div class={[
         "max-sm:fixed",
         "max-sm:top-0",
         "max-sm:w-full",
         "max-sm:z-40",
         "max-sm:transition",
+        "shrink-0",
         @ui.drawer_open? && "max-sm:opacity-0"
       ]}>
         <Navbar.render
@@ -62,7 +63,14 @@ defmodule LexWeb.Layouts do
         socket={@socket}
       >
         {render_slot(@page_head)}
-        <main class="min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8 max-sm:mt-30">
+
+        <main class={[
+          "w-full min-w-0 max-w-[90ch] mx-auto",
+          "flex flex-1 flex-col",
+          "max-sm:mt-26",
+          "sm:px-8",
+          "sm:py-4"
+        ]}>
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
