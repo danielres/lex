@@ -76,7 +76,7 @@ defmodule LexWeb.Live.Tagging.Components do
     }>
       <.link class="clickable" navigate={Path.to(@scope, @endorsement.tagged_by_membership)}>
         <Avatar.render
-          class="reactive"
+          class="clickable"
           user={@endorsement.tagged_by_membership}
         />
       </.link>

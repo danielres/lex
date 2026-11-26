@@ -30,7 +30,7 @@ defmodule LexWeb.Layouts.Navbar do
 
       <Dropdown.render id="navbar-user-dropdown">
         <Avatar.render
-          class="reactive"
+          class="clickable"
           user={@scope.user}
         />
 

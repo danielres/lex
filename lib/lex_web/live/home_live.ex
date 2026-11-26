@@ -133,7 +133,7 @@ defmodule LexWeb.HomeLive do
 
   defp list_spaces(assigns) do
     grid_item_class = [
-      "reactive",
+      "clickable",
       "p-4",
       "block",
       "aspect-square",

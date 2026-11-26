@@ -81,7 +81,7 @@ defmodule LexWeb.MemberLive do
       </:page_head>
 
       <div class="space-y-4" inert={@mode == :sort_taggings}>
-        <Avatar.render size="xl" class="reactive" user={@profile} />
+        <Avatar.render size="xl" class="clickable" user={@profile} />
 
         <Taggings.render_list
           dimensions={@taggings.dimensions}
