@@ -16,7 +16,7 @@ defmodule LexWeb.Layouts.Navbar do
       "bg-base-300",
       "px-2 py-1 sm:py-2 pr-4 max-sm:pl-0",
       "flex items-center gap-3",
-      "border-b border-base-content/20"
+      "border-b border-base-content/30"
     ]}>
       <.toggle_button {assigns} />
       <div class="grow">
@@ -41,7 +41,7 @@ defmodule LexWeb.Layouts.Navbar do
             "min-w-36",
             "rounded-box",
             "shadow-lg",
-            "border border-base-content/20",
+            "border border-base-content/30",
             "grid gap-2"
           ]}>
             <div class={[
@@ -53,7 +53,7 @@ defmodule LexWeb.Layouts.Navbar do
             <.button_sign_out />
 
             <hr class={[
-              "border-base-content/20",
+              "border-base-content/30",
               "my-2"
             ]} />
 

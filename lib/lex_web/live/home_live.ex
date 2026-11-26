@@ -144,7 +144,7 @@ defmodule LexWeb.HomeLive do
 
     ~H"""
     <div>
-      <h1 class="text-xl font-semibold border-b border-base-content/20 pb-2 mb-4">
+      <h1 class="text-xl font-semibold border-b border-base-content/30 pb-2 mb-4">
         Your spaces
       </h1>
 

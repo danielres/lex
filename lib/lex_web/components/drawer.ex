@@ -27,7 +27,7 @@ defmodule LexWeb.Components.Drawer do
 
       <div class={[
         "sm:bg-base-300/50 sm:backdrop-blur-lg",
-        "sm:border-r sm:border-base-content/20"
+        "sm:border-r sm:border-base-content/30"
       ]}>
         <div class={[
           "max-sm:z-50",
@@ -36,7 +36,7 @@ defmodule LexWeb.Components.Drawer do
           "max-sm:fixed",
           "max-sm:inset-0",
           "max-sm:bg-base-300/50 max-sm:backdrop-blur-lg",
-          "max-sm:border-r max-sm:border-base-content/20",
+          "max-sm:border-r max-sm:border-base-content/30",
           "sm:sticky",
           "sm:top-0",
           "sm:self-start",
