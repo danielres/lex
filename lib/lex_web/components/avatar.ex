@@ -6,6 +6,7 @@ defmodule LexWeb.Components.Avatar do
 
   attr :user, :map, required: true
   attr :class, :string, default: ""
+  attr :size, :string, default: "md"
 
   def render(assigns) do
     {display_name, hue} = appearance(assigns.user)
@@ -14,10 +15,17 @@ defmodule LexWeb.Components.Avatar do
     color =
       "oklch(var(--collaboration-color-lightness) var(--collaboration-color-chroma) #{hue}deg)"
 
+    size_class =
+      case assigns.size do
+        "xl" -> "size-12"
+        "md" -> "size-6"
+      end
+
     assigns =
       assigns
-      |> assign(initials: initials)
       |> assign(color: color)
+      |> assign(initials: initials)
+      |> assign(size_class: size_class)
 
     ~H"""
     <div class={[
@@ -26,7 +34,8 @@ defmodule LexWeb.Components.Avatar do
     ]}>
       <div
         class={[
-          "size-6 rounded-full",
+          @size_class,
+          "rounded-full",
           "flex items-center justify-center"
         ]}
         style={"background: #{@color}"}
