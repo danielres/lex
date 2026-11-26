@@ -16,7 +16,7 @@ defmodule LexWeb.Layouts.Navbar do
       "bg-base-300",
       "px-2 py-1 sm:py-2 pr-4 max-sm:pl-0",
       "flex items-center gap-3",
-      "border-b border-base-content/30"
+      "border-b border-base-content/20"
     ]}>
       <.toggle_button {assigns} />
       <div class="grow">
@@ -53,7 +53,7 @@ defmodule LexWeb.Layouts.Navbar do
             <.button_sign_out />
 
             <hr class={[
-              "border-base-content/30",
+              "border-base-content/20",
               "my-2"
             ]} />
 
@@ -90,17 +90,17 @@ defmodule LexWeb.Layouts.Navbar do
         aria-label="open sidebar"
         class={[
           "stacked",
-          "bg-base-300 hover:bg-base-100 transition",
           "cursor-pointer",
           "size-8 rounded",
-          "flex items-center justify-center"
+          "flex items-center justify-center",
+          "group"
         ]}
       >
         <.icon
           name="hero-bars-3-micro"
           class={[
             "size-5",
-            !@drawer_open? && "opacity-100",
+            !@drawer_open? && "opacity-70 group-hover:opacity-100 transition",
             @drawer_open? && "opacity-0",
             "transition"
           ]}

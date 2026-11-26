@@ -84,7 +84,11 @@ defmodule LexWeb.Layouts do
     ~H"""
     <button
       :if={assigns[:close_event]}
-      class={[@dialog? && "bg-base-200/30 cursor-pointer fixed inset-0 transition z-20"]}
+      class={[
+        @dialog? && "bg-base-200/30 hover:bg-base-200/10 transition",
+        @dialog? && "cursor-pointer",
+        @dialog? && "fixed inset-0 z-20"
+      ]}
       phx-click={@close_event}
       type="button"
     />
@@ -92,10 +96,10 @@ defmodule LexWeb.Layouts do
     <div class={[
       "mb-4 max-sm:fixed max-sm:w-full sm:sticky max-sm:top-10 sm:top-0 z-20",
       !@dialog? && "bg-base-200",
-      @dialog? && "bg-base-300/40 backdrop-blur"
+      @dialog? && "bg-base-300/20 backdrop-blur border-b border-base-content/20"
     ]}>
       <div class={[
-        "border-b border-base-content/20 py-2 shadow"
+        "border-b border-base-content/10 py-2"
       ]}>
         <div class={[
           "min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8"
@@ -134,7 +138,7 @@ defmodule LexWeb.Layouts do
             data-auto-animate-resize-only
             class={[
               "relative",
-              @dialog? && "Xmt-4 Xborder-t border-base-content/20 py-2"
+              @dialog? && "py-2"
             ]}
           >
             {render_slot(@dialog)}

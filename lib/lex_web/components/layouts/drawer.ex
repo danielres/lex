@@ -53,7 +53,7 @@ defmodule LexWeb.Layouts.Drawer do
   defp separator(assigns) do
     ~H"""
     <hr class={[
-      "border-base-content/30",
+      "border-base-content/15",
       @visible? && "opacity-100",
       !@visible? && "opacity-0",
       "transition"

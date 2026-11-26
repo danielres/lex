@@ -26,8 +26,8 @@ defmodule LexWeb.Components.Drawer do
       />
 
       <div class={[
-        "sm:bg-base-300/50 sm:backdrop-blur-lg",
-        "sm:border-r sm:border-base-content/30"
+        "sm:bg-base-300/40",
+        "sm:border-r sm:border-base-content/20"
       ]}>
         <div class={[
           "max-sm:z-50",
