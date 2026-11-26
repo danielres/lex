@@ -76,7 +76,7 @@ defmodule LexWeb.Layouts.Drawer do
         "flex items-center gap-2",
         "h-8 rounded",
         "text-sm",
-        "transition",
+        "transition"
       ] %>
 
       <% non_active_class = "opacity-50 hover:opacity-100" %>
