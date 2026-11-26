@@ -146,18 +146,11 @@ defmodule LexWeb.Live.Tagging.Components do
       <li>
         <.sorting_button
           phx-click={@event}
-          phx-value-by="alpha"
+          phx-value-by="interest"
         >
-          <.direction value={direction(@sorting, :alpha)} />
-
-          <div class={[
-            "size-4 rounded-full",
-            "flex items-center justify-center",
-            "text-xs font-semibold"
-          ]}>
-            Aa
-          </div>
-          <span class="text-sm opacity-80">{@alpha_label}</span>
+          <.direction value={direction(@sorting, :interest)} />
+          <.sort_dimension dimension="interest" />
+          <span class="text-sm opacity-80">Interest</span>
         </.sorting_button>
       </li>
 
@@ -175,11 +168,18 @@ defmodule LexWeb.Live.Tagging.Components do
       <li>
         <.sorting_button
           phx-click={@event}
-          phx-value-by="interest"
+          phx-value-by="alpha"
         >
-          <.direction value={direction(@sorting, :interest)} />
-          <.sort_dimension dimension="interest" />
-          <span class="text-sm opacity-80">Interest</span>
+          <.direction value={direction(@sorting, :alpha)} />
+
+          <div class={[
+            "size-4 rounded-full",
+            "flex items-center justify-center",
+            "text-xs font-semibold"
+          ]}>
+            Aa
+          </div>
+          <span class="text-sm opacity-80">{@alpha_label}</span>
         </.sorting_button>
       </li>
     </ul>
