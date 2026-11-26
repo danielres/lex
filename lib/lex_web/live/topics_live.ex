@@ -79,7 +79,10 @@ defmodule LexWeb.TopicsLive do
       ui={@ui}
     >
       <:page_head>
-        <Layouts.page_head dialog?={dialog?(@mode)}>
+        <Layouts.page_head
+          close_event={@mode != :view && "mode:reset"}
+          dialog?={dialog?(@mode)}
+        >
           <:crumb><span class="opacity-80">Topics</span></:crumb>
           <:title>Overview</:title>
           <:actions><.action_buttons mode={@mode} /></:actions>
