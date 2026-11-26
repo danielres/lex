@@ -17,7 +17,8 @@ defmodule LexWeb.Components.Avatar do
 
     size_class =
       case assigns.size do
-        "xl" -> "size-12"
+        "xl" -> "size-14"
+        "lg" -> "size-10"
         "md" -> "size-6"
       end
 
