@@ -3,7 +3,7 @@ import autoAnimate, { getTransitionSizes } from "@formkit/auto-animate"
 const duration = 250
 const easing = "ease-in-out"
 
-function animation(el, action, oldCoords, newCoords) {
+function animation(el, action, oldCoords, newCoords, resizeOnly) {
   const animationDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ? 0
     : duration
@@ -25,8 +25,8 @@ function animation(el, action, oldCoords, newCoords) {
       oldCoords,
       newCoords,
     )
-    const start = { transform: `translate(${deltaX}px, ${deltaY}px)` }
-    const end = { transform: "translate(0, 0)" }
+    const start = resizeOnly ? {} : { transform: `translate(${deltaX}px, ${deltaY}px)` }
+    const end = resizeOnly ? {} : { transform: "translate(0, 0)" }
 
     if (widthFrom !== widthTo) {
       start.width = `${widthFrom}px`
@@ -49,7 +49,10 @@ function animation(el, action, oldCoords, newCoords) {
 
 export const AutoAnimate = {
   mounted() {
-    this.animation = autoAnimate(this.el, animation)
+    const resizeOnly = this.el.hasAttribute("data-auto-animate-resize-only")
+    this.animation = autoAnimate(this.el, (el, action, oldCoords, newCoords) =>
+      animation(el, action, oldCoords, newCoords, resizeOnly)
+    )
   },
 
   destroyed() {

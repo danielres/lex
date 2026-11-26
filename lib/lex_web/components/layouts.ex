@@ -121,6 +121,7 @@ defmodule LexWeb.Layouts do
       <div
         id="layout-dialog-wrapper"
         phx-hook="AutoAnimate"
+        data-auto-animate-resize-only
         class={[
           "relative",
           @dialog? && "bg-base-300/60 rounded px-6 py-4",
