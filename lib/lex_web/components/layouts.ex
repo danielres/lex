@@ -84,7 +84,7 @@ defmodule LexWeb.Layouts do
     ~H"""
     <button
       :if={assigns[:close_event]}
-      class={[@dialog? && "bg-base-200/30 cursor-pointer fixed inset-0 transition z-30"]}
+      class={[@dialog? && "bg-base-200/30 cursor-pointer fixed inset-0 transition z-20"]}
       phx-click={@close_event}
       type="button"
     />
