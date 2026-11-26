@@ -36,6 +36,7 @@ defmodule LexWeb.Layouts do
   attr :ui, :map, required: true
 
   slot :inner_block, required: true
+  slot :page_head, required: false
 
   def app(assigns) do
     ~H"""
@@ -60,7 +61,8 @@ defmodule LexWeb.Layouts do
         scope={@scope}
         socket={@socket}
       >
-        <main class="min-w-0 max-w-[90ch] mx-auto p-2 sm:p-8">
+        {render_slot(@page_head)}
+        <main class="min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8">
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
@@ -87,48 +89,57 @@ defmodule LexWeb.Layouts do
       type="button"
     />
 
-    <div class="mb-4 sticky top-0 bg-base-200 z-50">
+    <div class={[
+      "mb-4 sticky top-0 z-40",
+      !@dialog? && "bg-base-200",
+      @dialog? && "bg-base-300/20 backdrop-blur"
+    ]}>
       <div class={[
-        "text-xl border-b-2 border-base-content/20 pb-2",
-        @dialog? && "border-none",
-        "flex items-end gap-2"
+        "border-b-2 border-base-content/10 py-2"
       ]}>
-        <h2 class="grow">
-          <div class="flex items-center gap-1 text-sm">
-            <%= for crumb <- @crumb do %>
-              <span class="leading-none">{render_slot(crumb)}</span>
-              <.icon
-                name="hero-chevron-right-micro"
-                class="size-3 opacity-60"
-              />
-            <% end %>
+        <div class={[
+          "min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8"
+        ]}>
+          <div class={[
+            "flex items-end gap-2"
+          ]}>
+            <h2 class="grow text-xl">
+              <div class="flex items-center gap-1 text-sm">
+                <%= for crumb <- @crumb do %>
+                  <span class="leading-none">{render_slot(crumb)}</span>
+                  <.icon
+                    name="hero-chevron-right-micro"
+                    class="size-3 opacity-60"
+                  />
+                <% end %>
 
-            <span class="opacity-50">&nbsp;</span>
+                <span class="opacity-50">&nbsp;</span>
+              </div>
+
+              <%= for {title, index} <- Enum.with_index(@title) do %>
+                <.icon
+                  :if={index > 0}
+                  name="hero-chevron-right-micro"
+                  class="size-4 opacity-60"
+                />
+                <span class="leading-none">{render_slot(title)}</span>
+              <% end %>
+            </h2>
+            {render_slot(@actions)}
           </div>
 
-          <%= for {title, index} <- Enum.with_index(@title) do %>
-            <.icon
-              :if={index > 0}
-              name="hero-chevron-right-micro"
-              class="size-4 opacity-60"
-            />
-            <span class="leading-none">{render_slot(title)}</span>
-          <% end %>
-        </h2>
-        {render_slot(@actions)}
-      </div>
-
-      <div
-        id="layout-dialog-wrapper"
-        phx-hook="AutoAnimate"
-        data-auto-animate-resize-only
-        class={[
-          "relative",
-          @dialog? && "bg-base-300/60 rounded px-6 py-4",
-          @dialog? && "border-2 border-base-content/30"
-        ]}
-      >
-        {render_slot(@dialog)}
+          <div
+            id="layout-dialog-wrapper"
+            phx-hook="AutoAnimate"
+            data-auto-animate-resize-only
+            class={[
+              "relative",
+              @dialog? && "Xmt-4 Xborder-t border-base-content/20 py-2"
+            ]}
+          >
+            {render_slot(@dialog)}
+          </div>
+        </div>
       </div>
     </div>
     """

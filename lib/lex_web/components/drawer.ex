@@ -16,7 +16,7 @@ defmodule LexWeb.Components.Drawer do
       data-drawer-open={to_string(@open?)}
       data-testid="drawer"
     >
-      <div class="order-2 min-w-0 max-sm:mt-14">
+      <div class="order-2 min-w-0 max-sm:mt-11">
         {render_slot(@inner_block)}
       </div>
 

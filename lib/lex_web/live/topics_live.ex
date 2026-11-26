@@ -78,13 +78,16 @@ defmodule LexWeb.TopicsLive do
       socket={@socket}
       ui={@ui}
     >
-      <Layouts.page_head dialog?={dialog?(@mode)}>
-        <:title>Topics</:title>
-        <:actions><.action_buttons mode={@mode} /></:actions>
-        <:dialog :if={dialog?(@mode)}>
-          <Creation.render_form creation={@creation} topics={@graph.topics} />
-        </:dialog>
-      </Layouts.page_head>
+      <:page_head>
+        <Layouts.page_head dialog?={dialog?(@mode)}>
+          <:crumb>Topics</:crumb>
+          <:title>Overview</:title>
+          <:actions><.action_buttons mode={@mode} /></:actions>
+          <:dialog :if={dialog?(@mode)}>
+            <Creation.render_form creation={@creation} topics={@graph.topics} />
+          </:dialog>
+        </Layouts.page_head>
+      </:page_head>
 
       <div inert={dialog?(@mode)}>
         <Graph.render

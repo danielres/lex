@@ -134,26 +134,28 @@ defmodule LexWeb.TopicLive do
       socket={@socket}
       ui={@ui}
     >
-      <Layouts.page_head
-        close_event={@live_action != :show && "close_dialog"}
-        dialog?={@live_action != :show}
-      >
-        <:crumb>
-          <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
-        </:crumb>
-        <:title>{@topic.name}</:title>
-        <:actions>
-          <.action_buttons
-            live_action={@live_action}
-            sortable?={@taggings.status == :ready}
-          />
-        </:actions>
-        <:dialog>
-          <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
-          <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
-          <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
-        </:dialog>
-      </Layouts.page_head>
+      <:page_head>
+        <Layouts.page_head
+          close_event={@live_action != :show && "close_dialog"}
+          dialog?={@live_action != :show}
+        >
+          <:crumb>
+            <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
+          </:crumb>
+          <:title>{@topic.name}</:title>
+          <:actions>
+            <.action_buttons
+              live_action={@live_action}
+              sortable?={@taggings.status == :ready}
+            />
+          </:actions>
+          <:dialog>
+            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
+            <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
+          </:dialog>
+        </Layouts.page_head>
+      </:page_head>
 
       <div class="sm:flex gap-3" inert={@live_action == :sort_taggings}>
         <div class="space-y-4 min-w-0 grow">

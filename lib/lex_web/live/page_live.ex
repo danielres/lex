@@ -55,26 +55,33 @@ defmodule LexWeb.PageLive do
       socket={@socket}
       ui={@ui}
     >
+      <:page_head>
+        <Layouts.page_head
+          :if={@page}
+          dialog?={dialog?(@live_action)}
+          close_event={@live_action == :info && "close_dialog"}
+        >
+          <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
+          <:title>{@page.title}</:title>
+
+          <:actions>
+            <.action_buttons
+              editing={@editing}
+              live_action={@live_action}
+              page={@page}
+              scope={@scope}
+            />
+          </:actions>
+
+          <:dialog>
+            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
+            <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
+          </:dialog>
+        </Layouts.page_head>
+      </:page_head>
+
       <Creation.render :if={@page == nil} creation={@creation} scope={@scope} />
-
-      <Layouts.page_head
-        :if={@page}
-        dialog?={dialog?(@live_action)}
-        close_event={@live_action == :info && "close_dialog"}
-      >
-        <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
-        <:title>{@page.title}</:title>
-
-        <:actions>
-          <.action_buttons editing={@editing} live_action={@live_action} page={@page} scope={@scope} />
-        </:actions>
-
-        <:dialog>
-          <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
-          <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
-          <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
-        </:dialog>
-      </Layouts.page_head>
 
       <div :if={@page} class="stacked items-start">
         <section

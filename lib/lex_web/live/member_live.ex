@@ -59,11 +59,7 @@ defmodule LexWeb.MemberLive do
       socket={@socket}
       ui={@ui}
     >
-      <div
-        phx-click-away={if dialog?(@mode), do: "taggings:mode:reset"}
-        phx-key="escape"
-        phx-window-keydown={if dialog?(@mode), do: "taggings:mode:reset"}
-      >
+      <:page_head>
         <Layouts.page_head dialog?={dialog?(@mode)}>
           <:crumb>
             <.link navigate={Path.members(@scope)} class="opacity-80 hover:opacity-100 transition">Members</.link>
@@ -80,23 +76,21 @@ defmodule LexWeb.MemberLive do
             />
 
             <Taggings.render_sorting :if={@mode == :sort_taggings} taggings={@taggings} />
-            <%!-- <div phx-click-away={if @mode == :sort_taggings, do: "taggings:mode:reset"}> --%>
-            <%!-- </div> --%>
           </:dialog>
         </Layouts.page_head>
+      </:page_head>
 
-        <div class="space-y-4" inert={@mode == :sort_taggings}>
-          <Avatar.render size="xl" class="reactive" user={@profile} />
+      <div class="space-y-4" inert={@mode == :sort_taggings}>
+        <Avatar.render size="xl" class="reactive" user={@profile} />
 
-          <Taggings.render_list
-            dimensions={@taggings.dimensions}
-            groups={@taggings.groups}
-            own_profile?={@taggings.own_profile?}
-            scope={@scope}
-          />
+        <Taggings.render_list
+          dimensions={@taggings.dimensions}
+          groups={@taggings.groups}
+          own_profile?={@taggings.own_profile?}
+          scope={@scope}
+        />
 
-          <div>Member for: {Utils.Time.relative(@profile.inserted_at)}</div>
-        </div>
+        <div>Member for: {Utils.Time.relative(@profile.inserted_at)}</div>
       </div>
     </Layouts.app>
     """

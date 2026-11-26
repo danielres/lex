@@ -93,87 +93,91 @@ defmodule LexWeb.WikiLive do
       socket={@socket}
       ui={@ui}
     >
-      <div class="space-y-4">
-        <div class="flex justify-end">
-          <.link
-            navigate={Path.wiki_home(@scope)}
-            class="btn btn-info px-2 rounded-box"
-          >
-            <.icon name="hero-home-micro" />
-            <span>Home</span>
-            <.icon name="hero-chevron-right-micro" />
-          </.link>
-        </div>
+      <:page_head>
+        <Layouts.page_head>
+          <:crumb>Wiki</:crumb>
+          <:title>Overview</:title>
+          <:actions>
+            <.link
+              navigate={Path.wiki_home(@scope)}
+              class="btn btn-soft btn-sm px-2 rounded-box"
+            >
+              <.icon name="hero-home-micro" />
+              <span>Homepage</span>
+              <.icon name="hero-chevron-right-micro" />
+            </.link>
+          </:actions>
+        </Layouts.page_head>
+      </:page_head>
 
-        <div class="bg-base-300 p-0 rounded-box">
-          <table class="table max-sm:table-sm">
-            <thead>
-              <tr>
-                <th aria-sort={aria_sort(@sort_by, @sort_direction, :title)} class="w-1/3">
-                  <.sortable
-                    field={:title}
-                    sort_by={@sort_by}
-                    sort_direction={@sort_direction}
-                  >
-                    Page
-                  </.sortable>
-                </th>
-                <th aria-sort={aria_sort(@sort_by, @sort_direction, :inserted_at)} class="w-1/3">
-                  <.sortable
-                    field={:inserted_at}
-                    sort_by={@sort_by}
-                    sort_direction={@sort_direction}
-                  >
-                    Created
-                  </.sortable>
-                </th>
-                <th aria-sort={aria_sort(@sort_by, @sort_direction, :last_updated_at)}>
-                  <.sortable
-                    field={:last_updated_at}
-                    sort_by={@sort_by}
-                    sort_direction={@sort_direction}
-                  >
-                    Updated
-                  </.sortable>
-                </th>
-              </tr>
-            </thead>
+      <div class="bg-card p-0 rounded-box">
+        <table class="table max-sm:table-sm">
+          <thead>
+            <tr>
+              <th aria-sort={aria_sort(@sort_by, @sort_direction, :title)} class="w-1/3">
+                <.sortable
+                  field={:title}
+                  sort_by={@sort_by}
+                  sort_direction={@sort_direction}
+                >
+                  Page
+                </.sortable>
+              </th>
+              <th aria-sort={aria_sort(@sort_by, @sort_direction, :inserted_at)} class="w-1/3">
+                <.sortable
+                  field={:inserted_at}
+                  sort_by={@sort_by}
+                  sort_direction={@sort_direction}
+                >
+                  Created
+                </.sortable>
+              </th>
+              <th aria-sort={aria_sort(@sort_by, @sort_direction, :last_updated_at)}>
+                <.sortable
+                  field={:last_updated_at}
+                  sort_by={@sort_by}
+                  sort_direction={@sort_direction}
+                >
+                  Updated
+                </.sortable>
+              </th>
+            </tr>
+          </thead>
 
-            <tbody phx-hook="AutoAnimate" id="wiki-pages-entries">
-              <tr :for={page <- @pages} id={"wiki-pages-entries-" <> page.id}>
-                <td>
-                  <.link
-                    class={[
-                      "font-semibold",
-                      "flex items-center gap-1",
-                      page.slug != "home" && "text-base-content/75",
-                      page.slug == "home" && "text-base-content",
-                      "hover:text-info",
-                      "transition"
-                    ]}
-                    navigate={Path.to(@scope, page)}
-                  >
-                    {page.title}
-                    <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />
-                  </.link>
-                  <div
-                    class="mt-1 flex items-center gap-2 text-xs text-base-content/60"
-                    data-testid={"page-list-author-#{page.id}"}
-                  >
-                    <Avatar.render user={page.author} />
-                    <span>{page.author.display_name}</span>
-                  </div>
-                </td>
-                <td>
-                  {Utils.Time.relative(page.inserted_at)}
-                </td>
-                <td>
-                  {Utils.Time.relative(page.last_updated_at)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <tbody phx-hook="AutoAnimate" id="wiki-pages-entries">
+            <tr :for={page <- @pages} id={"wiki-pages-entries-" <> page.id}>
+              <td>
+                <.link
+                  class={[
+                    "font-semibold",
+                    "flex items-center gap-1",
+                    page.slug != "home" && "text-base-content/75",
+                    page.slug == "home" && "text-base-content",
+                    "hover:text-info",
+                    "transition"
+                  ]}
+                  navigate={Path.to(@scope, page)}
+                >
+                  {page.title}
+                  <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />
+                </.link>
+                <div
+                  class="mt-1 flex items-center gap-2 text-xs text-base-content/60"
+                  data-testid={"page-list-author-#{page.id}"}
+                >
+                  <Avatar.render user={page.author} />
+                  <span>{page.author.display_name}</span>
+                </div>
+              </td>
+              <td>
+                {Utils.Time.relative(page.inserted_at)}
+              </td>
+              <td>
+                {Utils.Time.relative(page.last_updated_at)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </Layouts.app>
     """

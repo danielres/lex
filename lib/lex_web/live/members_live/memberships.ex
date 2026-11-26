@@ -124,8 +124,8 @@ defmodule LexWeb.MembersLive.Memberships do
       class={[
         "py-4",
         "px-4 py-2 rounded",
-        @membership.status == :active && "bg-base-300",
-        @membership.status != :active && "bg-base-300/50"
+        "bg-card",
+        @membership.status != :active && "opacity-80"
       ]}
       data-testid="membership"
     >

@@ -168,3 +168,7 @@ html, body {
 .clickable {
   @apply opacity-80 hover:opacity-100 transition cursor-pointer;
 }
+
+.bg-card {
+  @apply bg-base-100/40;
+}
