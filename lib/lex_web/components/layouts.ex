@@ -103,7 +103,7 @@ defmodule LexWeb.Layouts do
           <div class={[
             "flex items-end gap-2"
           ]}>
-            <h2 class="grow text-xl">
+            <h2 class="grow text-lg sm:text-xl">
               <div class="flex items-center gap-1 text-sm">
                 <%= for crumb <- @crumb do %>
                   <span class="leading-none">{render_slot(crumb)}</span>
