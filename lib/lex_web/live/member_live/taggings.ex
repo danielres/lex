@@ -140,7 +140,7 @@ defmodule LexWeb.MemberLive.Taggings do
   def render_list(assigns) do
     ~H"""
     <Components.cards>
-      <p :if={@groups == []} class="opacity-60">No topics assigned yet</p>
+      <%!-- <p :if={@groups == []} class="opacity-60">No topics assigned yet</p> --%>
 
       <Components.card :for={group <- @groups} id={"profile-topic-#{group.topic.id}"}>
         <:title>
