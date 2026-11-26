@@ -82,32 +82,6 @@ defmodule LexWeb.Layouts.Drawer do
 
       <li>
         <.link
-          navigate={Path.to(@scope.space)}
-          class={[
-            link_class,
-            @active == "space" && active_class
-          ]}
-        >
-          <.icon name="hero-chart-bar-micro" />
-          <span :if={@open?}>Overview</span>
-        </.link>
-      </li>
-
-      <li>
-        <.link
-          navigate={Path.members(@scope)}
-          class={[
-            link_class,
-            @active == "members" && active_class
-          ]}
-        >
-          <.icon name="hero-user-group-mini" />
-          <span :if={@open?}>Members</span>
-        </.link>
-      </li>
-
-      <li>
-        <.link
           navigate={Path.wiki_home(@scope)}
           class={[
             link_class,
@@ -130,6 +104,19 @@ defmodule LexWeb.Layouts.Drawer do
         >
           <.icon name="hero-tag-mini" />
           <span :if={@open?}>Topics</span>
+        </.link>
+      </li>
+
+      <li>
+        <.link
+          navigate={Path.members(@scope)}
+          class={[
+            link_class,
+            @active == "members" && active_class
+          ]}
+        >
+          <.icon name="hero-user-group-mini" />
+          <span :if={@open?}>Members</span>
         </.link>
       </li>
     </ul>
