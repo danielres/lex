@@ -90,7 +90,7 @@ defmodule LexWeb.Layouts do
     />
 
     <div class={[
-      "mb-4 sticky top-0 z-40",
+      "mb-4 max-sm:fixed max-sm:w-full sm:sticky max-sm:top-10 sm:top-0 z-20",
       !@dialog? && "bg-base-200",
       @dialog? && "bg-base-300/20 backdrop-blur"
     ]}>
