@@ -62,7 +62,7 @@ defmodule LexWeb.Layouts do
         socket={@socket}
       >
         {render_slot(@page_head)}
-        <main class="min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8">
+        <main class="min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8 max-sm:mt-30">
           {render_slot(@inner_block)}
         </main>
       </Drawer.render>
