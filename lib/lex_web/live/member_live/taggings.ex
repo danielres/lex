@@ -95,7 +95,7 @@ defmodule LexWeb.MemberLive.Taggings do
       active?={@mode == :add_tagging}
       icon="hero-plus-micro"
       phx-click={delegate_event((@mode == :add_tagging && "mode:reset") || "form:new")}
-      title="Sort"
+      title="Add assessment"
     />
     """
   end

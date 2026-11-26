@@ -130,7 +130,7 @@ defmodule LexWeb.Layouts do
   attr :icon, :string, required: true
   attr :navigate, :string, default: nil
   attr :patch, :string, default: nil
-  attr :rest, :global, include: ~w(patch)
+  attr :rest, :global, include: ~w(disabled)
 
   def action_button(assigns) do
     attrs =

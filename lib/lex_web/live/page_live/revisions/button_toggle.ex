@@ -11,6 +11,7 @@ defmodule LexWeb.PageLive.Revisions.ButtonToggle do
       title={(@active? && "Close") || "View versions"}
       icon="hero-clock-solid"
       active?={@active?}
+      data-testid="revisions-toggle"
       patch={(@active? && Path.to(@scope, @page)) || Path.revisions(@scope, @page)}
     />
     """

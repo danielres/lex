@@ -10,6 +10,8 @@ defmodule LexWeb.PageLive.Editing.ButtonToggle do
     ~H"""
     <Layouts.action_button
       active?={@active?}
+      data-testid="editing-toggle"
+      disabled={@editing.saving?}
       title={button_label(@active?, @editing.saving?)}
       phx-click={delegate_event("toggle")}
       icon="hero-pencil-mini"

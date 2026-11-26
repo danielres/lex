@@ -93,6 +93,7 @@ defmodule LexWeb.MembersLive.Invites do
     <Layouts.action_button
       :if={can?(@scope, :manage_members)}
       active?={@invites.open?}
+      data-testid="add-members-button"
       icon="hero-user-plus-micro"
       phx-click={delegate_event("toggle")}
       title="Add members"

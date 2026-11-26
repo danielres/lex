@@ -333,7 +333,7 @@ defmodule LexWeb.PageLiveTest do
 
     assert has_element?(view, "[data-testid='page-editor'][data-editable=true]")
     assert has_element?(view, "button[aria-label='End editing']")
-    assert has_element?(view, "[aria-label='Page versions']")
+    assert has_element?(view, "[data-testid='revisions-toggle']")
 
     view
     |> element("[data-testid='editing-toggle']")
