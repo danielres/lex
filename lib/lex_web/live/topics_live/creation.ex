@@ -4,7 +4,7 @@ defmodule LexWeb.TopicsLive.Creation do
 
   alias Lex.Topics.Graph
   alias Lex.Topics.Topic
-  alias LexWeb.Live.Components.Combobox
+  alias LexWeb.Components.Combobox
 
   def on_mount(_params, _session, socket) do
     socket

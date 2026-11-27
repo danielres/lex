@@ -1,4 +1,4 @@
-defmodule LexWeb.Live.Components.Combobox do
+defmodule LexWeb.Components.Combobox do
   use LexWeb, :html
 
   attr :field, Phoenix.HTML.FormField, required: true

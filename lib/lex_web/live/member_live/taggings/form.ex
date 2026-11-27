@@ -4,7 +4,7 @@ defmodule LexWeb.MemberLive.Taggings.Form do
 
   alias Lex.Topics.Tagging
   alias Lex.Topics.Topic
-  alias LexWeb.Live.Components.Combobox
+  alias LexWeb.Components.Combobox
 
   def on_mount(_params, _session, socket) do
     scope = socket.assigns.scope
@@ -75,7 +75,9 @@ defmodule LexWeb.MemberLive.Taggings.Form do
       dimensions: dimensions_from_params(params, socket.assigns.taggings.form.own_profile?),
       text: params["text"]
     }
+
     dbg(profile)
+
     case Tagging.set(profile, topic, tagged_by_membership, content, scope: scope) do
       {:ok, nil} ->
         socket =
@@ -143,16 +145,18 @@ defmodule LexWeb.MemberLive.Taggings.Form do
       phx-hook="ScrollToTop"
       phx-submit={delegate_event("save")}
     >
-      <Combobox.field
-        display_value={@topic && @topic.name}
-        empty_message="No matching topic"
-        field={@form.data[:topic_id]}
-        id="profile-tagging-topic"
-        label="Topic"
-        options_json={@form.options_json}
-        placeholder="Search topics"
-        suggested_values_json={@form.suggested_values_json}
-      />
+      <div class="max-w-64">
+        <Combobox.field
+          display_value={@topic && @topic.name}
+          empty_message="No matching topic"
+          field={@form.data[:topic_id]}
+          id="profile-tagging-topic"
+          label="Topic"
+          options_json={@form.options_json}
+          placeholder="Search topics"
+          suggested_values_json={@form.suggested_values_json}
+        />
+      </div>
 
       <div
         class={[
