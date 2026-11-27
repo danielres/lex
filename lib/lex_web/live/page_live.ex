@@ -82,7 +82,9 @@ defmodule LexWeb.PageLive do
           </:actions>
 
           <:dialog>
-            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <div :if={@live_action == :edit_title} class="pt-4">
+              <EditTitle.render_form edit_title={@edit_title} />
+            </div>
             <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
             <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
           </:dialog>

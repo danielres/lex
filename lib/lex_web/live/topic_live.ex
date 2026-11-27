@@ -158,7 +158,9 @@ defmodule LexWeb.TopicLive do
             />
           </:actions>
           <:dialog>
-            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <div :if={@live_action == :edit_title} class="pt-4">
+              <EditTitle.render_form edit_title={@edit_title} />
+            </div>
             <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
             <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
           </:dialog>
