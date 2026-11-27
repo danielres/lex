@@ -83,13 +83,6 @@ defmodule LexWeb.PageLive.EditTitle do
 
   def render_form(assigns) do
     ~H"""
-    <h2 class={[
-      "small-caps text-lg",
-      "mb-2"
-    ]}>
-      <span>Page name and path</span>
-    </h2>
-
     <.form
       for={@edit_title.form}
       data-testid="edit-title-form"

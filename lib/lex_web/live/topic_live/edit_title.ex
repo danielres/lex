@@ -90,8 +90,6 @@ defmodule LexWeb.TopicLive.EditTitle do
 
   def render_form(assigns) do
     ~H"""
-    <h2 class="small-caps text-lg mb-2">Name and path</h2>
-
     <.form
       for={@edit_title.form}
       id="topic-title-form"

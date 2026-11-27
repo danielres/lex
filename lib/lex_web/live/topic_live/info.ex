@@ -2,7 +2,7 @@ defmodule LexWeb.TopicLive.Info do
   use LexWeb, :live_view
   use LiveDelegate, path: [:info]
 
-  alias LexWeb.Components.Avatar
+  alias LexWeb.Components.ResourceInfo
   alias LexWeb.Layouts
   alias LexWeb.Router.Path
   alias LexWeb.TopicLive.EditTitle
@@ -20,46 +20,20 @@ defmodule LexWeb.TopicLive.Info do
     {:noreply, socket}
   end
 
-  defp path_preview(scope, topic) do
-    path = Path.to(scope, topic) |> String.split("/") |> Enum.slice(2..9) |> Enum.join("/")
-    "/" <> path
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <div>
-        <h2 class={[
-          "small-caps text-lg",
-          "flex items-center gap-2"
-        ]}>
-          <span>Name and path</span>
-          <EditTitle.button_edit :if={Ash.can?({@topic, :update}, @scope)} />
-        </h2>
-
-        <div class="ml-4">
-          <div class="flex items-baseline gap-2">
-            {@topic.name}
-          </div>
-          <div class="opacity-80 font-mono">{path_preview(@scope, @topic)}</div>
-        </div>
-      </div>
+    <ResourceInfo.container>
+      <ResourceInfo.path_preview path={Path.to(@scope, @topic)} />
 
       <hr class="text-base-content/20 my-4" />
 
-      <div
-        class="space-y-1"
+      <ResourceInfo.created_by
+        author={@topic.author}
+        inserted_at={@topic.inserted_at}
         data-testid="topic-author"
-      >
-        <h2 class="small-caps text-lg">Created by</h2>
-        <div class="flex items-baseline gap-2 ml-4">
-          <Avatar.render user={@topic.author} />
-          <span class="opacity-100">{@topic.author.display_name}</span>
-          <span class="text-sm">{Utils.Time.relative(@topic.inserted_at)}</span>
-        </div>
-      </div>
-    </div>
+      />
+    </ResourceInfo.container>
     """
   end
 
