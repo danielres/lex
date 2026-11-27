@@ -32,7 +32,9 @@ defmodule LexWeb.Components.ResourceRename do
       for={@form}
       id={@id}
       phx-change={@change_event}
+      phx-key="Escape"
       phx-submit={@save_event}
+      phx-window-keydown={@cancel_event}
       tabindex="-1"
       class="space-y-2"
       {@rest}
@@ -44,8 +46,6 @@ defmodule LexWeb.Components.ResourceRename do
         id={@field.id}
         name={@field.name}
         phx-hook="CapitalizeFirstLetter"
-        phx-key="Escape"
-        phx-keydown={@cancel_event}
         value={@field.value}
         phx-mounted={JS.focus() |> JS.dispatch("focus-at-end")}
       />
