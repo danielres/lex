@@ -6,15 +6,15 @@ defmodule LexWeb.PageLive.Navigation do
   alias Lex.Accounts.Membership.Access
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageRevision
-  alias Lex.Wiki.PageTitle
+  alias Lex.Wiki.PageName
   alias LexWeb.PageLive.Creation
-  alias LexWeb.PageLive.EditTitle
+  alias LexWeb.Live.Rename
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
   alias LexWeb.Router.Path
   alias Utils.Slugify
 
-  @creation_title_flash "page_creation_title"
+  @creation_name_flash "page_creation_name"
 
   def handle_params(socket, %{"page_slug" => slug} = params) do
     scope = socket.assigns.scope
@@ -35,7 +35,7 @@ defmodule LexWeb.PageLive.Navigation do
   def load_page(socket, page, revision_number) do
     socket
     |> assign(page: page)
-    |> EditTitle.reload(page)
+    |> Rename.clear()
     |> Revisions.reload(page, revision_number)
     |> PageRepository.reload()
   end
@@ -87,8 +87,8 @@ defmodule LexWeb.PageLive.Navigation do
       end
 
     socket =
-      case PageTitle.normalize(slug) do
-        {:ok, title} -> socket |> put_flash(@creation_title_flash, title)
+      case PageName.normalize(slug) do
+        {:ok, name} -> socket |> put_flash(@creation_name_flash, name)
         {:error, _message} -> socket
       end
 
@@ -99,11 +99,11 @@ defmodule LexWeb.PageLive.Navigation do
 
   defp load_page_from_slug(socket, scope, slug, params) do
     live_action = socket.assigns.live_action
-    suggested_title = socket.assigns.flash |> Phoenix.Flash.get(@creation_title_flash)
+    suggested_name = socket.assigns.flash |> Phoenix.Flash.get(@creation_name_flash)
 
     socket =
       if connected?(socket) do
-        socket |> clear_flash(@creation_title_flash)
+        socket |> clear_flash(@creation_name_flash)
       else
         socket
       end
@@ -117,12 +117,12 @@ defmodule LexWeb.PageLive.Navigation do
       {:ok, nil} when slug == "home" ->
         socket =
           socket
-          |> load_home_or_creation(scope, slug, suggested_title, params["revision_number"])
+          |> load_home_or_creation(scope, slug, suggested_name, params["revision_number"])
 
         {:noreply, socket}
 
       {:ok, nil} ->
-        socket = socket |> load_creation(scope, slug, suggested_title)
+        socket = socket |> load_creation(scope, slug, suggested_name)
 
         {:noreply, socket}
 
@@ -139,19 +139,20 @@ defmodule LexWeb.PageLive.Navigation do
     end
   end
 
-  defp load_home_or_creation(socket, scope, slug, suggested_title, revision_number) do
+  defp load_home_or_creation(socket, scope, slug, suggested_name, revision_number) do
     if scope |> Access.can?(:edit_pages) do
       page = scope |> Page.ensure!("Home")
 
       socket |> load_page(page, revision_number)
     else
-      socket |> load_creation(scope, slug, suggested_title)
+      socket |> load_creation(scope, slug, suggested_name)
     end
   end
 
-  defp load_creation(socket, scope, slug, suggested_title) do
+  defp load_creation(socket, scope, slug, suggested_name) do
     socket
     |> assign(page: nil)
-    |> Creation.reload(scope, slug, suggested_title)
+    |> Rename.clear()
+    |> Creation.reload(scope, slug, suggested_name)
   end
 end

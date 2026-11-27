@@ -4,8 +4,9 @@ defmodule LexWeb.PageLive do
 
   alias Ash.Notifier.Notification
   alias Lex.Wiki
+  alias Lex.Wiki.Page
+  alias LexWeb.Live.Rename
   alias LexWeb.PageLive.Creation
-  alias LexWeb.PageLive.EditTitle
   alias LexWeb.PageLive.Editing
   alias LexWeb.PageLive.Info
   alias LexWeb.PageLive.Navigation
@@ -16,7 +17,7 @@ defmodule LexWeb.PageLive do
   alias LexWeb.UI
 
   delegate(:creation, Creation, info: false)
-  delegate(:edit_title, EditTitle, info: false)
+  delegate(:rename, Rename, info: false)
   delegate(:editing, Editing, info: false)
   delegate(:info, Info, info: false, mount: false)
   delegate(:page_repository, PageRepository, info: false)
@@ -26,7 +27,6 @@ defmodule LexWeb.PageLive do
   @impl true
   def mount(params, session, socket) do
     socket = socket |> delegate_mount(params, session)
-    # socket = socket |> assign(live_action: :edit_title)
     if connected?(socket), do: Wiki.subscribe()
     {:ok, socket}
   end
@@ -41,7 +41,7 @@ defmodule LexWeb.PageLive do
 
   def dialog?(live_action) do
     live_action == :info ||
-      live_action == :edit_title ||
+      live_action == :rename ||
       live_action == :revisions
   end
 
@@ -63,10 +63,10 @@ defmodule LexWeb.PageLive do
         >
           <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
           <:title>
-            {@page.title}
+            {@page.name}
 
             <span class="ml-2">
-              <EditTitle.button_edit :if={
+              <Rename.button_edit label="Edit page name" :if={
                 @live_action == :info && @page.slug != "home" && Ash.can?({@page, :rename}, @scope)
               } />
             </span>
@@ -82,8 +82,13 @@ defmodule LexWeb.PageLive do
           </:actions>
 
           <:dialog>
-            <div :if={@live_action == :edit_title} class="pt-4">
-              <EditTitle.render_form edit_title={@edit_title} scope={@scope} />
+            <div :if={@live_action == :rename} class="pt-4">
+              <Rename.render_form
+                form={@rename.form}
+                label="Page title"
+                path_prefix="/wiki/"
+                deletable?={Ash.can?({@page, :destroy}, @scope)}
+              />
             </div>
             <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
             <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
@@ -205,7 +210,28 @@ defmodule LexWeb.PageLive do
     """
   end
 
+  def handle_event(
+        "rename:open",
+        _params,
+        %{assigns: %{live_action: :info, page: %Page{} = page, scope: scope}} = socket
+      )
+      when page.slug != "home" do
+    if Ash.can?({page, :rename}, scope) do
+      {:noreply, Rename.open(socket, page)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event(
+        "rename:delete",
+        _params,
+        %{assigns: %{live_action: :rename, page: page, scope: scope}} = socket
+      ) do
+    {:noreply, Rename.delete(socket, page, "page", Path.wiki(scope))}
+  end
+
   def handle_event("close_dialog", _params, socket) do
-    {:noreply, assign(socket, :live_action, :view)}
+    {:noreply, socket |> Rename.clear() |> assign(:live_action, :show)}
   end
 end

@@ -4,6 +4,7 @@ defmodule LexWeb.PageLive.Info do
 
   alias LexWeb.Components.ResourceInfo
   alias LexWeb.Layouts
+  alias LexWeb.Live.Rename
   alias LexWeb.Router.Path
 
   @impl true
@@ -14,7 +15,7 @@ defmodule LexWeb.PageLive.Info do
         _ -> :info
       end
 
-    socket = socket |> assign(live_action: live_action)
+    socket = socket |> Rename.clear() |> assign(live_action: live_action)
 
     {:noreply, socket}
   end

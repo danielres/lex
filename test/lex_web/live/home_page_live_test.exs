@@ -39,7 +39,7 @@ defmodule LexWeb.HomePageLiveTest do
              %{
                author_id: first_author_id,
                space_id: first_space_id,
-               title: "Home",
+               name: "Home",
                slug: "home"
              }
            ] =
@@ -49,7 +49,7 @@ defmodule LexWeb.HomePageLiveTest do
              %{
                author_id: second_author_id,
                space_id: second_space_id,
-               title: "Home",
+               name: "Home",
                slug: "home"
              }
            ] =
@@ -74,12 +74,12 @@ defmodule LexWeb.HomePageLiveTest do
     assert Page.list!(scope: scope) == []
 
     view
-    |> form("[data-testid='page-creation-form']", page: %{title: "New Page"})
+    |> form("[data-testid='page-creation-form']", page: %{name: "New Page"})
     |> render_submit()
 
     assert_redirect(view, ~p"/#{space.slug}/wiki/new-page")
 
-    assert [%{space_id: space_id, title: "New Page", slug: "new-page"}] =
+    assert [%{space_id: space_id, name: "New Page", slug: "new-page"}] =
              Page.list!(scope: scope)
 
     assert space_id == space.id

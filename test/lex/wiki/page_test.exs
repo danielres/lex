@@ -14,7 +14,7 @@ defmodule Lex.Wiki.PageTest do
 
       assert page.author.id == scope.user.id
       assert page.author_id == scope.user.id
-      assert page.title == "Summer Activities"
+      assert page.name == "Summer Activities"
       assert page.slug == "summer-activities"
       assert {:ok, page.id} == Ecto.UUID.cast(page.id)
     end
@@ -22,7 +22,7 @@ defmodule Lex.Wiki.PageTest do
     test "requires an actor when creating a page", %{scope: scope} do
       result =
         Page
-        |> Ash.Changeset.for_create(:create, %{title: "Summer Activities"},
+        |> Ash.Changeset.for_create(:create, %{name: "Summer Activities"},
           tenant: scope.space.id
         )
         |> Ash.create()
@@ -36,7 +36,7 @@ defmodule Lex.Wiki.PageTest do
         Page
         |> Ash.Changeset.for_create(
           :create,
-          %{author_id: create_user("Other User").id, title: "Summer Activities"},
+          %{author_id: create_user("Other User").id, name: "Summer Activities"},
           scope: scope
         )
 
@@ -52,7 +52,7 @@ defmodule Lex.Wiki.PageTest do
       assert_receive %Ash.Notifier.Notification{
         resource: Page,
         action: %{name: :create},
-        data: %{id: page_id, title: "Summer Activities"}
+        data: %{id: page_id, name: "Summer Activities"}
       }
 
       assert page_id == page.id
@@ -135,7 +135,7 @@ defmodule Lex.Wiki.PageTest do
       assert renamed_page.id == page.id
       assert renamed_page.author.id == scope.user.id
       assert renamed_page.author_id == page.author_id
-      assert renamed_page.title == "Winter Activities"
+      assert renamed_page.name == "Winter Activities"
       assert renamed_page.slug == "winter-activities"
     end
 
@@ -156,7 +156,7 @@ defmodule Lex.Wiki.PageTest do
       assert_receive %Ash.Notifier.Notification{
         resource: Page,
         action: %{name: :rename},
-        data: %{id: page_id, title: "Winter Activities"}
+        data: %{id: page_id, name: "Winter Activities"}
       }
 
       assert page_id == renamed_page.id
@@ -169,7 +169,7 @@ defmodule Lex.Wiki.PageTest do
       scope |> Page.ensure!("Home")
       scope |> Page.ensure!("About")
 
-      assert Page.list!(scope: scope) |> Enum.map(& &1.title) == [
+      assert Page.list!(scope: scope) |> Enum.map(& &1.name) == [
                "About",
                "Home",
                "Summer Activities"

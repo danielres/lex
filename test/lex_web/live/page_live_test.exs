@@ -26,29 +26,29 @@ defmodule LexWeb.PageLiveTest do
     assert Ash.read!(Page, scope: scope) == []
 
     view
-    |> form("[data-testid='page-creation-form']", page: %{title: "Different Page"})
+    |> form("[data-testid='page-creation-form']", page: %{name: "Different Page"})
     |> render_change()
 
     assert has_element?(view, "[data-testid='page-slug-preview']", "wiki/different-page")
 
     view
-    |> form("[data-testid='page-creation-form']", page: %{title: ""})
+    |> form("[data-testid='page-creation-form']", page: %{name: ""})
     |> render_change()
 
     refute has_element?(view, "[data-testid='page-slug-preview']")
 
     view
-    |> form("[data-testid='page-creation-form']", page: %{title: "No"})
+    |> form("[data-testid='page-creation-form']", page: %{name: "No"})
     |> render_change()
 
     refute has_element?(view, "[data-testid='page-slug-preview']")
 
     view
-    |> form("[data-testid='page-creation-form']", page: %{title: "A Better Title"})
+    |> form("[data-testid='page-creation-form']", page: %{name: "A Better Title"})
     |> render_submit()
 
     assert_redirect(view, ~p"/test-space/wiki/a-better-title")
-    assert [%{title: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
+    assert [%{name: "A Better Title", slug: "a-better-title"}] = Ash.read!(Page, scope: scope)
   end
 
   test "redirects a noncanonical page URL to its canonical slug", %{conn: conn} do
@@ -124,17 +124,17 @@ defmodule LexWeb.PageLiveTest do
     |> element("[data-testid='page-info-toggle']")
     |> render_click()
 
-    refute has_element?(view, "[data-testid='edit-title-button']")
+    refute has_element?(view, "[data-testid='rename-open']")
 
-    render_hook(view, "edit_title:change", %{
-      "page_title" => %{"title" => "Forbidden Rename"}
+    render_hook(view, "rename:change", %{
+      "rename" => %{"name" => "Forbidden Rename"}
     })
 
-    render_hook(view, "edit_title:save", %{
-      "page_title" => %{"title" => "Forbidden Rename"}
+    render_hook(view, "rename:save", %{
+      "rename" => %{"name" => "Forbidden Rename"}
     })
 
-    assert Page.get!(page.id, scope: member_scope).title == "Existing Page"
+    assert Page.get!(page.id, scope: member_scope).name == "Existing Page"
 
     missing_conn = conn |> recycle() |> log_in_user(member)
     {:ok, missing_view, _html} = live(missing_conn, ~p"/test-space/wiki/missing-page")
@@ -189,7 +189,7 @@ defmodule LexWeb.PageLiveTest do
 
     render_hook(view, "page_repository:ensure", %{"title" => "Winter Plans"})
 
-    assert Page.list!(scope: scope) |> Enum.any?(&(&1.title == "Winter Plans"))
+    assert Page.list!(scope: scope) |> Enum.any?(&(&1.name == "Winter Plans"))
   end
 
   test "opens a missing page when it is created by another viewer", %{conn: conn, scope: scope} do
@@ -383,23 +383,22 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
-    open_title_edit(view)
+    open_rename(view)
 
     assert has_element?(
              view,
-             "[data-testid='edit-title-form'] input[value='Summer Activities']"
+             "[data-testid='rename-form'] input[value='Summer Activities']"
            )
 
     view
-    |> form("[data-testid='edit-title-form']", page_title: %{title: "Winter Activities"})
+    |> form("[data-testid='rename-form']", rename: %{name: "Winter Activities"})
     |> render_submit()
 
-    assert_push_event(view, "page_title_blur", %{})
     assert_patch(view, ~p"/test-space/wiki/winter-activities")
-    assert Page.get!(page.id, scope: scope).title == "Winter Activities"
+    assert Page.get!(page.id, scope: scope).name == "Winter Activities"
     assert Page.get!(page.id, scope: scope).slug == "winter-activities"
 
-    refute has_element?(view, "[data-testid='edit-title-form']")
+    refute has_element?(view, "[data-testid='rename-form']")
     assert has_element?(view, "h2", "Winter Activities")
   end
 
@@ -409,10 +408,10 @@ defmodule LexWeb.PageLiveTest do
     second_conn = conn |> recycle() |> log_in_user(scope.user)
     {:ok, second_view, _html} = live(second_conn, ~p"/test-space/wiki/summer-activities")
 
-    open_title_edit(first_view)
+    open_rename(first_view)
 
     first_view
-    |> form("[data-testid='edit-title-form']", page_title: %{title: "Winter Activities"})
+    |> form("[data-testid='rename-form']", rename: %{name: "Winter Activities"})
     |> render_submit()
 
     assert_patch(second_view, ~p"/test-space/wiki/winter-activities")
@@ -443,38 +442,38 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
-    open_title_edit(view)
+    open_rename(view)
 
     view
-    |> form("[data-testid='edit-title-form']", page_title: %{title: "Unsaved Title"})
+    |> form("[data-testid='rename-form']", rename: %{name: "Unsaved Title"})
     |> render_change()
 
     view
-    |> element("[data-testid='edit-title-cancel']")
+    |> element("[data-testid='rename-cancel']")
     |> render_click()
 
-    refute has_element?(view, "[data-testid='edit-title-form']")
-    assert has_element?(view, "[data-testid='edit-title-button']")
-    assert Page.get!(page.id, scope: scope).title == "Summer Activities"
+    refute has_element?(view, "[data-testid='rename-form']")
+    assert has_element?(view, "[data-testid='rename-open']")
+    assert Page.get!(page.id, scope: scope).name == "Summer Activities"
   end
 
   test "cancels an unsaved page title with Escape", %{conn: conn, scope: scope} do
     page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
-    open_title_edit(view)
+    open_rename(view)
 
     view
-    |> form("[data-testid='edit-title-form']", page_title: %{title: "Unsaved Title"})
+    |> form("[data-testid='rename-form']", rename: %{name: "Unsaved Title"})
     |> render_change()
 
     view
-    |> element("[data-testid='edit-title-form'] input")
+    |> element("[data-testid='rename-form']")
     |> render_keydown(%{"key" => "Escape"})
 
-    refute has_element?(view, "[data-testid='edit-title-form']")
-    assert has_element?(view, "[data-testid='edit-title-button']")
-    assert Page.get!(page.id, scope: scope).title == "Summer Activities"
+    refute has_element?(view, "[data-testid='rename-form']")
+    assert has_element?(view, "[data-testid='rename-open']")
+    assert Page.get!(page.id, scope: scope).name == "Summer Activities"
   end
 
   test "shows title errors without renaming the page", %{conn: conn, scope: scope} do
@@ -482,14 +481,14 @@ defmodule LexWeb.PageLiveTest do
     page = scope |> Page.ensure!("Summer Activities")
     {:ok, view, _html} = live(conn, ~p"/test-space/wiki/summer-activities")
 
-    open_title_edit(view)
+    open_rename(view)
 
     view
-    |> form("[data-testid='edit-title-form']", page_title: %{title: "Winter Activities"})
+    |> form("[data-testid='rename-form']", rename: %{name: "Winter Activities"})
     |> render_submit()
 
     assert render(view) =~ "Not available"
-    assert Page.get!(page.id, scope: scope).title == "Summer Activities"
+    assert Page.get!(page.id, scope: scope).name == "Summer Activities"
   end
 
   test "browses revisions with URL-backed previous and next navigation", %{
@@ -652,13 +651,13 @@ defmodule LexWeb.PageLiveTest do
     refute_patched(view)
   end
 
-  defp open_title_edit(view) do
+  defp open_rename(view) do
     view
     |> element("[data-testid='page-info-toggle']")
     |> render_click()
 
     view
-    |> element("[data-testid='edit-title-button']")
+    |> element("[data-testid='rename-open']")
     |> render_click()
   end
 

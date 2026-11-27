@@ -7,13 +7,13 @@ defmodule LexWeb.TopicLive do
   alias Lex.Topics.Topic
   alias LexWeb.Layouts
   alias LexWeb.Router.Path
-  alias LexWeb.TopicLive.EditTitle
+  alias LexWeb.Live.Rename
   alias LexWeb.TopicLive.Info
   alias LexWeb.TopicLive.Taggings
   alias LexWeb.TopicsLive.Graph
   alias LexWeb.UI
 
-  delegate(:edit_title, EditTitle, info: false)
+  delegate(:rename, Rename, info: false)
   delegate(:graph, Graph)
   delegate(:info, Info, info: false, mount: false)
   delegate(:taggings, Taggings)
@@ -54,6 +54,7 @@ defmodule LexWeb.TopicLive do
         socket =
           socket
           |> assign(topic: topic)
+          |> Rename.clear()
           |> Taggings.load_topic()
 
         {:noreply, socket}
@@ -73,19 +74,25 @@ defmodule LexWeb.TopicLive do
 
   @impl true
   def handle_info(
-        %{resource: Topic, action: %{name: :rename}, data: %Topic{id: id} = topic},
-        %{assigns: %{topic: %Topic{id: id, name: previous_name}, scope: scope}} = socket
-      )
-      when previous_name != topic.name do
-    socket =
-      socket
-      |> Toast.put_toast(:info, "Topic #{previous_name} was renamed to #{topic.name}")
-      |> push_navigate(to: Path.to(scope, topic), replace: true)
+        %{resource: Topic, action: %{name: :rename}, data: %Topic{id: id}} = message,
+        %{assigns: %{topic: %Topic{id: id} = previous, scope: scope}} = socket
+      ) do
+    {:noreply, socket} = Graph.handle_info(message, socket)
 
-    {:noreply, socket}
+    case Ash.get(Topic, id, load: [:author], scope: scope) do
+      {:ok, topic} when topic.name != previous.name or topic.slug != previous.slug ->
+        socket =
+          socket
+          |> assign(:topic, topic)
+          |> Rename.apply_change(previous, topic, "Topic", Path.to(scope, topic))
+
+        {:noreply, socket}
+
+      _result ->
+        {:noreply, socket}
+    end
   end
 
-  @impl true
   def handle_info(
         %{resource: Topic, action: %{name: :destroy}, data: %Topic{id: id, name: name}},
         %{assigns: %{topic: %Topic{id: id}, scope: scope}} = socket
@@ -116,12 +123,32 @@ defmodule LexWeb.TopicLive do
         _ -> :sort_taggings
       end
 
-    {:noreply, assign(socket, :live_action, live_action)}
+    {:noreply, socket |> Rename.clear() |> assign(:live_action, live_action)}
   end
 
   @impl true
+  def handle_event(
+        "rename:open",
+        _params,
+        %{assigns: %{live_action: :info, topic: %Topic{} = topic, scope: scope}} = socket
+      ) do
+    if Ash.can?({topic, :rename}, scope) do
+      {:noreply, Rename.open(socket, topic)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event(
+        "rename:delete",
+        _params,
+        %{assigns: %{live_action: :rename, topic: topic, scope: scope}} = socket
+      ) do
+    {:noreply, Rename.delete(socket, topic, "topic", Path.topics(scope))}
+  end
+
   def handle_event("close_dialog", _params, socket) do
-    {:noreply, assign(socket, :live_action, :show)}
+    {:noreply, socket |> Rename.clear() |> assign(:live_action, :show)}
   end
 
   @impl true
@@ -146,7 +173,7 @@ defmodule LexWeb.TopicLive do
             {@topic.name}
 
             <span class="ml-2">
-              <EditTitle.button_edit :if={
+              <Rename.button_edit label="Edit topic name" :if={
                 @live_action == :info && Ash.can?({@topic, :rename}, @scope)
               } />
             </span>
@@ -158,8 +185,13 @@ defmodule LexWeb.TopicLive do
             />
           </:actions>
           <:dialog>
-            <div :if={@live_action == :edit_title} class="pt-4">
-              <EditTitle.render_form edit_title={@edit_title} />
+            <div :if={@live_action == :rename} class="pt-4">
+              <Rename.render_form
+                form={@rename.form}
+                label="Topic name"
+                path_prefix="/topics/"
+                deletable?={Ash.can?({@topic, :destroy}, @scope)}
+              />
             </div>
             <Info.render :if={@live_action == :info} topic={@topic} scope={@scope} />
             <Taggings.render_sorting :if={@live_action == :sort_taggings} taggings={@taggings} />
@@ -204,7 +236,7 @@ defmodule LexWeb.TopicLive do
 
   def action_buttons(assigns) do
     ~H"""
-    <Info.button_toggle active?={@live_action == :info || @live_action == :edit_title} />
+    <Info.button_toggle active?={@live_action == :info || @live_action == :rename} />
 
     <Layouts.action_button
       active?={@live_action == :sort_taggings}

@@ -3,16 +3,16 @@ defmodule LexWeb.PageLive.Creation do
   use LiveDelegate, path: [:creation]
 
   alias Lex.Wiki.Page
-  alias Lex.Wiki.PageTitle
+  alias Lex.Wiki.PageName
   alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     socket |> delegate_assign(%{form: nil, slug: nil})
   end
 
-  def reload(socket, scope, slug, suggested_title) do
-    title = suggested_title || PageTitle.from_slug(slug)
-    form = if can?(scope, :edit_pages), do: scope |> creation_form(title)
+  def reload(socket, scope, slug, suggested_name) do
+    name = suggested_name || PageName.from_slug(slug)
+    form = if can?(scope, :edit_pages), do: scope |> creation_form(name)
 
     socket |> delegate_assign(%{form: form, slug: slug})
   end
@@ -53,7 +53,7 @@ defmodule LexWeb.PageLive.Creation do
   def render(assigns) do
     path_preview =
       if assigns.creation.form do
-        path_preview(assigns.creation.form[:title].value)
+        path_preview(assigns.creation.form[:name].value)
       end
 
     assigns = assigns |> assign(path_preview: path_preview)
@@ -81,7 +81,7 @@ defmodule LexWeb.PageLive.Creation do
       >
         <.input
           autocomplete="off"
-          field={@creation.form[:title]}
+          field={@creation.form[:name]}
           placeholder="Page title"
           phx-hook="CapitalizeFirstLetter"
         />
@@ -100,26 +100,26 @@ defmodule LexWeb.PageLive.Creation do
     """
   end
 
-  defp creation_form(scope, title) do
+  defp creation_form(scope, name) do
     Page
     |> AshPhoenix.Form.for_create(:create,
       as: "page",
-      params: %{"title" => title},
+      params: %{"name" => name},
       scope: scope
     )
     |> to_form()
   end
 
-  defp path_preview(title) when is_binary(title) do
-    if String.trim(title) == "" do
+  defp path_preview(name) when is_binary(name) do
+    if String.trim(name) == "" do
       nil
     else
-      case PageTitle.slug(title) do
+      case PageName.slug(name) do
         {:ok, slug} -> "/wiki/#{slug}"
         {:error, _message} -> nil
       end
     end
   end
 
-  defp path_preview(_title), do: nil
+  defp path_preview(_name), do: nil
 end
