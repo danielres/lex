@@ -3,6 +3,7 @@ defmodule LexWeb.PageLive.EditTitle do
   use LiveDelegate, path: [:edit_title]
 
   alias LexWeb.Components.ResourceRename
+  alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{form: nil})
@@ -66,6 +67,23 @@ defmodule LexWeb.PageLive.EditTitle do
     end
   end
 
+  def handle_event("delete", _params, %{assigns: %{live_action: :edit_title, page: page, scope: scope}} = socket) do
+    case Ash.destroy(page, scope: scope) do
+      :ok ->
+        socket =
+          socket
+          |> Toast.put_toast(:info, ~s(Deleted page "#{page.title}"))
+          |> push_navigate(to: Path.wiki(scope))
+
+        {:noreply, socket}
+
+      {:error, _error} ->
+        {:noreply, Toast.put_toast(socket, :error, "Could not delete page")}
+    end
+  end
+
+  def handle_event("delete", _params, socket), do: {:noreply, socket}
+
   def button_edit(assigns) do
     ~H"""
     <ResourceRename.button_edit event={delegate_event("open")} data-testid="edit-title-button" />
@@ -73,6 +91,7 @@ defmodule LexWeb.PageLive.EditTitle do
   end
 
   attr :edit_title, :map, required: true
+  attr :scope, :map, required: true
 
   def render_form(assigns) do
     ~H"""
@@ -87,6 +106,9 @@ defmodule LexWeb.PageLive.EditTitle do
       cancel_event={delegate_event("cancel")}
       data-testid="edit-title-form"
       cancel_testid="edit-title-cancel"
+      delete_event={
+        if Ash.can?({@edit_title.form.data, :destroy}, @scope), do: delegate_event("delete")
+      }
     />
     """
   end

@@ -23,8 +23,8 @@ defmodule LexWeb.Components.ResourceRename do
   attr :change_event, :string, required: true
   attr :save_event, :string, required: true
   attr :cancel_testid, :string, default: nil
+  attr :delete_event, :string, default: nil
   attr :rest, :global
-  slot :actions
 
   def render_form(assigns) do
     ~H"""
@@ -61,7 +61,17 @@ defmodule LexWeb.Components.ResourceRename do
       </p>
 
       <div class="flex gap-2">
-        {render_slot(@actions)}
+        <button
+          :if={@delete_event}
+          type="button"
+          class="btn btn-error"
+          data-confirm={~s(Are you sure you want to delete "#{Map.fetch!(@form.data, @field.field)}"?)}
+          phx-click={@delete_event}
+          phx-disable-with="Deleting..."
+        >
+          Delete
+        </button>
+
         <button
           class="btn btn-ghost ml-auto"
           data-testid={@cancel_testid}

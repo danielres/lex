@@ -26,7 +26,7 @@ defmodule Lex.Wiki.Page do
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :destroy]
 
     read :list do
       prepare build(load: [:author, :last_updated_at], sort: :title)
@@ -55,6 +55,11 @@ defmodule Lex.Wiki.Page do
     policy action([:create, :rename]) do
       authorize_if {HasPrivilege, privilege: :edit_pages}
     end
+
+    policy action(:destroy) do
+      forbid_if expr(slug == "home")
+      authorize_if {HasPrivilege, privilege: :edit_pages}
+    end
   end
 
   pub_sub do
@@ -64,6 +69,7 @@ defmodule Lex.Wiki.Page do
 
     publish :create, "pages"
     publish :rename, "pages"
+    publish :destroy, "pages"
   end
 
   multitenancy do

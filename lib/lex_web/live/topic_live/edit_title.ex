@@ -92,19 +92,8 @@ defmodule LexWeb.TopicLive.EditTitle do
       change_event={delegate_event("change")}
       save_event={delegate_event("save")}
       cancel_event={delegate_event("cancel")}
-    >
-      <:actions>
-        <button
-          type="button"
-          class="btn btn-error"
-          data-confirm={~s(Are you sure you want to delete "#{@edit_title.form.data.name}"?)}
-          phx-click={delegate_event("delete")}
-          phx-disable-with="Deleting..."
-        >
-          Delete
-        </button>
-      </:actions>
-    </ResourceRename.render_form>
+      delete_event={delegate_event("delete")}
+    />
     """
   end
 

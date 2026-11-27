@@ -9,6 +9,7 @@ defmodule LexWeb.PageLive.Notifications do
   alias LexWeb.PageLive.Navigation
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
+  alias LexWeb.Router.Path
 
   def handle(
         socket,
@@ -106,6 +107,21 @@ defmodule LexWeb.PageLive.Notifications do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle(socket, %Notification{resource: Page, action: %{name: :destroy}, data: page}) do
+    %{page: current_page, scope: scope} = socket.assigns
+
+    socket =
+      if current_page && current_page.id == page.id do
+        socket
+        |> Toast.put_toast(:info, "Page #{page.title} was deleted")
+        |> push_navigate(to: Path.wiki(scope), replace: true)
+      else
+        PageRepository.reload(socket)
+      end
+
+    {:noreply, socket}
   end
 
   defp requested_revision_number(%{

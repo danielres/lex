@@ -13,6 +13,10 @@ defmodule Lex.Wiki.PageRevisionContributor do
   postgres do
     table "page_revision_contributors"
     repo Lex.Repo
+
+    references do
+      reference :page_revision, on_delete: :delete
+    end
   end
 
   actions do

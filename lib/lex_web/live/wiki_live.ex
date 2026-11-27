@@ -45,7 +45,7 @@ defmodule LexWeb.WikiLive do
   end
 
   def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)
-      when action in [:create, :rename] do
+      when action in [:create, :rename, :destroy] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
     scope = socket.assigns.scope
