@@ -168,3 +168,16 @@ html, body {
 .bg-card {
   @apply bg-base-100/30;
 }
+
+@layer utilities {
+  @layer daisyui.l1.l2.l3 {
+    .input, .textarea {
+      @apply opacity-80 transition;
+
+      &:focus, &:focus-within {
+        @apply opacity-100 ;
+        outline: 0px solid var(--input-color);
+      }
+    }
+  }
+}
