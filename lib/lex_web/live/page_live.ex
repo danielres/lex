@@ -62,7 +62,15 @@ defmodule LexWeb.PageLive do
           close_event={@live_action == :info && "close_dialog"}
         >
           <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
-          <:title>{@page.title}</:title>
+          <:title>
+            {@page.title}
+
+            <span class="ml-2">
+              <EditTitle.button_edit :if={
+                @live_action == :info && @page.slug != "home" && Ash.can?({@page, :rename}, @scope)
+              } />
+            </span>
+          </:title>
 
           <:actions>
             <.action_buttons

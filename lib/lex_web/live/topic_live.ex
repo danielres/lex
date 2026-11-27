@@ -142,7 +142,15 @@ defmodule LexWeb.TopicLive do
           <:crumb>
             <.link navigate={Path.topics(@scope)} class="opacity-80 hover:opacity-100 transition">Topics</.link>
           </:crumb>
-          <:title>{@topic.name}</:title>
+          <:title>
+            {@topic.name}
+
+            <span class="ml-2">
+              <EditTitle.button_edit :if={
+                @live_action == :info && Ash.can?({@topic, :update}, @scope)
+              } />
+            </span>
+          </:title>
           <:actions>
             <.action_buttons
               live_action={@live_action}
