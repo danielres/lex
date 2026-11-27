@@ -162,7 +162,7 @@ function highlightActiveOption(hook: ComboboxHook) {
     if (!(element instanceof HTMLButtonElement)) return;
 
     const isActive = Number(element.dataset.optionIndex) === hook.activeIndex;
-    element.classList.toggle("bg-base-200", isActive);
+    element.classList.toggle("bg-base-100", isActive);
     element.setAttribute("aria-selected", isActive ? "true" : "false");
 
     if (isActive) element.scrollIntoView({ block: "nearest" });
@@ -201,7 +201,7 @@ function renderList(hook: ComboboxHook) {
     const button = document.createElement("button");
     button.type = "button";
     button.className =
-      "flex w-full items-center rounded-md px-3 py-2 text-left text-sm hover:bg-base-200 truncate";
+      "flex w-full items-center rounded px-3 py-1.5 text-left text-sm hover:bg-info/60 transition cursor-pointer truncate";
     button.dataset.optionIndex = String(index);
     button.role = "option";
     button.setAttribute("aria-selected", "false");

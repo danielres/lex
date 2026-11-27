@@ -43,7 +43,7 @@ defmodule LexWeb.Live.Components.Combobox do
     ~H"""
     <div
       id={@picker_id}
-      class="fieldset relative"
+      class="relative"
       data-debounce-ms={@debounce_ms}
       data-empty-display={@empty_display}
       data-empty-message={@empty_message}
@@ -74,8 +74,8 @@ defmodule LexWeb.Live.Components.Combobox do
           aria-expanded="false"
           class={[
             "input",
-            "h-auto",
-            "flex justify-between items-start py-2 gap-2",
+            "w-full",
+            "flex justify-between items-center py-2 gap-2",
             "text-left",
             "cursor-pointer",
             @errors != [] && "input-error"
@@ -85,7 +85,13 @@ defmodule LexWeb.Live.Components.Combobox do
           style={"anchor-name:#{@anchor_name}"}
           type="button"
         >
-          <span class="whitespace-normal" data-role="trigger-label">
+          <span
+            class={[
+              "whitespace-normal",
+              @field_value == "" && "opacity-60"
+            ]}
+            data-role="trigger-label"
+          >
             {@display_value}
           </span>
           <.icon class="size-4 opacity-60" name="hero-chevron-up-down-mini" />
@@ -95,8 +101,8 @@ defmodule LexWeb.Live.Components.Combobox do
       <div
         id={"#{@picker_id}-panel"}
         class={[
-          "dropdown z-20 mt-1 w-[min(32rem,calc(100vw-2rem))] rounded",
-          "bg-base-100 border border-base-content/50 p-2 shadow-lg"
+          "dropdown z-20 mt-1 min-w-64 max-w-[min(32rem,calc(100vw-2rem))] rounded-field",
+          "bg-base-100 border border-base-content/20 p-2 shadow-lg"
         ]}
         data-role="panel"
         popover
@@ -105,7 +111,7 @@ defmodule LexWeb.Live.Components.Combobox do
         <input
           aria-controls={"#{@picker_id}-options"}
           autocomplete="off"
-          class="input input w-full bg-base-200"
+          class="input input w-full border-info"
           data-role="search"
           placeholder={@placeholder}
           type="text"
@@ -113,10 +119,18 @@ defmodule LexWeb.Live.Components.Combobox do
 
         <ul
           id={"#{@picker_id}-options"}
-          class="mt-2 max-h-64 overflow-y-auto overflow-x-hidden"
+          class={[
+            "mt-2",
+            "max-h-64 overflow-y-auto overflow-x-hidden",
+            ~s([&_button]:opacity-80),
+            ~s([&_button]:hover:opacity-100),
+            ~s([&_button[data-option-index="0"]]:font-bold),
+            ~s([&_button[data-option-index="0"]]:opacity-80)
+          ]}
           data-role="list"
           role="listbox"
         />
+        <%!-- data-option-index="0" --%>
       </div>
 
       <.error :for={msg <- @errors}>{msg}</.error>
