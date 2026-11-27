@@ -84,8 +84,8 @@ defmodule LexWeb.TopicsLive.Creation do
     ~H"""
     <.form
       class={[
-        "grid gap-2",
-        @class
+        @class,
+        "space-y-2"
       ]}
       for={@creation.form}
       id="topic-form"
@@ -105,17 +105,15 @@ defmodule LexWeb.TopicsLive.Creation do
         />
       </div>
 
-      <div class="flex gap-2">
-        <div class="grow">
-          <.input
-            field={@creation.form[:name]}
-            placeholder="Name"
-            phx-mounted={JS.focus()}
-            autocomplete="off"
-            phx-hook="CapitalizeFirstLetter"
-          />
-        </div>
+      <.input
+        field={@creation.form[:name]}
+        placeholder="New topic name"
+        phx-mounted={JS.focus()}
+        autocomplete="off"
+        phx-hook="CapitalizeFirstLetter"
+      />
 
+      <div class="flex justify-end">
         <button type="submit" phx-disable-with="Saving..." class="btn btn-info">
           Add topic
         </button>
