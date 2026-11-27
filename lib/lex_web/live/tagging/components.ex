@@ -8,7 +8,7 @@ defmodule LexWeb.Live.Tagging.Components do
 
   def cards(assigns) do
     ~H"""
-    <div id="taggings-list" class="space-y-3" phx-hook="AutoAnimate">
+    <div id="taggings-list" class="space-y-3 relative" phx-hook="AutoAnimate">
       {render_slot(@inner_block)}
     </div>
     """
