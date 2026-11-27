@@ -45,6 +45,11 @@ defmodule LexWeb.MemberLive do
     Taggings.handle_info(message, socket)
   end
 
+  @impl true
+  def handle_event("close_dialog", _params, socket) do
+    {:noreply, assign(socket, :mode, :view)}
+  end
+
   defp dialog?(mode) do
     mode != :view
   end
@@ -60,7 +65,10 @@ defmodule LexWeb.MemberLive do
       ui={@ui}
     >
       <:page_head>
-        <Layouts.page_head dialog?={dialog?(@mode)}>
+        <Layouts.page_head
+          close_event={@mode != :view && "close_dialog"}
+          dialog?={dialog?(@mode)}
+        >
           <:crumb>
             <.link navigate={Path.members(@scope)} class="opacity-80 hover:opacity-100 transition">Members</.link>
           </:crumb>
