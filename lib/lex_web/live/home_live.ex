@@ -143,7 +143,7 @@ defmodule LexWeb.HomeLive do
     assigns = assigns |> assign(grid_item_class: grid_item_class)
 
     ~H"""
-    <div>
+    <div class="p-4">
       <h1 class="text-xl font-semibold border-b border-base-content/30 pb-2 mb-4">
         Your spaces
       </h1>
