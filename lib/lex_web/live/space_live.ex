@@ -22,12 +22,17 @@ defmodule LexWeb.SpaceLive do
       socket={@socket}
       ui={@ui}
     >
-      <Layouts.page_head>
-        <:crumb>
-          <.link navigate={Path.spaces()} class="clickable">Spaces</.link>
-        </:crumb>
-        <:title>{@scope.space.name}</:title>
-      </Layouts.page_head>
+      <:page_head>
+        <Layouts.page_head>
+          <:crumb>
+            <.link navigate={Path.spaces()} class="clickable">Spaces</.link>
+          </:crumb>
+          <:crumb>
+            <span class="opacity-80">{@scope.space.name}</span>
+          </:crumb>
+          <:title>Overview</:title>
+        </Layouts.page_head>
+      </:page_head>
     </Layouts.app>
     """
   end

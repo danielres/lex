@@ -26,17 +26,20 @@ defmodule LexWeb.MembersLive do
       socket={@socket}
       ui={@ui}
     >
-      <Layouts.page_head dialog?={@invites.open?}>
-        <:title>Members</:title>
+      <:page_head>
+        <Layouts.page_head dialog?={@invites.open?}>
+          <:crumb><span class="opacity-80">Members</span></:crumb>
+          <:title>Overview</:title>
 
-        <:dialog :if={@invites.open?}>
-          <Invites.render invites={@invites} />
-        </:dialog>
+          <:dialog :if={@invites.open?}>
+            <Invites.render invites={@invites} />
+          </:dialog>
 
-        <:actions>
-          <Invites.button_toggle invites={@invites} scope={@scope} />
-        </:actions>
-      </Layouts.page_head>
+          <:actions>
+            <Invites.button_toggle invites={@invites} scope={@scope} />
+          </:actions>
+        </Layouts.page_head>
+      </:page_head>
 
       <Memberships.render memberships={@memberships} scope={@scope} />
     </Layouts.app>

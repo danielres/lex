@@ -99,7 +99,7 @@ defmodule LexWeb.MembersLive.Memberships do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-3xl space-y-6">
-      <div class="space-y-2" data-testid="memberships">
+      <div class="space-y-4" data-testid="memberships">
         <%= for memberships <- [
           @memberships.active,
           @memberships.pending,
@@ -124,8 +124,9 @@ defmodule LexWeb.MembersLive.Memberships do
       class={[
         "py-4",
         "px-4 py-2 rounded",
-        @membership.status == :active && "bg-base-300",
-        @membership.status != :active && "bg-base-300/50"
+        "bg-card",
+        "border border-base-content/10",
+        @membership.status != :active && "opacity-80"
       ]}
       data-testid="membership"
     >
@@ -138,7 +139,7 @@ defmodule LexWeb.MembersLive.Memberships do
                 navigate={Path.to(@scope, @membership)}
                 class="clickable"
               >
-                <Avatar.render user={@membership.user} />
+                <Avatar.render size="lg" user={@membership.user} />
                 {membership_name(@membership)}
               </.link>
 

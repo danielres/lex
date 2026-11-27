@@ -53,7 +53,7 @@ defmodule LexWeb.Layouts.Drawer do
   defp separator(assigns) do
     ~H"""
     <hr class={[
-      "border-base-content/20",
+      "border-base-content/15",
       @visible? && "opacity-100",
       !@visible? && "opacity-0",
       "transition"
@@ -67,7 +67,7 @@ defmodule LexWeb.Layouts.Drawer do
 
   defp main_links(assigns) do
     ~H"""
-    <ul class="grid gap-2">
+    <ul class="grid gap-1.5">
       <% link_class = [
         !@open? && "aspect-square",
         !@open? && "justify-center",
@@ -75,44 +75,18 @@ defmodule LexWeb.Layouts.Drawer do
         "font-semibold",
         "flex items-center gap-2",
         "h-8 rounded",
-        "text-sm"
+        "text-sm",
+        "transition"
       ] %>
 
-      <% active_class = "bg-info text-white" %>
-
-      <li>
-        <.link
-          navigate={Path.to(@scope.space)}
-          class={[
-            link_class,
-            @active == "space" && active_class
-          ]}
-        >
-          <.icon name="hero-chart-bar-micro" />
-          <span :if={@open?}>Overview</span>
-        </.link>
-      </li>
-
-      <li>
-        <.link
-          navigate={Path.members(@scope)}
-          class={[
-            link_class,
-            @active == "members" && active_class
-          ]}
-        >
-          <.icon name="hero-user-group-mini" />
-          <span :if={@open?}>Members</span>
-        </.link>
-      </li>
+      <% non_active_class = "opacity-50 hover:opacity-100" %>
 
       <li>
         <.link
           navigate={Path.wiki_home(@scope)}
           class={[
             link_class,
-            @active == "page" && active_class,
-            @active == "wiki" && active_class
+            @active != "wiki" && non_active_class
           ]}
         >
           <.icon name="hero-book-open-mini" />
@@ -125,11 +99,24 @@ defmodule LexWeb.Layouts.Drawer do
           navigate={Path.topics(@scope)}
           class={[
             link_class,
-            @active == "topics" && active_class
+            @active != "topics" && non_active_class
           ]}
         >
           <.icon name="hero-tag-mini" />
           <span :if={@open?}>Topics</span>
+        </.link>
+      </li>
+
+      <li>
+        <.link
+          navigate={Path.members(@scope)}
+          class={[
+            link_class,
+            @active != "members" && non_active_class
+          ]}
+        >
+          <.icon name="hero-user-group-mini" />
+          <span :if={@open?}>Members</span>
         </.link>
       </li>
     </ul>

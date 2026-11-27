@@ -21,7 +21,7 @@ defmodule LexWeb.Live.Tagging.Components do
 
   def card(assigns) do
     ~H"""
-    <div id={@id} class="p-4 bg-base-100/40 rounded-lg">
+    <div id={@id} class="p-4 bg-card rounded-lg">
       <div class="flex items-start gap-3">
         <span class="text-lg small-caps font-bold leading-none">{render_slot(@title)}</span>
         {render_slot(@action_buttons)}
@@ -76,7 +76,7 @@ defmodule LexWeb.Live.Tagging.Components do
     }>
       <.link class="clickable" navigate={Path.to(@scope, @endorsement.tagged_by_membership)}>
         <Avatar.render
-          class="reactive"
+          class="clickable"
           user={@endorsement.tagged_by_membership}
         />
       </.link>

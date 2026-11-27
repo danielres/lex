@@ -30,7 +30,7 @@ defmodule LexWeb.Layouts.Navbar do
 
       <Dropdown.render id="navbar-user-dropdown">
         <Avatar.render
-          class="reactive"
+          class="clickable"
           user={@scope.user}
         />
 
@@ -41,7 +41,7 @@ defmodule LexWeb.Layouts.Navbar do
             "min-w-36",
             "rounded-box",
             "shadow-lg",
-            "border border-base-content/20",
+            "border border-base-content/30",
             "grid gap-2"
           ]}>
             <div class={[
@@ -90,17 +90,17 @@ defmodule LexWeb.Layouts.Navbar do
         aria-label="open sidebar"
         class={[
           "stacked",
-          "bg-base-300 hover:bg-base-100 transition",
           "cursor-pointer",
           "size-8 rounded",
-          "flex items-center justify-center"
+          "flex items-center justify-center",
+          "group"
         ]}
       >
         <.icon
           name="hero-bars-3-micro"
           class={[
             "size-5",
-            !@drawer_open? && "opacity-100",
+            !@drawer_open? && "opacity-70 group-hover:opacity-100 transition",
             @drawer_open? && "opacity-0",
             "transition"
           ]}

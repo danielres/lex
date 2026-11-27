@@ -3,11 +3,25 @@
   @apply border border-transparent;
 }
 
+#current-page-editor > .lexical-editor {
+  &,
+  & > .lexical-editor-surface,
+  & > .lexical-editor-surface > .lexical-editor-container,
+  & .lexical-editor-container > .lexical-editor-scroller,
+  & .lexical-editor-scroller > .lexical-editor-content {
+    @apply flex flex-1 flex-col;
+  }
+
+  & .lexical-editor-content > .ContentEditable__root,
+  & .lexical-editor-container > .ContentEditable__root {
+    @apply flex-1;
+  }
+}
+
 .lexical-editor-surface {
   &[data-editable='true'] .ContentEditable__root {
     @apply px-4 py-4 pt-8 sm:pl-12;
-    @apply focus-within:outline-2 outline-info/50 rounded-box;
-    @apply bg-base-100/25;
+    @apply bg-base-100/40;
   }
 
   .ContentEditable__root {

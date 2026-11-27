@@ -3,6 +3,7 @@ defmodule LexWeb.PresencesLive do
 
   alias LexWeb.Components.Avatar
   alias LexWeb.Components.Tooltip
+  alias LexWeb.UI
 
   @room_key "DEFAULT_TEMP_ROOM"
 
@@ -80,9 +81,9 @@ defmodule LexWeb.PresencesLive do
       "transition p-4"
     ]}>
       <button
-        class="indicator"
+        class="indicator group cursor-pointer"
         data-testid="presences-toggle"
-        phx-click={JS.exec("phx-click", to: "#drawer-toggle")}
+        phx-click={JS.push(UI.toggle_drawer_event(), target: "#drawer-toggle")}
         type="button"
       >
         <span
@@ -96,7 +97,7 @@ defmodule LexWeb.PresencesLive do
         >
           {length(@presences)}
         </span>
-        <.icon name="hero-users-micro" class="opacity-50" />
+        <.icon name="hero-users-micro" class="opacity-50 group-hover:opacity-100 transition" />
       </button>
     </div>
     """

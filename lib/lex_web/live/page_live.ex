@@ -49,40 +49,49 @@ defmodule LexWeb.PageLive do
   def render(assigns) do
     ~H"""
     <Layouts.app
-      active="page"
+      active="wiki"
       flash={@flash}
       scope={@scope}
       socket={@socket}
       ui={@ui}
     >
+      <:page_head>
+        <Layouts.page_head
+          :if={@page}
+          dialog?={dialog?(@live_action)}
+          close_event={@live_action == :info && "close_dialog"}
+        >
+          <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
+          <:title>{@page.title}</:title>
+
+          <:actions>
+            <.action_buttons
+              editing={@editing}
+              live_action={@live_action}
+              page={@page}
+              scope={@scope}
+            />
+          </:actions>
+
+          <:dialog>
+            <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
+            <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
+            <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
+          </:dialog>
+        </Layouts.page_head>
+      </:page_head>
+
       <Creation.render :if={@page == nil} creation={@creation} scope={@scope} />
 
-      <Layouts.page_head
-        :if={@page}
-        dialog?={dialog?(@live_action)}
-      >
-        <:crumb><.link navigate={Path.wiki(@scope)} class="clickable">Wiki</.link></:crumb>
-        <:title>{@page.title}</:title>
-
-        <:actions>
-          <.action_buttons editing={@editing} live_action={@live_action} page={@page} scope={@scope} />
-        </:actions>
-
-        <:dialog>
-          <EditTitle.render_form :if={@live_action == :edit_title} edit_title={@edit_title} />
-          <Info.render :if={@live_action == :info} page={@page} scope={@scope} />
-          <Revisions.render_dialog :if={@live_action == :revisions} {assigns} />
-        </:dialog>
-      </Layouts.page_head>
-
-      <div :if={@page}>
+      <div :if={@page} class="stacked flex-1">
         <section
           class={[
-            @live_action == :revisions && "hidden",
-            @live_action != :editing && "mt-8",
-            "min-w-0"
+            "flex min-w-0 flex-col",
+            @live_action == :revisions && "invisible",
+            @live_action != :editing && "max-sm:px-2 max-sm:py-4 sm:p-6 pb-0 bg-card rounded-box"
           ]}
           id="current-page-editor"
+          inert={@live_action == :revisions}
         >
           <.editor
             editable?={can?(@scope, :edit_pages) && @live_action == :editing && !@editing.saving?}
@@ -184,5 +193,9 @@ defmodule LexWeb.PageLive do
       active?={@live_action == :editing}
     />
     """
+  end
+
+  def handle_event("close_dialog", _params, socket) do
+    {:noreply, assign(socket, :live_action, :view)}
   end
 end
