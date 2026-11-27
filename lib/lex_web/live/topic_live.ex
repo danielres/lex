@@ -23,26 +23,7 @@ defmodule LexWeb.TopicLive do
 
   @impl true
   def mount(params, session, socket) do
-    scope = socket.assigns.scope
-    slug = params["topic_slug"]
-    result = find_topic(scope, slug)
-
-    case result do
-      {:ok, topic} ->
-        socket =
-          socket
-          |> assign(:topic, topic)
-          |> delegate_mount(params, session)
-
-        {:ok, socket}
-
-      {:error, _error} ->
-        {:ok,
-         socket
-         |> assign(:topic, nil)
-         |> Toast.put_toast(:error, "Topic not found")
-         |> push_navigate(to: Path.to(scope.space))}
-    end
+    {:ok, delegate_mount(socket, params, session)}
   end
 
   @impl true
