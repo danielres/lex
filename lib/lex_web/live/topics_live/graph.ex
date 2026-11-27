@@ -150,19 +150,21 @@ defmodule LexWeb.TopicsLive.Graph do
 
     ~H"""
     <li id={@node.dom_id} phx-hook="AutoAnimate">
-      <div class={[
-        "flex items-center gap-8 transition rounded",
-        !@attaching? && @edit? && "opacity-80 hover:opacity-100 transition hover:bg-base-300/20",
-        @attaching? && @parent_candidate? && "hover:bg-info",
-        @attaching? && !@parent_candidate? && "opacity-30"
-      ]}>
+      <div
+        class={[
+          "flex items-center gap-8 transition rounded",
+          @edit? && !@attaching? && "hover:bg-base-300/80",
+          @attaching? && !@parent_candidate? && "opacity-30"
+        ]}
+        inert={@attaching? && !@parent_candidate?}
+      >
         <button
           :if={@attaching? && @parent_candidate?}
           type="button"
           class={[
             "text-left cursor-pointer",
-            "grow",
-            "py-1 px-2"
+            "py-0.5 px-2",
+            "hover:bg-info rounded"
           ]}
           phx-click={delegate_event("attachment:choose_parent")}
           phx-value-parent-id={@node.topic.id}
@@ -172,7 +174,7 @@ defmodule LexWeb.TopicsLive.Graph do
         </button>
 
         <.link
-          :if={not @attaching? or not @parent_candidate?}
+          :if={!(@attaching? && @parent_candidate?)}
           navigate={if !@patch?, do: Path.to(@scope, @node.topic)}
           patch={if @patch?, do: Path.to(@scope, @node.topic)}
           class={["grow", "py-1 px-2", "group", "leading-tight"]}
@@ -185,7 +187,18 @@ defmodule LexWeb.TopicsLive.Graph do
           </span>
         </.link>
 
-        <div :if={not @attaching? && @edit?} class="flex gap-2">
+        <% show_buttons? = @edit? && !@attaching? %>
+
+        <div
+          :if={@edit?}
+          id={"#{@node.dom_id}_action_buttons"}
+          class={[
+            "flex gap-2 transition-opacity",
+            show_buttons? && "opacity-100 starting:opacity-0",
+            !show_buttons? && "opacity-0"
+          ]}
+          inert={!show_buttons?}
+        >
           <button
             :if={@node.parent_id}
             type="button"
@@ -221,10 +234,15 @@ defmodule LexWeb.TopicsLive.Graph do
       </div>
 
       <ul
-        :if={@node.children != []}
+        :if={@node.children != [] || (@attaching? && @parent_candidate?)}
         id={"#{@node.dom_id}-children"}
+        aria-hidden={@node.children == []}
         phx-hook="AutoAnimate"
-        class="relative border-l border-base-content/20 pl-4 ml-2"
+        class={[
+          "relative",
+          "pl-4 border-l border-base-content/20",
+          "ml-2"
+        ]}
       >
         <.topic_node
           :for={child <- @node.children}
