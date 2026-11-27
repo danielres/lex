@@ -111,7 +111,7 @@ defmodule LexWeb.Layouts do
       <div class={[
         "min-w-0 max-w-[90ch] mx-auto px-2 sm:px-8"
       ]}>
-        <div class="flex items-end gap-1 text-sm relative top-2 z-21">
+        <div class="flex items-end gap-1 text-sm relative top-1.5 z-21">
           <%= for crumb <- @crumb do %>
             <span class="leading-none">{render_slot(crumb)}</span>
             <.icon
@@ -140,10 +140,13 @@ defmodule LexWeb.Layouts do
         <div class={[
           "flex items-center gap-2"
         ]}>
-          <h2 class="grow text-lg sm:text-xl leading-none">
+          <h2 class="grow text-lg sm:text-xl leading-none min-h-6">
             {render_slot(@title)}
           </h2>
-          {render_slot(@actions)}
+          <div class="flex">
+            <.action_button title="spacer" icon="hero-arrows-up-down" class="invisible" />
+            {render_slot(@actions)}
+          </div>
         </div>
 
         <div
@@ -163,6 +166,7 @@ defmodule LexWeb.Layouts do
   end
 
   attr :active?, :boolean, default: false
+  attr :class, :string, default: ""
   attr :title, :string, required: true
   attr :icon, :string, required: true
   attr :navigate, :string, default: nil
@@ -176,7 +180,8 @@ defmodule LexWeb.Layouts do
         title: assigns.title,
         class: [
           "btn btn-sm btn-circle hover:btn-info",
-          assigns.active? && "btn-info"
+          assigns.active? && "btn-info",
+          assigns.class
         ]
       })
 
