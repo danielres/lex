@@ -171,6 +171,10 @@ html, body {
 
 @layer utilities {
   @layer daisyui.l1.l2.l3 {
+    .label {
+      @apply font-semibold text-sm;
+    }
+
     .input, .textarea {
       @apply opacity-80 transition;
 
