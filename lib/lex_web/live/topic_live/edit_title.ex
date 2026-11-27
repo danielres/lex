@@ -2,7 +2,7 @@ defmodule LexWeb.TopicLive.EditTitle do
   use LexWeb, :live_view
   use LiveDelegate, path: [:edit_title]
 
-  alias LexWeb.Live.Components
+  alias LexWeb.Components.ResourceRename
   alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
@@ -75,14 +75,7 @@ defmodule LexWeb.TopicLive.EditTitle do
 
   def button_edit(assigns) do
     ~H"""
-    <button
-      type="button"
-      class="clickable"
-      aria-label="Edit topic name"
-      phx-click={delegate_event("open")}
-    >
-      <.icon name="hero-pencil-micro" />
-    </button>
+    <ResourceRename.button_edit event={delegate_event("open")} aria-label="Edit topic name" />
     """
   end
 
@@ -90,28 +83,17 @@ defmodule LexWeb.TopicLive.EditTitle do
 
   def render_form(assigns) do
     ~H"""
-    <.form
-      for={@edit_title.form}
+    <ResourceRename.render_form
       id="topic-title-form"
-      phx-change={delegate_event("change")}
-      phx-submit={delegate_event("save")}
-      tabindex="-1"
-      class="space-y-2"
+      form={@edit_title.form}
+      field={@edit_title.form[:name]}
+      label="Topic name"
+      path_prefix="/topics/"
+      change_event={delegate_event("change")}
+      save_event={delegate_event("save")}
+      cancel_event={delegate_event("cancel")}
     >
-      <.input
-        field={@edit_title.form[:name]}
-        aria-label="Topic name"
-        class="input input-lg w-full"
-        phx-mounted={JS.focus() |> JS.dispatch("focus-at-end")}
-        autocomplete="off"
-        phx-hook="CapitalizeFirstLetter"
-        phx-key="Escape"
-        phx-keydown={delegate_event("cancel")}
-      />
-
-      <Components.slug_preview form={@edit_title.form} prefix="/topics/" />
-
-      <div class="flex gap-2">
+      <:actions>
         <button
           type="button"
           class="btn btn-error"
@@ -121,26 +103,14 @@ defmodule LexWeb.TopicLive.EditTitle do
         >
           Delete
         </button>
-
-        <button
-          type="button"
-          class="btn btn-ghost ml-auto"
-          phx-click={delegate_event("cancel")}
-        >
-          Cancel
-        </button>
-
-        <button type="submit" phx-disable-with="Saving..." class="btn btn-info">
-          Rename
-        </button>
-      </div>
-    </.form>
+      </:actions>
+    </ResourceRename.render_form>
     """
   end
 
   defp title_form(scope, topic) do
     topic
-    |> AshPhoenix.Form.for_update(:update, as: "topic_title", scope: scope)
+    |> AshPhoenix.Form.for_update(:rename, as: "topic_title", scope: scope)
     |> to_form()
   end
 end

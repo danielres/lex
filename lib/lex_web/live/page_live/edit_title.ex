@@ -2,7 +2,7 @@ defmodule LexWeb.PageLive.EditTitle do
   use LexWeb, :live_view
   use LiveDelegate, path: [:edit_title]
 
-  alias LexWeb.Live.Components
+  alias LexWeb.Components.ResourceRename
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{form: nil})
@@ -53,8 +53,8 @@ defmodule LexWeb.PageLive.EditTitle do
     socket.assigns.edit_title.form
     |> AshPhoenix.Form.submit(params: params)
     |> case do
-      {:ok, _page} ->
-        {:noreply, socket}
+      {:ok, page} ->
+        {:noreply, Toast.put_toast(socket, :info, ~s(Renamed page to "#{page.title}"))}
 
       {:error, form} ->
         socket =
@@ -68,14 +68,7 @@ defmodule LexWeb.PageLive.EditTitle do
 
   def button_edit(assigns) do
     ~H"""
-    <button
-      type="button"
-      class="clickable"
-      data-testid="edit-title-button"
-      phx-click={delegate_event("open")}
-    >
-      <.icon name="hero-pencil-micro" />
-    </button>
+    <ResourceRename.button_edit event={delegate_event("open")} data-testid="edit-title-button" />
     """
   end
 
@@ -83,60 +76,18 @@ defmodule LexWeb.PageLive.EditTitle do
 
   def render_form(assigns) do
     ~H"""
-    <.form
-      for={@edit_title.form}
-      data-testid="edit-title-form"
+    <ResourceRename.render_form
       id="page-title-form"
-      phx-change={delegate_event("change")}
-      phx-submit={delegate_event("save")}
-      tabindex="-1"
-      class="space-y-2"
-    >
-      <input
-        aria-label="Page title"
-        autocomplete="off"
-        class={[
-          "input input-lg w-full"
-        ]}
-        id={@edit_title.form[:title].id}
-        name={@edit_title.form[:title].name}
-        phx-hook="CapitalizeFirstLetter"
-        phx-key="Escape"
-        phx-keydown={delegate_event("cancel")}
-        value={@edit_title.form[:title].value}
-        phx-mounted={JS.focus() |> JS.dispatch("focus-at-end")}
-      />
-
-      <Components.slug_preview form={@edit_title.form} prefix="/wiki/" />
-
-      <p
-        :for={{message, _options} <- @edit_title.form[:title].errors}
-        class="mt-1.5 flex items-center gap-2 text-sm text-error"
-      >
-        <.icon name="hero-exclamation-circle" class="size-5" />
-        {message}
-      </p>
-
-      <div class="flex justify-between">
-        <button
-          aria-label="Cancel title change"
-          class="btn btn-soft"
-          data-testid="edit-title-cancel"
-          phx-click={delegate_event("cancel")}
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <button
-          aria-label="Save page title"
-          class="btn btn-info"
-          type="submit"
-        >
-          Update
-        </button>
-      </div>
-    </.form>
+      form={@edit_title.form}
+      field={@edit_title.form[:title]}
+      label="Page title"
+      path_prefix="/wiki/"
+      change_event={delegate_event("change")}
+      save_event={delegate_event("save")}
+      cancel_event={delegate_event("cancel")}
+      data-testid="edit-title-form"
+      cancel_testid="edit-title-cancel"
+    />
     """
   end
 

@@ -47,7 +47,7 @@ defmodule LexWeb.TopicsLive.Graph do
 
   @impl true
   def handle_info(%{action: %{name: action}}, socket)
-      when action in [:create, :update, :destroy] do
+      when action in [:create, :update, :rename, :destroy] do
     {:noreply, reload_data(socket)}
   end
 

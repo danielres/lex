@@ -26,7 +26,7 @@ defmodule Lex.Topics.Topic do
       change {Changes.GenerateSlug, from: :name}
     end
 
-    update :update do
+    update :rename do
       accept [:name]
       primary? true
       require_atomic? false
@@ -52,7 +52,7 @@ defmodule Lex.Topics.Topic do
       authorize_if ActiveMember
     end
 
-    policy action(:update) do
+    policy action(:rename) do
       authorize_if ActiveMember
     end
 
@@ -68,7 +68,7 @@ defmodule Lex.Topics.Topic do
     name Lex.PubSub
     prefix "topics"
     publish :create, "topics"
-    publish :update, "topics"
+    publish :rename, "topics"
     publish :destroy, "topics"
   end
 

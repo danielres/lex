@@ -73,7 +73,7 @@ defmodule LexWeb.TopicLive do
 
   @impl true
   def handle_info(
-        %{resource: Topic, action: %{name: :update}, data: %Topic{id: id} = topic},
+        %{resource: Topic, action: %{name: :rename}, data: %Topic{id: id} = topic},
         %{assigns: %{topic: %Topic{id: id, name: previous_name}, scope: scope}} = socket
       )
       when previous_name != topic.name do
@@ -147,7 +147,7 @@ defmodule LexWeb.TopicLive do
 
             <span class="ml-2">
               <EditTitle.button_edit :if={
-                @live_action == :info && Ash.can?({@topic, :update}, @scope)
+                @live_action == :info && Ash.can?({@topic, :rename}, @scope)
               } />
             </span>
           </:title>
