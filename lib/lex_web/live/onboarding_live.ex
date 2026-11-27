@@ -1,4 +1,4 @@
-defmodule LexWeb.MembershipOnboardingLive do
+defmodule LexWeb.OnboardingLive do
   use LexWeb, :live_view
 
   alias Lex.Accounts.Membership

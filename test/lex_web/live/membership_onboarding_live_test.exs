@@ -1,4 +1,4 @@
-defmodule LexWeb.MembershipOnboardingLiveTest do
+defmodule LexWeb.OnboardingLiveTest do
   use LexWeb.ConnCase
 
   import Phoenix.LiveViewTest

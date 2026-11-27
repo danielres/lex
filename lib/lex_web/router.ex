@@ -45,7 +45,7 @@ defmodule LexWeb.Router do
       live "/", HomeLive
 
       scope "/:space_slug" do
-        live "/join", MembershipOnboardingLive, :join
+        live "/join", OnboardingLive, :join
         live "/", SpaceLive
         live "/members", MembersLive
         live "/members/:member_slug", MemberLive
