@@ -15,7 +15,7 @@ defmodule LexWeb.WikiLive do
   @sort_fields %{
     "inserted_at" => :inserted_at,
     "last_updated_at" => :last_updated_at,
-    "title" => :title
+    "name" => :name
   }
 
   @impl true
@@ -45,7 +45,7 @@ defmodule LexWeb.WikiLive do
   end
 
   def handle_info(%Notification{resource: Page, action: %{name: action}}, socket)
-      when action in [:create, :rename] do
+      when action in [:create, :rename, :destroy] do
     sort_by = socket.assigns.sort_by
     sort_direction = socket.assigns.sort_direction
     scope = socket.assigns.scope
@@ -114,9 +114,9 @@ defmodule LexWeb.WikiLive do
         <table class="table max-sm:table-sm">
           <thead>
             <tr>
-              <th aria-sort={aria_sort(@sort_by, @sort_direction, :title)} class="w-1/3">
+              <th aria-sort={aria_sort(@sort_by, @sort_direction, :name)} class="w-1/3">
                 <.sortable
-                  field={:title}
+                  field={:name}
                   sort_by={@sort_by}
                   sort_direction={@sort_direction}
                 >
@@ -158,7 +158,7 @@ defmodule LexWeb.WikiLive do
                   ]}
                   navigate={Path.to(@scope, page)}
                 >
-                  {page.title}
+                  {page.name}
                   <.icon :if={page.slug == "home"} name="hero-home-mini" class="opacity-50" />
                 </.link>
                 <div
@@ -231,7 +231,7 @@ defmodule LexWeb.WikiLive do
 
   defp next_sort_direction(%{sort_by: sort_by, sort_direction: :asc}, sort_by), do: :desc
   defp next_sort_direction(%{sort_by: sort_by, sort_direction: :desc}, sort_by), do: :asc
-  defp next_sort_direction(_assigns, :title), do: :asc
+  defp next_sort_direction(_assigns, :name), do: :asc
 
   defp next_sort_direction(_assigns, field)
        when field in [:inserted_at, :last_updated_at],

@@ -5,10 +5,11 @@ defmodule LexWeb.PageLive.Notifications do
   alias Lex.Wiki.Page
   alias Lex.Wiki.PageDocument
   alias Lex.Wiki.PageRevision
-  alias LexWeb.PageLive.EditTitle
+  alias LexWeb.Live.Rename
   alias LexWeb.PageLive.Navigation
   alias LexWeb.PageLive.PageRepository
   alias LexWeb.PageLive.Revisions
+  alias LexWeb.Router.Path
 
   def handle(
         socket,
@@ -82,30 +83,45 @@ defmodule LexWeb.PageLive.Notifications do
         socket,
         %Notification{resource: Page, action: %{name: :rename}, data: renamed_page}
       ) do
-    current_page = socket.assigns.page
-    live_action = socket.assigns.live_action
-    socket = socket |> PageRepository.reload()
+    %{page: previous, live_action: live_action, scope: scope} = socket.assigns
 
-    if current_page != nil and current_page.id == renamed_page.id do
+    socket =
+      if renamed_page.space_id == scope.space.id do
+        socket |> PageRepository.reload()
+      else
+        socket
+      end
+
+    with %Page{id: id} <- previous,
+         true <- id == renamed_page.id,
+         %Page{} = page <- Enum.find(socket.assigns.page_repository.pages, &(&1.id == id)),
+         true <- previous.name != page.name or previous.slug != page.slug do
+      path = if live_action != :editing, do: Navigation.page_path(socket, page)
+
       socket =
         socket
-        |> assign(page: renamed_page)
-        |> EditTitle.reload(renamed_page)
-        |> push_event("page_title_blur", %{})
-
-      socket =
-        if live_action == :editing do
-          socket
-        else
-          path = socket |> Navigation.page_path(renamed_page)
-
-          socket |> push_patch(to: path)
-        end
+        |> assign(:page, page)
+        |> Rename.apply_change(previous, page, "Page", path)
 
       {:noreply, socket}
     else
-      {:noreply, socket}
+      _other -> {:noreply, socket}
     end
+  end
+
+  def handle(socket, %Notification{resource: Page, action: %{name: :destroy}, data: page}) do
+    %{page: current_page, scope: scope} = socket.assigns
+
+    socket =
+      if current_page && current_page.id == page.id do
+        socket
+        |> Toast.put_toast(:info, "Page #{page.name} was deleted")
+        |> push_navigate(to: Path.wiki(scope), replace: true)
+      else
+        PageRepository.reload(socket)
+      end
+
+    {:noreply, socket}
   end
 
   defp requested_revision_number(%{

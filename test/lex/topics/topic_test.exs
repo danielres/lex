@@ -61,7 +61,7 @@ defmodule Lex.Topics.TopicTest do
     assert {:error, _error} =
              member_topic
              |> Ash.Changeset.for_update(
-               :update,
+               :rename,
                %{name: "Blocked Rename"},
                scope: disabled_scope
              )

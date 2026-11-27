@@ -103,7 +103,7 @@ defmodule LexWeb.PageLive.PageRepository do
       id: page.id,
       path: Path.to(scope, page),
       slug: page.slug,
-      title: page.title
+      title: page.name
     }
   end
 end

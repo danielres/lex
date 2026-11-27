@@ -2,7 +2,8 @@ defmodule LexWeb.PageLive.EditTitle do
   use LexWeb, :live_view
   use LiveDelegate, path: [:edit_title]
 
-  alias LexWeb.Live.Components
+  alias LexWeb.Components.ResourceRename
+  alias LexWeb.Router.Path
 
   def on_mount(_params, _session, socket) do
     delegate_assign(socket, %{form: nil})
@@ -53,8 +54,8 @@ defmodule LexWeb.PageLive.EditTitle do
     socket.assigns.edit_title.form
     |> AshPhoenix.Form.submit(params: params)
     |> case do
-      {:ok, _page} ->
-        {:noreply, socket}
+      {:ok, page} ->
+        {:noreply, Toast.put_toast(socket, :info, ~s(Renamed page to "#{page.title}"))}
 
       {:error, form} ->
         socket =
@@ -66,77 +67,49 @@ defmodule LexWeb.PageLive.EditTitle do
     end
   end
 
+  def handle_event("delete", _params, %{assigns: %{live_action: :edit_title, page: page, scope: scope}} = socket) do
+    case Ash.destroy(page, scope: scope) do
+      :ok ->
+        socket =
+          socket
+          |> Toast.put_toast(:info, ~s(Deleted page "#{page.title}"))
+          |> push_navigate(to: Path.wiki(scope))
+
+        {:noreply, socket}
+
+      {:error, _error} ->
+        {:noreply, Toast.put_toast(socket, :error, "Could not delete page")}
+    end
+  end
+
+  def handle_event("delete", _params, socket), do: {:noreply, socket}
+
   def button_edit(assigns) do
     ~H"""
-    <button
-      type="button"
-      class="clickable"
-      data-testid="edit-title-button"
-      phx-click={delegate_event("open")}
-    >
-      <.icon name="hero-pencil-micro" />
-    </button>
+    <ResourceRename.button_edit event={delegate_event("open")} data-testid="edit-title-button" />
     """
   end
 
   attr :edit_title, :map, required: true
+  attr :scope, :map, required: true
 
   def render_form(assigns) do
     ~H"""
-    <.form
-      for={@edit_title.form}
-      data-testid="edit-title-form"
+    <ResourceRename.render_form
       id="page-title-form"
-      phx-change={delegate_event("change")}
-      phx-submit={delegate_event("save")}
-      tabindex="-1"
-      class="space-y-2"
-    >
-      <input
-        aria-label="Page title"
-        autocomplete="off"
-        class={[
-          "input input-lg w-full"
-        ]}
-        id={@edit_title.form[:title].id}
-        name={@edit_title.form[:title].name}
-        phx-hook="CapitalizeFirstLetter"
-        phx-key="Escape"
-        phx-keydown={delegate_event("cancel")}
-        value={@edit_title.form[:title].value}
-        phx-mounted={JS.focus() |> JS.dispatch("focus-at-end")}
-      />
-
-      <Components.slug_preview form={@edit_title.form} prefix="/wiki/" />
-
-      <p
-        :for={{message, _options} <- @edit_title.form[:title].errors}
-        class="mt-1.5 flex items-center gap-2 text-sm text-error"
-      >
-        <.icon name="hero-exclamation-circle" class="size-5" />
-        {message}
-      </p>
-
-      <div class="flex justify-between">
-        <button
-          aria-label="Cancel title change"
-          class="btn btn-soft"
-          data-testid="edit-title-cancel"
-          phx-click={delegate_event("cancel")}
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <button
-          aria-label="Save page title"
-          class="btn btn-info"
-          type="submit"
-        >
-          Update
-        </button>
-      </div>
-    </.form>
+      form={@edit_title.form}
+      field={@edit_title.form[:title]}
+      label="Page title"
+      path_prefix="/wiki/"
+      change_event={delegate_event("change")}
+      save_event={delegate_event("save")}
+      cancel_event={delegate_event("cancel")}
+      data-testid="edit-title-form"
+      cancel_testid="edit-title-cancel"
+      delete_event={
+        if Ash.can?({@edit_title.form.data, :destroy}, @scope), do: delegate_event("delete")
+      }
+    />
     """
   end
 

@@ -4,9 +4,9 @@ defmodule Lex.Wiki.Page do
   alias Lex.Accounts.Membership.Checks.ActiveMember
   alias Lex.Accounts.Membership.Checks.HasPrivilege
   alias Lex.Accounts.User
-  alias Lex.Wiki.Page.Changes.SetTitleAndSlug
+  alias Lex.Wiki.Page.Changes.SetNameAndSlug
   alias Lex.Wiki.PageSlug
-  alias Lex.Wiki.PageTitle
+  alias Lex.Wiki.PageName
 
   use Ash.Resource,
     domain: Lex.Wiki,
@@ -22,28 +22,28 @@ defmodule Lex.Wiki.Page do
   code_interface do
     define :get, action: :read, get_by: [:id]
     define :list, action: :list
-    define :rename, action: :rename, args: [:title]
+    define :rename, action: :rename, args: [:name]
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :destroy]
 
     read :list do
-      prepare build(load: [:author, :last_updated_at], sort: :title)
+      prepare build(load: [:author, :last_updated_at], sort: :name)
     end
 
     create :create do
-      accept [:title]
+      accept [:name]
 
       change relate_actor(:author)
-      change SetTitleAndSlug
+      change SetNameAndSlug
     end
 
     update :rename do
-      accept [:title]
+      accept [:name]
       require_atomic? false
 
-      change SetTitleAndSlug
+      change SetNameAndSlug
     end
   end
 
@@ -55,6 +55,11 @@ defmodule Lex.Wiki.Page do
     policy action([:create, :rename]) do
       authorize_if {HasPrivilege, privilege: :edit_pages}
     end
+
+    policy action(:destroy) do
+      forbid_if expr(slug == "home")
+      authorize_if {HasPrivilege, privilege: :edit_pages}
+    end
   end
 
   pub_sub do
@@ -64,6 +69,7 @@ defmodule Lex.Wiki.Page do
 
     publish :create, "pages"
     publish :rename, "pages"
+    publish :destroy, "pages"
   end
 
   multitenancy do
@@ -74,7 +80,7 @@ defmodule Lex.Wiki.Page do
   attributes do
     uuid_v7_primary_key :id
 
-    attribute :title, :string do
+    attribute :name, :string do
       allow_nil? false
       public? true
     end
@@ -115,22 +121,22 @@ defmodule Lex.Wiki.Page do
   identities do
     identity :unique_slug, [:slug],
       eager_check?: true,
-      field_names: [:title],
+      field_names: [:name],
       message: "Not available"
   end
 
-  def ensure(scope, title) do
-    with {:ok, title} <- PageTitle.normalize(title),
-         {:ok, slug} <- PageTitle.slug(title) do
-      scope |> ensure_title_and_slug(title, slug)
+  def ensure(scope, name) do
+    with {:ok, name} <- PageName.normalize(name),
+         {:ok, slug} <- PageName.slug(name) do
+      scope |> ensure_name_and_slug(name, slug)
     else
-      {:error, message} -> invalid_attribute(:title, title, message)
+      {:error, message} -> invalid_attribute(:name, name, message)
     end
   end
 
-  def ensure!(scope, title) do
+  def ensure!(scope, name) do
     scope
-    |> ensure(title)
+    |> ensure(name)
     |> case do
       {:ok, page} -> page
       {:error, error} -> raise Ash.Error.to_error_class(error)
@@ -148,33 +154,33 @@ defmodule Lex.Wiki.Page do
     end
   end
 
-  defp ensure_title_and_slug(scope, title, slug) do
+  defp ensure_name_and_slug(scope, name, slug) do
     scope
     |> get_by_slug(slug)
     |> case do
-      {:ok, nil} -> scope |> create_page(title, slug)
-      {:ok, %{title: ^title} = page} -> {:ok, page}
-      {:ok, _page} -> title_collision(title, slug)
+      {:ok, nil} -> scope |> create_page(name, slug)
+      {:ok, %{name: ^name} = page} -> {:ok, page}
+      {:ok, _page} -> name_collision(name, slug)
       {:error, error} -> {:error, error}
     end
   end
 
-  defp create_page(scope, title, slug) do
+  defp create_page(scope, name, slug) do
     __MODULE__
-    |> Ash.Changeset.for_create(:create, %{title: title}, scope: scope)
+    |> Ash.Changeset.for_create(:create, %{name: name}, scope: scope)
     |> Ash.create()
-    |> recover_concurrent_create(scope, title, slug)
+    |> recover_concurrent_create(scope, name, slug)
   end
 
-  defp recover_concurrent_create({:ok, page}, _scope, _title, _slug), do: {:ok, page}
+  defp recover_concurrent_create({:ok, page}, _scope, _name, _slug), do: {:ok, page}
 
-  defp recover_concurrent_create({:error, original_error}, scope, title, slug) do
+  defp recover_concurrent_create({:error, original_error}, scope, name, slug) do
     scope
     |> get_by_slug(slug)
     |> case do
-      {:ok, %{title: ^title} = page} -> {:ok, page}
+      {:ok, %{name: ^name} = page} -> {:ok, page}
       {:ok, nil} -> {:error, original_error}
-      {:ok, _page} -> title_collision(title, slug)
+      {:ok, _page} -> name_collision(name, slug)
       {:error, _error} -> {:error, original_error}
     end
   end
@@ -186,10 +192,10 @@ defmodule Lex.Wiki.Page do
     |> Ash.read_one(scope: scope)
   end
 
-  defp title_collision(title, slug) do
+  defp name_collision(name, slug) do
     invalid_attribute(
-      :title,
-      title,
+      :name,
+      name,
       "produces the already-used slug #{inspect(slug)}"
     )
   end

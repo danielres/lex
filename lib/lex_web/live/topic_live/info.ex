@@ -4,18 +4,18 @@ defmodule LexWeb.TopicLive.Info do
 
   alias LexWeb.Components.ResourceInfo
   alias LexWeb.Layouts
+  alias LexWeb.Live.Rename
   alias LexWeb.Router.Path
-  alias LexWeb.TopicLive.EditTitle
 
   @impl true
   def handle_event("toggle", _, socket) do
     live_action =
       case socket.assigns.live_action do
-        action when action in [:info, :edit_title] -> :show
+        action when action in [:info, :rename] -> :show
         _ -> :info
       end
 
-    socket = socket |> assign(live_action: live_action)
+    socket = socket |> Rename.clear() |> assign(live_action: live_action)
 
     {:noreply, socket}
   end

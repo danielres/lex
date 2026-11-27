@@ -1,29 +1,29 @@
-defmodule Lex.Wiki.PageTitle do
+defmodule Lex.Wiki.PageName do
   alias Utils.Slugify
 
   @whitespace ~r/\s+/u
 
-  def normalize(title) when is_binary(title) do
-    title =
-      title
+  def normalize(name) when is_binary(name) do
+    name =
+      name
       |> String.normalize(:nfc)
       |> String.trim()
       |> String.replace(@whitespace, " ")
       |> capitalize_first()
 
-    case String.length(title) do
+    case String.length(name) do
       0 -> {:error, "Cannot be empty"}
       length when length < 3 -> {:error, "Min 3 chars"}
       length when length > 40 -> {:error, "Max 40 chars"}
-      _length -> {:ok, title}
+      _length -> {:ok, name}
     end
   end
 
   def normalize(_title), do: {:error, "Must be a string"}
 
-  def slug(title) do
-    with {:ok, title} <- normalize(title) do
-      slug = Slugify.generate(title)
+  def slug(name) do
+    with {:ok, name} <- normalize(name) do
+      slug = Slugify.generate(name)
 
       if slug == "" do
         {:error, "Must contain at least one letter or number"}
@@ -39,19 +39,19 @@ defmodule Lex.Wiki.PageTitle do
     |> capitalize_first()
   end
 
-  defp capitalize_first(title) do
-    case String.next_grapheme(title) do
+  defp capitalize_first(name) do
+    case String.next_grapheme(name) do
       {first, rest} ->
         capitalized = String.upcase(first) <> rest
 
-        if Slugify.generate(capitalized) == Slugify.generate(title) do
+        if Slugify.generate(capitalized) == Slugify.generate(name) do
           capitalized
         else
-          title
+          name
         end
 
       nil ->
-        title
+        name
     end
   end
 end
