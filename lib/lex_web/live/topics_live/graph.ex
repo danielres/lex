@@ -92,11 +92,12 @@ defmodule LexWeb.TopicsLive.Graph do
         "bg-base-200 px-4 py-2 rounded-box",
         "shadow-lg",
         "border-2 border-info",
-        "fixed max-w-[16ch] right-8 top-8 leading-tight"
+        "fixed w-fit right-8 top-12 leading-tight"
       ]}
     >
-      <p class="text-sm">
-        Please choose a new parent for <span class="font-semibold">{@selected_child.name}</span>
+      <p class="text-sm text-center">
+        Please choose a new parent for <br />
+        <span class="font-semibold">{@selected_child.name}</span>
       </p>
       <button
         type="button"
