@@ -92,7 +92,7 @@ defmodule LexWeb.TopicsLive.Graph do
         "bg-base-200 p-3 py-2 rounded-box",
         "shadow-lg",
         "border-2 border-info",
-        "fixed w-fit right-8 top-12 leading-tight"
+        "fixed w-fit right-2 sm:right-8 top-12 leading-tight"
       ]}
     >
       <p class="text-sm">
