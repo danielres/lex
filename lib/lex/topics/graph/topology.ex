@@ -13,6 +13,16 @@ defmodule Lex.Topics.Graph.Topology do
     end
   end
 
+  def move(children, source_parent_id, parent_id, child_id) do
+    if child_id in Map.get(children, source_parent_id, []) do
+      children
+      |> detach(source_parent_id, child_id)
+      |> attach(parent_id, child_id)
+    else
+      {:error, :stale_parent}
+    end
+  end
+
   def detach(children, parent_id, child_id) do
     case Map.get(children, parent_id, []) |> Enum.reject(&(&1 == child_id)) do
       [] -> Map.delete(children, parent_id)

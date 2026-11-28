@@ -98,6 +98,19 @@ defmodule Lex.Topics.Graph do
     end
   end
 
+  def move(source_parent_id, parent_id, child_id, opts) do
+    scope = Keyword.fetch!(opts, :scope)
+
+    with :ok <- validate_topics(parent_id, child_id, scope),
+         {:ok, graph} when not is_nil(graph) <- read_graph(scope),
+         {:ok, children} <- Topology.move(graph.children, source_parent_id, parent_id, child_id) do
+      persist_children(graph, children, scope)
+    else
+      {:ok, nil} -> {:error, :stale_parent}
+      {:error, error} -> {:error, error}
+    end
+  end
+
   def detach(parent_id, child_id, opts) do
     scope = Keyword.fetch!(opts, :scope)
 

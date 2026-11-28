@@ -89,19 +89,46 @@ defmodule LexWeb.TopicsLive.Graph do
       :if={@selected_child}
       class={[
         "z-50",
-        "bg-base-200 px-4 py-2 rounded-box",
+        "bg-base-200 p-3 py-2 rounded-box",
         "shadow-lg",
         "border-2 border-info",
         "fixed w-fit right-8 top-12 leading-tight"
       ]}
     >
-      <p class="text-sm text-center">
+      <p class="text-sm">
         Please choose a new parent for <br />
         <span class="font-semibold">{@selected_child.name}</span>
       </p>
+
+      <form
+        :if={@graph.attachment.source_parent_id}
+        class="mt-4 ml-4"
+        phx-change={delegate_event("attachment:mode")}
+      >
+        <label class="block label flex gap-2">
+          <input
+            type="radio"
+            name="parent_mode"
+            value="move"
+            checked={@graph.attachment.mode == "move"}
+          />
+          <span>Move</span>
+        </label>
+
+        <label class="block label flex gap-2">
+          <input
+            type="radio"
+            name="parent_mode"
+            value="attach"
+            checked={@graph.attachment.mode == "attach"}
+          />
+          <span>Add</span>
+        </label>
+      </form>
+
       <button
         type="button"
-        class="btn btn-info btn-sm w-full mt-4"
+        class="btn bg-base-100 hover:bg-info transition btn-sm w-full mt-4"
         phx-click={delegate_event("attachment:cancel")}
       >
         Cancel
@@ -177,7 +204,12 @@ defmodule LexWeb.TopicsLive.Graph do
           :if={!(@attaching? && @parent_candidate?)}
           navigate={if !@patch?, do: Path.to(@scope, @node.topic)}
           patch={if @patch?, do: Path.to(@scope, @node.topic)}
-          class={["grow", "py-1 px-2", "group", "leading-tight"]}
+          class={[
+            "grow",
+            "py-1 px-2",
+            "group",
+            "leading-tight"
+          ]}
         >
           <span class={[
             "opacity-80 group-hover:opacity-100 transition",
@@ -226,6 +258,7 @@ defmodule LexWeb.TopicsLive.Graph do
             class="btn btn-circle btn-xs hover:btn-info"
             phx-click={delegate_event("attachment:start")}
             phx-value-child-id={@node.topic.id}
+            phx-value-source-parent-id={@node.parent_id}
             aria-label={"Attach #{@node.topic.name} under another topic"}
           >
             <.icon name="hero-arrow-turn-down-right-micro" />
