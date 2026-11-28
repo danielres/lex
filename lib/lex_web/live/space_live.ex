@@ -27,10 +27,9 @@ defmodule LexWeb.SpaceLive do
           <:crumb>
             <.link navigate={Path.spaces()} class="clickable">Spaces</.link>
           </:crumb>
-          <:crumb>
-            <span class="opacity-80">{@scope.space.name}</span>
-          </:crumb>
-          <:title>Overview</:title>
+          <:title>
+            {@scope.space.name}
+          </:title>
         </Layouts.page_head>
       </:page_head>
     </Layouts.app>
