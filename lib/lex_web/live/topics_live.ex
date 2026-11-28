@@ -92,7 +92,7 @@ defmodule LexWeb.TopicsLive do
         </Layouts.page_head>
       </:page_head>
 
-      <div inert={dialog?(@mode)}>
+      <div inert={dialog?(@mode)} class="sm:-ml-1">
         <Graph.render
           edit?={@mode == :edit}
           focus_topic_id={@focus_topic_id}
